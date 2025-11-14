@@ -75,9 +75,29 @@ export default function Settings() {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => toast.info('Notification settings coming soon')}
+              onClick={() => navigate('/settings/notifications')}
             >
               Configure Reminders
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Health & Growth</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/growth')}>
+              Growth Tracker
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/health')}>
+              Health Records
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/milestones')}>
+              Milestones
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/photos')}>
+              Photo Gallery
             </Button>
           </CardContent>
         </Card>

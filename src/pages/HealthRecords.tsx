@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MedicationTracker } from '@/components/MedicationTracker';
+import { VaccineScheduleView } from '@/components/VaccineScheduleView';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Plus, Thermometer, Stethoscope, Syringe, AlertCircle } from 'lucide-react';
@@ -324,6 +326,18 @@ export default function HealthRecords() {
           </Dialog>
         </CardContent>
       </Card>
+
+      {baby && <MedicationTracker baby={baby} />}
+
+      {baby && (
+        <VaccineScheduleView 
+          baby={baby} 
+          completedVaccines={records
+            .filter(r => r.record_type === 'vaccine' && r.vaccine_name)
+            .map(r => r.vaccine_name!)
+          } 
+        />
+      )}
 
       <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)}>
         <TabsList className="w-full">
