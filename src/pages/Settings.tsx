@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Users, Bell, Shield, Info, ChevronRight } from 'lucide-react';
+import { LogOut, Users, Bell, Shield, Info, ChevronRight, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
@@ -71,13 +71,20 @@ export default function Settings() {
               Notifications
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button 
               variant="outline" 
               className="w-full justify-start"
               onClick={() => navigate('/settings/notifications')}
             >
               Configure Reminders
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/settings/shortcuts')}
+            >
+              Quick Actions & Voice
             </Button>
           </CardContent>
         </Card>
@@ -98,6 +105,26 @@ export default function Settings() {
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/photos')}>
               Photo Gallery
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              AI & Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/cry-insights')}>
+              Cry Insights
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/ai-assistant')}>
+              AI Assistant
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/analytics')}>
+              Analytics Dashboard
             </Button>
           </CardContent>
         </Card>

@@ -20,6 +20,10 @@ import HealthRecords from "./pages/HealthRecords";
 import Milestones from "./pages/Milestones";
 import PhotoGallery from "./pages/PhotoGallery";
 import NotificationSettings from "./pages/NotificationSettings";
+import CryInsights from "./pages/CryInsights";
+import AIAssistant from "./pages/AIAssistant";
+import Analytics from "./pages/Analytics";
+import ShortcutsSettings from "./pages/ShortcutsSettings";
 
 function AppContent() {
   useNotificationHandler();
@@ -41,6 +45,10 @@ function AppContent() {
       <Route path="/health" element={<HealthRecords />} />
       <Route path="/milestones" element={<Milestones />} />
       <Route path="/photos" element={<PhotoGallery />} />
+      <Route path="/cry-insights" element={<CryInsights />} />
+      <Route path="/ai-assistant" element={<AIAssistant />} />
+      <Route path="/analytics" element={<Analytics />} />
+      <Route path="/settings/shortcuts" element={<ShortcutsSettings />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

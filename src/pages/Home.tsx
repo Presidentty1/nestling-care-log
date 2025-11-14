@@ -11,6 +11,8 @@ import { EventLogModal } from '@/components/EventLogModal';
 import { EventTimeline } from '@/components/EventTimeline';
 import { BabySelector } from '@/components/BabySelector';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { QuickActions } from '@/components/QuickActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
@@ -228,6 +230,8 @@ export default function Home() {
           </Button>
         </div>
 
+        <QuickActions onActionSelect={(type) => openModal(type)} />
+
         <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
@@ -245,6 +249,14 @@ export default function Home() {
           editingEvent={editingEvent}
         />
       )}
+
+      <FloatingActionButton
+        onVoiceCommand={(command) => {
+          if (command.type) {
+            openModal(command.type);
+          }
+        }}
+      />
 
       <MobileNav />
     </div>
