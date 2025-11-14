@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { MobileNav } from '@/components/MobileNav';
+import { format, isBefore, isAfter } from 'date-fns';
+import { Baby, Milk, Moon, Baby as BabyIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MobileNav } from '@/components/MobileNav';
+import { EventLogModal } from '@/components/EventLogModal';
+import { EventTimeline } from '@/components/EventTimeline';
+import { BabySelector } from '@/components/BabySelector';
 import { supabase } from '@/integrations/supabase/client';
-import { Baby as BabyType, BabyEvent } from '@/lib/types';
-import { Baby, Milk, Moon, Droplet, Clock } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, formatDistanceToNow } from 'date-fns';
+import { useEventLogger } from '@/hooks/useEventLogger';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
+import { predictNextNap } from '@/lib/napPredictor';
+import { Baby as BabyType, BabyEvent, EventType } from '@/lib/types';
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
@@ -43,10 +48,8 @@ export default function Home() {
   }, [user]);
 
   useEffect(() => {
-    if (selectedBaby) {
-      loadTodayEvents();
-    }
-  }, [selectedBaby]);
+    loadTodayEvents();
+  }, [loadTodayEvents]);
 
   const loadBabies = async () => {
     try {
@@ -81,13 +84,19 @@ export default function Home() {
 
       if (babiesData && babiesData.length > 0) {
         setBabies(babiesData as BabyType[]);
-        setSelectedBaby(babiesData[0] as BabyType);
+        
+        // Check for saved baby selection
+        const savedBabyId = localStorage.getItem('selected_baby_id');
+        const selectedBabyData = savedBabyId 
+          ? babiesData.find(b => b.id === savedBabyId) || babiesData[0]
+          : babiesData[0];
+        
+        setSelectedBaby(selectedBabyData as BabyType);
       } else {
         navigate('/onboarding');
       }
     } catch (error) {
       console.error('Error loading babies:', error);
-      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
