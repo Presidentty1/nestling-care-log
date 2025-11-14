@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Users, Bell, Shield, Info, ChevronRight, Brain } from 'lucide-react';
+import { LogOut, Users, Bell, Shield, Info, ChevronRight, Brain, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
@@ -125,6 +125,29 @@ export default function Settings() {
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/analytics')}>
               Analytics Dashboard
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/sleep-training')}>
+              Sleep Training
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/predictions')}>
+              Smart Predictions
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Memories & Collaboration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/journal')}>
+              Baby Journal
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/activity-feed')}>
+              Activity Feed
             </Button>
           </CardContent>
         </Card>

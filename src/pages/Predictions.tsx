@@ -1,0 +1,211 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Baby } from '@/lib/types';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { BabySelector } from '@/components/BabySelector';
+import { MobileNav } from '@/components/MobileNav';
+import { ArrowLeft, TrendingUp, Loader2, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+
+export default function Predictions() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+
+  const { data: babies } = useQuery({
+    queryKey: ['babies'],
+    queryFn: async () => {
+      const { data: familyMembers } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+
+      if (!familyMembers || familyMembers.length === 0) return [];
+
+      const { data: babies } = await supabase
+        .from('babies')
+        .select('*')
+        .in('family_id', familyMembers.map(fm => fm.family_id));
+
+      return babies as Baby[];
+    },
+  });
+
+  const { data: predictions } = useQuery({
+    queryKey: ['predictions', selectedBaby?.id],
+    queryFn: async () => {
+      if (!selectedBaby) return [];
+      const { data } = await supabase
+        .from('predictions')
+        .select('*')
+        .eq('baby_id', selectedBaby.id)
+        .order('predicted_at', { ascending: false})
+        .limit(10);
+      return data || [];
+    },
+    enabled: !!selectedBaby,
+  });
+
+  const generatePredictionMutation = useMutation({
+    mutationFn: async (predictionType: string) => {
+      if (!selectedBaby) throw new Error('No baby selected');
+      
+      const { data, error } = await supabase.functions.invoke('generate-predictions', {
+        body: { babyId: selectedBaby.id, predictionType },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['predictions'] });
+      toast({
+        title: 'Prediction Generated',
+        description: 'New prediction added successfully',
+      });
+    },
+    onError: (error) => {
+      console.error('Prediction error:', error);
+      toast({
+        title: 'Failed to Generate Prediction',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  if (babies && babies.length > 0 && !selectedBaby) {
+    setSelectedBaby(babies[0]);
+  }
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 0.8) return 'bg-green-500';
+    if (confidence >= 0.6) return 'bg-yellow-500';
+    return 'bg-orange-500';
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto p-4">
+          <div className="flex items-center gap-4 mb-4">
+            <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Smart Predictions</h1>
+              <p className="text-sm text-muted-foreground">AI-powered insights</p>
+            </div>
+          </div>
+          {babies && babies.length > 0 && (
+            <BabySelector
+              babies={babies}
+              selectedBabyId={selectedBaby?.id || null}
+              onSelect={(babyId) => {
+                const baby = babies.find(b => b.id === babyId);
+                if (baby) setSelectedBaby(baby);
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="container mx-auto p-4 space-y-4 max-w-2xl">
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => generatePredictionMutation.mutate('next_feed')}
+            disabled={generatePredictionMutation.isPending}
+            variant="outline"
+          >
+            {generatePredictionMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <TrendingUp className="mr-2 h-4 w-4" />
+            )}
+            Predict Next Feed
+          </Button>
+          <Button
+            onClick={() => generatePredictionMutation.mutate('next_nap')}
+            disabled={generatePredictionMutation.isPending}
+            variant="outline"
+          >
+            {generatePredictionMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            Predict Next Nap
+          </Button>
+        </div>
+
+        {predictions && predictions.length > 0 ? (
+          predictions.map((prediction: any) => (
+            <Card key={prediction.id} className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <Badge className="mb-2 capitalize">
+                    {prediction.prediction_type.replace('_', ' ')}
+                  </Badge>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(prediction.predicted_at), 'PPp')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${getConfidenceColor(prediction.confidence_score)}`} />
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round(prediction.confidence_score * 100)}%
+                  </span>
+                </div>
+              </div>
+
+              {prediction.prediction_data && (
+                <div className="space-y-2">
+                  {prediction.prediction_data.nextFeedTime && (
+                    <p className="text-sm">
+                      <strong>Predicted time:</strong>{' '}
+                      {format(new Date(prediction.prediction_data.nextFeedTime), 'p')}
+                    </p>
+                  )}
+                  {prediction.prediction_data.nextNapTime && (
+                    <p className="text-sm">
+                      <strong>Predicted nap:</strong>{' '}
+                      {format(new Date(prediction.prediction_data.nextNapTime), 'p')}
+                    </p>
+                  )}
+                  {prediction.prediction_data.avgInterval && (
+                    <p className="text-sm">
+                      <strong>Avg interval:</strong>{' '}
+                      {prediction.prediction_data.avgInterval} hours
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {prediction.was_accurate !== null && (
+                <Badge variant={prediction.was_accurate ? 'default' : 'secondary'} className="mt-2">
+                  {prediction.was_accurate ? 'Accurate ✓' : 'Inaccurate'}
+                </Badge>
+              )}
+            </Card>
+          ))
+        ) : (
+          <Card className="p-8 text-center">
+            <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">No predictions yet</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Generate predictions to see AI-powered insights
+            </p>
+          </Card>
+        )}
+      </div>
+
+      <MobileNav />
+    </div>
+  );
+}
