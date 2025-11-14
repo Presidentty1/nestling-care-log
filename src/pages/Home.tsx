@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MobileNav } from '@/components/MobileNav';
 import { EventLogModal } from '@/components/EventLogModal';
+import { EventDialog } from '@/components/EventDialog';
 import { EventTimeline } from '@/components/EventTimeline';
 import { BabySelector } from '@/components/BabySelector';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
@@ -18,6 +19,7 @@ import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
 import { predictNextNap } from '@/lib/napPredictor';
 import { Baby as BabyType, BabyEvent, EventType } from '@/lib/types';
+import { toast } from 'sonner';
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();

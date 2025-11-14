@@ -54,13 +54,12 @@ export default function Settings() {
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </CardContent>
             </Card>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => toast.info('Baby profiles coming soon')}
-            >
-              Manage Babies
-            </Button>
+            <Card className="cursor-pointer hover:bg-accent border-0 shadow-none" onClick={() => navigate('/settings/babies')}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <span className="font-medium">Manage Babies</span>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
 
