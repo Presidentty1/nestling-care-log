@@ -10,6 +10,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { EventLogModal } from '@/components/EventLogModal';
 import { EventTimeline } from '@/components/EventTimeline';
 import { BabySelector } from '@/components/BabySelector';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { supabase } from '@/integrations/supabase/client';
 import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
@@ -173,6 +174,8 @@ export default function Home() {
             onSelect={handleBabySelect}
           />
         </div>
+
+        <OfflineIndicator />
 
         {selectedBaby && events.length > 0 && (() => {
           const prediction = predictNextNap(selectedBaby, events);
