@@ -13,6 +13,7 @@ import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
 import NapDetails from "./pages/NapDetails";
 import CaregiverManagement from "./pages/CaregiverManagement";
+import ManageBabies from "./pages/ManageBabies";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import GrowthTracker from "./pages/GrowthTracker";
@@ -43,6 +44,7 @@ function AppContent() {
       <Route path="/settings" element={<Settings />} />
       <Route path="/nap-details" element={<NapDetails />} />
       <Route path="/settings/caregivers" element={<CaregiverManagement />} />
+      <Route path="/settings/babies" element={<ManageBabies />} />
       <Route path="/settings/notifications" element={<NotificationSettings />} />
       <Route path="/invite/:token" element={<AcceptInvite />} />
       <Route path="/growth" element={<GrowthTracker />} />
