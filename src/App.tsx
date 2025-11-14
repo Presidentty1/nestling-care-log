@@ -24,6 +24,10 @@ import CryInsights from "./pages/CryInsights";
 import AIAssistant from "./pages/AIAssistant";
 import Analytics from "./pages/Analytics";
 import ShortcutsSettings from "./pages/ShortcutsSettings";
+import SleepTraining from "./pages/SleepTraining";
+import ActivityFeed from "./pages/ActivityFeed";
+import Predictions from "./pages/Predictions";
+import Journal from "./pages/Journal";
 
 function AppContent() {
   useNotificationHandler();
@@ -49,6 +53,10 @@ function AppContent() {
       <Route path="/ai-assistant" element={<AIAssistant />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/settings/shortcuts" element={<ShortcutsSettings />} />
+      <Route path="/sleep-training" element={<SleepTraining />} />
+      <Route path="/activity-feed" element={<ActivityFeed />} />
+      <Route path="/predictions" element={<Predictions />} />
+      <Route path="/journal" element={<Journal />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
