@@ -9,6 +9,9 @@ import Home from "./pages/Home";
 import History from "./pages/History";
 import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
+import NapDetails from "./pages/NapDetails";
+import CaregiverManagement from "./pages/CaregiverManagement";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,9 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/labs" element={<Labs />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/nap-details" element={<NapDetails />} />
+          <Route path="/settings/caregivers" element={<CaregiverManagement />} />
+          <Route path="/invite/:token" element={<AcceptInvite />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
