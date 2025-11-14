@@ -30,12 +30,10 @@ export default function Home() {
   const { deleteEvent } = useEventLogger();
 
   useEffect(() => {
-    // TEMP: Skip auth check if dev flag is set - REMOVE LATER
     const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
     if (!authLoading && !user && !skipAuth) {
       navigate('/auth');
     }
-    // If in dev mode, set up mock state immediately
     if (skipAuth && !user) {
       setLoading(false);
     }
@@ -47,20 +45,14 @@ export default function Home() {
     }
   }, [user]);
 
-  useEffect(() => {
-    loadTodayEvents();
-  }, [loadTodayEvents]);
-
   const loadBabies = async () => {
     try {
-      // TEMP: Skip data loading if in dev mode - REMOVE LATER
       const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
       if (skipAuth) {
         setLoading(false);
         return;
       }
 
-      // Get families the user belongs to
       const { data: familyMembers, error: fmError } = await supabase
         .from('family_members')
         .select('family_id')
@@ -73,8 +65,7 @@ export default function Home() {
         return;
       }
 
-      // Get babies from those families
-      const familyIds = familyMembers.map(fm => fm.family_id);
+      const familyIds = familyMembers.map((fm) => fm.family_id);
       const { data: babiesData, error: babiesError } = await supabase
         .from('babies')
         .select('*')
@@ -85,7 +76,6 @@ export default function Home() {
       if (babiesData && babiesData.length > 0) {
         setBabies(babiesData as BabyType[]);
         
-        // Check for saved baby selection
         const savedBabyId = localStorage.getItem('selected_baby_id');
         const selectedBabyData = savedBabyId 
           ? babiesData.find(b => b.id === savedBabyId) || babiesData[0]
@@ -102,166 +92,140 @@ export default function Home() {
     }
   };
 
-  const loadTodayEvents = async () => {
+  const loadTodayEvents = useCallback(async () => {
     if (!selectedBaby) return;
 
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .gte('start_time', today.toISOString())
-        .order('start_time', { ascending: false })
-        .limit(20);
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('baby_id', selectedBaby.id)
+      .gte('start_time', today.toISOString())
+      .order('start_time', { ascending: false });
 
-      if (error) throw error;
-      setEvents((data || []) as BabyEvent[]);
-    } catch (error) {
+    if (error) {
       console.error('Error loading events:', error);
+      return;
+    }
+
+    setEvents(data || []);
+  }, [selectedBaby]);
+
+  const handleBabySelect = (babyId: string) => {
+    const baby = babies.find((b) => b.id === babyId);
+    if (baby) {
+      setSelectedBaby(baby);
+      localStorage.setItem('selected_baby_id', babyId);
     }
   };
 
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case 'feed':
-        return <Milk className="h-4 w-4" />;
-      case 'sleep':
-        return <Moon className="h-4 w-4" />;
-      case 'diaper':
-        return <Droplet className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
+  const openModal = (type: EventType) => {
+    setModalType(type);
+    setEditingEvent(null);
+    setIsModalOpen(true);
   };
 
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'feed':
-        return 'text-secondary';
-      case 'sleep':
-        return 'text-primary';
-      case 'diaper':
-        return 'text-accent';
-      default:
-        return 'text-muted-foreground';
-    }
+  const handleEdit = (event: BabyEvent) => {
+    setEditingEvent(event);
+    setModalType(event.type);
+    setIsModalOpen(true);
   };
 
-  if (loading || authLoading) {
+  const handleDelete = async (eventId: string) => {
+    await deleteEvent(eventId);
+    loadTodayEvents();
+  };
+
+  useRealtimeEvents(selectedBaby?.family_id, loadTodayEvents);
+
+  useEffect(() => {
+    loadTodayEvents();
+  }, [loadTodayEvents]);
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen bg-surface pb-20 flex items-center justify-center">
+        <p>Loading...</p>
       </div>
     );
   }
 
-  // TEMP: Check if in dev mode and show placeholder - REMOVE LATER
-  const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
-  const displayBabyName = selectedBaby?.name || (skipAuth ? 'Test Baby' : 'Baby');
-  const displayBabyDob = selectedBaby?.date_of_birth || (skipAuth ? '2024-01-01' : null);
-
   return (
     <div className="min-h-screen bg-surface pb-20">
       <div className="max-w-2xl mx-auto p-4 space-y-4">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Baby className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">{displayBabyName}</h1>
+              <h1 className="text-xl font-bold">{selectedBaby?.name}</h1>
               <p className="text-sm text-muted-foreground">
-                {displayBabyDob && format(new Date(displayBabyDob), 'MMM d, yyyy')}
+                {selectedBaby && format(new Date(selectedBaby.date_of_birth), 'MMM d, yyyy')}
               </p>
             </div>
           </div>
+          <BabySelector
+            babies={babies}
+            selectedBabyId={selectedBaby?.id || null}
+            onSelect={handleBabySelect}
+          />
         </div>
 
-        {/* Nap Predictor Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-lg">Next Nap Window</CardTitle>
-                <CardDescription>Based on age and last wake time</CardDescription>
-              </div>
-              <Badge variant="secondary">Beta</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Complete a sleep event to see predictions
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Quick Log Buttons */}
-        <div className="grid grid-cols-3 gap-3">
-          <Button 
-            variant="outline" 
-            className="h-24 flex-col gap-2"
-            onClick={() => toast.info('Feed logging coming soon')}
-          >
-            <Milk className="h-6 w-6 text-secondary" />
-            <span className="text-sm font-medium">Feed</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-24 flex-col gap-2"
-            onClick={() => toast.info('Sleep logging coming soon')}
-          >
-            <Moon className="h-6 w-6 text-primary" />
-            <span className="text-sm font-medium">Sleep</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-24 flex-col gap-2"
-            onClick={() => toast.info('Diaper logging coming soon')}
-          >
-            <Droplet className="h-6 w-6 text-accent" />
-            <span className="text-sm font-medium">Diaper</span>
-          </Button>
-        </div>
-
-        {/* Today's Timeline */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Today</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {events.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No events logged today. Tap a button above to get started!
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {events.map((event) => (
-                  <div 
-                    key={event.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-surface hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <div className={`${getEventColor(event.type)}`}>
-                      {getEventIcon(event.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium capitalize">
-                        {event.type}
-                        {event.subtype && ` · ${event.subtype}`}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(event.start_time), { addSuffix: true })}
-                      </p>
-                    </div>
+        {selectedBaby && events.length > 0 && (() => {
+          const prediction = predictNextNap(selectedBaby, events);
+          const now = new Date();
+          const isOpen = isAfter(now, prediction.napWindowStart) && isBefore(now, prediction.napWindowEnd);
+          
+          return (
+            <Card className="cursor-pointer hover:bg-accent/5" onClick={() => navigate('/nap-details')}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>💤 Next Nap Window</span>
+                  <Badge variant={prediction.confidence === 'high' ? 'default' : 'secondary'}>
+                    {prediction.confidence}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isOpen ? (
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-green-600 mb-2">Window Open Now!</p>
+                    <p className="text-2xl font-bold">
+                      {format(prediction.napWindowStart, 'h:mm a')} - {format(prediction.napWindowEnd, 'h:mm a')}
+                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">
+                      {format(prediction.napWindowStart, 'h:mm a')} - {format(prediction.napWindowEnd, 'h:mm a')}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">Tap for details →</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
+
+        <div className="grid grid-cols-3 gap-3">
+          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('feed')}>
+            <Milk className="h-6 w-6" />
+            <span>Feed</span>
+          </Button>
+          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('sleep')}>
+            <Moon className="h-6 w-6" />
+            <span>Sleep</span>
+          </Button>
+          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('diaper')}>
+            <BabyIcon className="h-6 w-6" />
+            <span>Diaper</span>
+          </Button>
+        </div>
+
+        <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
       {selectedBaby && (
