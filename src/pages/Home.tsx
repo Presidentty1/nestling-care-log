@@ -25,6 +25,10 @@ export default function Home() {
     if (!authLoading && !user && !skipAuth) {
       navigate('/auth');
     }
+    // If in dev mode, set up mock state immediately
+    if (skipAuth && !user) {
+      setLoading(false);
+    }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
@@ -140,6 +144,11 @@ export default function Home() {
     );
   }
 
+  // TEMP: Check if in dev mode and show placeholder - REMOVE LATER
+  const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
+  const displayBabyName = selectedBaby?.name || (skipAuth ? 'Test Baby' : 'Baby');
+  const displayBabyDob = selectedBaby?.date_of_birth || (skipAuth ? '2024-01-01' : null);
+
   return (
     <div className="min-h-screen bg-surface pb-20">
       <div className="max-w-2xl mx-auto p-4 space-y-4">
@@ -150,9 +159,9 @@ export default function Home() {
               <Baby className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">{selectedBaby?.name}</h1>
+              <h1 className="text-xl font-bold">{displayBabyName}</h1>
               <p className="text-sm text-muted-foreground">
-                {selectedBaby && format(new Date(selectedBaby.date_of_birth), 'MMM d, yyyy')}
+                {displayBabyDob && format(new Date(displayBabyDob), 'MMM d, yyyy')}
               </p>
             </div>
           </div>
