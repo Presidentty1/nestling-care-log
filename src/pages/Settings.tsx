@@ -1,13 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import { MobileNav } from '@/components/MobileNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Users, Bell, Shield, Info } from 'lucide-react';
+import { LogOut, Users, Bell, Shield, Info, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { signOut, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -46,13 +48,12 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => toast.info('Caregiver management coming soon')}
-            >
-              Manage Caregivers
-            </Button>
+            <Card className="cursor-pointer hover:bg-accent border-0 shadow-none" onClick={() => navigate('/settings/caregivers')}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <span className="font-medium">Manage Caregivers</span>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
             <Button 
               variant="outline" 
               className="w-full justify-start"
