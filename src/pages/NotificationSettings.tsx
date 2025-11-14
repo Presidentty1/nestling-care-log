@@ -14,7 +14,7 @@ import { Bell } from 'lucide-react';
 
 export default function NotificationSettings() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
-  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'prompt-with-rationale'>('prompt');
   const queryClient = useQueryClient();
 
   const { data: babies } = useQuery({
