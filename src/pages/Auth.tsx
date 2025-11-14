@@ -152,6 +152,20 @@ export default function Auth() {
               </form>
             </TabsContent>
           </Tabs>
+
+          {/* TEMP: Development skip button - REMOVE LATER */}
+          <div className="mt-4 pt-4 border-t">
+            <Button 
+              variant="ghost" 
+              className="w-full text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                localStorage.setItem('dev_skip_auth', 'true');
+                navigate('/home');
+              }}
+            >
+              Skip Login (Dev Only)
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
