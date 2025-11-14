@@ -18,6 +18,11 @@ export default function Home() {
   const [selectedBaby, setSelectedBaby] = useState<BabyType | null>(null);
   const [events, setEvents] = useState<BabyEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<EventType>('feed');
+  const [editingEvent, setEditingEvent] = useState<BabyEvent | null>(null);
+
+  const { deleteEvent } = useEventLogger();
 
   useEffect(() => {
     // TEMP: Skip auth check if dev flag is set - REMOVE LATER
@@ -249,6 +254,21 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {selectedBaby && (
+        <EventLogModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingEvent(null);
+            loadTodayEvents();
+          }}
+          babyId={selectedBaby.id}
+          familyId={selectedBaby.family_id}
+          defaultType={modalType}
+          editingEvent={editingEvent}
+        />
+      )}
 
       <MobileNav />
     </div>
