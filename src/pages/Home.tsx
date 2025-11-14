@@ -20,7 +20,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    // TEMP: Skip auth check if dev flag is set - REMOVE LATER
+    const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
+    if (!authLoading && !user && !skipAuth) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
@@ -39,6 +41,13 @@ export default function Home() {
 
   const loadBabies = async () => {
     try {
+      // TEMP: Skip data loading if in dev mode - REMOVE LATER
+      const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
+      if (skipAuth) {
+        setLoading(false);
+        return;
+      }
+
       // Get families the user belongs to
       const { data: familyMembers, error: fmError } = await supabase
         .from('family_members')
