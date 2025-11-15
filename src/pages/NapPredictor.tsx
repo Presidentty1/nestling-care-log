@@ -12,29 +12,47 @@ import { format, formatDistanceToNow } from 'date-fns';
 export default function NapPredictor() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+
+  const { data: babies } = useQuery({
+    queryKey: ['babies'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: familyMembers } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id);
+      if (!familyMembers || familyMembers.length === 0) return [];
+      const { data } = await supabase
+        .from('babies')
+        .select('*')
+        .eq('family_id', familyMembers[0].family_id);
+      return data || [];
+    },
+  });
 
   const { data: prediction, isLoading } = useQuery({
-    queryKey: ['nap-prediction', selectedBaby?.id],
+    queryKey: ['nap-prediction', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return null;
+      if (!selectedBabyId) return null;
       
       const { data, error } = await supabase.functions.invoke('calculate-nap-window', {
-        body: { babyId: selectedBaby.id }
+        body: { babyId: selectedBabyId }
       });
 
       if (error) throw error;
       return data;
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const refreshMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedBaby) return;
+      if (!selectedBabyId) return;
       
       const { data, error } = await supabase.functions.invoke('calculate-nap-window', {
-        body: { babyId: selectedBaby.id }
+        body: { babyId: selectedBabyId }
       });
 
       if (error) throw error;
@@ -70,23 +88,23 @@ export default function NapPredictor() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Nap Window Predictor</h1>
-          <BabySelector value={selectedBaby} onChange={setSelectedBaby} />
+          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
 
-        {!selectedBaby && (
+        {!selectedBabyId && (
           <Card className="p-6 text-center text-muted-foreground">
             Select a baby to view nap predictions
           </Card>
         )}
 
-        {selectedBaby && isLoading && (
+        {selectedBabyId && isLoading && (
           <Card className="p-6 text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
             <p>Calculating nap window...</p>
           </Card>
         )}
 
-        {selectedBaby && prediction && (
+        {selectedBabyId && prediction && (
           <div className="space-y-4">
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">

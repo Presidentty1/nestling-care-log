@@ -27,7 +27,7 @@ export default function History() {
 
   const generateDates = () => {
     const dateArray = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 13; i >= 0; i--) {
       dateArray.push(subDays(new Date(), i));
     }
     setDates(dateArray);

@@ -9,36 +9,54 @@ import { TrendingUp, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Insights() {
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+
+  const { data: babies } = useQuery({
+    queryKey: ['babies'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: familyMembers } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id);
+      if (!familyMembers || familyMembers.length === 0) return [];
+      const { data } = await supabase
+        .from('babies')
+        .select('*')
+        .eq('family_id', familyMembers[0].family_id);
+      return data || [];
+    },
+  });
 
   const { data: patterns } = useQuery({
-    queryKey: ['pattern-insights', selectedBaby?.id],
+    queryKey: ['pattern-insights', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('pattern_insights')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .is('acknowledged_at', null)
         .order('detected_at', { ascending: false });
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const { data: correlations } = useQuery({
-    queryKey: ['correlations', selectedBaby?.id],
+    queryKey: ['correlations', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('correlation_analysis')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('created_at', { ascending: false })
         .limit(5);
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const getConfidenceColor = (confidence: number) => {
@@ -59,16 +77,16 @@ export default function Insights() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Insights & Patterns</h1>
-          <BabySelector value={selectedBaby} onChange={setSelectedBaby} />
+          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
 
-        {!selectedBaby && (
+        {!selectedBabyId && (
           <Card className="p-6 text-center text-muted-foreground">
             Select a baby to view insights
           </Card>
         )}
 
-        {selectedBaby && (
+        {selectedBabyId && (
           <>
             <div className="space-y-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">

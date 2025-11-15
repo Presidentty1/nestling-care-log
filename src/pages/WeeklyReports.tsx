@@ -12,33 +12,51 @@ import { format, startOfWeek, subWeeks } from 'date-fns';
 export default function WeeklyReports() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
 
   const weekStart = startOfWeek(subWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
 
-  const { data: summaries } = useQuery({
-    queryKey: ['weekly-summaries', selectedBaby?.id],
+  const { data: babies } = useQuery({
+    queryKey: ['babies'],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: familyMembers } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id);
+      if (!familyMembers || familyMembers.length === 0) return [];
+      const { data } = await supabase
+        .from('babies')
+        .select('*')
+        .eq('family_id', familyMembers[0].family_id);
+      return data || [];
+    },
+  });
+
+  const { data: summaries } = useQuery({
+    queryKey: ['weekly-summaries', selectedBabyId],
+    queryFn: async () => {
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('weekly_summaries')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('week_start', { ascending: false })
         .limit(10);
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const generateMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedBaby) return;
+      if (!selectedBabyId) return;
       
       const { data, error } = await supabase.functions.invoke('generate-weekly-summary', {
         body: { 
-          babyId: selectedBaby.id,
+          babyId: selectedBabyId,
           weekStart: weekStart.toISOString().split('T')[0]
         }
       });
@@ -64,10 +82,10 @@ export default function WeeklyReports() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Weekly Reports</h1>
-          <BabySelector value={selectedBaby} onChange={setSelectedBaby} />
+          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
 
-        {selectedBaby && (
+        {selectedBabyId && (
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">

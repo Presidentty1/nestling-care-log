@@ -18,7 +18,7 @@ import { format } from 'date-fns';
 export default function Goals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
     goal_type: 'feeding',
@@ -29,29 +29,47 @@ export default function Goals() {
     notes: '',
   });
 
-  const { data: goals } = useQuery({
-    queryKey: ['goals', selectedBaby?.id],
+  const { data: babies } = useQuery({
+    queryKey: ['babies'],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: familyMembers } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id);
+      if (!familyMembers || familyMembers.length === 0) return [];
+      const { data } = await supabase
+        .from('babies')
+        .select('*')
+        .eq('family_id', familyMembers[0].family_id);
+      return data || [];
+    },
+  });
+
+  const { data: goals } = useQuery({
+    queryKey: ['goals', selectedBabyId],
+    queryFn: async () => {
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('goals')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('created_at', { ascending: false });
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const createGoalMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedBaby) return;
+      if (!selectedBabyId) return;
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase.from('goals').insert({
-        baby_id: selectedBaby.id,
+        baby_id: selectedBabyId,
         goal_type: newGoal.goal_type,
         title: newGoal.title,
         target_value: parseFloat(newGoal.target_value) || null,
@@ -93,10 +111,10 @@ export default function Goals() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Goals & Milestones</h1>
-          <BabySelector value={selectedBaby} onChange={setSelectedBaby} />
+          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
 
-        {selectedBaby && (
+        {selectedBabyId && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -186,7 +204,7 @@ export default function Goals() {
           </Dialog>
         )}
 
-        {selectedBaby && (
+        {selectedBabyId && (
           <>
             <div className="space-y-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
