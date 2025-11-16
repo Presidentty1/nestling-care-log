@@ -7,7 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MobileNav } from '@/components/MobileNav';
-import { EventLogModal } from '@/components/EventLogModal';
+import { EventSheet } from '@/components/sheets/EventSheet';
+import { NapPredictionCard } from '@/components/NapPredictionCard';
+import { dataService } from '@/services/dataService';
+import { napService } from '@/services/napService';
+import { analyticsService } from '@/services/analyticsService';
+import { useEventSync } from '@/hooks/useEventSync';
+import { differenceInMonths } from 'date-fns';
 import { EventDialog } from '@/components/EventDialog';
 import { EventTimeline } from '@/components/EventTimeline';
 import { BabySelector } from '@/components/BabySelector';
@@ -18,7 +24,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
 import { predictNextNap } from '@/lib/napPredictor';
-import { Baby as BabyType, BabyEvent, EventType } from '@/lib/types';
+import { Baby as BabyType, BabyEvent } from '@/lib/types';
+import { EventType } from '@/types/events';
 import { toast } from 'sonner';
 
 export default function Home() {
@@ -31,6 +38,8 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<EventType>('feed');
   const [editingEvent, setEditingEvent] = useState<BabyEvent | null>(null);
+  const [napPrediction, setNapPrediction] = useState<any>(null);
+  const eventSync = selectedBaby ? useEventSync(selectedBaby.id) : null;
 
   const { deleteEvent } = useEventLogger();
 
@@ -238,17 +247,17 @@ export default function Home() {
       </div>
 
       {selectedBaby && (
-        <EventLogModal
+        <EventSheet
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setEditingEvent(null);
             loadTodayEvents();
           }}
+          eventType={modalType}
           babyId={selectedBaby.id}
           familyId={selectedBaby.family_id}
-          defaultType={modalType}
-          editingEvent={editingEvent}
+          editingEventId={editingEvent?.id}
         />
       )}
 

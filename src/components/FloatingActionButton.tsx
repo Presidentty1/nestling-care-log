@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Mic, X } from 'lucide-react';
-import { VoiceButton } from './VoiceButton';
+import { Mic } from 'lucide-react';
+import { VoiceMenu } from './sheets/VoiceMenu';
 import { cn } from '@/lib/utils';
 
 interface FloatingActionButtonProps {
@@ -10,31 +10,25 @@ interface FloatingActionButtonProps {
 }
 
 export function FloatingActionButton({ onVoiceCommand, className }: FloatingActionButtonProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showVoiceMenu, setShowVoiceMenu] = useState(false);
 
   return (
-    <div className={cn('fixed bottom-24 right-6 z-50', className)}>
-      {isExpanded ? (
-        <div className="flex flex-col items-center gap-4">
-          <VoiceButton onCommandParsed={onVoiceCommand} />
-          <Button
-            onClick={() => setIsExpanded(false)}
-            size="lg"
-            variant="secondary"
-            className="rounded-full w-14 h-14 shadow-lg"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-      ) : (
+    <>
+      <div className={cn('fixed bottom-24 right-6 z-50', className)}>
         <Button
-          onClick={() => setIsExpanded(true)}
+          onClick={() => setShowVoiceMenu(true)}
           size="lg"
           className="rounded-full w-14 h-14 shadow-lg"
+          aria-label="Open voice menu"
         >
           <Mic className="h-5 w-5" />
         </Button>
-      )}
-    </div>
+      </div>
+      
+      <VoiceMenu 
+        isOpen={showVoiceMenu}
+        onClose={() => setShowVoiceMenu(false)}
+      />
+    </>
   );
 }
