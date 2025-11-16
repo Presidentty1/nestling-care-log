@@ -152,6 +152,36 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          caregiver_mode: boolean | null
+          created_at: string | null
+          font_size: string | null
+          id: string
+          theme: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          caregiver_mode?: boolean | null
+          created_at?: string | null
+          font_size?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          caregiver_mode?: boolean | null
+          created_at?: string | null
+          font_size?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       babies: {
         Row: {
           created_at: string | null
@@ -643,6 +673,62 @@ export type Database = {
         }
         Relationships: []
       }
+      growth_records: {
+        Row: {
+          baby_id: string
+          created_at: string | null
+          head_circumference: number | null
+          id: string
+          length: number | null
+          note: string | null
+          percentile_head: number | null
+          percentile_length: number | null
+          percentile_weight: number | null
+          recorded_at: string
+          recorded_by: string | null
+          unit_system: string | null
+          weight: number | null
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string | null
+          head_circumference?: number | null
+          id?: string
+          length?: number | null
+          note?: string | null
+          percentile_head?: number | null
+          percentile_length?: number | null
+          percentile_weight?: number | null
+          recorded_at: string
+          recorded_by?: string | null
+          unit_system?: string | null
+          weight?: number | null
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string | null
+          head_circumference?: number | null
+          id?: string
+          length?: number | null
+          note?: string | null
+          percentile_head?: number | null
+          percentile_length?: number | null
+          percentile_weight?: number | null
+          recorded_at?: string
+          recorded_by?: string | null
+          unit_system?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_records_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       handoff_reports: {
         Row: {
           baby_id: string
@@ -687,6 +773,65 @@ export type Database = {
           to_user_id?: string | null
         }
         Relationships: []
+      }
+      health_records: {
+        Row: {
+          baby_id: string
+          created_at: string | null
+          created_by: string | null
+          diagnosis: string | null
+          doctor_name: string | null
+          id: string
+          note: string | null
+          record_type: string
+          recorded_at: string
+          temperature: number | null
+          title: string
+          treatment: string | null
+          vaccine_dose: string | null
+          vaccine_name: string | null
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string | null
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          note?: string | null
+          record_type: string
+          recorded_at: string
+          temperature?: number | null
+          title: string
+          treatment?: string | null
+          vaccine_dose?: string | null
+          vaccine_name?: string | null
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          note?: string | null
+          record_type?: string
+          recorded_at?: string
+          temperature?: number | null
+          title?: string
+          treatment?: string | null
+          vaccine_dose?: string | null
+          vaccine_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_records_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_entries: {
         Row: {
@@ -768,6 +913,56 @@ export type Database = {
           tag_name?: string
         }
         Relationships: []
+      }
+      milestones: {
+        Row: {
+          achieved_at: string | null
+          baby_id: string
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expected_age_months: number | null
+          id: string
+          note: string | null
+          photo_url: string | null
+          title: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          baby_id: string
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expected_age_months?: number | null
+          id?: string
+          note?: string | null
+          photo_url?: string | null
+          title: string
+        }
+        Update: {
+          achieved_at?: string | null
+          baby_id?: string
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expected_age_months?: number | null
+          id?: string
+          note?: string | null
+          photo_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monthly_recaps: {
         Row: {
@@ -1140,6 +1335,39 @@ export type Database = {
           memory_id?: string
           memory_type?: string
           tag_id?: string
+        }
+        Relationships: []
+      }
+      user_feedback: {
+        Row: {
+          created_at: string | null
+          feedback_type: string
+          id: string
+          message: string
+          rating: number | null
+          status: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feedback_type: string
+          id?: string
+          message: string
+          rating?: number | null
+          status?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feedback_type?: string
+          id?: string
+          message?: string
+          rating?: number | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string
         }
         Relationships: []
       }

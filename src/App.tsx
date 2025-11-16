@@ -29,6 +29,12 @@ import SleepTraining from "./pages/SleepTraining";
 import ActivityFeed from "./pages/ActivityFeed";
 import Predictions from "./pages/Predictions";
 import Journal from "./pages/Journal";
+import JournalEntry from "./pages/JournalEntry";
+import NewSleepTrainingSession from "./pages/NewSleepTrainingSession";
+import Referrals from "./pages/Referrals";
+import Accessibility from "./pages/Accessibility";
+import Feedback from "./pages/Feedback";
+import PrivacyCenter from "./pages/PrivacyCenter";
 
 function AppContent() {
   useNotificationHandler();
@@ -59,6 +65,13 @@ function AppContent() {
       <Route path="/activity-feed" element={<ActivityFeed />} />
       <Route path="/predictions" element={<Predictions />} />
       <Route path="/journal" element={<Journal />} />
+      <Route path="/journal/new" element={<JournalEntry />} />
+      <Route path="/journal/entry/:id" element={<JournalEntry />} />
+      <Route path="/sleep-training/new-session" element={<NewSleepTrainingSession />} />
+      <Route path="/referrals" element={<Referrals />} />
+      <Route path="/accessibility" element={<Accessibility />} />
+      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/privacy" element={<PrivacyCenter />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
