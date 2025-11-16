@@ -9,6 +9,8 @@ import { BabySelector } from '@/components/BabySelector';
 import { CryTimer } from '@/components/CryTimer';
 import { PatternInsights } from '@/components/PatternInsights';
 import { MobileNav } from '@/components/MobileNav';
+import { CryRecorder } from '@/components/CryRecorder';
+import { CryAnalysisResult } from '@/components/CryAnalysisResult';
 import { ArrowLeft, Clock, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +21,7 @@ export default function CryInsights() {
   const queryClient = useQueryClient();
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
   const [activeTab, setActiveTab] = useState('timer');
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -101,7 +104,7 @@ export default function CryInsights() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="timer">
               <Clock className="mr-2 h-4 w-4" />
-              Timer
+              Record
             </TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="patterns">
@@ -111,7 +114,22 @@ export default function CryInsights() {
           </TabsList>
 
           <TabsContent value="timer" className="space-y-4">
-            {selectedBaby && <CryTimer baby={selectedBaby} />}
+            {!analysisResult ? (
+              selectedBaby && (
+                <CryRecorder
+                  babyId={selectedBaby.id}
+                  onAnalysisComplete={setAnalysisResult}
+                />
+              )
+            ) : (
+              <CryAnalysisResult
+                result={analysisResult}
+                onFeedback={(helpful) => {
+                  toast({ title: helpful ? 'Thank you!' : 'We\'ll keep improving' });
+                  setTimeout(() => setAnalysisResult(null), 2000);
+                }}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">

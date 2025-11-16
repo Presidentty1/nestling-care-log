@@ -11,8 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Plus, TrendingUp, Ruler, Weight, Circle } from 'lucide-react';
+import { Plus, TrendingUp, Ruler, Weight, Circle, Download } from 'lucide-react';
 import { calculateWeightPercentile, calculateLengthPercentile, calculateHeadPercentile } from '@/lib/whoPercentiles';
+import { generateDoctorReport, downloadDoctorReport } from '@/lib/doctorReportPDF';
 
 export default function GrowthTracker() {
   const { user } = useAuth();
@@ -126,6 +127,41 @@ export default function GrowthTracker() {
     }
   };
 
+  const handleExportPDF = async () => {
+    if (!baby) return;
+    
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      
+      const { data: recentEvents } = await supabase
+        .from('events')
+        .select('*')
+        .eq('baby_id', baby.id)
+        .gte('start_time', startDate.toISOString());
+      
+      const { data: healthRecords } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('baby_id', baby.id)
+        .order('recorded_at', { ascending: false });
+      
+      const doc = await generateDoctorReport(
+        baby,
+        records,
+        recentEvents || [],
+        healthRecords || [],
+        [startDate, new Date()]
+      );
+      
+      downloadDoctorReport(doc, baby.name);
+      toast.success('Report exported successfully!');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('Failed to export report');
+    }
+  };
+
   const latestRecord = records[0];
 
   if (loading) {
@@ -136,9 +172,15 @@ export default function GrowthTracker() {
 
   return (
     <div className="container mx-auto p-4 pb-20 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Growth Tracker</h1>
-        <p className="text-muted-foreground">{baby.name}</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Growth Tracker</h1>
+          <p className="text-muted-foreground">{baby.name}</p>
+        </div>
+        <Button onClick={handleExportPDF} variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          Export PDF
+        </Button>
       </div>
 
       <Card className="mb-6">
