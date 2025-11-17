@@ -1,0 +1,128 @@
+# Cursor AI Rules for Nestling Baby Tracker
+
+## Project Context
+This is a React + TypeScript baby tracking app with:
+- Supabase backend (Lovable Cloud)
+- Capacitor for iOS native features
+- Local-first architecture with IndexedDB
+- AI features via Supabase edge functions
+
+## Coding Standards
+
+### TypeScript
+- Use strict mode
+- Prefer interfaces over types for objects
+- No `any` types (use `unknown` if truly dynamic)
+- Export types from centralized locations (`src/types/`)
+
+### React
+- Functional components only
+- Use hooks (useState, useEffect, custom hooks)
+- Avoid prop drilling (use context or zustand)
+- Memoize expensive calculations with useMemo
+- Use React.memo for expensive components
+
+### File Structure
+- Components in `src/components/`
+- Pages in `src/pages/`
+- Hooks in `src/hooks/`
+- Services in `src/services/`
+- Types in `src/types/` or co-located
+- UI components in `src/components/ui/` (shadcn)
+
+### Imports
+- Use `@/` alias for src imports
+- Group imports: React → Third-party → Local
+- No relative imports more than 2 levels deep
+
+### Error Handling
+- Always use try-catch for async operations
+- Show user-friendly toast messages via sonner
+- Log errors to console in development
+- Never expose technical errors to users
+- Use Error boundaries for component errors
+
+### Supabase
+- Use existing `src/integrations/supabase/client.ts`
+- Never create new Supabase clients
+- Use RLS policies, never bypass security
+- Handle auth state changes properly
+- Use React Query for data fetching
+
+### Testing
+- Write tests for business logic in `tests/`
+- E2E tests for critical user flows in `tests/e2e/`
+- Mock external services (Supabase, AI APIs)
+- Use `vitest` for unit tests
+- Use `playwright` for E2E tests
+
+### Performance
+- Lazy load routes with React.lazy()
+- Optimize re-renders with useMemo/useCallback
+- Use React Query for data fetching and caching
+- Avoid large inline objects/functions in JSX
+- Use IndexedDB for offline storage
+
+### Design System
+- Use Tailwind CSS with semantic tokens from `index.css`
+- Never use raw colors (use CSS variables)
+- Follow iOS design patterns (bottom sheets, large touch targets)
+- Support dark mode via `next-themes`
+- Use haptic feedback for interactions
+
+### AI Features
+- All AI calls go through edge functions
+- Never expose API keys client-side
+- Handle loading/error states
+- Add medical disclaimers where appropriate
+- Use Lovable AI models via edge functions
+
+## Forbidden Patterns
+- ❌ Direct Supabase auth.users table access (use profiles table)
+- ❌ Inline styles (use Tailwind classes)
+- ❌ Class components
+- ❌ Mutation without optimistic updates
+- ❌ Hardcoded environment variables
+- ❌ Creating new Supabase client instances
+- ❌ Raw colors (use CSS variables)
+- ❌ Synchronous operations on main thread
+
+## When Adding Features
+1. Check if similar component exists
+2. Reuse existing UI components (shadcn)
+3. Add TypeScript types first
+4. Write defensive code (null checks)
+5. Add error boundaries for new features
+6. Update tests if changing critical paths
+7. Consider offline functionality
+8. Follow iOS UX patterns
+
+## iOS-Specific Guidelines
+- Use Capacitor plugins for native features
+- Test on iOS simulator regularly
+- Handle safe area insets properly
+- Support haptic feedback
+- Optimize for one-handed use
+- Large touch targets (min 44x44pt)
+
+## State Management
+- Use Zustand for global state (`src/store/appStore.ts`)
+- Use React Query for server state
+- Use localStorage/IndexedDB for persistence
+- Keep state close to where it's used
+
+## Code Style
+- Use Prettier for formatting
+- Use ESLint for linting
+- Prefer early returns
+- Max line length: 100 characters
+- Use descriptive variable names
+- Comment complex logic only
+
+## Security
+- Never log sensitive data
+- Validate all user inputs
+- Use RLS policies on all tables
+- Sanitize data before displaying
+- Use parameterized queries
+- Follow OWASP best practices
