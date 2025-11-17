@@ -8,7 +8,7 @@ import { EventTimeline } from '@/components/EventTimeline';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import { SummaryChips } from '@/components/today/SummaryChips';
 import { NapPredictionCard } from '@/components/NapPredictionCard';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { FloatingActionButtonRadial } from '@/components/FloatingActionButtonRadial';
 import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -167,7 +167,7 @@ export default function Home() {
         </div>
       </div>
 
-      <FloatingActionButton />
+      <FloatingActionButtonRadial />
       <MobileNav />
 
       {selectedBaby && (
