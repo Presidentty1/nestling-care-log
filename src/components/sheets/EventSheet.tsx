@@ -36,10 +36,7 @@ export function EventSheet({
     feed: 'Log Feed',
     sleep: 'Log Sleep',
     diaper: 'Log Diaper',
-    tummy: 'Log Tummy Time',
-    medication: 'Log Medication',
-    bath: 'Log Bath',
-    temperature: 'Log Temperature',
+    tummy_time: 'Log Tummy Time',
   };
   
   const title = titles[eventType] || 'Log Event';
@@ -169,7 +166,7 @@ export function EventSheet({
               onSubmit={handleSave}
             />
           )}
-          {eventType === 'tummy' && (
+          {eventType === 'tummy_time' && (
             <TummyTimeForm
               babyId={babyId}
               editingEventId={editingEventId}

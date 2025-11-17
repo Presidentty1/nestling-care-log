@@ -24,7 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
 import { predictNextNap } from '@/lib/napPredictor';
-import { Baby as BabyType, BabyEvent } from '@/lib/types';
+import { Baby as BabyType, BabyEvent, EventType as LibEventType } from '@/lib/types';
 import { EventType } from '@/types/events';
 import { toast } from 'sonner';
 
@@ -36,7 +36,7 @@ export default function Home() {
   const [events, setEvents] = useState<BabyEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<EventType>('feed');
+  const [modalType, setModalType] = useState<LibEventType>('feed');
   const [editingEvent, setEditingEvent] = useState<BabyEvent | null>(null);
   const [napPrediction, setNapPrediction] = useState<any>(null);
   const eventSync = selectedBaby ? useEventSync(selectedBaby.id) : null;
@@ -246,7 +246,7 @@ export default function Home() {
         <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
-      {selectedBaby && (
+      {selectedBaby && modalType && ['feed', 'sleep', 'diaper', 'tummy_time'].includes(modalType) && (
         <EventSheet
           isOpen={isModalOpen}
           onClose={() => {
@@ -254,7 +254,7 @@ export default function Home() {
             setEditingEvent(null);
             loadTodayEvents();
           }}
-          eventType={modalType}
+          eventType={modalType as EventType}
           babyId={selectedBaby.id}
           familyId={selectedBaby.family_id}
           editingEventId={editingEvent?.id}
