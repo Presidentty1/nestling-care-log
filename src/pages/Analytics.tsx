@@ -5,7 +5,7 @@ import { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BabySelector } from '@/components/BabySelector';
+import { BabySwitcher } from '@/components/BabySwitcher';
 import { SleepAnalysis } from '@/components/analytics/SleepAnalysis';
 import { FeedingAnalysis } from '@/components/analytics/FeedingAnalysis';
 import { PatternVisualization } from '@/components/analytics/PatternVisualization';
@@ -18,8 +18,9 @@ import { useToast } from '@/hooks/use-toast';
 export default function Analytics() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('week');
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -40,9 +41,12 @@ export default function Analytics() {
     },
   });
 
-  if (babies && babies.length > 0 && !selectedBaby) {
-    setSelectedBaby(babies[0]);
+  if (babies && babies.length > 0 && !selectedBabyId) {
+    setSelectedBabyId(babies[0].id);
+    localStorage.setItem('selected_baby_id', babies[0].id);
   }
+
+  const selectedBaby = babies?.find(b => b.id === selectedBabyId);
 
   const handleExport = async () => {
     if (!selectedBaby) return;
@@ -95,14 +99,16 @@ export default function Analytics() {
               Export
             </Button>
           </div>
-          <BabySelector
-            babies={babies}
-            selectedBabyId={selectedBaby?.id || null}
-            onSelect={(babyId) => {
-              const baby = babies.find(b => b.id === babyId);
-              if (baby) setSelectedBaby(baby);
-            }}
-          />
+          {babies.length > 1 && (
+            <Button
+              onClick={() => setIsSwitcherOpen(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              {selectedBaby?.name}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -142,18 +148,29 @@ export default function Analytics() {
           </TabsList>
 
           <TabsContent value="sleep" className="space-y-4">
-            {selectedBaby && <SleepAnalysis babyId={selectedBaby.id} dateRange={dateRange} />}
+            {selectedBabyId && <SleepAnalysis babyId={selectedBabyId} dateRange={dateRange} />}
           </TabsContent>
 
           <TabsContent value="feeding" className="space-y-4">
-            {selectedBaby && <FeedingAnalysis babyId={selectedBaby.id} dateRange={dateRange} />}
+            {selectedBabyId && <FeedingAnalysis babyId={selectedBabyId} dateRange={dateRange} />}
           </TabsContent>
 
           <TabsContent value="patterns" className="space-y-4">
-            {selectedBaby && <PatternVisualization babyId={selectedBaby.id} dateRange={dateRange} />}
+            {selectedBabyId && <PatternVisualization babyId={selectedBabyId} dateRange={dateRange} />}
           </TabsContent>
         </Tabs>
       </div>
+
+      <BabySwitcher
+        babies={babies || []}
+        selectedBabyId={selectedBabyId}
+        isOpen={isSwitcherOpen}
+        onOpenChange={setIsSwitcherOpen}
+        onSelect={(babyId) => {
+          setSelectedBabyId(babyId);
+          localStorage.setItem('selected_baby_id', babyId);
+        }}
+      />
 
       <MobileNav />
     </div>

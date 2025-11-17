@@ -5,7 +5,7 @@ import { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BabySelector } from '@/components/BabySelector';
+import { BabySwitcher } from '@/components/BabySwitcher';
 import { MobileNav } from '@/components/MobileNav';
 import { ArrowLeft, Plus, Moon, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,8 @@ export default function SleepTraining() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
