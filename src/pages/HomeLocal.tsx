@@ -136,21 +136,15 @@ export default function Home() {
           </div>
         )}
 
-        {summary && selectedBaby && (
-          <SummaryChips
-            feedCount={summary.feedCount}
-            totalMl={summary.totalMl}
-            sleepMinutes={summary.sleepMinutes}
-            wet={summary.diaperWet}
-            dirty={summary.diaperDirty}
-            units={selectedBaby.units}
-          />
+        {summary && (
+          <SummaryChips summary={summary} />
         )}
 
-        {napPrediction && (
+        {napPrediction && selectedBaby && (
           <NapPredictionCard
             prediction={napPrediction}
-            onFeedback={async () => {}}
+            babyId={selectedBaby.id}
+            onFeedbackSubmitted={loadNapPrediction}
           />
         )}
 
@@ -173,7 +167,13 @@ export default function Home() {
         </div>
       </div>
 
-      <FloatingActionButton onClick={() => handleQuickAction('feed')} />
+      <FloatingActionButton
+        onVoiceCommand={(command) => {
+          if (command.type) {
+            handleQuickAction(command.type);
+          }
+        }}
+      />
       <MobileNav />
 
       {selectedBaby && (
