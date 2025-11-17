@@ -15,12 +15,13 @@ import { eventsService, EventRecord } from '@/services/eventsService';
 import { babyService } from '@/services/babyService';
 import { toast } from 'sonner';
 import { startOfDay, endOfDay } from 'date-fns';
+import { DailySummary } from '@/types/summary';
 
 export default function History() {
   const { activeBabyId } = useAppStore();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<EventRecord[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<DailySummary | null>(null);
   const [babyName, setBabyName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);

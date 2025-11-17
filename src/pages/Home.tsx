@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInMonths, subDays } from 'date-fns';
 import { EventType } from '@/types/events';
+import { DailySummary } from '@/types/summary';
 import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventSheet } from '@/components/sheets/EventSheet';
@@ -34,7 +35,7 @@ export default function Home() {
     type: 'feed',
   });
   const [napWindow, setNapWindow] = useState<{ start: Date; end: Date; reason: string } | null>(null);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   useEffect(() => {

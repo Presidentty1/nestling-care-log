@@ -1,21 +1,23 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Milk, Moon, Baby } from 'lucide-react';
+import { DailySummary } from '@/types/summary';
 
 interface SummaryChipsProps {
-  summary: {
-    feedCount: number;
-    totalMl: number;
-    sleepMinutes: number;
-    sleepCount: number;
-    diaperWet: number;
-    diaperDirty: number;
-    diaperTotal: number;
-  };
+  summary: DailySummary;
 }
 
 export function SummaryChips({ summary }: SummaryChipsProps) {
-  const sleepHours = Math.floor(summary.sleepMinutes / 60);
-  const sleepMins = summary.sleepMinutes % 60;
+  // Defensive: ensure values are numbers
+  const sleepMinutes = summary.sleepMinutes || 0;
+  const sleepHours = Math.floor(sleepMinutes / 60);
+  const sleepMins = sleepMinutes % 60;
+
+  // Format sleep display for iOS polish
+  const formatSleepTime = () => {
+    if (sleepMinutes === 0) return '—'; // Em dash for zero state
+    if (sleepHours > 0) return `${sleepHours}h ${sleepMins}m`;
+    return `${sleepMins}m`;
+  };
 
   return (
     <div className="grid grid-cols-3 gap-4">
@@ -25,12 +27,12 @@ export function SummaryChips({ summary }: SummaryChipsProps) {
           <Milk className="h-6 w-6 mx-auto text-primary" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
-              {summary.feedCount}
+              {summary.feedCount || 0}
             </div>
             <div className="text-secondary text-muted-foreground">Feeds</div>
             {summary.totalMl > 0 && (
               <div className="text-caption text-text-subtle">
-                {summary.totalMl} ml
+                {Math.round(summary.totalMl)} ml
               </div>
             )}
           </div>
@@ -43,7 +45,7 @@ export function SummaryChips({ summary }: SummaryChipsProps) {
           <Moon className="h-6 w-6 mx-auto text-primary" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
-              {sleepHours > 0 ? `${sleepHours}h` : ''} {sleepMins}m
+              {formatSleepTime()}
             </div>
             <div className="text-secondary text-muted-foreground">Sleep</div>
             {summary.sleepCount > 0 && (
@@ -61,12 +63,12 @@ export function SummaryChips({ summary }: SummaryChipsProps) {
           <Baby className="h-6 w-6 mx-auto text-primary" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
-              {summary.diaperTotal}
+              {summary.diaperTotal || 0}
             </div>
             <div className="text-secondary text-muted-foreground">Diapers</div>
             {summary.diaperTotal > 0 && (
               <div className="text-caption text-text-subtle">
-                💧{summary.diaperWet} 💩{summary.diaperDirty}
+                💧{summary.diaperWet || 0} 💩{summary.diaperDirty || 0}
               </div>
             )}
           </div>

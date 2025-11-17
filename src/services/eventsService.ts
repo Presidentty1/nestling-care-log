@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { differenceInMinutes, differenceInSeconds, startOfDay, endOfDay } from 'date-fns';
+import { DailySummary } from '@/types/summary';
 
 export interface CreateEventData {
   baby_id: string;
@@ -195,9 +196,9 @@ class EventsService {
   }
 
   // Calculate daily summary
-  calculateSummary(events: EventRecord[]) {
+  calculateSummary(events: EventRecord[]): DailySummary {
     const feeds = events.filter(e => e.type === 'feed');
-    const sleeps = events.filter(e => e.type === 'sleep');
+    const sleeps = events.filter(e => e.type === 'sleep' && e.end_time); // Only completed sleeps
     const diapers = events.filter(e => e.type === 'diaper');
 
     const totalFeedAmount = feeds.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -207,19 +208,13 @@ class EventsService {
     const dirtyCount = diapers.filter(d => d.subtype === 'dirty' || d.subtype === 'both').length;
 
     return {
-      feeds: {
-        count: feeds.length,
-        totalMl: totalFeedAmount,
-      },
-      sleep: {
-        count: sleeps.length,
-        totalMinutes: totalSleepMin,
-      },
-      diapers: {
-        count: diapers.length,
-        wet: wetCount,
-        dirty: dirtyCount,
-      },
+      feedCount: feeds.length,
+      totalMl: totalFeedAmount,
+      sleepMinutes: totalSleepMin,
+      sleepCount: sleeps.length,
+      diaperWet: wetCount,
+      diaperDirty: dirtyCount,
+      diaperTotal: diapers.length,
     };
   }
 }
