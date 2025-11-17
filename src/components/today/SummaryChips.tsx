@@ -18,7 +18,7 @@ export function SummaryChips({ summary }: SummaryChipsProps) {
   const sleepMins = summary.sleepMinutes % 60;
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-4">
       {/* Feed Chip */}
       <Card className="shadow-soft">
         <CardContent className="p-4 text-center space-y-2">

@@ -51,6 +51,11 @@ export function SheetFrame({
         side="bottom" 
         className="rounded-t-[24px] max-h-[90vh] overflow-y-auto"
       >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 rounded-full bg-muted/40" />
+        </div>
+        
         <SheetHeader className="relative pb-4">
           <SheetTitle className="text-center pr-8">{title}</SheetTitle>
           <Button
