@@ -84,6 +84,13 @@ export default {
         '18': '4.5rem', /* 72px */
         '22': '5.5rem', /* 88px */
       },
+      fontSize: {
+        'headline': ['22px', { lineHeight: '28px', fontWeight: '700' }],
+        'title': ['17px', { lineHeight: '22px', fontWeight: '600' }],
+        'body': ['15px', { lineHeight: '20px' }],
+        'caption': ['13px', { lineHeight: '18px' }],
+        'label': ['11px', { lineHeight: '13px', fontWeight: '500', letterSpacing: '0.06em' }],
+      },
       keyframes: {
         "accordion-down": {
           from: {

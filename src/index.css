@@ -61,6 +61,9 @@ All colors MUST be HSL.
     /* Shadows */
     --shadow-soft: 0 6px 24px rgba(13, 27, 30, 0.06);
 
+    /* Caregiver Mode - UI Scaling */
+    --caregiver-scale: 1.0;
+
     /* Sidebar (desktop) */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 199 62% 8%;
@@ -112,6 +115,9 @@ All colors MUST be HSL.
     --ring: 168 36% 64%;
 
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+    /* Caregiver Mode - UI Scaling */
+    --caregiver-scale: 1.0;
 
     --sidebar-background: 210 31% 9%;
     --sidebar-foreground: 190 25% 93%;
@@ -178,21 +184,12 @@ All colors MUST be HSL.
 
   /* Caregiver Mode - Accessibility Enhancement */
   body.caregiver-mode {
-    font-size: calc(17px + 2pt);
+    --caregiver-scale: 1.2;
   }
-
-  body.caregiver-mode button,
-  body.caregiver-mode .card,
-  body.caregiver-mode [role="button"] {
-    padding: calc(var(--spacing, 1rem) * 1.2) !important;
-    min-height: 52px; /* 44px + 20% */
-  }
-
-  body.caregiver-mode input,
-  body.caregiver-mode textarea,
-  body.caregiver-mode select {
-    font-size: calc(17px + 2pt);
-    min-height: 52px;
+  
+  body.caregiver-mode #root > * {
+    transform: scale(var(--caregiver-scale));
+    transform-origin: top center;
   }
 
   /* iOS-style animations */
