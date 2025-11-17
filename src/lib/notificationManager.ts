@@ -137,6 +137,16 @@ class NotificationManager {
     await this.cancelNotification(this.notificationIds.diaper);
   }
 
+  async requestPermission(): Promise<boolean> {
+    try {
+      const result = await LocalNotifications.requestPermissions();
+      return result.display === 'granted';
+    } catch (error) {
+      console.error('Failed to request notification permission:', error);
+      return false;
+    }
+  }
+
   private isQuietHours(time: Date, settings: NotificationSettings): boolean {
     if (!settings.quiet_hours_start || !settings.quiet_hours_end) {
       return false;

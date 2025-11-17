@@ -516,6 +516,7 @@ export type Database = {
         Row: {
           amount: number | null
           baby_id: string
+          bottle_type: string | null
           created_at: string | null
           created_by: string | null
           duration_min: number | null
@@ -534,6 +535,7 @@ export type Database = {
         Insert: {
           amount?: number | null
           baby_id: string
+          bottle_type?: string | null
           created_at?: string | null
           created_by?: string | null
           duration_min?: number | null
@@ -552,6 +554,7 @@ export type Database = {
         Update: {
           amount?: number | null
           baby_id?: string
+          bottle_type?: string | null
           created_at?: string | null
           created_by?: string | null
           duration_min?: number | null
