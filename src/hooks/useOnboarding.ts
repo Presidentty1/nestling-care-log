@@ -70,8 +70,40 @@ export function useOnboarding() {
         const babies = await babyService.getUserBabies();
         
         if (babies.length === 0) {
-          // Has family but no babies - go to onboarding
-          setChecking(false);
+          // Has family but no babies - auto-provision a demo baby via backend
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            toast.error('Authentication session not found');
+            setChecking(false);
+            return;
+          }
+
+          const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+          const response = await supabase.functions.invoke('bootstrap-user', {
+            body: {
+              babyName: 'Demo Baby',
+              dateOfBirth: demoBirthdate,
+              timezone: timezone
+            },
+            headers: {
+              Authorization: `Bearer ${session.access_token}`
+            }
+          });
+
+          if (response.error) {
+            console.error('Bootstrap (no-baby) error:', response.error);
+            // Fall back to manual onboarding UI
+            setChecking(false);
+            return;
+          }
+
+          const { babyId } = response.data;
+          setActiveBabyId(babyId);
+          localStorage.setItem('activeBabyId', babyId);
+          toast.success('Your profile is ready!');
+          navigate('/home');
         } else {
           // All set - go to home
           const storedBabyId = localStorage.getItem('activeBabyId');
