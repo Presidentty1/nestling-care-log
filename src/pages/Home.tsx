@@ -21,6 +21,8 @@ import { toast } from 'sonner';
 import { TimelineList } from '@/components/today/TimelineList';
 import { NapWindowCard } from '@/components/today/NapWindowCard';
 import { NapPill } from '@/components/today/NapPill';
+import { triggerConfetti } from '@/lib/confetti';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -37,6 +39,12 @@ export default function Home() {
   const [napWindow, setNapWindow] = useState<{ start: Date; end: Date; reason: string } | null>(null);
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+  const [hasShownConfetti, setHasShownConfetti] = useState(false);
+
+  useKeyboardShortcuts({
+    escape: () => setModalState({ open: false, type: 'feed' }),
+    newEvent: () => setModalState({ open: true, type: 'feed' }),
+  });
 
   useEffect(() => {
     if (user) {
@@ -52,12 +60,19 @@ export default function Home() {
 
   useEffect(() => {
     const unsubscribe = eventsService.subscribe((action) => {
-      if (action === 'add' || action === 'update' || action === 'delete') {
+      if (action === 'add') {
+        // Show confetti on first event
+        if (events.length === 0 && !hasShownConfetti) {
+          triggerConfetti();
+          setHasShownConfetti(true);
+        }
+        loadTodayEvents();
+      } else if (action === 'update' || action === 'delete') {
         loadTodayEvents();
       }
     });
     return unsubscribe;
-  }, [activeBabyId]);
+  }, [activeBabyId, events.length, hasShownConfetti]);
 
   const loadBabies = async () => {
     try {
