@@ -48,7 +48,7 @@ export function useEventLogger() {
         return null;
       }
 
-      toast.success('Event logged successfully');
+      toast.success('Logged!');
       queryClient.invalidateQueries({ queryKey: ['events'] });
       return data;
     } catch (error: any) {
@@ -63,7 +63,7 @@ export function useEventLogger() {
           created_by: user?.id,
         },
       });
-      toast.info('Event saved offline');
+      toast.info('Saved offline, will sync when connected');
       return null;
     } finally {
       setIsLoading(false);
@@ -82,12 +82,12 @@ export function useEventLogger() {
 
       if (error) throw error;
 
-      toast.success('Event updated');
+      toast.success('Updated!');
       queryClient.invalidateQueries({ queryKey: ['events'] });
       return data;
     } catch (error: any) {
       console.error('Error updating event:', error);
-      toast.error(error.message || 'Failed to update event');
+      toast.error("Couldn't save changes. Try again?");
       throw error;
     } finally {
       setIsLoading(false);
@@ -101,11 +101,11 @@ export function useEventLogger() {
 
       if (error) throw error;
 
-      toast.success('Event deleted');
+      toast.success('Removed!');
       queryClient.invalidateQueries({ queryKey: ['events'] });
     } catch (error: any) {
       console.error('Error deleting event:', error);
-      toast.error(error.message || 'Failed to delete event');
+      toast.error("Couldn't remove that. Try again?");
       throw error;
     } finally {
       setIsLoading(false);

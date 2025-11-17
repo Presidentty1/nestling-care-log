@@ -59,8 +59,8 @@ export default function Analytics() {
       });
     } catch (error) {
       toast({
-        title: 'Export Failed',
-        description: 'Could not generate report. Please try again.',
+        title: "Couldn't Export",
+        description: 'Something went wrong. Try again?',
         variant: 'destructive',
       });
     }
@@ -74,7 +74,7 @@ export default function Analytics() {
           Back
         </Button>
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No babies found. Please add a baby first.</p>
+          <p className="text-muted-foreground">No babies yet. Add one to see insights!</p>
         </Card>
       </div>
     );
