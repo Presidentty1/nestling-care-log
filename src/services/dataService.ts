@@ -193,6 +193,19 @@ class DataService {
       lastWakeTime: lastSleep?.endTime,
     };
   }
+
+  async storeNapPrediction(babyId: string, prediction: any): Promise<void> {
+    const key = `nap_prediction_${babyId}`;
+    await localforage.setItem(key, {
+      ...prediction,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  async getNapPrediction(babyId: string): Promise<any | null> {
+    const key = `nap_prediction_${babyId}`;
+    return await localforage.getItem(key);
+  }
 }
 
 export const dataService = new DataService();

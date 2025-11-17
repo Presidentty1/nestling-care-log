@@ -1,13 +1,22 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Moon, Clock } from 'lucide-react';
+import { Moon, Clock, Info } from 'lucide-react';
 import { format, isBefore, isAfter } from 'date-fns';
 import { NapPrediction } from '@/types/events';
+import { NapFeedbackButtons } from './NapFeedbackButtons';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 interface NapPredictionCardProps {
   prediction: NapPrediction;
+  babyId: string;
+  onFeedbackSubmitted?: () => void;
 }
 
-export function NapPredictionCard({ prediction }: NapPredictionCardProps) {
+export function NapPredictionCard({ prediction, babyId, onFeedbackSubmitted }: NapPredictionCardProps) {
   const now = new Date();
   const windowStart = new Date(prediction.nextWindowStartISO);
   const windowEnd = new Date(prediction.nextWindowEndISO);
@@ -35,6 +44,24 @@ export function NapPredictionCard({ prediction }: NapPredictionCardProps) {
                 Now
               </span>
             )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                  <Info className="h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">How this works</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {prediction.reason}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Predictions improve as you log more sleep events. Your feedback helps us learn your baby's unique patterns.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Clock className="h-3 w-3" />
@@ -45,6 +72,14 @@ export function NapPredictionCard({ prediction }: NapPredictionCardProps) {
           <p className="text-xs text-muted-foreground mt-1">
             {Math.round(prediction.confidence * 100)}% confidence
           </p>
+          {!isPast && (
+            <NapFeedbackButtons
+              predictionStart={prediction.nextWindowStartISO}
+              predictionEnd={prediction.nextWindowEndISO}
+              babyId={babyId}
+              onFeedbackSubmitted={onFeedbackSubmitted}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
