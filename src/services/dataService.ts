@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import { EventRecord, TimerState } from '@/types/events';
+import { EventRecord, TimerState, Baby, NapFeedback, NotificationSettings } from '@/types/events';
 import { differenceInMinutes } from 'date-fns';
 
 const eventsStore = localforage.createInstance({
@@ -10,6 +10,21 @@ const eventsStore = localforage.createInstance({
 const timersStore = localforage.createInstance({
   name: 'nestling',
   storeName: 'timers',
+});
+
+const babiesStore = localforage.createInstance({
+  name: 'nestling',
+  storeName: 'babies',
+});
+
+const napFeedbackStore = localforage.createInstance({
+  name: 'nestling',
+  storeName: 'napFeedback',
+});
+
+const settingsStore = localforage.createInstance({
+  name: 'nestling',
+  storeName: 'settings',
 });
 
 class DataService {
@@ -147,18 +162,100 @@ class DataService {
     );
   }
 
-  async clearAllData(): Promise<{ eventsCleared: number; timersCleared: number }> {
+  async addBaby(baby: Omit<Baby, 'id' | 'createdAt' | 'updatedAt'>): Promise<Baby> {
+    const now = new Date().toISOString();
+    const record: Baby = {
+      ...baby,
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    };
+    await babiesStore.setItem(record.id, record);
+    this.emitChange('baby_added', record);
+    return record;
+  }
+
+  async listBabies(): Promise<Baby[]> {
+    const babies: Baby[] = [];
+    await babiesStore.iterate<Baby, void>((baby) => {
+      babies.push(baby);
+    });
+    return babies.sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  }
+
+  async getBaby(id: string): Promise<Baby | null> {
+    return await babiesStore.getItem<Baby>(id);
+  }
+
+  async updateBaby(id: string, updates: Partial<Baby>): Promise<Baby> {
+    const existing = await babiesStore.getItem<Baby>(id);
+    if (!existing) throw new Error('Baby not found');
+    
+    const updated: Baby = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    await babiesStore.setItem(id, updated);
+    this.emitChange('baby_updated', updated);
+    return updated;
+  }
+
+  async deleteBaby(id: string): Promise<void> {
+    await babiesStore.removeItem(id);
+    this.emitChange('baby_deleted', { id });
+  }
+
+  async addNapFeedback(feedback: Omit<NapFeedback, 'id' | 'createdAt'>): Promise<NapFeedback> {
+    const record: NapFeedback = {
+      ...feedback,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
+    await napFeedbackStore.setItem(record.id, record);
+    return record;
+  }
+
+  async listNapFeedback(babyId: string): Promise<NapFeedback[]> {
+    const feedbacks: NapFeedback[] = [];
+    await napFeedbackStore.iterate<NapFeedback, void>((feedback) => {
+      if (feedback.babyId === babyId) {
+        feedbacks.push(feedback);
+      }
+    });
+    return feedbacks.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async saveNotificationSettings(babyId: string, settings: NotificationSettings): Promise<void> {
+    await settingsStore.setItem(`notifications_${babyId}`, settings);
+  }
+
+  async getNotificationSettings(babyId: string): Promise<NotificationSettings | null> {
+    return await settingsStore.getItem(`notifications_${babyId}`);
+  }
+
+  async clearAllData(): Promise<{ eventsCleared: number; timersCleared: number; babiesCleared: number }> {
     const eventsCount = await eventsStore.length();
     const timersCount = await timersStore.length();
+    const babiesCount = await babiesStore.length();
     
     await eventsStore.clear();
     await timersStore.clear();
+    await babiesStore.clear();
+    await napFeedbackStore.clear();
+    await settingsStore.clear();
     
     this.emitChange('clear', {});
     
     return {
       eventsCleared: eventsCount,
       timersCleared: timersCount,
+      babiesCleared: babiesCount,
     };
   }
 

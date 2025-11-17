@@ -39,3 +39,35 @@ export interface NapPrediction {
   confidence: number;
   reason: string;
 }
+
+export interface Baby {
+  id: string;
+  name: string;
+  dobISO: string;
+  sex?: 'm' | 'f' | 'other';
+  timeZone: string;
+  units: 'metric' | 'imperial';
+  feedingStyle?: 'breast' | 'bottle' | 'both';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NapFeedback {
+  id: string;
+  babyId: string;
+  predictionStartISO: string;
+  predictionEndISO: string;
+  rating: 'too_early' | 'just_right' | 'too_late';
+  actualNapStartISO?: string;
+  createdAt: string;
+}
+
+export interface NotificationSettings {
+  feedReminderEnabled: boolean;
+  feedReminderHours: number;
+  napWindowAlertEnabled: boolean;
+  diaperReminderEnabled: boolean;
+  diaperReminderHours: number;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+}
