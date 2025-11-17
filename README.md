@@ -1,6 +1,29 @@
-# Welcome to your Lovable project
+# Nestling 🍼
 
-## Project info
+A comprehensive baby care logging app with local-first architecture. Track feedings, sleep, diapers, tummy time with intelligent predictions and offline support.
+
+## ✨ Features
+
+- 📱 **Complete Offline Support** - Works without internet
+- 🎯 **Smart Nap Predictions** - Age-based wake windows
+- ⏱️ **Flexible Logging** - Timer or manual entry
+- 📊 **Visual Timeline** - See your day at a glance
+- 📅 **History Tracking** - Navigate past days
+- 👨‍👩‍👧‍👦 **Multiple Babies** - Manage care for siblings
+- 📤 **Export Data** - CSV/PDF for doctor visits
+- ♿ **Caregiver Mode** - Enhanced accessibility
+- 🔒 **Privacy First** - All data stays local
+
+## 🚀 Quick Start
+
+```bash
+npm install
+npm run dev
+```
+
+Visit http://localhost:5173
+
+## Project Info
 
 **URL**: https://lovable.dev/projects/3be850d6-430e-4062-887d-a465d2abf643
 
