@@ -67,20 +67,38 @@ export default function Home() {
   }, [activeBabyId]);
 
   useEffect(() => {
-    const unsubscribe = eventsService.subscribe((action) => {
+    const unsubscribe = eventsService.subscribe((action, data) => {
       if (action === 'add') {
         // Show confetti on first event
         if (events.length === 0 && !hasShownConfetti) {
           triggerConfetti();
           setHasShownConfetti(true);
         }
+        
+        // Save last used values for quick log
+        if (data && !modalState.editingId) {
+          const event = data as EventRecord;
+          const values: any = {};
+          if (event.type === 'feed') {
+            values.subtype = event.subtype;
+            values.amount = event.amount;
+            values.unit = event.unit;
+            values.side = event.side;
+          } else if (event.type === 'diaper') {
+            values.subtype = event.subtype;
+          } else if (event.type === 'tummy_time') {
+            values.duration_min = event.duration_min;
+          }
+          saveLastUsed(event.type as EventType, values);
+        }
+        
         loadTodayEvents();
       } else if (action === 'update' || action === 'delete') {
         loadTodayEvents();
       }
     });
     return unsubscribe;
-  }, [activeBabyId, events.length, hasShownConfetti]);
+  }, [activeBabyId, events.length, hasShownConfetti, modalState.editingId]);
 
   const loadBabies = async () => {
     try {
@@ -173,6 +191,63 @@ export default function Home() {
     setModalState({ open: true, type });
   };
 
+  const handleQuickLog = async (type: EventType) => {
+    if (!selectedBaby) return;
+    
+    const lastUsed = getLastUsed(type);
+    const now = new Date();
+    
+    const quickEvent: Partial<EventRecord> = {
+      baby_id: selectedBaby.id,
+      family_id: selectedBaby.family_id,
+      type,
+      start_time: now.toISOString(),
+      ...(type === 'feed' && {
+        subtype: lastUsed.subtype || 'bottle',
+        amount: lastUsed.amount || 4,
+        unit: lastUsed.unit || 'oz',
+        side: lastUsed.side,
+      }),
+      ...(type === 'diaper' && {
+        subtype: lastUsed.subtype || 'wet',
+      }),
+      ...(type === 'sleep' && {
+        end_time: now.toISOString(),
+      }),
+      ...(type === 'tummy_time' && {
+        duration_min: lastUsed.duration_min || 5,
+        end_time: new Date(now.getTime() + (lastUsed.duration_min || 5) * 60000).toISOString(),
+      }),
+    };
+
+    try {
+      await eventsService.createEvent(quickEvent as EventRecord);
+      
+      const formattedTime = format(now, 'h:mm a');
+      let details = '';
+      if (type === 'feed') {
+        details = ` • ${lastUsed.amount || 4}${lastUsed.unit || 'oz'}`;
+      }
+      
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} logged`, {
+        description: `${formattedTime}${details} (last used)`,
+      });
+
+      // Check if this is the first event
+      if (events.length === 0 && !hasShownConfetti) {
+        triggerConfetti();
+        setHasShownConfetti(true);
+      }
+
+      loadTodayEvents();
+    } catch (error) {
+      console.error('Quick log error:', error);
+      toast.error('Failed to log event', {
+        description: 'Please try again.',
+      });
+    }
+  };
+
   const handleBabySwitch = (babyId: string) => {
     setActiveBabyId(babyId);
     localStorage.setItem('activeBabyId', babyId);
@@ -245,7 +320,65 @@ export default function Home() {
           </div>
         )}
 
-        <QuickActions onActionSelect={handleQuickAction} />
+        {!privacyBanner.isDismissed && (
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4 flex items-start gap-3">
+              <Lock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium mb-1">Your data stays private</p>
+                <p className="text-xs text-muted-foreground">
+                  No ads, no tracking. Data syncs only when you invite a caregiver.
+                </p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={privacyBanner.dismiss}
+                className="flex-shrink-0 -mr-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!caregiverBanner.isDismissed && babies.length > 0 && (
+          <Card className="bg-secondary/5 border-secondary/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <Users className="h-5 w-5 text-secondary flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium mb-1">Invite your partner</p>
+                  <p className="text-xs text-muted-foreground">
+                    Sync logs across devices in real-time
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate('/settings/caregivers')}
+                  className="flex-1"
+                >
+                  Invite
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={caregiverBanner.dismiss}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <QuickActions 
+          onActionSelect={handleQuickAction}
+          onQuickLog={handleQuickLog}
+          recentEvents={events}
+        />
 
         <div className="space-y-3">
           <h2 className="text-headline">Today's Timeline</h2>
@@ -255,6 +388,10 @@ export default function Home() {
             onDelete={handleDelete}
           />
         </div>
+
+        <p className="text-xs text-center text-muted-foreground py-4 px-6">
+          This app is not medical advice. Consult your pediatrician for guidance.
+        </p>
       </div>
 
       <FloatingActionButtonRadial />
