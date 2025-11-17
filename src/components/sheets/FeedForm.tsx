@@ -8,6 +8,8 @@ import { Play, Square } from 'lucide-react';
 import { CreateEventData, eventsService } from '@/services/eventsService';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { unitConversion } from '@/services/unitConversion';
+import { hapticFeedback } from '@/lib/haptics';
 
 interface FeedFormProps {
   babyId: string;
@@ -16,13 +18,13 @@ interface FeedFormProps {
   onSubmit: (data: Partial<CreateEventData>) => void;
 }
 
-const ML_PER_OZ = 29.5735;
-
 export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: FeedFormProps) {
   const [segment, setSegment] = useState<'breast' | 'bottle' | 'pumping'>('breast');
   const [side, setSide] = useState<'left' | 'right' | 'both'>('left');
+  const [bottleType, setBottleType] = useState<'formula' | 'breast_milk' | 'mixed'>('formula');
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState<'ml' | 'oz'>('ml');
+  const [pumpingMode, setPumpingMode] = useState<'timer' | 'manual'>('manual');
   const [note, setNote] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -35,15 +37,16 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
         if (event) {
           setSegment((event.subtype as 'breast' | 'bottle' | 'pumping') || 'breast');
           setSide((event.side as 'left' | 'right' | 'both') || 'left');
+          setBottleType((event as any).bottle_type || 'formula');
           setNote(event.note || '');
           if (event.amount) {
             const displayUnit = event.unit || 'ml';
             setUnit(displayUnit);
-            if (displayUnit === 'oz') {
-              setAmount((event.amount / ML_PER_OZ).toFixed(1));
-            } else {
-              setAmount(event.amount.toString());
-            }
+            const displayAmount = unitConversion.fromStorageVolume(event.amount, displayUnit);
+            setAmount(displayAmount.toString());
+          }
+          if (event.duration_sec && !event.amount) {
+            setPumpingMode('timer');
           }
           if (event.start_time) {
             setStartTime(new Date(event.start_time));
@@ -71,25 +74,39 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
       const valid = startTime !== null && endTime !== null;
       onValidChange(valid);
       return valid;
-    } else {
+    } else if (segment === 'bottle') {
       const amountNum = parseFloat(amount);
       const valid = !isNaN(amountNum) && amountNum > 0;
       onValidChange(valid);
       return valid;
+    } else if (segment === 'pumping') {
+      if (pumpingMode === 'timer') {
+        const valid = startTime !== null && endTime !== null;
+        onValidChange(valid);
+        return valid;
+      } else {
+        const amountNum = parseFloat(amount);
+        const valid = !isNaN(amountNum) && amountNum > 0;
+        onValidChange(valid);
+        return valid;
+      }
     }
+    return false;
   };
 
   useEffect(() => {
     validate();
-  }, [segment, side, amount, unit, startTime, endTime]);
+  }, [segment, side, amount, unit, startTime, endTime, pumpingMode, bottleType]);
 
   const handleStart = () => {
+    hapticFeedback.medium();
     const now = new Date();
     setStartTime(now);
     setIsRunning(true);
   };
 
   const handleStop = () => {
+    hapticFeedback.medium();
     const now = new Date();
     setEndTime(now);
     setIsRunning(false);
@@ -115,7 +132,7 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
     } else {
       // bottle or pumping
       const amountNum = parseFloat(amount);
-      const amountMl = unit === 'oz' ? amountNum * ML_PER_OZ : amountNum;
+      const amountMl = unitConversion.toStorageVolume(amountNum, unit);
       data.amount = amountMl;
       data.unit = unit;
       data.start_time = new Date().toISOString();

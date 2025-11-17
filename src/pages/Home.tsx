@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { TimelineList } from '@/components/today/TimelineList';
 import { NapWindowCard } from '@/components/today/NapWindowCard';
+import { NapPill } from '@/components/today/NapPill';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -207,7 +208,17 @@ export default function Home() {
         )}
 
         {napWindow && selectedBaby && (
-          <NapWindowCard window={napWindow} />
+          <div className="mb-4">
+            <NapPill 
+              prediction={{
+                nextWindowStartISO: napWindow.start.toISOString(),
+                nextWindowEndISO: napWindow.end.toISOString(),
+                reason: napWindow.reason,
+                confidence: 0.85,
+              }}
+              babyId={activeBabyId}
+            />
+          </div>
         )}
 
         <QuickActions onActionSelect={handleQuickAction} />
