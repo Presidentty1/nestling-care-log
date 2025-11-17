@@ -94,22 +94,39 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
       reader.onloadend = async () => {
         const base64Audio = reader.result as string;
         
-        const { data, error } = await supabase.functions.invoke('analyze-cry-pattern', {
-          body: {
-            babyId,
-            audioData: base64Audio,
-          },
-        });
+        try {
+          const { data, error } = await supabase.functions.invoke('analyze-cry-pattern', {
+            body: {
+              babyId,
+              audioData: base64Audio,
+            },
+          });
 
-        if (error) throw error;
+          if (error) {
+            if (error.message?.includes('not found')) {
+              toast.error('AI analysis temporarily unavailable. Your logs are safe.');
+            } else {
+              throw error;
+            }
+            return;
+          }
 
-        onAnalysisComplete(data);
-        toast.success('Analysis complete!');
+          onAnalysisComplete(data);
+          toast.success('Analysis complete!');
+        } catch (error) {
+          console.error('Analysis error:', error);
+          if (error instanceof Error && error.message?.includes('network')) {
+            toast.error('Network error. Please check your connection.');
+          } else {
+            toast.error('Failed to analyze cry. Please try again.');
+          }
+        } finally {
+          setIsAnalyzing(false);
+        }
       };
     } catch (error) {
-      console.error('Analysis error:', error);
-      toast.error('Failed to analyze cry. Please try again.');
-    } finally {
+      console.error('FileReader error:', error);
+      toast.error('Failed to process audio. Please try again.');
       setIsAnalyzing(false);
     }
   };

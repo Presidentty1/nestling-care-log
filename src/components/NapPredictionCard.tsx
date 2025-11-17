@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Moon, Clock, Info } from 'lucide-react';
 import { format, isBefore, isAfter } from 'date-fns';
@@ -16,7 +17,7 @@ interface NapPredictionCardProps {
   onFeedbackSubmitted?: () => void;
 }
 
-export function NapPredictionCard({ prediction, babyId, onFeedbackSubmitted }: NapPredictionCardProps) {
+export const NapPredictionCard = memo(function NapPredictionCard({ prediction, babyId, onFeedbackSubmitted }: NapPredictionCardProps) {
   const now = new Date();
   const windowStart = new Date(prediction.nextWindowStartISO);
   const windowEnd = new Date(prediction.nextWindowEndISO);
@@ -84,4 +85,4 @@ export function NapPredictionCard({ prediction, babyId, onFeedbackSubmitted }: N
       </CardContent>
     </Card>
   );
-}
+});

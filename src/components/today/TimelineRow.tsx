@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { EventRecord } from '@/services/eventsService';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ interface TimelineRowProps {
   onDelete: () => void;
 }
 
-export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
+export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
   const getIcon = () => {
     switch (event.type) {
       case 'feed':
@@ -96,53 +97,57 @@ export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
       className="w-full min-h-[64px] flex items-center gap-4 px-4 py-3 rounded-md hover:bg-accent/50 active:scale-[0.99] transition-all duration-100 text-left"
       style={{ minHeight: '44px' }}
     >
-      {/* Left: Icon */}
       <div className="flex-shrink-0">
         {getIcon()}
       </div>
 
-      {/* Middle: Title + Meta */}
       <div className="flex-1 min-w-0 space-y-1">
         <div className="text-[17px] leading-[24px] font-medium truncate">
           {getTitle()}
         </div>
         {event.note && (
           <Badge variant="secondary" className="text-[13px] leading-[18px] font-normal">
-            {event.note.length > 40 ? `${event.note.slice(0, 40)}...` : event.note}
+            {event.note}
           </Badge>
         )}
-      </div>
-
-      {/* Right: Time + Menu */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <div className="text-secondary text-muted-foreground text-right tabular-nums">
+        <div className="text-[14px] leading-[20px] text-text-subtle">
           {getTimeDisplay()}
         </div>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="flex-shrink-0 h-11 w-11"
-              aria-label="Event options"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={(e) => { e.stopPropagation(); onDelete(); }}
-              className="text-destructive"
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-10 w-10 p-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVertical className="h-5 w-5" />
+            <span className="sr-only">Options</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}>
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </button>
   );
-}
+}, (prevProps, nextProps) => {
+  return prevProps.event.id === nextProps.event.id &&
+         prevProps.event.updated_at === nextProps.event.updated_at;
+});

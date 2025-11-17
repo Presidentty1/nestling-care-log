@@ -54,8 +54,18 @@ export default function AIAssistant() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    await sendMessage(input);
-    setInput('');
+    
+    try {
+      await sendMessage(input);
+      setInput('');
+    } catch (error) {
+      console.error('Send message error:', error);
+      if (error instanceof Error && error.message?.includes('not found')) {
+        // AI function not available
+      } else if (error instanceof Error && error.message?.includes('network')) {
+        // Network error already handled by hook
+      }
+    }
   };
 
   const handleQuickQuestion = (question: string) => {
