@@ -9,6 +9,7 @@ import { BabySwitcher } from '@/components/BabySwitcher';
 import { SleepAnalysis } from '@/components/analytics/SleepAnalysis';
 import { FeedingAnalysis } from '@/components/analytics/FeedingAnalysis';
 import { PatternVisualization } from '@/components/analytics/PatternVisualization';
+import { SkeletonCard } from '@/components/common/SkeletonCard';
 import { MobileNav } from '@/components/MobileNav';
 import { ArrowLeft, Download, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
