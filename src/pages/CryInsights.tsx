@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Baby } from '@/lib/types';
+import { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -173,6 +174,13 @@ export default function CryInsights() {
         </Tabs>
       </div>
 
+      <BabySwitcher
+        babies={babies || []}
+        selectedBabyId={selectedBabyId}
+        isOpen={isBabySwitcherOpen}
+        onClose={() => setIsBabySwitcherOpen(false)}
+        onSelect={setSelectedBabyId}
+      />
       <MobileNav />
     </div>
   );
