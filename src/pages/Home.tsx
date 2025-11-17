@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, differenceInMonths } from 'date-fns';
+import { format, differenceInMonths, subDays } from 'date-fns';
 import { EventType } from '@/types/events';
 import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
@@ -63,6 +63,28 @@ export default function Home() {
       setBabies(babyList);
       
       if (babyList.length === 0) {
+        // Auto-provision a demo baby via backend, then continue to Home
+        try {
+          const { data: { session } } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
+          if (session) {
+            const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const { supabase } = await import('@/integrations/supabase/client');
+            const response = await supabase.functions.invoke('bootstrap-user', {
+              body: { babyName: 'Demo Baby', dateOfBirth: demoBirthdate, timezone },
+              headers: { Authorization: `Bearer ${session.access_token}` }
+            });
+            if (!response.error) {
+              const { babyId } = response.data as any;
+              setActiveBabyId(babyId);
+              localStorage.setItem('activeBabyId', babyId);
+              setLoading(false);
+              return; // Stay on Home, data effects will load
+            }
+          }
+        } catch (e) {
+          console.error('Auto-provision error:', e);
+        }
         navigate('/onboarding');
         return;
       }
