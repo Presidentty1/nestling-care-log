@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Check, Plus } from 'lucide-react';
-import { Baby } from '@/types/events';
+import { Baby } from '@/services/babyService';
 import { getAgeDisplay } from '@/services/time';
 
 interface BabySwitcherModalProps {
@@ -53,7 +53,7 @@ export function BabySwitcherModal({
               <div className="flex-1 text-left">
                 <div className="font-medium">{baby.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  {getAgeDisplay(baby.dobISO)}
+                  {getAgeDisplay(baby.date_of_birth)}
                 </div>
               </div>
               {baby.id === activeBabyId && (

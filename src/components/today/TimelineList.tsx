@@ -1,11 +1,11 @@
-import { BabyEvent } from '@/lib/types';
+import { EventRecord } from '@/services/eventsService';
 import { TimelineRow } from './TimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';
 
 interface TimelineListProps {
-  events: BabyEvent[];
-  onEdit: (event: BabyEvent) => void;
+  events: EventRecord[];
+  onEdit: (event: EventRecord) => void;
   onDelete: (eventId: string) => void;
 }
 
@@ -20,10 +20,8 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
     );
   }
 
-  // Sort events by start time, most recent first
-  const sortedEvents = [...events].sort((a, b) => 
-    new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
-  );
+  // Events already sorted from service
+  const sortedEvents = events;
 
   return (
     <div className="space-y-2">
