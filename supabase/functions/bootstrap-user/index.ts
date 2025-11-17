@@ -133,18 +133,18 @@ serve(async (req) => {
 
     console.log('Created family member');
 
-    // 3. Create user role
+    // 3. Ensure user role (idempotent)
     const { error: roleError } = await supabase
       .from('user_roles')
-      .insert({
+      .upsert({
         user_id: user.id,
         family_id: family.id,
         role: 'admin'
-      });
+      }, { onConflict: 'user_id,family_id' });
 
     if (roleError) {
-      console.error('User role creation error:', roleError);
-      throw new Error('Failed to create user role: ' + roleError.message);
+      console.error('User role upsert error:', roleError);
+      throw new Error('Failed to upsert user role: ' + roleError.message);
     }
 
     console.log('Created user role');
