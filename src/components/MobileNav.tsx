@@ -13,8 +13,8 @@ export function MobileNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border safe-area-inset-bottom">
+      <div className="flex items-center justify-around h-20 max-w-lg mx-auto px-safe">
         {navItems.map(({ path, label, icon: Icon }) => {
           const isActive = location.pathname === path;
           return (
@@ -22,14 +22,14 @@ export function MobileNav() {
               key={path}
               to={path}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+                "flex flex-col items-center justify-center flex-1 h-full gap-1.5 transition-colors min-w-[44px]",
                 isActive
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted hover:text-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{label}</span>
+              <Icon className={cn("h-6 w-6", isActive && "scale-105")} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium leading-tight">{label}</span>
             </Link>
           );
         })}

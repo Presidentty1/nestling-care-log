@@ -160,21 +160,21 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5">
         {selectedBaby && (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <Button
               variant="ghost"
-              className="flex items-center gap-2"
+              className="flex items-center gap-3 -ml-2 h-auto py-2"
               onClick={() => setIsSwitcherOpen(true)}
             >
-              <Avatar className="h-10 w-10">
-                <AvatarFallback>{getInitials(selectedBaby.name)}</AvatarFallback>
+              <Avatar className="h-11 w-11">
+                <AvatarFallback className="text-base font-semibold">{getInitials(selectedBaby.name)}</AvatarFallback>
               </Avatar>
               <div className="text-left">
-                <div className="font-semibold">{selectedBaby.name}</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="font-semibold text-[17px] leading-[24px]">{selectedBaby.name}</div>
+                <div className="text-secondary text-muted-foreground">
                   {differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth))} months
                 </div>
               </div>
@@ -192,8 +192,8 @@ export default function Home() {
 
         <QuickActions onActionSelect={handleQuickAction} />
 
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Today's Timeline</h2>
+        <div className="space-y-3">
+          <h2 className="text-[22px] leading-[28px] font-semibold">Today's Timeline</h2>
           <TimelineList
             events={events}
             onEdit={handleEdit}

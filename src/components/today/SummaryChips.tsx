@@ -19,42 +19,57 @@ export function SummaryChips({ summary }: SummaryChipsProps) {
 
   return (
     <div className="grid grid-cols-3 gap-3">
-      <Card>
-        <CardContent className="p-3 text-center">
-          <Milk className="h-5 w-5 mx-auto mb-1 text-blue-500" />
-          <div className="text-xs text-muted-foreground">Feeds</div>
-          <div className="font-bold text-lg">{summary.feedCount}</div>
-          {summary.totalMl > 0 && (
-            <div className="text-xs text-muted-foreground">{summary.totalMl} ml</div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-3 text-center">
-          <Moon className="h-5 w-5 mx-auto mb-1 text-purple-500" />
-          <div className="text-xs text-muted-foreground">Sleep</div>
-          <div className="font-bold text-lg">
-            {sleepHours > 0 ? `${sleepHours}h` : ''} {sleepMins}m
+      {/* Feed Chip */}
+      <Card className="shadow-soft">
+        <CardContent className="p-4 text-center space-y-2">
+          <Milk className="h-6 w-6 mx-auto text-primary" />
+          <div className="space-y-1">
+            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+              {summary.feedCount}
+            </div>
+            <div className="text-secondary text-muted-foreground">Feeds</div>
+            {summary.totalMl > 0 && (
+              <div className="text-caption text-text-subtle">
+                {summary.totalMl} ml
+              </div>
+            )}
           </div>
-          {summary.sleepCount > 0 && (
-            <div className="text-xs text-muted-foreground">
-              {summary.sleepCount} {summary.sleepCount === 1 ? 'nap' : 'naps'}
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-3 text-center">
-          <Baby className="h-5 w-5 mx-auto mb-1 text-green-500" />
-          <div className="text-xs text-muted-foreground">Diapers</div>
-          <div className="font-bold text-lg">{summary.diaperTotal}</div>
-          {summary.diaperTotal > 0 && (
-            <div className="text-xs text-muted-foreground">
-              💧{summary.diaperWet} 💩{summary.diaperDirty}
+      {/* Sleep Chip */}
+      <Card className="shadow-soft">
+        <CardContent className="p-4 text-center space-y-2">
+          <Moon className="h-6 w-6 mx-auto text-primary" />
+          <div className="space-y-1">
+            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+              {sleepHours > 0 ? `${sleepHours}h` : ''} {sleepMins}m
             </div>
-          )}
+            <div className="text-secondary text-muted-foreground">Sleep</div>
+            {summary.sleepCount > 0 && (
+              <div className="text-caption text-text-subtle">
+                {summary.sleepCount} {summary.sleepCount === 1 ? 'nap' : 'naps'}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Diaper Chip */}
+      <Card className="shadow-soft">
+        <CardContent className="p-4 text-center space-y-2">
+          <Baby className="h-6 w-6 mx-auto text-primary" />
+          <div className="space-y-1">
+            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+              {summary.diaperTotal}
+            </div>
+            <div className="text-secondary text-muted-foreground">Diapers</div>
+            {summary.diaperTotal > 0 && (
+              <div className="text-caption text-text-subtle">
+                💧{summary.diaperWet} 💩{summary.diaperDirty}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
