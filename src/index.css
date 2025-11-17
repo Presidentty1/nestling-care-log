@@ -120,4 +120,22 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Caregiver Mode - Accessibility Enhancement */
+  body.caregiver-mode {
+    font-size: calc(1rem + 2pt);
+  }
+
+  body.caregiver-mode button,
+  body.caregiver-mode .card,
+  body.caregiver-mode [role="button"] {
+    padding: calc(var(--spacing, 1rem) * 1.2) !important;
+  }
+
+  body.caregiver-mode input,
+  body.caregiver-mode textarea,
+  body.caregiver-mode select {
+    font-size: calc(1rem + 2pt);
+    min-height: 48px;
+  }
 }

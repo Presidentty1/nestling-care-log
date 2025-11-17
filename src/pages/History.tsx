@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { MobileNav } from '@/components/MobileNav';
 import { EventTimeline } from '@/components/EventTimeline';
-import { SummaryChips } from '@/components/SummaryChips';
+import { SummaryChips } from '@/components/today/SummaryChips';
 import { DayStrip } from '@/components/history/DayStrip';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
