@@ -1,11 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInMonths } from 'date-fns';
-import { Baby as BabyType, BabyEvent } from '@/lib/types';
 import { EventType } from '@/types/events';
-import { NapPrediction } from '@/types/events';
-import { BabySwitcher } from '@/components/BabySwitcher';
+import { NapPrediction, Baby } from '@/types/events';
+import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventTimeline } from '@/components/EventTimeline';
 import { EventSheet } from '@/components/sheets/EventSheet';
@@ -13,21 +11,19 @@ import { SummaryChips } from '@/components/SummaryChips';
 import { NapPredictionCard } from '@/components/NapPredictionCard';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MobileNav } from '@/components/MobileNav';
-import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 import { dataService } from '@/services/dataService';
 import { napService } from '@/services/napService';
-import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
+import { useAppStore } from '@/store/appStore';
 import { toast } from 'sonner';
 
 export default function Home() {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [babies, setBabies] = useState<BabyType[]>([]);
-  const [selectedBaby, setSelectedBaby] = useState<BabyType | null>(null);
-  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
-  const [events, setEvents] = useState<BabyEvent[]>([]);
+  const { activeBabyId, setActiveBabyId } = useAppStore();
+  const [babies, setBabies] = useState<Baby[]>([]);
+  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string }>({
     open: false,
