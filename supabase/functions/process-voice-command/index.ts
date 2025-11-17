@@ -12,11 +12,74 @@ serve(async (req) => {
   }
 
   try {
-    const { transcript, babyId, userId } = await req.json();
-    
+    // SECURITY: Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // SECURITY: Validate input
+    const body = await req.json();
+    const { transcript, babyId } = body;
+
+    if (!transcript || typeof transcript !== 'string' || transcript.length > 500) {
+      return new Response(JSON.stringify({ error: 'Invalid transcript' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!babyId || typeof babyId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid babyId' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // SECURITY: Verify user has access to baby
+    const { data: baby } = await supabase
+      .from('babies')
+      .select('family_id')
+      .eq('id', babyId)
+      .single();
+
+    if (!baby) {
+      return new Response(JSON.stringify({ error: 'Baby not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: member } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('family_id', baby.family_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!member) {
+      return new Response(JSON.stringify({ error: 'Unauthorized access to baby' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const lowerTranscript = transcript.toLowerCase();
     
@@ -124,9 +187,9 @@ serve(async (req) => {
       errorMessage = error instanceof Error ? error.message : 'Unknown error';
     }
 
-    // Log the command
+    // Log the command with authenticated user ID
     await supabase.from('voice_commands').insert({
-      user_id: userId,
+      user_id: user.id,
       baby_id: babyId,
       transcript,
       parsed_command: parsedCommand,

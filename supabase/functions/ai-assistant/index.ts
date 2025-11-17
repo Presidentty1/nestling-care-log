@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -12,7 +13,70 @@ serve(async (req) => {
   }
 
   try {
-    const { conversationId, messages, babyContext } = await req.json();
+    // SECURITY: Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // SECURITY: Validate input
+    const body = await req.json();
+    const { conversationId, messages, babyContext } = body;
+
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // SECURITY: Verify user has access to baby if babyContext provided
+    if (babyContext?.babyId) {
+      const { data: baby } = await supabaseClient
+        .from('babies')
+        .select('family_id')
+        .eq('id', babyContext.babyId)
+        .single();
+
+      if (!baby) {
+        return new Response(JSON.stringify({ error: 'Baby not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const { data: member } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('family_id', baby.family_id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (!member) {
+        return new Response(JSON.stringify({ error: 'Unauthorized access to baby' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
