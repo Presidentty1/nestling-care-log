@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby, Clock } from 'lucide-react';
 import { EventType } from '@/types/events';
@@ -9,30 +8,26 @@ interface QuickActionsProps {
 
 export function QuickActions({ onActionSelect }: QuickActionsProps) {
   const actions = [
-    { type: 'feed' as EventType, label: 'Feed', icon: Milk, color: 'bg-blue-500' },
-    { type: 'sleep' as EventType, label: 'Sleep', icon: Moon, color: 'bg-purple-500' },
-    { type: 'diaper' as EventType, label: 'Diaper', icon: Baby, color: 'bg-green-500' },
-    { type: 'tummy_time' as EventType, label: 'Tummy Time', icon: Clock, color: 'bg-orange-500' },
+    { type: 'feed' as EventType, label: 'Feed', icon: Milk },
+    { type: 'sleep' as EventType, label: 'Sleep', icon: Moon },
+    { type: 'diaper' as EventType, label: 'Diaper', icon: Baby },
+    { type: 'tummy_time' as EventType, label: 'Tummy', icon: Clock },
   ];
 
   return (
-    <Card className="p-4">
-      <h3 className="font-medium mb-3 text-sm">Quick Actions</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {actions.map((action) => (
-          <Button
-            key={action.type}
-            onClick={() => onActionSelect(action.type)}
-            variant="outline"
-            className="flex flex-col items-center gap-2 h-auto py-4"
-          >
-            <div className={`p-2 rounded-full ${action.color} bg-opacity-10`}>
-              <action.icon className="h-5 w-5" />
-            </div>
-            <span className="text-xs">{action.label}</span>
-          </Button>
-        ))}
-      </div>
-    </Card>
+    <div className="grid grid-cols-2 gap-3">
+      {actions.map((action) => (
+        <Button
+          key={action.type}
+          onClick={() => onActionSelect(action.type)}
+          variant="outline"
+          className="h-[112px] flex flex-col items-center justify-center gap-3 rounded-md border-2 hover:bg-primary-100 hover:border-primary active:scale-[0.98] transition-all duration-100"
+          style={{ minHeight: '44px', minWidth: '44px' }}
+        >
+          <action.icon className="h-8 w-8 text-primary" strokeWidth={2} />
+          <span className="text-[15px] leading-[20px] font-medium">{action.label}</span>
+        </Button>
+      ))}
+    </div>
   );
 }

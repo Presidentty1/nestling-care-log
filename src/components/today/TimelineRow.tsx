@@ -1,5 +1,4 @@
 import { EventRecord } from '@/services/eventsService';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby, ActivitySquare, MoreVertical } from 'lucide-react';
@@ -21,20 +20,20 @@ export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
   const getIcon = () => {
     switch (event.type) {
       case 'feed':
-        return <Milk className="h-5 w-5 text-blue-500" />;
+        return <Milk className="h-6 w-6 text-primary" strokeWidth={2} />;
       case 'sleep':
-        return <Moon className="h-5 w-5 text-purple-500" />;
+        return <Moon className="h-6 w-6 text-primary" strokeWidth={2} />;
       case 'diaper':
-        return <Baby className="h-5 w-5 text-green-500" />;
+        return <Baby className="h-6 w-6 text-primary" strokeWidth={2} />;
       case 'tummy_time':
-        return <ActivitySquare className="h-5 w-5 text-orange-500" />;
+        return <ActivitySquare className="h-6 w-6 text-primary" strokeWidth={2} />;
       default:
         return null;
     }
   };
 
   const getTitle = () => {
-    let title = event.type.charAt(0).toUpperCase() + event.type.slice(1);
+    let title = event.type.charAt(0).toUpperCase() + event.type.slice(1).replace('_', ' ');
     
     if (event.subtype) {
       const subtype = event.subtype.split('_')[0];
@@ -70,47 +69,58 @@ export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
   };
 
   return (
-    <Card className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={onEdit}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex-shrink-0">{getIcon()}</div>
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{getTitle()}</div>
-              <div className="text-sm text-muted-foreground">{getTimeDisplay()}</div>
-              {event.note && (
-                <Badge variant="outline" className="mt-1 text-xs">
-                  {event.note.length > 30 ? `${event.note.slice(0, 30)}...` : event.note}
-                </Badge>
-              )}
-            </div>
-          </div>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="flex-shrink-0"
-                aria-label="Event options"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="text-destructive"
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <button
+      onClick={onEdit}
+      className="w-full min-h-[64px] flex items-center gap-4 px-4 py-3 rounded-md hover:bg-accent/50 active:scale-[0.99] transition-all duration-100 text-left"
+      style={{ minHeight: '44px' }}
+    >
+      {/* Left: Icon */}
+      <div className="flex-shrink-0">
+        {getIcon()}
+      </div>
+
+      {/* Middle: Title + Meta */}
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="text-[17px] leading-[24px] font-medium truncate">
+          {getTitle()}
         </div>
-      </CardContent>
-    </Card>
+        {event.note && (
+          <Badge variant="secondary" className="text-[13px] leading-[18px] font-normal">
+            {event.note.length > 40 ? `${event.note.slice(0, 40)}...` : event.note}
+          </Badge>
+        )}
+      </div>
+
+      {/* Right: Time + Menu */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="text-secondary text-muted-foreground text-right tabular-nums">
+          {getTimeDisplay()}
+        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="flex-shrink-0 h-11 w-11"
+              aria-label="Event options"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="text-destructive"
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </button>
   );
 }
