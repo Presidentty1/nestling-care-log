@@ -11,6 +11,7 @@ import { FloatingActionButtonRadial } from '@/components/FloatingActionButtonRad
 import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { eventsService, EventRecord } from '@/services/eventsService';
 import { babyService, Baby } from '@/services/babyService';
 import { napPredictorService } from '@/services/napPredictorService';
@@ -23,6 +24,9 @@ import { NapWindowCard } from '@/components/today/NapWindowCard';
 import { NapPill } from '@/components/today/NapPill';
 import { triggerConfetti } from '@/lib/confetti';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
+import { useLastUsedValues } from '@/hooks/useLastUsedValues';
+import { Lock, Users, X } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -40,6 +44,10 @@ export default function Home() {
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
+  
+  const privacyBanner = useDismissibleBanner('privacy_stance');
+  const caregiverBanner = useDismissibleBanner('caregiver_invite');
+  const { getLastUsed, saveLastUsed } = useLastUsedValues();
 
   useKeyboardShortcuts({
     escape: () => setModalState({ open: false, type: 'feed' }),

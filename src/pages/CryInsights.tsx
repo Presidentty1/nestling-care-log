@@ -12,9 +12,10 @@ import { PatternInsights } from '@/components/PatternInsights';
 import { MobileNav } from '@/components/MobileNav';
 import { CryRecorder } from '@/components/CryRecorder';
 import { CryAnalysisResult } from '@/components/CryAnalysisResult';
-import { ArrowLeft, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function CryInsights() {
   const navigate = useNavigate();
@@ -102,7 +103,15 @@ export default function CryInsights() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 space-y-4">
+        <Alert variant="destructive" className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle className="text-amber-900 dark:text-amber-100">Experimental Feature</AlertTitle>
+          <AlertDescription className="text-amber-800 dark:text-amber-200">
+            Cry analysis is in beta and may be inaccurate. Always trust your instincts and consult a doctor if concerned.
+          </AlertDescription>
+        </Alert>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="timer">
