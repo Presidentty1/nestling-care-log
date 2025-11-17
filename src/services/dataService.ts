@@ -147,6 +147,52 @@ class DataService {
   private emitChange(action: string, data: any): void {
     this.listeners.forEach(listener => listener(action, data));
   }
+
+  async getTodaySummary(babyId: string) {
+    const today = new Date().toISOString().split('T')[0];
+    return this.getDaySummary(babyId, today);
+  }
+
+  async getDaySummary(babyId: string, dateISO: string) {
+    const events = await this.listEventsByDay(babyId, dateISO);
+    
+    const feeds = events.filter(e => e.type === 'feed');
+    const sleeps = events.filter(e => e.type === 'sleep' && e.endTime);
+    const diapers = events.filter(e => e.type === 'diaper');
+    
+    const totalMl = feeds.reduce((sum, e) => {
+      if (!e.amount) return sum;
+      // Convert oz to ml if needed (1 oz = 29.5735 ml)
+      const ml = e.unit === 'oz' ? e.amount * 29.5735 : e.amount;
+      return sum + ml;
+    }, 0);
+
+    const sleepMinutes = sleeps.reduce((sum, e) => sum + (e.durationMin || 0), 0);
+
+    const diaperWet = diapers.filter(e => 
+      e.subtype === 'wet' || e.subtype === 'both'
+    ).length;
+    
+    const diaperDirty = diapers.filter(e => 
+      e.subtype === 'dirty' || e.subtype === 'both'
+    ).length;
+
+    // Get last feed and wake times
+    const lastFeed = feeds.length > 0 ? feeds[0] : null;
+    const lastSleep = sleeps.length > 0 ? sleeps[0] : null;
+
+    return {
+      feedCount: feeds.length,
+      totalMl: Math.round(totalMl),
+      sleepMinutes,
+      sleepCount: sleeps.length,
+      diaperWet,
+      diaperDirty,
+      diaperTotal: diaperWet + diaperDirty,
+      lastFeedTime: lastFeed?.startTime,
+      lastWakeTime: lastSleep?.endTime,
+    };
+  }
 }
 
 export const dataService = new DataService();

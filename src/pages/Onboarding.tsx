@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Baby, ChevronRight } from 'lucide-react';
+import { DateInput } from '@/components/DateInput';
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -111,12 +112,10 @@ export default function Onboarding() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth *</Label>
-                <Input
-                  id="dob"
-                  type="date"
+                <DateInput
                   value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
+                  onChange={setDateOfBirth}
+                  maxDate={new Date()}
                 />
               </div>
               <div className="space-y-2">

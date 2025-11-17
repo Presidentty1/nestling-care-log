@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { format, isBefore, isAfter } from 'date-fns';
 import { Baby, Milk, Moon, Baby as BabyIcon } from 'lucide-react';
+import { SummaryChips } from '@/components/SummaryChips';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,7 @@ export default function Home() {
   const [modalType, setModalType] = useState<LibEventType>('feed');
   const [editingEvent, setEditingEvent] = useState<BabyEvent | null>(null);
   const [napPrediction, setNapPrediction] = useState<any>(null);
+  const [summary, setSummary] = useState<any>(null);
   const eventSync = selectedBaby ? useEventSync(selectedBaby.id) : null;
 
   const { deleteEvent } = useEventLogger();
@@ -109,22 +111,31 @@ export default function Home() {
   const loadTodayEvents = useCallback(async () => {
     if (!selectedBaby) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('baby_id', selectedBaby.id)
-      .gte('start_time', today.toISOString())
-      .order('start_time', { ascending: false });
-
-    if (error) {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const events = await dataService.listEventsByDay(selectedBaby.id, today);
+      
+      // Map EventRecord to BabyEvent format for UI compatibility
+      const mappedEvents: BabyEvent[] = events.map(e => ({
+        id: e.id,
+        baby_id: e.babyId,
+        family_id: e.familyId,
+        type: e.type as any,
+        subtype: e.subtype,
+        start_time: e.startTime,
+        end_time: e.endTime,
+        amount: e.amount,
+        unit: e.unit,
+        note: e.notes,
+        created_at: e.createdAt,
+        updated_at: e.updatedAt,
+        created_by: null,
+      }));
+      
+      setEvents(mappedEvents);
+    } catch (error) {
       console.error('Error loading events:', error);
-      return;
     }
-
-    setEvents(data || []);
   }, [selectedBaby]);
 
   const handleBabySelect = (babyId: string) => {
@@ -152,15 +163,40 @@ export default function Home() {
   };
 
   const handleDelete = async (eventId: string) => {
-    await deleteEvent(eventId);
-    loadTodayEvents();
+    try {
+      await dataService.deleteEvent(eventId);
+      toast.success('Event deleted');
+    } catch (error) {
+      toast.error('Failed to delete event');
+    }
   };
 
   useRealtimeEvents(selectedBaby?.family_id, loadTodayEvents);
 
   useEffect(() => {
-    loadTodayEvents();
-  }, [loadTodayEvents]);
+    if (selectedBaby) {
+      loadTodayEvents();
+    }
+  }, [selectedBaby, loadTodayEvents]);
+
+  // Subscribe to dataService changes for real-time updates
+  useEffect(() => {
+    if (!selectedBaby) return;
+    
+    const unsubscribe = dataService.subscribe((action, data) => {
+      if (action === 'add' || action === 'update' || action === 'delete') {
+        loadTodayEvents();
+      }
+    });
+    return unsubscribe;
+  }, [selectedBaby, loadTodayEvents]);
+
+  // Load summary when baby or events change
+  useEffect(() => {
+    if (selectedBaby) {
+      dataService.getTodaySummary(selectedBaby.id).then(setSummary);
+    }
+  }, [selectedBaby, events]);
 
   if (loading) {
     return (
@@ -246,6 +282,8 @@ export default function Home() {
         </div>
 
         <QuickActions onActionSelect={(type) => openModal(type)} />
+
+        {summary && <SummaryChips summary={summary} />}
 
         <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
