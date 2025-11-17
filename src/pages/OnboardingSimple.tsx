@@ -79,8 +79,10 @@ export default function OnboardingSimple() {
       navigate('/home');
     } catch (error) {
       console.error('Failed to create baby:', error);
-      toast.error('Failed to create baby profile');
-    } finally {
+      toast.error(
+        'Could not save baby locally. Your data never leaves your device. Please try again.',
+        { duration: 5000 }
+      );
       setIsCreating(false);
     }
   };

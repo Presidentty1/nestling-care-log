@@ -207,13 +207,7 @@ export default function Home() {
         </div>
       </div>
 
-      <FloatingActionButton
-        onVoiceCommand={(command) => {
-          if (command.type) {
-            handleQuickAction(command.type);
-          }
-        }}
-      />
+      <FloatingActionButton />
       <MobileNav />
 
       {selectedBaby && (

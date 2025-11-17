@@ -20,7 +20,7 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Baby Management
+              Family & Caregivers
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -31,6 +31,16 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Baby className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Manage Babies</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/settings/caregivers')}
+            >
+              <div className="flex items-center gap-3">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Manage Caregivers</span>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>

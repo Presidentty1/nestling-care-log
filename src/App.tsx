@@ -7,7 +7,8 @@ import { queryClient } from "@/lib/queryClient";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { dataService } from '@/services/dataService';
-import { notifyService } from '@/services/notifyService';
+import { notificationMonitor } from '@/services/notificationMonitor';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import OnboardingSimple from "./pages/OnboardingSimple";
 import Home from "./pages/Home";
 import History from "./pages/History";
@@ -15,6 +16,7 @@ import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
 import ManageBabiesPage from "./pages/Settings/ManageBabies";
 import NotificationSettingsPage from "./pages/Settings/NotificationSettings";
+import ManageCaregiversPage from "./pages/Settings/ManageCaregivers";
 import PrivacyDataPage from "./pages/Settings/PrivacyData";
 import GrowthTracker from "./pages/GrowthTracker";
 import HealthRecords from "./pages/HealthRecords";
@@ -62,16 +64,17 @@ function AppContent() {
 
   useEffect(() => {
     if (activeBabyId) {
-      notifyService.startMonitoring(activeBabyId);
+      notificationMonitor.start(activeBabyId);
     }
 
     return () => {
-      notifyService.stopMonitoring();
+      notificationMonitor.stop();
     };
   }, [activeBabyId]);
 
   return (
     <div className={caregiverMode ? 'caregiver-mode' : ''}>
+      <NotificationBanner />
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/onboarding-simple" element={<OnboardingSimple />} />
@@ -80,6 +83,7 @@ function AppContent() {
         <Route path="/labs" element={<Labs />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/babies" element={<ManageBabiesPage />} />
+        <Route path="/settings/caregivers" element={<ManageCaregiversPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/privacy" element={<PrivacyDataPage />} />
         <Route path="/growth" element={<GrowthTracker />} />
