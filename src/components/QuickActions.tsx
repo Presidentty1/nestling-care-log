@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby, Clock } from 'lucide-react';
-import { EventType } from '@/lib/types';
+import { EventType } from '@/types/events';
 
 interface QuickActionsProps {
   onActionSelect: (type: EventType) => void;
