@@ -33,10 +33,7 @@ export function NapFeedbackButtons({
         }),
       });
 
-      analyticsService.track('nap_feedback_submitted', {
-        rating,
-        babyId,
-      });
+      analyticsService.trackFeedbackSubmitted(rating);
 
       toast.success('Thanks for your feedback!');
       onFeedbackSubmitted?.();

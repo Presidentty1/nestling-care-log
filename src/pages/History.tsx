@@ -1,97 +1,58 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { MobileNav } from '@/components/MobileNav';
 import { EventTimeline } from '@/components/EventTimeline';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { Baby, BabyEvent } from '@/lib/types';
-import { format, subDays } from 'date-fns';
-import { Moon, Milk, Baby as BabyIcon } from 'lucide-react';
-import { dataService } from '@/services/dataService';
 import { SummaryChips } from '@/components/SummaryChips';
+import { DayStrip } from '@/components/history/DayStrip';
+import { EmptyState } from '@/components/common/EmptyState';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useAppStore } from '@/store/appStore';
+import { dataService } from '@/services/dataService';
+import { getDayTotals } from '@/store/selectors';
+import { EventRecord, Baby } from '@/types/events';
+import { BabyEvent } from '@/lib/types';
 import { toast } from 'sonner';
 
 export default function History() {
-  const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { activeBabyId } = useAppStore();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<BabyEvent[]>([]);
-  const [baby, setBaby] = useState<Baby | null>(null);
-  const [dates, setDates] = useState<Date[]>([]);
   const [summary, setSummary] = useState<any>(null);
-  const safeSummary = summary ?? { sleepMinutes: 0, sleepCount: 0, feedCount: 0, diaperCount: 0 };
+  const [baby, setBaby] = useState<Baby | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
+    if (!activeBabyId) return;
     loadBaby();
-    generateDates();
-  }, []);
+  }, [activeBabyId]);
 
   useEffect(() => {
-    if (baby) {
-      loadEvents();
-    }
-  }, [selectedDate, baby]);
-
-  // Subscribe to dataService changes for real-time updates
-  useEffect(() => {
-    if (!baby) return;
-    
-    const unsubscribe = dataService.subscribe((action, data) => {
-      if (action === 'add' || action === 'update' || action === 'delete') {
-        loadEvents();
-      }
-    });
-    return unsubscribe;
-  }, [baby]);
-
-  // Load summary when baby or events change
-  useEffect(() => {
-    if (baby) {
-      const dayISO = format(selectedDate, 'yyyy-MM-dd');
-      dataService.getDaySummary(baby.id, dayISO).then(setSummary);
-    }
-  }, [baby, selectedDate, events]);
-
-  const generateDates = () => {
-    const dateArray = [];
-    for (let i = 13; i >= 0; i--) {
-      dateArray.push(subDays(new Date(), i));
-    }
-    setDates(dateArray);
-  };
+    if (!activeBabyId) return;
+    loadDayData();
+  }, [activeBabyId, selectedDate]);
 
   const loadBaby = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: familyMembers } = await supabase
-      .from('family_members')
-      .select('family_id')
-      .eq('user_id', user.id);
-
-    if (!familyMembers || familyMembers.length === 0) return;
-
-    const { data: babies } = await supabase
-      .from('babies')
-      .select('*')
-      .eq('family_id', familyMembers[0].family_id);
-
-    if (!babies || babies.length === 0) return;
-
-    const selectedBabyId = localStorage.getItem('selected_baby_id') || babies[0].id;
-    const selectedBaby = babies.find((b) => b.id === selectedBabyId) || babies[0];
-    setBaby(selectedBaby);
+    if (!activeBabyId) return;
+    const b = await dataService.getBaby(activeBabyId);
+    setBaby(b);
   };
 
-  const loadEvents = useCallback(async () => {
-    if (!baby) return;
-
+  const loadDayData = async () => {
+    if (!activeBabyId) return;
+    
+    setLoading(true);
     try {
       const dayISO = format(selectedDate, 'yyyy-MM-dd');
-      const events = await dataService.listEventsByDay(baby.id, dayISO);
+      const dayEvents = await dataService.listEventsByDay(activeBabyId, dayISO);
       
-      // Map EventRecord to BabyEvent format for UI compatibility
-      const mappedEvents: BabyEvent[] = events.map(e => ({
+      // Map EventRecord to BabyEvent format
+      const mappedEvents: BabyEvent[] = dayEvents.map(e => ({
         id: e.id,
         baby_id: e.babyId,
         family_id: e.familyId,
@@ -108,78 +69,135 @@ export default function History() {
       }));
       
       setEvents(mappedEvents);
+      
+      const totals = getDayTotals(dayEvents);
+      setSummary(totals);
     } catch (error) {
-      console.error('Error loading events:', error);
+      console.error('Failed to load day data:', error);
+      toast.error('Failed to load events');
+    } finally {
+      setLoading(false);
     }
-  }, [baby, selectedDate]);
+  };
 
-  const handleEdit = (event: BabyEvent) => {
-    // Navigate to home with edit modal
-    navigate('/home', { state: { editEvent: event } });
+  const goToPreviousDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const goToNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
   };
 
   const handleDelete = async (eventId: string) => {
     try {
       await dataService.deleteEvent(eventId);
       toast.success('Event deleted');
+      loadDayData();
     } catch (error) {
       toast.error('Failed to delete event');
     }
   };
 
+  if (!activeBabyId) {
+    return (
+      <div className="min-h-screen bg-surface pb-20">
+        <div className="max-w-2xl mx-auto p-4">
+          <EmptyState
+            icon={CalendarDays}
+            title="No Baby Selected"
+            description="Please select or create a baby to view history"
+            action={{ label: 'Go to Home', onClick: () => window.location.href = '/home' }}
+          />
+        </div>
+        <MobileNav />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-surface pb-20">
       <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <h1 className="text-2xl font-bold">History</h1>
-
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {dates.map((date) => (
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">History</h1>
+          <div className="flex gap-2">
             <Button
-              key={date.toISOString()}
-              variant={
-                format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-                  ? 'default'
-                  : 'outline'
-              }
-              onClick={() => setSelectedDate(date)}
-              className="flex-shrink-0"
+              variant="outline"
+              size="icon"
+              onClick={goToPreviousDay}
             >
-              <div className="text-center">
-                <div className="text-xs">{format(date, 'EEE')}</div>
-                <div className="font-bold">{format(date, 'd')}</div>
-              </div>
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-          ))}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToNextDay}
+              disabled={format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <Moon className="h-6 w-6 mx-auto mb-2 text-purple-500" />
-              <p className="text-2xl font-bold">
-                {Math.floor(safeSummary.sleepMinutes / 60)}h {Math.round(safeSummary.sleepMinutes % 60)}m
-              </p>
-              <p className="text-xs text-muted-foreground">{safeSummary.sleepCount} naps</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <Milk className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-              <p className="text-2xl font-bold">{safeSummary.feedCount}</p>
-              <p className="text-xs text-muted-foreground">feeds</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <BabyIcon className="h-6 w-6 mx-auto mb-2 text-green-500" />
-              <p className="text-2xl font-bold">{safeSummary.diaperCount}</p>
-              <p className="text-xs text-muted-foreground">diapers</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="p-4">
+          <div className="mb-3">
+            <h2 className="font-semibold text-lg mb-1">
+              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+            </h2>
+          </div>
+          <DayStrip
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            onOpenCalendar={() => setIsCalendarOpen(true)}
+          />
+        </Card>
 
-        <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
+        {summary && <SummaryChips summary={summary} />}
+
+        {loading ? (
+          <LoadingSpinner text="Loading events..." />
+        ) : events.length > 0 ? (
+          <div>
+            <h2 className="text-xl font-semibold mb-3">Timeline</h2>
+            <EventTimeline
+              events={events}
+              onEdit={(event) => {
+                toast.info('Edit functionality coming soon');
+              }}
+              onDelete={handleDelete}
+            />
+          </div>
+        ) : (
+          <EmptyState
+            icon={CalendarDays}
+            title="No Events Logged"
+            description={`No activities were logged on ${format(selectedDate, 'MMMM d, yyyy')}`}
+          />
+        )}
       </div>
+
+      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+        <PopoverTrigger asChild>
+          <div />
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="center">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              if (date) {
+                setSelectedDate(date);
+                setIsCalendarOpen(false);
+              }
+            }}
+            disabled={(date) => date > new Date()}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
 
       <MobileNav />
     </div>

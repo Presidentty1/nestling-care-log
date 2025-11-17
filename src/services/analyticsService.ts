@@ -1,53 +1,90 @@
-interface AnalyticsEvent {
-  name: string;
-  properties: Record<string, any>;
-  timestamp: string;
-}
+import { EventType } from '@/types/events';
 
+/**
+ * Analytics service for tracking user actions
+ * Console stub for MVP - will be replaced with real analytics later
+ */
 class AnalyticsService {
-  private events: AnalyticsEvent[] = [];
   private enabled = true;
-  
-  track(eventName: string, properties: Record<string, any> = {}): void {
+
+  private log(event: string, data?: any) {
     if (!this.enabled) return;
-    
-    const event: AnalyticsEvent = {
-      name: eventName,
-      properties: this.sanitizeProperties(properties),
-      timestamp: new Date().toISOString(),
-    };
-    
-    this.events.push(event);
-    console.log('[Analytics]', event);
-    
-    if (this.events.length > 100) {
-      this.events.shift();
-    }
-    localStorage.setItem('nestling_analytics', JSON.stringify(this.events));
+    console.log(`[Analytics] ${event}`, data || '');
   }
-  
-  private sanitizeProperties(properties: Record<string, any>): Record<string, any> {
-    const sanitized = { ...properties };
-    delete sanitized.babyName;
-    delete sanitized.notes;
-    delete sanitized.userId;
-    return sanitized;
+
+  trackOnboardingComplete(babyId: string) {
+    this.log('onboarding_completed', { babyId });
   }
-  
-  getEvents(): AnalyticsEvent[] {
-    return this.events;
+
+  trackBabySwitch(babyId: string) {
+    this.log('baby_switched', { babyId });
   }
-  
-  clearEvents(): void {
-    this.events = [];
-    localStorage.removeItem('nestling_analytics');
+
+  trackEventSaved(type: EventType, subtype?: string) {
+    this.log('event_saved', { type, subtype });
   }
-  
-  disable(): void {
+
+  trackEventEdited(eventId: string, type: EventType) {
+    this.log('event_edited', { eventId, type });
+  }
+
+  trackEventDeleted(eventId: string, type: EventType) {
+    this.log('event_deleted', { eventId, type });
+  }
+
+  trackNapRecalc(ageMonths: number) {
+    this.log('nap_recalculated', { ageMonths });
+  }
+
+  trackFeedbackSubmitted(rating: string) {
+    this.log('nap_feedback_submitted', { rating });
+  }
+
+  trackExport(format: 'csv' | 'pdf') {
+    this.log('data_exported', { format });
+  }
+
+  trackDeleteAllData() {
+    this.log('delete_all_data');
+  }
+
+  trackBabyCreated(babyId: string) {
+    this.log('baby_created', { babyId });
+  }
+
+  trackBabyUpdated(babyId: string) {
+    this.log('baby_updated', { babyId });
+  }
+
+  trackBabyDeleted(babyId: string) {
+    this.log('baby_deleted', { babyId });
+  }
+
+  trackNotificationSettingsSaved() {
+    this.log('notification_settings_saved');
+  }
+
+  trackNotificationPermissionRequested() {
+    this.log('notification_permission_requested');
+  }
+
+  trackCaregiverModeToggled(enabled: boolean) {
+    this.log('caregiver_mode_toggled', { enabled });
+  }
+
+  trackPageView(page: string) {
+    this.log('page_view', { page });
+  }
+
+  trackError(error: string, context?: any) {
+    this.log('error', { error, context });
+  }
+
+  disable() {
     this.enabled = false;
   }
-  
-  enable(): void {
+
+  enable() {
     this.enabled = true;
   }
 }

@@ -1,65 +1,15 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileNav } from '@/components/MobileNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/hooks/useAuth';
-import { useEventSync } from '@/hooks/useEventSync';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-import { SyncHealthDashboard } from '@/components/SyncHealthDashboard';
-import { supabase } from '@/integrations/supabase/client';
-import { LogOut, Users, Bell, Shield, Info, ChevronRight, Brain, BookOpen } from 'lucide-react';
-import { toast } from 'sonner';
+import { useAppStore } from '@/store/appStore';
+import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info } from 'lucide-react';
 
 export default function Settings() {
-  const { signOut, user } = useAuth();
   const navigate = useNavigate();
-  const { isOnline } = useNetworkStatus();
-  const [babyId, setBabyId] = useState<string>('');
-
-  const {
-    isSyncing,
-    pendingCount,
-    pendingByType,
-    lastSyncTime,
-    failedCount,
-    syncHistory,
-    forceSyncNow,
-  } = useEventSync(babyId);
-
-  useEffect(() => {
-    loadBaby();
-  }, []);
-
-  const loadBaby = async () => {
-    if (!user) return;
-    const { data: familyMember } = await supabase
-      .from('family_members')
-      .select('family_id')
-      .eq('user_id', user.id)
-      .single();
-
-    if (familyMember) {
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('id')
-        .eq('family_id', familyMember.family_id)
-        .limit(1)
-        .single();
-      
-      if (babies) {
-        setBabyId(babies.id);
-      }
-    }
-  };
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Failed to sign out');
-    }
-  };
+  const { caregiverMode, setCaregiverMode } = useAppStore();
 
   return (
     <div className="min-h-screen bg-surface pb-20">
@@ -68,142 +18,43 @@ export default function Settings() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Account</CardTitle>
-            <CardDescription>{user?.email}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Family & Caregivers
+              Baby Management
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Card className="cursor-pointer hover:bg-accent border-0 shadow-none" onClick={() => navigate('/settings/caregivers')}>
-              <CardContent className="p-4 flex items-center justify-between">
-                <span className="font-medium">Manage Caregivers</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:bg-accent border-0 shadow-none" onClick={() => navigate('/settings/babies')}>
-              <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="space-y-2">
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/settings/babies')}
+            >
+              <div className="flex items-center gap-3">
+                <Baby className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Manage Babies</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </CardContent>
         </Card>
-
-        {babyId && (
-          <SyncHealthDashboard
-            isOnline={isOnline}
-            isSyncing={isSyncing}
-            pendingCount={pendingCount}
-            lastSyncTime={lastSyncTime}
-            failedCount={failedCount}
-            pendingByType={pendingByType}
-            syncHistory={syncHistory}
-            onSyncNow={forceSyncNow}
-          />
-        )}
 
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Notifications
+              Notifications & Reminders
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => navigate('/settings/notifications')}
-            >
-              Configure Reminders
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => navigate('/settings/shortcuts')}
-            >
-              Quick Actions & Voice
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Health & Growth</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/growth')}>
-              Growth Tracker
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/health')}>
-              Health Records
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/milestones')}>
-              Milestones
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/photos')}>
-              Photo Gallery
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              AI & Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/cry-insights')}>
-              Cry Insights
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/ai-assistant')}>
-              AI Assistant
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/analytics')}>
-              Analytics Dashboard
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/sleep-training')}>
-              Sleep Training
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/predictions')}>
-              Smart Predictions
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Memories & Collaboration
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/journal')}>
-              Baby Journal
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/activity-feed')}>
-              Activity Feed
-            </Button>
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/settings/notifications')}
+            >
+              <div className="flex items-center gap-3">
+                <Bell className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Notification Settings</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </CardContent>
         </Card>
 
@@ -214,22 +65,39 @@ export default function Settings() {
               Privacy & Data
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => toast.info('Data download coming soon')}
+          <CardContent className="space-y-2">
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/settings/privacy')}
             >
-              Download My Data
-            </Button>
-            <Separator />
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-destructive hover:text-destructive"
-              onClick={() => toast.info('Account deletion coming soon')}
-            >
-              Delete Account
-            </Button>
+              <div className="flex items-center gap-3">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Export & Delete Data</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Accessibility</CardTitle>
+            <CardDescription>Adjust settings for easier use</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="caregiver-mode">Caregiver Mode</Label>
+                <p className="text-sm text-muted-foreground">
+                  Larger text and buttons for easier viewing
+                </p>
+              </div>
+              <Switch
+                id="caregiver-mode"
+                checked={caregiverMode}
+                onCheckedChange={setCaregiverMode}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -241,21 +109,14 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="text-sm space-y-1">
-              <p className="font-medium">Nestling v1.0.0</p>
-              <p className="text-muted-foreground text-xs">
-                The fastest shared baby logger
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">Nestling Care Log v1.0.0</p>
+            <p className="text-sm text-muted-foreground">
+              A local-first baby tracking app for modern parents
+            </p>
             <Separator className="my-3" />
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>
-                <strong>Disclaimer:</strong> Nestling provides general wellness guidance only 
-                and is not a medical device. It does not diagnose, treat, cure, or prevent 
-                any disease. If you're worried about your baby's health, contact your 
-                pediatrician or local emergency services immediately.
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              All your data is stored locally on your device and never leaves your device.
+            </p>
           </CardContent>
         </Card>
       </div>
