@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Baby } from 'lucide-react';
+import { useAppStore } from '@/store/appStore';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -16,6 +17,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const { setActiveBabyId } = useAppStore();
 
   // Redirect if already logged in
   if (user) {
@@ -32,6 +34,9 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
+      // Reset any stale local state tied to previous users
+      setActiveBabyId(null);
+      localStorage.removeItem('activeBabyId');
       toast.success('Welcome back!');
       navigate('/home');
     }
@@ -54,8 +59,11 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
+      // Clear previous user's state and go to onboarding/home flow
+      setActiveBabyId(null);
+      localStorage.removeItem('activeBabyId');
       toast.success('Account created! Setting up your profile...');
-      // Will redirect to onboarding via Auth.tsx
+      navigate('/home');
     }
 
     setLoading(false);
@@ -81,6 +89,9 @@ export default function Auth() {
       if (error) {
         toast.error('Skip login failed: ' + error.message);
       } else {
+        // Clear any stale baby selection so Home can route correctly
+        setActiveBabyId(null);
+        localStorage.removeItem('activeBabyId');
         toast.success('Signed in as dev user');
         navigate('/home');
       }
