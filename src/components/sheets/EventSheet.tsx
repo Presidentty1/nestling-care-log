@@ -10,7 +10,6 @@ import { TummyTimeForm } from './TummyTimeForm';
 import { dataService } from '@/services/dataService';
 import { analyticsService } from '@/services/analyticsService';
 import { napService } from '@/services/napService';
-import { supabase } from '@/integrations/supabase/client';
 import { differenceInMonths } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -98,7 +97,7 @@ export function EventSheet({
     try {
       if (editingEventId) {
         await dataService.updateEvent(editingEventId, data);
-        analyticsService.track('event_edited', { type: eventType });
+        analyticsService.trackEventEdited(editingEventId, eventType);
         toast.success('Event updated');
       } else {
         await dataService.addEvent({
@@ -106,36 +105,25 @@ export function EventSheet({
           babyId,
           familyId,
         });
-        analyticsService.track('event_saved', {
-          type: eventType,
-          subtype: data.subtype,
-          hasAmount: !!data.amount,
-          hasDuration: !!data.durationMin,
-        });
+        analyticsService.trackEventSaved(eventType, data.subtype);
         toast.success('Event saved');
       }
 
       // Recalculate nap prediction after sleep event
       if (eventType === 'sleep' && data.endTime) {
         try {
-          // Get baby data to calculate age
-          const { data: baby, error } = await supabase
-            .from('babies')
-            .select('*')
-            .eq('id', babyId)
-            .single();
+          const baby = await dataService.getBaby(babyId);
           
-          if (!error && baby) {
-            const ageMonths = differenceInMonths(new Date(), new Date(baby.date_of_birth));
+          if (baby) {
+            const ageMonths = differenceInMonths(new Date(), new Date(baby.dobISO));
             const prediction = await napService.recalculate(babyId, ageMonths);
             if (prediction) {
               await dataService.storeNapPrediction(babyId, prediction);
-              analyticsService.track('nap_prediction_updated', { babyId });
+              analyticsService.trackNapRecalc(ageMonths);
             }
           }
         } catch (error) {
           console.error('Failed to recalculate nap prediction:', error);
-          // Don't show error to user, this is background work
         }
       }
 
