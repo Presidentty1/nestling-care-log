@@ -5,9 +5,10 @@ import { Baby } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Trash2 } from 'lucide-react';
+import { Download, Share2, Trash2, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { EmptyState } from '@/components/common/EmptyState';
 
 interface PhotoItem {
   url: string;
@@ -153,9 +154,11 @@ export default function PhotoGallery() {
       </Tabs>
 
       {photos.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">
-          No photos yet. Add photos to milestones or health records!
-        </p>
+        <EmptyState
+          icon={Camera}
+          title="No photos yet"
+          description="Add photos to milestones or health records to see them here"
+        />
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {photos.map((photo, idx) => (

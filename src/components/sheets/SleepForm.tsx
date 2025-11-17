@@ -170,14 +170,15 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit }: S
         </TabsContent>
 
         <TabsContent value="manual" className="space-y-4">
-          <div>
-            <Label htmlFor="manual-start">Start Time</Label>
-            <Input
-              id="manual-start"
-              type="datetime-local"
-              value={manualStart}
-              onChange={(e) => setManualStart(e.target.value)}
-            />
+        <div>
+          <Label htmlFor="manual-start">Start Time</Label>
+          <Input
+            id="manual-start"
+            type="datetime-local"
+            value={manualStart}
+            onChange={(e) => setManualStart(e.target.value)}
+            autoFocus
+          />
           </div>
           <div>
             <Label htmlFor="manual-end">End Time</Label>

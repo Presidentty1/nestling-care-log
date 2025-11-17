@@ -75,6 +75,7 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit }: 
           type="datetime-local"
           value={timestamp}
           onChange={(e) => setTimestamp(e.target.value)}
+          autoFocus
         />
       </div>
 

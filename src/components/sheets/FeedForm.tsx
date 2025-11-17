@@ -217,6 +217,7 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="90"
+                autoFocus
               />
             </div>
             <div>
