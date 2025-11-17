@@ -1,20 +1,30 @@
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { dataService } from '@/services/dataService';
 
 export async function exportToJSON(familyId: string, startDate: Date, endDate: Date) {
-  const { data: events } = await supabase
-    .from('events')
-    .select('*')
-    .eq('family_id', familyId)
-    .gte('start_time', startDate.toISOString())
-    .lte('start_time', endDate.toISOString())
-    .order('start_time', { ascending: false });
-
+  // Get babies from Supabase
   const { data: babies } = await supabase
     .from('babies')
     .select('*')
     .eq('family_id', familyId);
 
+  // Get events from IndexedDB for each baby
+  const allEvents = [];
+  if (babies) {
+    for (const baby of babies) {
+      const events = await dataService.listEventsRange(
+        baby.id,
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
+      allEvents.push(...events);
+    }
+  }
+
+  // Get nap predictions from localStorage
+  const napPredictions = localStorage.getItem('nap_predictions');
+  
   const exportData = {
     exported_at: new Date().toISOString(),
     app_version: '1.0.0',
@@ -23,7 +33,12 @@ export async function exportToJSON(familyId: string, startDate: Date, endDate: D
       end: endDate.toISOString(),
     },
     babies,
-    events,
+    events: allEvents,
+    nap_predictions: napPredictions ? JSON.parse(napPredictions) : [],
+    metadata: {
+      total_events: allEvents.length,
+      total_babies: babies?.length || 0,
+    }
   };
 
   const blob = new Blob([JSON.stringify(exportData, null, 2)], {
@@ -39,31 +54,40 @@ export async function exportToJSON(familyId: string, startDate: Date, endDate: D
 }
 
 export async function exportToCSV(familyId: string, startDate: Date, endDate: Date) {
-  const { data: events } = await supabase
-    .from('events')
-    .select('*, babies(name)')
-    .eq('family_id', familyId)
-    .gte('start_time', startDate.toISOString())
-    .lte('start_time', endDate.toISOString())
-    .order('start_time', { ascending: false });
+  // Get babies from Supabase
+  const { data: babies } = await supabase
+    .from('babies')
+    .select('*')
+    .eq('family_id', familyId);
 
-  if (!events) return;
+  if (!babies) return;
+
+  // Get events from IndexedDB
+  const allEvents = [];
+  for (const baby of babies) {
+    const events = await dataService.listEventsRange(
+      baby.id,
+      startDate.toISOString(),
+      endDate.toISOString()
+    );
+    allEvents.push(...events.map(e => ({ ...e, babyName: baby.name })));
+  }
 
   const headers = ['Date', 'Time', 'Baby', 'Type', 'Subtype', 'Duration/Amount', 'Unit', 'Notes'];
-  const rows = events.map(event => {
-    const duration = event.end_time 
-      ? Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 60000)
+  const rows = allEvents.map((event: any) => {
+    const duration = event.endTime 
+      ? Math.round((new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000)
       : event.amount || '';
     
     return [
-      format(new Date(event.start_time), 'yyyy-MM-dd'),
-      format(new Date(event.start_time), 'HH:mm'),
-      (event.babies as any)?.name || '',
+      format(new Date(event.startTime), 'yyyy-MM-dd'),
+      format(new Date(event.startTime), 'HH:mm'),
+      event.babyName || '',
       event.type,
       event.subtype || '',
       duration,
       event.unit || '',
-      event.note || '',
+      event.notes || '',
     ];
   });
 

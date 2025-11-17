@@ -1,15 +1,58 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileNav } from '@/components/MobileNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
+import { useEventSync } from '@/hooks/useEventSync';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { SyncHealthDashboard } from '@/components/SyncHealthDashboard';
+import { supabase } from '@/integrations/supabase/client';
 import { LogOut, Users, Bell, Shield, Info, ChevronRight, Brain, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const { isOnline } = useNetworkStatus();
+  const [babyId, setBabyId] = useState<string>('');
+
+  const {
+    isSyncing,
+    pendingCount,
+    pendingByType,
+    lastSyncTime,
+    failedCount,
+    syncHistory,
+    forceSyncNow,
+  } = useEventSync(babyId);
+
+  useEffect(() => {
+    loadBaby();
+  }, []);
+
+  const loadBaby = async () => {
+    if (!user) return;
+    const { data: familyMember } = await supabase
+      .from('family_members')
+      .select('family_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (familyMember) {
+      const { data: babies } = await supabase
+        .from('babies')
+        .select('id')
+        .eq('family_id', familyMember.family_id)
+        .limit(1)
+        .single();
+      
+      if (babies) {
+        setBabyId(babies.id);
+      }
+    }
+  };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -62,6 +105,19 @@ export default function Settings() {
             </Card>
           </CardContent>
         </Card>
+
+        {babyId && (
+          <SyncHealthDashboard
+            isOnline={isOnline}
+            isSyncing={isSyncing}
+            pendingCount={pendingCount}
+            lastSyncTime={lastSyncTime}
+            failedCount={failedCount}
+            pendingByType={pendingByType}
+            syncHistory={syncHistory}
+            onSyncNow={forceSyncNow}
+          />
+        )}
 
         <Card>
           <CardHeader>

@@ -137,6 +137,31 @@ class DataService {
     await timersStore.removeItem(`timer_${babyId}`);
   }
 
+  async getAllEvents(): Promise<EventRecord[]> {
+    const events: EventRecord[] = [];
+    await eventsStore.iterate<EventRecord, void>((event) => {
+      events.push(event);
+    });
+    return events.sort((a, b) => 
+      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    );
+  }
+
+  async clearAllData(): Promise<{ eventsCleared: number; timersCleared: number }> {
+    const eventsCount = await eventsStore.length();
+    const timersCount = await timersStore.length();
+    
+    await eventsStore.clear();
+    await timersStore.clear();
+    
+    this.emitChange('clear', {});
+    
+    return {
+      eventsCleared: eventsCount,
+      timersCleared: timersCount,
+    };
+  }
+
   subscribe(callback: (action: string, data: any) => void): () => void {
     this.listeners.push(callback);
     return () => {
