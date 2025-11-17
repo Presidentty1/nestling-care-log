@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import App from "./App.tsx";
 import "./index.css";
 import { useAppStore } from './store/appStore';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function AppWrapper() {
   const caregiverMode = useAppStore((state) => state.caregiverMode);
@@ -18,4 +19,8 @@ function AppWrapper() {
   return <App />;
 }
 
-createRoot(document.getElementById("root")!).render(<AppWrapper />);
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
+    <AppWrapper />
+  </ErrorBoundary>
+);

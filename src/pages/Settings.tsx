@@ -86,6 +86,16 @@ export default function Settings() {
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/privacy')}
+            >
+              <div className="flex items-center gap-3">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Privacy Policy</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </CardContent>
         </Card>
 
@@ -97,9 +107,9 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="caregiver-mode">Caregiver Mode</Label>
+                <Label htmlFor="caregiver-mode" className="text-base">Caregiver Mode</Label>
                 <p className="text-sm text-muted-foreground">
-                  Larger text and buttons for easier viewing
+                  Larger text and buttons for easier use
                 </p>
               </div>
               <Switch
@@ -118,15 +128,27 @@ export default function Settings() {
               About
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground">Nestling Care Log v1.0.0</p>
-            <p className="text-sm text-muted-foreground">
-              A local-first baby tracking app for modern parents
-            </p>
-            <Separator className="my-3" />
-            <p className="text-xs text-muted-foreground">
-              All your data is stored locally on your device and never leaves your device.
-            </p>
+          <CardContent className="space-y-3">
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p className="flex items-center justify-between">
+                <span>App Version</span>
+                <span className="font-medium">1.0.0</span>
+              </p>
+              <Separator />
+              <div className="p-3 bg-muted rounded-lg space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">⚕️</span>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground text-sm">Medical Disclaimer</p>
+                    <p className="text-xs leading-relaxed mt-1">
+                      Nestling is not a medical device. Always consult your pediatrician or healthcare 
+                      provider for medical advice, diagnosis, or treatment. AI features provide general 
+                      information only and should not replace professional medical judgment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
