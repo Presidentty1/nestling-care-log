@@ -20,10 +20,12 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
+        elevated: "hsl(var(--elevated))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          dark: "hsl(var(--primary-dark))",
+          600: "hsl(var(--primary-600))",
+          100: "hsl(var(--primary-100))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -37,6 +39,10 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -45,7 +51,7 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        "soft-mint": "hsl(var(--soft-mint))",
+        "text-subtle": "hsl(var(--text-subtle))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -66,9 +72,17 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius-lg)", /* 20px for sheets */
+        md: "var(--radius-md)", /* 16px for cards */
+        sm: "var(--radius-button)", /* 14px for buttons */
+        DEFAULT: "var(--radius)",
+      },
+      boxShadow: {
+        soft: "var(--shadow-soft)",
+      },
+      spacing: {
+        '18': '4.5rem', /* 72px */
+        '22': '5.5rem', /* 88px */
       },
       keyframes: {
         "accordion-down": {
