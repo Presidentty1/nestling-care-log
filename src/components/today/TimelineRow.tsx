@@ -1,4 +1,4 @@
-import { BabyEvent } from '@/lib/types';
+import { EventRecord } from '@/services/eventsService';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface TimelineRowProps {
-  event: BabyEvent;
+  event: EventRecord;
   onEdit: () => void;
   onDelete: () => void;
 }

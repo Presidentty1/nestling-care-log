@@ -7,10 +7,7 @@ import { FeedForm } from './FeedForm';
 import { SleepForm } from './SleepForm';
 import { DiaperForm } from './DiaperForm';
 import { TummyTimeForm } from './TummyTimeForm';
-import { dataService } from '@/services/dataService';
-import { analyticsService } from '@/services/analyticsService';
-import { napService } from '@/services/napService';
-import { differenceInMonths } from 'date-fns';
+import { eventsService, CreateEventData } from '@/services/eventsService';
 import { toast } from 'sonner';
 
 interface EventSheetProps {
@@ -35,48 +32,13 @@ export function EventSheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   
   const titles: Partial<Record<EventType, string>> = {
-    feed: 'Log Feed',
-    sleep: 'Log Sleep',
-    diaper: 'Log Diaper',
-    tummy_time: 'Log Tummy Time',
+    feed: editingEventId ? 'Edit Feed' : 'Log Feed',
+    sleep: editingEventId ? 'Edit Sleep' : 'Log Sleep',
+    diaper: editingEventId ? 'Edit Diaper' : 'Log Diaper',
+    tummy_time: editingEventId ? 'Edit Tummy Time' : 'Log Tummy Time',
   };
   
   const title = titles[eventType] || 'Log Event';
-  
-  // Focus trap
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const focusableElements = sheetRef.current?.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    if (!focusableElements || focusableElements.length === 0) return;
-    
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-    
-    setTimeout(() => firstElement.focus(), 100);
-    
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
-      }
-    };
-    
-    document.addEventListener('keydown', handleTab);
-    return () => document.removeEventListener('keydown', handleTab);
-  }, [isOpen]);
   
   // Escape key
   useEffect(() => {
@@ -92,128 +54,107 @@ export function EventSheet({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
   
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: Partial<CreateEventData>) => {
     setIsSaving(true);
+    
     try {
+      const eventData: CreateEventData = {
+        baby_id: babyId,
+        family_id: familyId,
+        type: eventType,
+        ...data,
+      } as CreateEventData;
+
       if (editingEventId) {
-        await dataService.updateEvent(editingEventId, data);
-        analyticsService.trackEventEdited(editingEventId, eventType);
+        await eventsService.updateEvent(editingEventId, eventData);
         toast.success('Event updated');
       } else {
-        await dataService.addEvent({
-          ...data,
-          babyId,
-          familyId,
-        });
-        analyticsService.trackEventSaved(eventType, data.subtype);
+        await eventsService.createEvent(eventData);
         toast.success('Event saved');
       }
-
-      // Recalculate nap prediction after sleep event
-      if (eventType === 'sleep' && data.endTime) {
-        try {
-          const baby = await dataService.getBaby(babyId);
-          
-          if (baby) {
-            const ageMonths = differenceInMonths(new Date(), new Date(baby.dobISO));
-            const prediction = await napService.recalculate(babyId, ageMonths);
-            if (prediction) {
-              await dataService.storeNapPrediction(babyId, prediction);
-              analyticsService.trackNapRecalc(ageMonths);
-            }
-          }
-        } catch (error) {
-          console.error('Failed to recalculate nap prediction:', error);
-        }
-      }
-
+      
       onClose();
     } catch (error) {
       console.error('Failed to save event:', error);
-      toast.error('Failed to save event');
+      toast.error('We couldn\'t save this entry to the server. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
   
+  const renderForm = () => {
+    switch (eventType) {
+      case 'feed':
+        return (
+          <FeedForm
+            babyId={babyId}
+            editingEventId={editingEventId}
+            onValidChange={setIsValid}
+            onSubmit={handleSave}
+          />
+        );
+      case 'sleep':
+        return (
+          <SleepForm
+            babyId={babyId}
+            editingEventId={editingEventId}
+            onValidChange={setIsValid}
+            onSubmit={handleSave}
+          />
+        );
+      case 'diaper':
+        return (
+          <DiaperForm
+            babyId={babyId}
+            editingEventId={editingEventId}
+            onValidChange={setIsValid}
+            onSubmit={handleSave}
+          />
+        );
+      case 'tummy_time':
+        return (
+          <TummyTimeForm
+            babyId={babyId}
+            editingEventId={editingEventId}
+            onValidChange={setIsValid}
+            onSubmit={handleSave}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DrawerContent 
-        ref={sheetRef}
-        className="rounded-t-[24px] max-h-[90vh]"
-        aria-labelledby="event-sheet-title"
-      >
-        <DrawerHeader className="border-b">
-          <div className="flex items-center justify-between">
-            <DrawerTitle id="event-sheet-title">{title}</DrawerTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent ref={sheetRef}>
+        <DrawerHeader className="flex items-center justify-between">
+          <DrawerTitle>{title}</DrawerTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DrawerHeader>
         
-        <div className="overflow-y-auto max-h-[60vh] px-4 py-6">
-          {eventType === 'feed' && (
-            <FeedForm
-              babyId={babyId}
-              editingEventId={editingEventId}
-              onValidChange={setIsValid}
-              onSubmit={handleSave}
-            />
-          )}
-          {eventType === 'sleep' && (
-            <SleepForm
-              babyId={babyId}
-              editingEventId={editingEventId}
-              onValidChange={setIsValid}
-              onSubmit={handleSave}
-            />
-          )}
-          {eventType === 'diaper' && (
-            <DiaperForm
-              babyId={babyId}
-              editingEventId={editingEventId}
-              onValidChange={setIsValid}
-              onSubmit={handleSave}
-            />
-          )}
-          {eventType === 'tummy_time' && (
-            <TummyTimeForm
-              babyId={babyId}
-              editingEventId={editingEventId}
-              onValidChange={setIsValid}
-              onSubmit={handleSave}
-            />
-          )}
+        <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
+          {renderForm()}
         </div>
         
-        <DrawerFooter className="border-t sticky bottom-0 bg-background pt-4">
-          <div className="flex gap-3 w-full">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={onClose}
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex-1"
-              onClick={() => {
-                document.getElementById('event-form')?.dispatchEvent(
-                  new Event('submit', { cancelable: true, bubbles: true })
-                );
-              }}
-              disabled={!isValid || isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save Log'}
-            </Button>
-          </div>
+        <DrawerFooter>
+          <Button
+            onClick={() => {
+              const form = sheetRef.current?.querySelector('form');
+              form?.requestSubmit();
+            }}
+            disabled={!isValid || isSaving}
+            className="w-full"
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
