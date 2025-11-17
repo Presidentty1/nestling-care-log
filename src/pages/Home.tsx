@@ -269,58 +269,13 @@ export default function Home() {
           )}
         </div>
 
-        <OfflineIndicator />
-
-        {selectedBaby && events.length > 0 && (() => {
-          const prediction = predictNextNap(selectedBaby, events);
-          const now = new Date();
-          const isOpen = isAfter(now, prediction.napWindowStart) && isBefore(now, prediction.napWindowEnd);
-          
-          return (
-            <Card className="cursor-pointer hover:bg-accent/5" onClick={() => navigate('/nap-details')}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>💤 Next Nap Window</span>
-                  <Badge variant={prediction.confidence === 'high' ? 'default' : 'secondary'}>
-                    {prediction.confidence}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isOpen ? (
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-green-600 mb-2">Window Open Now!</p>
-                    <p className="text-2xl font-bold">
-                      {format(prediction.napWindowStart, 'h:mm a')} - {format(prediction.napWindowEnd, 'h:mm a')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">
-                      {format(prediction.napWindowStart, 'h:mm a')} - {format(prediction.napWindowEnd, 'h:mm a')}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">Tap for details →</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })()}
-
-        <div className="grid grid-cols-3 gap-3">
-          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('feed')}>
-            <Milk className="h-6 w-6" />
-            <span>Feed</span>
-          </Button>
-          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('sleep')}>
-            <Moon className="h-6 w-6" />
-            <span>Sleep</span>
-          </Button>
-          <Button size="lg" className="h-24 flex-col gap-2" onClick={() => openModal('diaper')}>
-            <BabyIcon className="h-6 w-6" />
-            <span>Diaper</span>
-          </Button>
-        </div>
+        {napPrediction && selectedBaby && (
+          <NapPredictionCard 
+            prediction={napPrediction} 
+            babyId={selectedBaby.id}
+            onFeedbackSubmitted={handleFeedbackSubmitted}
+          />
+        )}
 
         <QuickActions onActionSelect={(type) => openModal(type)} />
 
@@ -329,20 +284,22 @@ export default function Home() {
         <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
-      {isModalOpen && modalType && ['feed', 'sleep', 'diaper', 'tummy_time'].includes(modalType) && (
-        <EventSheet
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setEditingEvent(null);
-            loadTodayEvents();
-          }}
-          eventType={modalType as EventType}
-          babyId={selectedBaby?.id ?? 'local-dev-baby'}
-          familyId={selectedBaby?.family_id ?? 'local-dev-family'}
-          editingEventId={editingEvent?.id}
-        />
-      )}
+      <EventSheet
+        isOpen={modalState.open}
+        onClose={() => setModalState({ open: false, type: 'feed' })}
+        eventType={modalState.type}
+        babyId={selectedBaby?.id ?? 'local-dev-baby'}
+        familyId={selectedBaby?.family_id ?? 'local-dev-family'}
+        editingEventId={modalState.editingId}
+      />
+
+      <BabySwitcher
+        babies={babies}
+        selectedBabyId={selectedBabyId}
+        onSelect={handleBabySelect}
+        isOpen={isSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
+      />
 
       <FloatingActionButton
         onVoiceCommand={(command) => {
