@@ -61,16 +61,47 @@ export default function Auth() {
     setLoading(false);
   };
 
+  const handleSkipLogin = async () => {
+    setLoading(true);
+    
+    // Create/sign in with dev account
+    const devEmail = 'dev@nestling.app';
+    const devPassword = 'devpass123';
+    
+    try {
+      // Try signing in first
+      let { error } = await signIn(devEmail, devPassword);
+      
+      // If account doesn't exist, create it
+      if (error?.message?.includes('Invalid login credentials')) {
+        const signUpResult = await signUp(devEmail, devPassword, 'Dev User');
+        error = signUpResult.error;
+      }
+      
+      if (error) {
+        toast.error('Skip login failed: ' + error.message);
+      } else {
+        toast.success('Signed in as dev user');
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Skip login error:', err);
+      toast.error('Failed to skip login');
+    }
+    
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-soft">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
+          <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-soft">
             <Baby className="h-8 w-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Nestling</CardTitle>
-            <CardDescription>The fastest shared baby logger</CardDescription>
+            <CardTitle className="text-[28px] leading-[34px]">Nestling</CardTitle>
+            <CardDescription className="text-secondary">The fastest shared baby logger</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -153,17 +184,15 @@ export default function Auth() {
             </TabsContent>
           </Tabs>
 
-          {/* TEMP: Development skip button - REMOVE LATER */}
+          {/* TEMP: Development skip button */}
           <div className="mt-4 pt-4 border-t">
             <Button 
               variant="ghost" 
               className="w-full text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                localStorage.setItem('dev_skip_auth', 'true');
-                navigate('/home');
-              }}
+              onClick={handleSkipLogin}
+              disabled={loading}
             >
-              Skip Login (Dev Only)
+              {loading ? 'Signing in...' : 'Skip Login (Dev Only)'}
             </Button>
           </div>
         </CardContent>
