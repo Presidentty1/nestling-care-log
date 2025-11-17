@@ -1,47 +1,47 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Download, Trash2, AlertTriangle } from 'lucide-react';
+import { Shield, Download, Trash2, AlertTriangle, Upload, RefreshCw } from 'lucide-react';
+import { exportToJSON } from '@/lib/dataExport';
+import { parseImportFile, validateImportData, importEventsToDataService } from '@/lib/dataImport';
+import { dataService } from '@/services/dataService';
+import { queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PrivacyCenter() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [importPreview, setImportPreview] = useState<any>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportDataMutation = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Fetch all user data
-      const [profiles, babies, events, healthRecords, milestones] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id),
-        supabase.from('babies').select('*'),
-        supabase.from('events').select('*'),
-        supabase.from('health_records').select('*'),
-        supabase.from('milestones').select('*'),
-      ]);
+      // Get family info
+      const { data: familyMember } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id)
+        .single();
 
-      const exportData = {
-        exported_at: new Date().toISOString(),
-        user: profiles.data,
-        babies: babies.data,
-        events: events.data,
-        health_records: healthRecords.data,
-        milestones: milestones.data,
-      };
+      if (!familyMember) throw new Error('No family found');
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nestling-data-export-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      // Export using dataService (IndexedDB)
+      await exportToJSON(
+        familyMember.family_id,
+        new Date(0),
+        new Date()
+      );
     },
     onSuccess: () => {
       toast({ title: 'Data exported successfully!' });
@@ -55,18 +55,125 @@ export default function PrivacyCenter() {
     },
   });
 
+  const importDataMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const data = await parseImportFile(file);
+      const validation = await validateImportData(data);
+      
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
+      setImportPreview(data);
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: 'Import preview ready',
+        description: `Found ${data.events?.length || 0} events, ${data.babies?.length || 0} babies`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to parse import file',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const confirmImportMutation = useMutation({
+    mutationFn: async () => {
+      if (!importPreview) throw new Error('No import data');
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: familyMember } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!familyMember) throw new Error('No family found');
+
+      const { data: babies } = await supabase
+        .from('babies')
+        .select('id')
+        .eq('family_id', familyMember.family_id)
+        .single();
+
+      if (!babies) throw new Error('No baby found');
+
+      const result = await importEventsToDataService(
+        importPreview,
+        babies.id,
+        familyMember.family_id
+      );
+
+      return result;
+    },
+    onSuccess: (result) => {
+      toast({ 
+        title: 'Import completed!',
+        description: `Added ${result.added} events, skipped ${result.skipped} duplicates`,
+      });
+      setImportPreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Import failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const clearLocalDataMutation = useMutation({
+    mutationFn: async () => {
+      // Clear IndexedDB
+      const result = await dataService.clearAllData();
+      
+      // Clear localStorage
+      localStorage.removeItem('nap_predictions');
+      localStorage.removeItem('nestling_sync_history');
+      localStorage.removeItem('nestling-react-query-cache');
+      
+      // Clear React Query cache
+      queryClient.clear();
+      
+      return result;
+    },
+    onSuccess: (result) => {
+      toast({ 
+        title: 'Local data cleared',
+        description: `Cleared ${result.eventsCleared} events. Refresh to re-sync from cloud.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to clear local data',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Delete all user data
+      // Clear local data first
+      await dataService.clearAllData();
+      localStorage.clear();
+      queryClient.clear();
+
+      // Delete all Supabase data
       await Promise.all([
         supabase.from('app_settings').delete().eq('user_id', user.id),
-        supabase.from('notification_settings').delete().eq('user_id', user.id),
-        supabase.from('voice_commands').delete().eq('user_id', user.id),
-        supabase.from('user_feedback').delete().eq('user_id', user.id),
-        supabase.from('referral_codes').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('id', user.id),
       ]);
 
       // Sign out
@@ -85,6 +192,13 @@ export default function PrivacyCenter() {
       setIsDeleting(false);
     },
   });
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      importDataMutation.mutate(file);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background p-4">
