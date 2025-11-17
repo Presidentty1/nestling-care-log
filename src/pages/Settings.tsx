@@ -5,7 +5,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store/appStore';
-import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info } from 'lucide-react';
+import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -96,6 +97,46 @@ export default function Settings() {
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Nestling Pro
+            </CardTitle>
+            <CardDescription>Unlock advanced features</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2 text-sm">
+                <span className="text-primary">✓</span>
+                <span>AI nap predictions with wake window analysis</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm">
+                <span className="text-primary">✓</span>
+                <span>Advanced reminders & notifications</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm">
+                <span className="text-primary">✓</span>
+                <span>CSV export to share with pediatrician</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm">
+                <span className="text-primary">✓</span>
+                <span>Priority support</span>
+              </li>
+            </ul>
+            <div className="pt-2">
+              <p className="text-sm text-muted-foreground mb-3">
+                <strong className="text-primary">$39.99/yr</strong> (founder launch special)
+                <br />
+                <span className="text-xs">Also available: $4.99/mo • $79.99 lifetime</span>
+              </p>
+              <Button disabled className="w-full" variant="default">
+                Coming Soon
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
