@@ -19,7 +19,7 @@ export default function Auth() {
 
   // Redirect if already logged in
   if (user) {
-    navigate('/onboarding');
+    navigate('/home');
     return null;
   }
 
@@ -54,8 +54,8 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Account created! Welcome to Nestling');
-      navigate('/onboarding');
+      toast.success('Account created! Setting up your profile...');
+      // Will redirect to onboarding via Auth.tsx
     }
 
     setLoading(false);

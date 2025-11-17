@@ -6,10 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { queryClient } from "@/lib/queryClient";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/appStore';
-import { dataService } from '@/services/dataService';
-import { notificationMonitor } from '@/services/notificationMonitor';
+import { reminderService } from '@/services/reminderService';
 import { NotificationBanner } from '@/components/NotificationBanner';
-import OnboardingSimple from "./pages/OnboardingSimple";
+import { useAuth } from '@/hooks/useAuth';
+import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Labs from "./pages/Labs";
@@ -38,24 +39,23 @@ import Feedback from "./pages/Feedback";
 import PrivacyCenter from "./pages/PrivacyCenter";
 import NotFound from "./pages/NotFound";
 
-function HomeGuard({ children }: { children: React.ReactNode }) {
-  const { activeBabyId } = useAppStore();
-  const [hasChecked, setHasChecked] = useState(false);
-  const [hasBabies, setHasBabies] = useState(false);
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    checkBabies();
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
-  const checkBabies = async () => {
-    const babies = await dataService.listBabies();
-    setHasBabies(babies.length > 0);
-    setHasChecked(true);
-  };
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
-  if (!hasChecked) return null;
-  if (!hasBabies || !activeBabyId) return <Navigate to="/onboarding-simple" replace />;
-  
   return <>{children}</>;
 }
 
@@ -64,11 +64,11 @@ function AppContent() {
 
   useEffect(() => {
     if (activeBabyId) {
-      notificationMonitor.start(activeBabyId);
+      reminderService.start();
     }
 
     return () => {
-      notificationMonitor.stop();
+      reminderService.stop();
     };
   }, [activeBabyId]);
 
@@ -77,9 +77,10 @@ function AppContent() {
       <NotificationBanner />
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/onboarding-simple" element={<OnboardingSimple />} />
-        <Route path="/home" element={<HomeGuard><Home /></HomeGuard>} />
-        <Route path="/history" element={<HomeGuard><History /></HomeGuard>} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
+        <Route path="/home" element={<AuthGuard><Home /></AuthGuard>} />
+        <Route path="/history" element={<AuthGuard><History /></AuthGuard>} />
         <Route path="/labs" element={<Labs />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/babies" element={<ManageBabiesPage />} />
@@ -92,7 +93,7 @@ function AppContent() {
         <Route path="/photos" element={<PhotoGallery />} />
         <Route path="/cry-insights" element={<CryInsights />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
-        <Route path="/analytics" element={<HomeGuard><Analytics /></HomeGuard>} />
+        <Route path="/analytics" element={<AuthGuard><Analytics /></AuthGuard>} />
         <Route path="/settings/shortcuts" element={<ShortcutsSettings />} />
         <Route path="/sleep-training" element={<SleepTraining />} />
         <Route path="/activity-feed" element={<ActivityFeed />} />
