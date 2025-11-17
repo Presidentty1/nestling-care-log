@@ -6,7 +6,7 @@ import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventTimeline } from '@/components/EventTimeline';
 import { EventSheet } from '@/components/sheets/EventSheet';
-import { SummaryChips } from '@/components/SummaryChips';
+import { SummaryChips } from '@/components/today/SummaryChips';
 import { NapPredictionCard } from '@/components/NapPredictionCard';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MobileNav } from '@/components/MobileNav';

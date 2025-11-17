@@ -4,88 +4,87 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ChevronLeft, Download, FileText, Trash2 } from 'lucide-react';
 import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
-import { format } from 'date-fns';
-import jsPDF from 'jspdf';
+import { format, subDays } from 'date-fns';
 import { toast } from 'sonner';
+import { exportEventsCSV } from '@/lib/csvExport';
+import { exportDaySummaryPDF } from '@/lib/pdfExport';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 export default function PrivacyData() {
   const navigate = useNavigate();
   const { activeBabyId, setActiveBabyId } = useAppStore();
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isFinalDeleteOpen, setIsFinalDeleteOpen] = useState(false);
+  
+  // CSV export date range
+  const [csvStartDate, setCsvStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'));
+  const [csvEndDate, setCsvEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  
+  // PDF export date
+  const [pdfDate, setPdfDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  const exportCSV = async () => {
-    if (!activeBabyId) return;
+  const handleExportCSV = async () => {
+    if (!activeBabyId) {
+      toast.error('No baby selected');
+      return;
+    }
 
-    const events = await dataService.getAllEvents();
-    const babyEvents = events.filter(e => e.babyId === activeBabyId);
+    try {
+      const baby = await dataService.getBaby(activeBabyId);
+      if (!baby) {
+        toast.error('Baby not found');
+        return;
+      }
 
-    const csv = [
-      ['Date', 'Type', 'Subtype', 'Amount', 'Unit', 'Start', 'End', 'Duration (min)', 'Notes'].join(','),
-      ...babyEvents.map(e => [
-        format(new Date(e.startTime), 'yyyy-MM-dd'),
-        e.type,
-        e.subtype || '',
-        e.amount || '',
-        e.unit || '',
-        format(new Date(e.startTime), 'HH:mm'),
-        e.endTime ? format(new Date(e.endTime), 'HH:mm') : '',
-        e.durationMin || '',
-        e.notes ? `"${e.notes.replace(/"/g, '""')}"` : '',
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nestling-export-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast.success('CSV exported');
+      await exportEventsCSV(
+        activeBabyId,
+        baby.name,
+        new Date(csvStartDate),
+        new Date(csvEndDate)
+      );
+      
+      toast.success('CSV exported successfully');
+    } catch (error) {
+      console.error('CSV export error:', error);
+      toast.error('Failed to export CSV');
+    }
   };
 
-  const exportPDF = async () => {
-    if (!activeBabyId) return;
+  const handleExportPDF = async () => {
+    if (!activeBabyId) {
+      toast.error('No baby selected');
+      return;
+    }
 
-    const baby = await dataService.getBaby(activeBabyId);
-    if (!baby) return;
+    try {
+      const baby = await dataService.getBaby(activeBabyId);
+      if (!baby) {
+        toast.error('Baby not found');
+        return;
+      }
 
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const summary = await dataService.getDaySummary(activeBabyId, today);
-
-    const doc = new jsPDF();
-    
-    doc.setFontSize(18);
-    doc.text(`${baby.name}'s Daily Summary`, 20, 20);
-    
-    doc.setFontSize(12);
-    doc.text(`Date: ${format(new Date(), 'MMMM d, yyyy')}`, 20, 35);
-    
-    doc.text(`Feeds: ${summary.feedCount}`, 20, 50);
-    doc.text(`Total: ${summary.totalMl} ml`, 20, 57);
-    
-    doc.text(`Sleep: ${Math.floor(summary.sleepMinutes / 60)}h ${summary.sleepMinutes % 60}m`, 20, 70);
-    
-    doc.text(`Diapers: ${summary.diaperTotal}`, 20, 83);
-    doc.text(`  Wet: ${summary.diaperWet}`, 30, 90);
-    doc.text(`  Dirty: ${summary.diaperDirty}`, 30, 97);
-    
-    doc.save(`nestling-summary-${today}.pdf`);
-    toast.success('PDF exported');
+      await exportDaySummaryPDF(baby, new Date(pdfDate));
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('Failed to export PDF');
+    }
   };
 
-  const handleDeleteAllData = async () => {
+  const handleDeleteClick = () => {
     if (deleteConfirm !== 'DELETE') {
       toast.error('Please type DELETE to confirm');
       return;
     }
+    setIsDeleteDialogOpen(false);
+    setIsFinalDeleteOpen(true);
+  };
 
+  const handleFinalDelete = async () => {
     await dataService.clearAllData();
     localStorage.clear();
     setActiveBabyId(null);
@@ -105,74 +104,138 @@ export default function PrivacyData() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Export Your Data</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Your Data (CSV)
+            </CardTitle>
             <CardDescription>
-              Download your baby's data for your records
+              Download your baby's events in CSV format for a custom date range
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button onClick={exportCSV} variant="outline" className="w-full justify-start">
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="csv-start-date">Start Date</Label>
+                <Input
+                  id="csv-start-date"
+                  type="date"
+                  value={csvStartDate}
+                  onChange={(e) => setCsvStartDate(e.target.value)}
+                  max={csvEndDate}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="csv-end-date">End Date</Label>
+                <Input
+                  id="csv-end-date"
+                  type="date"
+                  value={csvEndDate}
+                  onChange={(e) => setCsvEndDate(e.target.value)}
+                  min={csvStartDate}
+                  max={format(new Date(), 'yyyy-MM-dd')}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <Button onClick={handleExportCSV} className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Export as CSV
+              Export CSV
             </Button>
-            <Button onClick={exportPDF} variant="outline" className="w-full justify-start">
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Export Daily Summary (PDF)
+            </CardTitle>
+            <CardDescription>
+              Generate a PDF summary for any day
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="pdf-date">Select Date</Label>
+              <Input
+                id="pdf-date"
+                type="date"
+                value={pdfDate}
+                onChange={(e) => setPdfDate(e.target.value)}
+                max={format(new Date(), 'yyyy-MM-dd')}
+                className="mt-1"
+              />
+            </div>
+            <Button onClick={handleExportPDF} className="w-full">
               <FileText className="mr-2 h-4 w-4" />
-              Export Today's Summary (PDF)
+              Export PDF
             </Button>
           </CardContent>
         </Card>
 
         <Card className="border-destructive">
           <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete All Data
+            </CardTitle>
             <CardDescription>
-              Permanently delete all data. This action cannot be undone.
+              Permanently delete all your data from this device. This action cannot be undone.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="delete-confirm">Type DELETE to confirm</Label>
+              <Input
+                id="delete-confirm"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder="DELETE"
+                className="mt-1 font-mono"
+              />
+            </div>
             <Button
               variant="destructive"
-              className="w-full"
               onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={deleteConfirm !== 'DELETE'}
+              className="w-full"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete All Data
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground text-center">
+              <strong>Important:</strong> Nestling is a care tracking tool, not medical advice. 
+              Always consult healthcare professionals for medical decisions.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete All Data?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete ALL data including babies, events, and settings.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <Label>Type DELETE to confirm</Label>
-            <Input
-              value={deleteConfirm}
-              onChange={(e) => setDeleteConfirm(e.target.value)}
-              placeholder="DELETE"
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteConfirm('')}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAllData}
-              disabled={deleteConfirm !== 'DELETE'}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete Everything
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteClick}
+        title="Are you sure?"
+        description="You typed DELETE. Click continue to proceed with permanent deletion."
+        confirmText="Continue"
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={isFinalDeleteOpen}
+        onOpenChange={setIsFinalDeleteOpen}
+        onConfirm={handleFinalDelete}
+        title="Final Confirmation"
+        description="This will permanently delete ALL your data from this device. This action CANNOT be undone. Are you absolutely sure?"
+        confirmText="Yes, Delete Everything"
+        variant="destructive"
+      />
     </div>
   );
 }
