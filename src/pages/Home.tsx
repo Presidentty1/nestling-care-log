@@ -1,32 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { format, isBefore, isAfter } from 'date-fns';
-import { Baby, Milk, Moon, Baby as BabyIcon } from 'lucide-react';
-import { SummaryChips } from '@/components/SummaryChips';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MobileNav } from '@/components/MobileNav';
+import { format, differenceInMonths } from 'date-fns';
+import { Baby as BabyType, BabyEvent } from '@/lib/types';
+import { EventType } from '@/types/events';
+import { NapPrediction } from '@/types/events';
+import { BabySwitcher } from '@/components/BabySwitcher';
+import { QuickActions } from '@/components/QuickActions';
+import { EventTimeline } from '@/components/EventTimeline';
 import { EventSheet } from '@/components/sheets/EventSheet';
+import { SummaryChips } from '@/components/SummaryChips';
 import { NapPredictionCard } from '@/components/NapPredictionCard';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { MobileNav } from '@/components/MobileNav';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 import { dataService } from '@/services/dataService';
 import { napService } from '@/services/napService';
-import { analyticsService } from '@/services/analyticsService';
-import { useEventSync } from '@/hooks/useEventSync';
-import { differenceInMonths } from 'date-fns';
-import { EventDialog } from '@/components/EventDialog';
-import { EventTimeline } from '@/components/EventTimeline';
-import { BabySelector } from '@/components/BabySelector';
-import { OfflineIndicator } from '@/components/OfflineIndicator';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { QuickActions } from '@/components/QuickActions';
-import { supabase } from '@/integrations/supabase/client';
-import { useEventLogger } from '@/hooks/useEventLogger';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
-import { predictNextNap } from '@/lib/napPredictor';
-import { Baby as BabyType, BabyEvent, EventType as LibEventType } from '@/lib/types';
-import { EventType } from '@/types/events';
 import { toast } from 'sonner';
 
 export default function Home() {
@@ -34,16 +26,16 @@ export default function Home() {
   const navigate = useNavigate();
   const [babies, setBabies] = useState<BabyType[]>([]);
   const [selectedBaby, setSelectedBaby] = useState<BabyType | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [events, setEvents] = useState<BabyEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<LibEventType>('feed');
-  const [editingEvent, setEditingEvent] = useState<BabyEvent | null>(null);
-  const [napPrediction, setNapPrediction] = useState<any>(null);
+  const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string }>({
+    open: false,
+    type: 'feed',
+  });
+  const [napPrediction, setNapPrediction] = useState<NapPrediction | null>(null);
   const [summary, setSummary] = useState<any>(null);
-  const eventSync = selectedBaby ? useEventSync(selectedBaby.id) : null;
-
-  const { deleteEvent } = useEventLogger();
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   useEffect(() => {
     const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
@@ -98,6 +90,7 @@ export default function Home() {
           : babiesData[0];
         
         setSelectedBaby(selectedBabyData as BabyType);
+        setSelectedBabyId(selectedBabyData.id);
       } else {
         navigate('/onboarding');
       }
@@ -142,24 +135,17 @@ export default function Home() {
     const baby = babies.find((b) => b.id === babyId);
     if (baby) {
       setSelectedBaby(baby);
+      setSelectedBabyId(babyId);
       localStorage.setItem('selected_baby_id', babyId);
     }
   };
 
-  const openModal = (type: EventType | LibEventType) => {
-    setModalType(type);
-    setEditingEvent(null);
-    setIsModalOpen(true);
-    
-    if (!selectedBaby) {
-      toast.info('No baby selected - logging locally only');
-    }
+  const openModal = (type: EventType) => {
+    setModalState({ open: true, type });
   };
 
   const handleEdit = (event: BabyEvent) => {
-    setEditingEvent(event);
-    setModalType(event.type);
-    setIsModalOpen(true);
+    setModalState({ open: true, type: event.type as EventType, editingId: event.id });
   };
 
   const handleDelete = async (eventId: string) => {
@@ -198,6 +184,55 @@ export default function Home() {
     }
   }, [selectedBaby, events]);
 
+  // Load nap prediction
+  useEffect(() => {
+    if (!selectedBaby) return;
+
+    const loadNapPrediction = async () => {
+      try {
+        // Try to get cached prediction first
+        const cached = await dataService.getNapPrediction(selectedBaby.id);
+        if (cached) {
+          setNapPrediction(cached);
+          return;
+        }
+
+        // Calculate fresh prediction if no cache
+        const ageMonths = differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth));
+        const prediction = await napService.recalculate(selectedBaby.id, ageMonths);
+        if (prediction) {
+          setNapPrediction(prediction);
+          await dataService.storeNapPrediction(selectedBaby.id, prediction);
+        }
+      } catch (error) {
+        console.error('Failed to load nap prediction:', error);
+      }
+    };
+
+    loadNapPrediction();
+  }, [selectedBaby, events]);
+
+  const handleFeedbackSubmitted = async () => {
+    // Refresh prediction after feedback
+    if (selectedBaby) {
+      const ageMonths = differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth));
+      const prediction = await napService.recalculate(selectedBaby.id, ageMonths);
+      if (prediction) {
+        setNapPrediction(prediction);
+        await dataService.storeNapPrediction(selectedBaby.id, prediction);
+      }
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-surface pb-20 flex items-center justify-center">
@@ -208,24 +243,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Baby className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">{selectedBaby?.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {selectedBaby && format(new Date(selectedBaby.date_of_birth), 'MMM d, yyyy')}
-              </p>
-            </div>
+      <OfflineIndicator />
+      
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">
+              {selectedBaby?.name || 'Welcome'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {format(new Date(), 'EEEE, MMMM d')}
+            </p>
           </div>
-          <BabySelector
-            babies={babies}
-            selectedBabyId={selectedBaby?.id || null}
-            onSelect={handleBabySelect}
-          />
+          {babies.length > 1 && selectedBaby && (
+            <button
+              onClick={() => setIsSwitcherOpen(true)}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {getInitials(selectedBaby.name)}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          )}
         </div>
 
         <OfflineIndicator />

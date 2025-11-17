@@ -9,6 +9,9 @@ import { DiaperForm } from './DiaperForm';
 import { TummyTimeForm } from './TummyTimeForm';
 import { dataService } from '@/services/dataService';
 import { analyticsService } from '@/services/analyticsService';
+import { napService } from '@/services/napService';
+import { supabase } from '@/integrations/supabase/client';
+import { differenceInMonths } from 'date-fns';
 import { toast } from 'sonner';
 
 interface EventSheetProps {
@@ -111,6 +114,31 @@ export function EventSheet({
         });
         toast.success('Event saved');
       }
+
+      // Recalculate nap prediction after sleep event
+      if (eventType === 'sleep' && data.endTime) {
+        try {
+          // Get baby data to calculate age
+          const { data: baby, error } = await supabase
+            .from('babies')
+            .select('*')
+            .eq('id', babyId)
+            .single();
+          
+          if (!error && baby) {
+            const ageMonths = differenceInMonths(new Date(), new Date(baby.date_of_birth));
+            const prediction = await napService.recalculate(babyId, ageMonths);
+            if (prediction) {
+              await dataService.storeNapPrediction(babyId, prediction);
+              analyticsService.track('nap_prediction_updated', { babyId });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to recalculate nap prediction:', error);
+          // Don't show error to user, this is background work
+        }
+      }
+
       onClose();
     } catch (error) {
       console.error('Failed to save event:', error);
