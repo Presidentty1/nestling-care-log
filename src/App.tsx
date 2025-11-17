@@ -4,40 +4,60 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { queryClient } from "@/lib/queryClient";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { reminderService } from '@/services/reminderService';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { useAuth } from '@/hooks/useAuth';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+
+// Core pages (eager loaded)
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
 import History from "./pages/History";
-import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
 import ManageBabiesPage from "./pages/Settings/ManageBabies";
 import NotificationSettingsPage from "./pages/Settings/NotificationSettings";
 import ManageCaregiversPage from "./pages/Settings/ManageCaregivers";
 import PrivacyDataPage from "./pages/Settings/PrivacyData";
-import GrowthTracker from "./pages/GrowthTracker";
-import HealthRecords from "./pages/HealthRecords";
-import Milestones from "./pages/Milestones";
-import PhotoGallery from "./pages/PhotoGallery";
-import CryInsights from "./pages/CryInsights";
-import AIAssistant from "./pages/AIAssistant";
-import Analytics from "./pages/Analytics";
-import ShortcutsSettings from "./pages/ShortcutsSettings";
-import SleepTraining from "./pages/SleepTraining";
-import ActivityFeed from "./pages/ActivityFeed";
-import Predictions from "./pages/Predictions";
-import Journal from "./pages/Journal";
-import JournalEntry from "./pages/JournalEntry";
-import NewSleepTrainingSession from "./pages/NewSleepTrainingSession";
-import Referrals from "./pages/Referrals";
-import Accessibility from "./pages/Accessibility";
-import Feedback from "./pages/Feedback";
-import PrivacyCenter from "./pages/PrivacyCenter";
 import NotFound from "./pages/NotFound";
+
+// Heavy pages (lazy loaded for better performance)
+const Labs = lazy(() => import("./pages/Labs"));
+const GrowthTracker = lazy(() => import("./pages/GrowthTracker"));
+const HealthRecords = lazy(() => import("./pages/HealthRecords"));
+const Milestones = lazy(() => import("./pages/Milestones"));
+const PhotoGallery = lazy(() => import("./pages/PhotoGallery"));
+const CryInsights = lazy(() => import("./pages/CryInsights"));
+const AIAssistant = lazy(() => import("./pages/AIAssistant"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const ShortcutsSettings = lazy(() => import("./pages/ShortcutsSettings"));
+const SleepTraining = lazy(() => import("./pages/SleepTraining"));
+const ActivityFeed = lazy(() => import("./pages/ActivityFeed"));
+const Predictions = lazy(() => import("./pages/Predictions"));
+const Journal = lazy(() => import("./pages/Journal"));
+const JournalEntry = lazy(() => import("./pages/JournalEntry"));
+const NewSleepTrainingSession = lazy(() => import("./pages/NewSleepTrainingSession"));
+const Referrals = lazy(() => import("./pages/Referrals"));
+const Accessibility = lazy(() => import("./pages/Accessibility"));
+const Feedback = lazy(() => import("./pages/Feedback"));
+const PrivacyCenter = lazy(() => import("./pages/PrivacyCenter"));
+
+// Suspense wrapper for lazy loaded routes
+function SuspenseWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen animate-fade-in">
+          <LoadingSpinner />
+        </div>
+      }
+    >
+      {children}
+    </Suspense>
+  );
+}
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -81,31 +101,33 @@ function AppContent() {
         <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
         <Route path="/home" element={<AuthGuard><Home /></AuthGuard>} />
         <Route path="/history" element={<AuthGuard><History /></AuthGuard>} />
-        <Route path="/labs" element={<Labs />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/babies" element={<ManageBabiesPage />} />
         <Route path="/settings/caregivers" element={<ManageCaregiversPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/privacy" element={<PrivacyDataPage />} />
-        <Route path="/growth" element={<GrowthTracker />} />
-        <Route path="/health" element={<HealthRecords />} />
-        <Route path="/milestones" element={<Milestones />} />
-        <Route path="/photos" element={<PhotoGallery />} />
-        <Route path="/cry-insights" element={<CryInsights />} />
-        <Route path="/ai-assistant" element={<AIAssistant />} />
-        <Route path="/analytics" element={<AuthGuard><Analytics /></AuthGuard>} />
-        <Route path="/settings/shortcuts" element={<ShortcutsSettings />} />
-        <Route path="/sleep-training" element={<SleepTraining />} />
-        <Route path="/activity-feed" element={<ActivityFeed />} />
-        <Route path="/predictions" element={<Predictions />} />
-        <Route path="/journal" element={<Journal />} />
-        <Route path="/journal/new" element={<JournalEntry />} />
-        <Route path="/journal/entry/:id" element={<JournalEntry />} />
-        <Route path="/sleep-training/new-session" element={<NewSleepTrainingSession />} />
-        <Route path="/referrals" element={<Referrals />} />
-        <Route path="/accessibility" element={<Accessibility />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/privacy" element={<PrivacyCenter />} />
+        <Route path="/settings/shortcuts" element={<SuspenseWrapper><ShortcutsSettings /></SuspenseWrapper>} />
+        
+        {/* Lazy loaded routes for better performance */}
+        <Route path="/labs" element={<SuspenseWrapper><Labs /></SuspenseWrapper>} />
+        <Route path="/growth" element={<SuspenseWrapper><AuthGuard><GrowthTracker /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/health" element={<SuspenseWrapper><AuthGuard><HealthRecords /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/milestones" element={<SuspenseWrapper><AuthGuard><Milestones /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/photos" element={<SuspenseWrapper><AuthGuard><PhotoGallery /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/cry-insights" element={<SuspenseWrapper><AuthGuard><CryInsights /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/ai-assistant" element={<SuspenseWrapper><AuthGuard><AIAssistant /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/analytics" element={<SuspenseWrapper><AuthGuard><Analytics /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/sleep-training" element={<SuspenseWrapper><AuthGuard><SleepTraining /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/sleep-training/new-session" element={<SuspenseWrapper><AuthGuard><NewSleepTrainingSession /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/activity-feed" element={<SuspenseWrapper><AuthGuard><ActivityFeed /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/predictions" element={<SuspenseWrapper><AuthGuard><Predictions /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/journal" element={<SuspenseWrapper><AuthGuard><Journal /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/journal/new" element={<SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/journal/entry/:id" element={<SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/referrals" element={<SuspenseWrapper><Referrals /></SuspenseWrapper>} />
+        <Route path="/accessibility" element={<SuspenseWrapper><Accessibility /></SuspenseWrapper>} />
+        <Route path="/feedback" element={<SuspenseWrapper><Feedback /></SuspenseWrapper>} />
+        <Route path="/privacy" element={<SuspenseWrapper><PrivacyCenter /></SuspenseWrapper>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

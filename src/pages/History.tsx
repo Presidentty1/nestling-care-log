@@ -61,7 +61,7 @@ export default function History() {
       setSummary(totals);
     } catch (error) {
       console.error('Failed to load day data:', error);
-      toast.error('Failed to load events');
+      toast.error("Couldn't load events. Try again?");
     } finally {
       setLoading(false);
     }
@@ -70,10 +70,10 @@ export default function History() {
   const handleDelete = async (eventId: string) => {
     try {
       await eventsService.deleteEvent(eventId);
-      toast.success('Event deleted');
+      toast.success('Removed!');
       loadDayData();
     } catch (error) {
-      toast.error('Failed to delete event');
+      toast.error("Couldn't remove that. Try again?");
     }
   };
 
@@ -84,7 +84,7 @@ export default function History() {
           <EmptyState
             icon={CalendarDays}
             title="No Baby Selected"
-            description="Please select or create a baby to view history"
+            description="Select or add a baby to see their history"
             action={{ label: 'Go to Home', onClick: () => window.location.href = '/home' }}
           />
         </div>

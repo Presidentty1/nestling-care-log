@@ -97,7 +97,7 @@ export default function Home() {
       setLoading(false);
     } catch (error) {
       console.error('Failed to load babies:', error);
-      toast.error('Failed to load babies');
+      toast.error("Couldn't load your babies. Check your connection?");
       setLoading(false);
     }
   };
