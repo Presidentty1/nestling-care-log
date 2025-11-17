@@ -38,27 +38,32 @@ serve(async (req) => {
     const dateOfBirth = body.dateOfBirth || format(subDays(new Date(), 60), 'yyyy-MM-dd');
     const timezone = body.timezone || 'America/New_York';
 
-    // Check if user already has a family membership (idempotent)
-    const { data: existingMembership } = await supabase
+    // Check if user already has at least one family membership (idempotent)
+    const { data: memberships, error: membershipError } = await supabase
       .from('family_members')
-      .select('family_id')
+      .select('family_id, created_at')
       .eq('user_id', user.id)
-      .maybeSingle();
+      .order('created_at', { ascending: true });
 
-    if (existingMembership) {
-      console.log('User already has family:', existingMembership.family_id);
+    // If any memberships exist, pick the earliest family and ensure a baby exists
+
+    const hasMembership = memberships && memberships.length > 0;
+
+    if (hasMembership) {
+      const familyId = memberships![0].family_id;
+      console.log('User already has family:', familyId);
       
       // Get the first baby in this family
       const { data: babies } = await supabase
         .from('babies')
         .select('id')
-        .eq('family_id', existingMembership.family_id)
+        .eq('family_id', familyId)
         .limit(1);
 
       if (babies && babies.length > 0) {
         return new Response(
           JSON.stringify({ 
-            familyId: existingMembership.family_id, 
+            familyId: familyId, 
             babyId: babies[0].id,
             existed: true 
           }),
@@ -71,7 +76,7 @@ serve(async (req) => {
       const { data: baby, error: babyError } = await supabase
         .from('babies')
         .insert({
-          family_id: existingMembership.family_id,
+          family_id: familyId,
           name: babyName,
           date_of_birth: dateOfBirth,
           timezone: timezone
@@ -88,7 +93,7 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ 
-          familyId: existingMembership.family_id, 
+          familyId: familyId, 
           babyId: baby.id,
           existed: false
         }),
