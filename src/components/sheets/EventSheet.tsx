@@ -121,7 +121,7 @@ export function EventSheet({
   };
   
   return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
+    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DrawerContent 
         ref={sheetRef}
         className="rounded-t-[24px] max-h-[90vh]"
