@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { useAppStore } from '@/store/appStore';
 import { format, subDays } from 'date-fns';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useOnboarding() {
   const { user, loading: authLoading } = useAuth();
@@ -30,16 +31,38 @@ export function useOnboarding() {
       const families = await familyService.getUserFamilies();
       
       if (families.length === 0) {
-        // First time user - auto-create family + demo baby
-        const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd'); // 2 months old
-        const { baby } = await familyService.createFamilyWithBaby(
-          'My Family',
-          'Demo Baby',
-          demoBirthdate
-        );
+        // First time user - call backend to bootstrap
+        const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         
-        setActiveBabyId(baby.id);
-        localStorage.setItem('activeBabyId', baby.id);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast.error('Authentication session not found');
+          setChecking(false);
+          return;
+        }
+
+        const response = await supabase.functions.invoke('bootstrap-user', {
+          body: {
+            babyName: 'Demo Baby',
+            dateOfBirth: demoBirthdate,
+            timezone: timezone
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.error) {
+          console.error('Bootstrap error:', response.error);
+          toast.error('Could not complete setup. Please finish onboarding below.');
+          setChecking(false);
+          return;
+        }
+
+        const { babyId } = response.data;
+        setActiveBabyId(babyId);
+        localStorage.setItem('activeBabyId', babyId);
         toast.success('Welcome to Nestling! Your demo profile is ready.');
         navigate('/home');
       } else {

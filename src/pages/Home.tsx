@@ -37,11 +37,9 @@ export default function Home() {
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
+    if (user) {
+      loadBabies();
     }
-    loadBabies();
   }, [user]);
 
   useEffect(() => {
