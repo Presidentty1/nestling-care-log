@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Milk, TrendingUp, Calendar } from 'lucide-react';
+import { dataService } from '@/services/dataService';
+import { subDays } from 'date-fns';
 
 interface FeedingAnalysisProps {
   babyId: string;
@@ -14,18 +15,16 @@ export function FeedingAnalysis({ babyId, dateRange }: FeedingAnalysisProps) {
     queryKey: ['feeding-analysis', babyId, dateRange],
     queryFn: async () => {
       const daysAgo = dateRange === 'week' ? 7 : dateRange === 'month' ? 30 : 365;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - daysAgo);
+      const startDate = subDays(new Date(), daysAgo);
+      const endDate = new Date();
 
-      const { data } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', babyId)
-        .eq('type', 'feed')
-        .gte('start_time', startDate.toISOString())
-        .order('start_time', { ascending: true });
+      const allEvents = await dataService.listEventsRange(
+        babyId,
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
 
-      return data || [];
+      return allEvents.filter(e => e.type === 'feed');
     },
   });
 
@@ -55,7 +54,7 @@ export function FeedingAnalysis({ babyId, dateRange }: FeedingAnalysisProps) {
   // Daily chart data
   const dailyData: { [key: string]: number } = {};
   feedData?.forEach(feed => {
-    const date = new Date(feed.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const date = new Date(feed.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     dailyData[date] = (dailyData[date] || 0) + 1;
   });
 

@@ -5,7 +5,7 @@ import { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { BabySelector } from '@/components/BabySelector';
+import { BabySwitcher } from '@/components/BabySwitcher';
 import { QuickQuestions } from '@/components/QuickQuestions';
 import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { MobileNav } from '@/components/MobileNav';
@@ -15,9 +15,10 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -38,15 +39,18 @@ export default function AIAssistant() {
     },
   });
 
+  if (babies && babies.length > 0 && !selectedBabyId) {
+    setSelectedBabyId(babies[0].id);
+    localStorage.setItem('selected_baby_id', babies[0].id);
+  }
+
+  const selectedBaby = babies?.find(b => b.id === selectedBabyId) || null;
+
   const { messages, isLoading, sendMessage } = useAIChat(selectedBaby);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  if (babies && babies.length > 0 && !selectedBaby) {
-    setSelectedBaby(babies[0]);
-  }
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -71,15 +75,15 @@ export default function AIAssistant() {
               <p className="text-sm text-muted-foreground">Ask questions about baby care</p>
             </div>
           </div>
-          {babies && babies.length > 0 && (
-            <BabySelector
-              babies={babies}
-              selectedBabyId={selectedBaby?.id || null}
-              onSelect={(babyId) => {
-                const baby = babies.find(b => b.id === babyId);
-                if (baby) setSelectedBaby(baby);
-              }}
-            />
+          {babies && babies.length > 1 && (
+            <Button
+              onClick={() => setIsSwitcherOpen(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              {selectedBaby?.name}
+            </Button>
           )}
         </div>
       </div>

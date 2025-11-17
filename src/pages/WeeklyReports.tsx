@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { BabySelector } from '@/components/BabySelector';
+import { BabySwitcher } from '@/components/BabySwitcher';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ export default function WeeklyReports() {
   const queryClient = useQueryClient();
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const weekStart = startOfWeek(subWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
 

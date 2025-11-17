@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Moon, TrendingUp, Clock } from 'lucide-react';
+import { dataService } from '@/services/dataService';
+import { subDays } from 'date-fns';
 
 interface SleepAnalysisProps {
   babyId: string;
@@ -14,18 +15,16 @@ export function SleepAnalysis({ babyId, dateRange }: SleepAnalysisProps) {
     queryKey: ['sleep-analysis', babyId, dateRange],
     queryFn: async () => {
       const daysAgo = dateRange === 'week' ? 7 : dateRange === 'month' ? 30 : 365;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - daysAgo);
+      const startDate = subDays(new Date(), daysAgo);
+      const endDate = new Date();
 
-      const { data } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', babyId)
-        .eq('type', 'sleep')
-        .gte('start_time', startDate.toISOString())
-        .order('start_time', { ascending: true });
+      const allEvents = await dataService.listEventsRange(
+        babyId,
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
 
-      return data || [];
+      return allEvents.filter(e => e.type === 'sleep');
     },
   });
 
@@ -34,9 +33,9 @@ export function SleepAnalysis({ babyId, dateRange }: SleepAnalysisProps) {
   }
 
   // Calculate metrics
-  const completedSleeps = sleepData?.filter(s => s.end_time) || [];
+  const completedSleeps = sleepData?.filter(s => s.endTime) || [];
   const totalSleepHours = completedSleeps.reduce((acc, sleep) => {
-    const duration = (new Date(sleep.end_time).getTime() - new Date(sleep.start_time).getTime()) / (1000 * 60 * 60);
+    const duration = (new Date(sleep.endTime).getTime() - new Date(sleep.startTime).getTime()) / (1000 * 60 * 60);
     return acc + duration;
   }, 0);
   const avgSleepDuration = completedSleeps.length > 0 ? totalSleepHours / completedSleeps.length : 0;
@@ -44,8 +43,8 @@ export function SleepAnalysis({ babyId, dateRange }: SleepAnalysisProps) {
 
   // Prepare chart data
   const chartData = completedSleeps.map(sleep => ({
-    date: new Date(sleep.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    hours: ((new Date(sleep.end_time).getTime() - new Date(sleep.start_time).getTime()) / (1000 * 60 * 60)).toFixed(1),
+    date: new Date(sleep.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    hours: ((new Date(sleep.endTime).getTime() - new Date(sleep.startTime).getTime()) / (1000 * 60 * 60)).toFixed(1),
   }));
 
   return (

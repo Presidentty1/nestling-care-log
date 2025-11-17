@@ -5,7 +5,7 @@ import { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BabySelector } from '@/components/BabySelector';
+import { BabySwitcher } from '@/components/BabySwitcher';
 import { CryTimer } from '@/components/CryTimer';
 import { PatternInsights } from '@/components/PatternInsights';
 import { MobileNav } from '@/components/MobileNav';
@@ -19,9 +19,10 @@ export default function CryInsights() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('timer');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],

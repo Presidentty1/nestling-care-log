@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { dataService } from '@/services/dataService';
+import { subDays } from 'date-fns';
 
 interface PatternVisualizationProps {
   babyId: string;
@@ -14,17 +15,14 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
     queryKey: ['pattern-events', babyId, dateRange],
     queryFn: async () => {
       const daysAgo = dateRange === 'week' ? 7 : dateRange === 'month' ? 30 : 365;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - daysAgo);
+      const startDate = subDays(new Date(), daysAgo);
+      const endDate = new Date();
 
-      const { data } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', babyId)
-        .gte('start_time', startDate.toISOString())
-        .order('start_time', { ascending: true });
-
-      return data || [];
+      return dataService.listEventsRange(
+        babyId,
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
     },
   });
 
@@ -39,16 +37,16 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
     const patterns: any[] = [];
 
     // Sleep pattern analysis
-    const sleeps = events.filter(e => e.type === 'sleep' && e.end_time);
+    const sleeps = events.filter(e => e.type === 'sleep' && e.endTime);
     if (sleeps.length > 3) {
       const nightSleeps = sleeps.filter(s => {
-        const hour = new Date(s.start_time).getHours();
+        const hour = new Date(s.startTime).getHours();
         return hour >= 19 || hour <= 6;
       });
 
       if (nightSleeps.length > 0) {
         const avgDuration = nightSleeps.reduce((acc, s) => {
-          const duration = (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
+          const duration = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / (1000 * 60 * 60);
           return acc + duration;
         }, 0) / nightSleeps.length;
 
@@ -67,7 +65,7 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
     if (feeds.length > 5) {
       const intervals: number[] = [];
       for (let i = 1; i < feeds.length; i++) {
-        const interval = (new Date(feeds[i].start_time).getTime() - new Date(feeds[i-1].start_time).getTime()) / (1000 * 60 * 60);
+        const interval = (new Date(feeds[i].startTime).getTime() - new Date(feeds[i-1].startTime).getTime()) / (1000 * 60 * 60);
         intervals.push(interval);
       }
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
@@ -83,12 +81,12 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
 
     // Activity pattern
     const morningEvents = events.filter(e => {
-      const hour = new Date(e.start_time).getHours();
+      const hour = new Date(e.startTime).getHours();
       return hour >= 6 && hour < 12;
     });
 
     const afternoonEvents = events.filter(e => {
-      const hour = new Date(e.start_time).getHours();
+      const hour = new Date(e.startTime).getHours();
       return hour >= 12 && hour < 18;
     });
 
