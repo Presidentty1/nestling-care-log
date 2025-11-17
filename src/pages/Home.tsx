@@ -135,7 +135,7 @@ export default function Home() {
     }
   };
 
-  const openModal = (type: EventType) => {
+  const openModal = (type: EventType | LibEventType) => {
     setModalType(type);
     setEditingEvent(null);
     setIsModalOpen(true);
