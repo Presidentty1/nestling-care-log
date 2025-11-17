@@ -1,13 +1,13 @@
 import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Baby } from 'lucide-react';
+import { Baby, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 export default function Auth() {
@@ -15,14 +15,22 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { setActiveBabyId } = useAppStore();
 
+  // Show spinner while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   // Redirect if already logged in
   if (user) {
-    navigate('/home');
-    return null;
+    return <Navigate to="/home" replace />;
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
