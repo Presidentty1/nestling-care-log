@@ -2,6 +2,7 @@ import { EventRecord } from '@/services/eventsService';
 import { TimelineRow } from './TimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimelineListProps {
   events: EventRecord[];
@@ -14,8 +15,8 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
     return (
       <EmptyState
         icon={Calendar}
-        title="No Events Yet"
-        description="Start logging your baby's activities using the quick actions above."
+        title="Your day is off to a quiet start ✨"
+        description="Tap + below to log your first event"
       />
     );
   }
@@ -25,14 +26,27 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
 
   return (
     <div className="space-y-2">
-      {sortedEvents.map((event) => (
-        <TimelineRow
-          key={event.id}
-          event={event}
-          onEdit={() => onEdit(event)}
-          onDelete={() => onDelete(event.id)}
-        />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {sortedEvents.map((event, i) => (
+          <motion.div
+            key={event.id}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ 
+              duration: 0.3, 
+              delay: i * 0.05,
+              ease: "easeOut" 
+            }}
+          >
+            <TimelineRow
+              event={event}
+              onEdit={() => onEdit(event)}
+              onDelete={() => onDelete(event.id)}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

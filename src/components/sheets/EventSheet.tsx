@@ -9,6 +9,8 @@ import { DiaperForm } from './DiaperForm';
 import { TummyTimeForm } from './TummyTimeForm';
 import { eventsService, CreateEventData } from '@/services/eventsService';
 import { toast } from 'sonner';
+import { hapticFeedback } from '@/lib/haptics';
+import FocusTrap from 'focus-trap-react';
 
 interface EventSheetProps {
   isOpen: boolean;
@@ -76,7 +78,7 @@ export function EventSheet({
       onClose();
     } catch (error) {
       console.error('Failed to save event:', error);
-      toast.error('We couldn\'t save this entry to the server. Please try again.');
+      toast.error('We couldn\'t save this entry. Check your connection and try again?');
     } finally {
       setIsSaving(false);
     }
@@ -128,34 +130,45 @@ export function EventSheet({
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent ref={sheetRef}>
-        <DrawerHeader className="flex items-center justify-between">
-          <DrawerTitle>{title}</DrawerTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </DrawerHeader>
-        
-        <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
-          {renderForm()}
-        </div>
-        
-        <DrawerFooter>
-          <Button
-            onClick={() => {
-              const form = sheetRef.current?.querySelector('form');
-              form?.requestSubmit();
-            }}
-            disabled={!isValid || isSaving}
-            className="w-full"
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
-        </DrawerFooter>
+        <FocusTrap active={isOpen}>
+          <div>
+            {/* Drag handle */}
+            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mt-2 mb-4" />
+            
+            <DrawerHeader className="flex items-center justify-between">
+              <DrawerTitle>{title}</DrawerTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  hapticFeedback.light();
+                  onClose();
+                }}
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DrawerHeader>
+            
+            <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
+              {renderForm()}
+            </div>
+            
+            <DrawerFooter className="sticky bottom-0 bg-background border-t pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <Button
+                onClick={() => {
+                  hapticFeedback.medium();
+                  const form = sheetRef.current?.querySelector('form');
+                  form?.requestSubmit();
+                }}
+                disabled={!isValid || isSaving}
+                className="w-full"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
+            </DrawerFooter>
+          </div>
+        </FocusTrap>
       </DrawerContent>
     </Drawer>
   );

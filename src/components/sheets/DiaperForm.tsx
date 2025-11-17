@@ -4,6 +4,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { CreateEventData, eventsService } from '@/services/eventsService';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
+import { Circle, Square, Droplet, Grid3x3, Waves } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { hapticFeedback } from '@/lib/haptics';
 
 interface DiaperFormProps {
   babyId: string;
@@ -96,22 +99,148 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit }: 
       {showColorTexture && (
         <>
           <div>
-            <Label htmlFor="color">Color (optional)</Label>
-            <Input
-              id="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              placeholder="e.g., yellow, green"
-            />
+            <Label>Color (optional)</Label>
+            <div className="grid grid-cols-5 gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setColor('yellow');
+                }}
+                className={cn(
+                  "h-12 w-12 rounded-full bg-yellow-400 transition-all min-h-[44px] min-w-[44px]",
+                  color === 'yellow' && "ring-2 ring-primary ring-offset-2"
+                )}
+                aria-label="Yellow"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setColor('green');
+                }}
+                className={cn(
+                  "h-12 w-12 rounded-full bg-green-500 transition-all min-h-[44px] min-w-[44px]",
+                  color === 'green' && "ring-2 ring-primary ring-offset-2"
+                )}
+                aria-label="Green"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setColor('brown');
+                }}
+                className={cn(
+                  "h-12 w-12 rounded-full bg-amber-700 transition-all min-h-[44px] min-w-[44px]",
+                  color === 'brown' && "ring-2 ring-primary ring-offset-2"
+                )}
+                aria-label="Brown"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setColor('black');
+                }}
+                className={cn(
+                  "h-12 w-12 rounded-full bg-gray-900 transition-all min-h-[44px] min-w-[44px]",
+                  color === 'black' && "ring-2 ring-primary ring-offset-2"
+                )}
+                aria-label="Black"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setColor('red');
+                }}
+                className={cn(
+                  "h-12 w-12 rounded-full bg-red-500 transition-all min-h-[44px] min-w-[44px]",
+                  color === 'red' && "ring-2 ring-primary ring-offset-2"
+                )}
+                aria-label="Red"
+              />
+            </div>
+            {color === 'red' && (
+              <p className="text-sm text-destructive mt-2">If you see red, contact your pediatrician</p>
+            )}
           </div>
+
           <div>
-            <Label htmlFor="texture">Texture (optional)</Label>
-            <Input
-              id="texture"
-              value={texture}
-              onChange={(e) => setTexture(e.target.value)}
-              placeholder="e.g., soft, runny"
-            />
+            <Label>Texture (optional)</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setTexture('soft');
+                }}
+                className={cn(
+                  "h-12 px-3 rounded-lg border-2 flex items-center gap-2 justify-center transition-all min-h-[44px]",
+                  texture === 'soft' ? "border-primary bg-primary/10" : "border-border"
+                )}
+              >
+                <Circle className="h-4 w-4" />
+                <span className="text-sm">Soft</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setTexture('firm');
+                }}
+                className={cn(
+                  "h-12 px-3 rounded-lg border-2 flex items-center gap-2 justify-center transition-all min-h-[44px]",
+                  texture === 'firm' ? "border-primary bg-primary/10" : "border-border"
+                )}
+              >
+                <Square className="h-4 w-4" />
+                <span className="text-sm">Firm</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setTexture('runny');
+                }}
+                className={cn(
+                  "h-12 px-3 rounded-lg border-2 flex items-center gap-2 justify-center transition-all min-h-[44px]",
+                  texture === 'runny' ? "border-primary bg-primary/10" : "border-border"
+                )}
+              >
+                <Droplet className="h-4 w-4" />
+                <span className="text-sm">Runny</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setTexture('seedy');
+                }}
+                className={cn(
+                  "h-12 px-3 rounded-lg border-2 flex items-center gap-2 justify-center transition-all min-h-[44px]",
+                  texture === 'seedy' ? "border-primary bg-primary/10" : "border-border"
+                )}
+              >
+                <Grid3x3 className="h-4 w-4" />
+                <span className="text-sm">Seedy</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  hapticFeedback.light();
+                  setTexture('mucous');
+                }}
+                className={cn(
+                  "h-12 px-3 rounded-lg border-2 flex items-center gap-2 justify-center transition-all min-h-[44px] col-span-2",
+                  texture === 'mucous' ? "border-primary bg-primary/10" : "border-border"
+                )}
+              >
+                <Waves className="h-4 w-4" />
+                <span className="text-sm">Mucous</span>
+              </button>
+            </div>
           </div>
         </>
       )}
