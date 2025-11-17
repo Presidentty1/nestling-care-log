@@ -73,19 +73,26 @@ export default function NotificationSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="max-w-2xl mx-auto p-4 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/settings')}
+            className="h-11 w-11"
+          >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-[28px] leading-[34px] font-semibold">Notifications</h1>
         </div>
 
-        <Card>
+        {/* Permission Status */}
+        <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Permission</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-[17px] font-semibold">Permission</CardTitle>
+            <CardDescription className="text-[15px]">
               {hasPermission
                 ? 'Notifications are enabled'
                 : 'Enable notifications to get reminders'}
@@ -94,128 +101,146 @@ export default function NotificationSettingsPage() {
           <CardContent className="space-y-3">
             {!hasPermission && (
               <>
-                <div className="rounded-lg bg-muted p-3 text-sm">
-                  <p className="text-muted-foreground">
-                    Notifications are currently in-app only. Enable browser notifications for alerts 
-                    when the app is in the background.
+                <div className="rounded-[12px] bg-primary/5 border border-primary/10 p-4">
+                  <p className="text-[15px] text-foreground/80">
+                    Enable browser notifications for reminders about feedings, naps, and diaper changes.
                   </p>
                 </div>
-                <Button onClick={requestPermission} className="w-full">
-                  Enable Browser Notifications
+                <Button 
+                  onClick={requestPermission} 
+                  className="w-full h-12 text-[17px] rounded-[14px]"
+                >
+                  Enable Notifications
                 </Button>
               </>
             )}
             {hasPermission && (
-              <Button onClick={testNotification} variant="outline" className="w-full">
+              <Button 
+                onClick={testNotification} 
+                variant="outline" 
+                className="w-full h-12 text-[17px] rounded-[14px]"
+              >
                 Send Test Notification
               </Button>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Feed Reminders */}
+        <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Feed Reminders</CardTitle>
+            <CardTitle className="text-[17px] font-semibold">Feed Reminders</CardTitle>
+            <CardDescription className="text-[15px]">Get reminded when it's time to feed</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Enable reminders</Label>
+            <div className="flex items-center justify-between min-h-[44px]">
+              <Label htmlFor="feed-enabled" className="text-[17px]">Enable Reminders</Label>
               <Switch
+                id="feed-enabled"
                 checked={settings.feedReminderEnabled}
-                onCheckedChange={(checked) =>
-                  updateSettings({ feedReminderEnabled: checked })
-                }
+                onCheckedChange={(checked) => updateSettings({ feedReminderEnabled: checked })}
               />
             </div>
             {settings.feedReminderEnabled && (
-              <div>
-                <Label>Hours since last feed</Label>
+              <div className="space-y-2 pt-2 border-t">
+                <Label htmlFor="feed-hours" className="text-[15px] font-semibold">
+                  Remind every (hours)
+                </Label>
                 <Input
+                  id="feed-hours"
                   type="number"
-                  min={1}
-                  max={12}
+                  min="1"
+                  max="12"
                   value={settings.feedReminderHours}
                   onChange={(e) =>
-                    updateSettings({ feedReminderHours: parseInt(e.target.value) })
+                    updateSettings({ feedReminderHours: parseInt(e.target.value) || 3 })
                   }
+                  className="h-12 text-[17px] rounded-[12px]"
                 />
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Nap Window Alerts */}
+        <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Nap Window Alerts</CardTitle>
+            <CardTitle className="text-[17px] font-semibold">Nap Window Alerts</CardTitle>
+            <CardDescription className="text-[15px]">Get notified of predicted nap times</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <Label>Alert when nap window starts</Label>
+            <div className="flex items-center justify-between min-h-[44px]">
+              <Label htmlFor="nap-enabled" className="text-[17px]">Enable Alerts</Label>
               <Switch
+                id="nap-enabled"
                 checked={settings.napWindowAlertEnabled}
-                onCheckedChange={(checked) =>
-                  updateSettings({ napWindowAlertEnabled: checked })
-                }
+                onCheckedChange={(checked) => updateSettings({ napWindowAlertEnabled: checked })}
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Diaper Reminders */}
+        <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Diaper Reminders</CardTitle>
+            <CardTitle className="text-[17px] font-semibold">Diaper Reminders</CardTitle>
+            <CardDescription className="text-[15px]">Get reminded to check diapers</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Enable reminders</Label>
+            <div className="flex items-center justify-between min-h-[44px]">
+              <Label htmlFor="diaper-enabled" className="text-[17px]">Enable Reminders</Label>
               <Switch
+                id="diaper-enabled"
                 checked={settings.diaperReminderEnabled}
-                onCheckedChange={(checked) =>
-                  updateSettings({ diaperReminderEnabled: checked })
-                }
+                onCheckedChange={(checked) => updateSettings({ diaperReminderEnabled: checked })}
               />
             </div>
             {settings.diaperReminderEnabled && (
-              <div>
-                <Label>Hours since last change</Label>
+              <div className="space-y-2 pt-2 border-t">
+                <Label htmlFor="diaper-hours" className="text-[15px] font-semibold">
+                  Remind every (hours)
+                </Label>
                 <Input
+                  id="diaper-hours"
                   type="number"
-                  min={1}
-                  max={6}
+                  min="1"
+                  max="12"
                   value={settings.diaperReminderHours}
                   onChange={(e) =>
-                    updateSettings({ diaperReminderHours: parseInt(e.target.value) })
+                    updateSettings({ diaperReminderHours: parseInt(e.target.value) || 3 })
                   }
+                  className="h-12 text-[17px] rounded-[12px]"
                 />
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Quiet Hours */}
+        <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Quiet Hours</CardTitle>
-            <CardDescription>No notifications during these hours</CardDescription>
+            <CardTitle className="text-[17px] font-semibold">Quiet Hours</CardTitle>
+            <CardDescription className="text-[15px]">No notifications during these times</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Start time</Label>
+            <div className="space-y-2">
+              <Label htmlFor="quiet-start" className="text-[15px] font-semibold">Start Time</Label>
               <Input
+                id="quiet-start"
                 type="time"
                 value={settings.quietHoursStart}
-                onChange={(e) =>
-                  updateSettings({ quietHoursStart: e.target.value })
-                }
+                onChange={(e) => updateSettings({ quietHoursStart: e.target.value })}
+                className="h-12 text-[17px] rounded-[12px]"
               />
             </div>
-            <div>
-              <Label>End time</Label>
+            <div className="space-y-2">
+              <Label htmlFor="quiet-end" className="text-[15px] font-semibold">End Time</Label>
               <Input
+                id="quiet-end"
                 type="time"
                 value={settings.quietHoursEnd}
-                onChange={(e) =>
-                  updateSettings({ quietHoursEnd: e.target.value })
-                }
+                onChange={(e) => updateSettings({ quietHoursEnd: e.target.value })}
+                className="h-12 text-[17px] rounded-[12px]"
               />
             </div>
           </CardContent>
