@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { TimerState } from '@/types/events';
 import { dataService } from '@/services/dataService';
 import { getElapsedSeconds } from '@/utils/time';
+import { toast } from 'sonner';
 
 export function useTimerState(babyId: string) {
   const [state, setState] = useState<TimerState>({
@@ -35,7 +36,20 @@ export function useTimerState(babyId: string) {
     if (persisted && persisted.status === 'running') {
       setState(persisted);
       if (persisted.startTime) {
-        setElapsedSeconds(getElapsedSeconds(persisted.startTime));
+        const elapsed = getElapsedSeconds(persisted.startTime);
+        setElapsedSeconds(elapsed);
+        
+        // Show restoration toast
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const timeStr = minutes > 0 
+          ? `${minutes}m ${seconds}s` 
+          : `${seconds}s`;
+        
+        toast.success(`Timer resumed from ${timeStr}`, {
+          description: 'Your timer was running and has been restored.',
+          duration: 4000,
+        });
       }
     }
   };

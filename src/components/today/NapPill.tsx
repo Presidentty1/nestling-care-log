@@ -69,7 +69,7 @@ export function NapPill({ prediction, babyId, onFeedbackSubmitted, className }: 
           aria-label="Nap window prediction"
         >
           <Moon className="h-4 w-4" />
-          <span className="text-sm font-medium">
+          <span className="text-body font-medium">
             Next nap window {format(windowStart, 'h:mm')}–{format(windowEnd, 'h:mm a')}
           </span>
           {isInWindow && (
@@ -88,10 +88,10 @@ export function NapPill({ prediction, babyId, onFeedbackSubmitted, className }: 
                 {format(windowStart, 'h:mm a')} - {format(windowEnd, 'h:mm a')}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-caption text-muted-foreground">
               {prediction.reason}
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-caption text-muted-foreground mt-2">
               {Math.round(prediction.confidence * 100)}% confidence
             </p>
           </div>

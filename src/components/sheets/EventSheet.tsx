@@ -136,7 +136,7 @@ export function EventSheet({
             <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mt-2 mb-4" />
             
             <DrawerHeader className="flex items-center justify-between">
-              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerTitle className="text-title">{title}</DrawerTitle>
               <Button
                 variant="ghost"
                 size="icon"
