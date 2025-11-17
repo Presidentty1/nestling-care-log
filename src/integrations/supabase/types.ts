@@ -523,6 +523,7 @@ export type Database = {
           family_id: string
           id: string
           note: string | null
+          side: string | null
           start_time: string
           subtype: string | null
           type: string
@@ -539,6 +540,7 @@ export type Database = {
           family_id: string
           id?: string
           note?: string | null
+          side?: string | null
           start_time: string
           subtype?: string | null
           type: string
@@ -555,6 +557,7 @@ export type Database = {
           family_id?: string
           id?: string
           note?: string | null
+          side?: string | null
           start_time?: string
           subtype?: string | null
           type?: string
