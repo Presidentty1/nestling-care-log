@@ -139,6 +139,10 @@ export default function Home() {
     setModalType(type);
     setEditingEvent(null);
     setIsModalOpen(true);
+    
+    if (!selectedBaby) {
+      toast.info('No baby selected - logging locally only');
+    }
   };
 
   const handleEdit = (event: BabyEvent) => {
@@ -246,7 +250,7 @@ export default function Home() {
         <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
-      {selectedBaby && modalType && ['feed', 'sleep', 'diaper', 'tummy_time'].includes(modalType) && (
+      {isModalOpen && modalType && ['feed', 'sleep', 'diaper', 'tummy_time'].includes(modalType) && (
         <EventSheet
           isOpen={isModalOpen}
           onClose={() => {
@@ -255,8 +259,8 @@ export default function Home() {
             loadTodayEvents();
           }}
           eventType={modalType as EventType}
-          babyId={selectedBaby.id}
-          familyId={selectedBaby.family_id}
+          babyId={selectedBaby?.id ?? 'local-dev-baby'}
+          familyId={selectedBaby?.family_id ?? 'local-dev-family'}
           editingEventId={editingEvent?.id}
         />
       )}
