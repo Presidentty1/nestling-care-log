@@ -23,6 +23,68 @@ npm run dev
 
 Visit http://localhost:5173
 
+## 📱 iOS Development
+
+### Prerequisites
+- macOS with Xcode 15+
+- iOS 14+ device or simulator
+- Valid Apple Developer account (for device testing)
+
+### Setup
+```bash
+# Install dependencies
+npm install
+
+# Build web assets
+npm run build
+
+# Add iOS platform (first time only)
+npx cap add ios
+
+# Sync and open Xcode
+npm run cap:ios
+```
+
+### Development Workflow
+```bash
+# Option 1: Hot reload from simulator
+# Edit capacitor.config.ts, set server.url to your local IP
+npm run dev
+# In Xcode, run on simulator - changes reload instantly!
+
+# Option 2: Full rebuild
+npm run cap:run:ios
+```
+
+### Building for App Store
+See `DEPLOYMENT.md` for complete guide.
+
+## 🔧 Development in Cursor
+
+This project is optimized for Cursor 2.0:
+1. Clone the repository
+2. Open in Cursor
+3. Run `npm install`
+4. Read `DEVELOPMENT.md` for full setup guide
+5. AI rules are in `.cursorrules`
+
+## 🚀 Deployment
+
+See `DEPLOYMENT.md` for:
+- Vercel/Netlify deployment
+- Edge function deployment  
+- iOS App Store submission
+- Environment variable setup
+
+## 📚 Documentation
+
+- `DEVELOPMENT.md` - Complete local development guide
+- `DEPLOYMENT.md` - Production deployment instructions
+- `TESTING_CHECKLIST.md` - Pre-deployment testing steps
+- `MIGRATION_CHECKLIST.md` - Lovable to Cursor migration guide
+- `SECRETS.md` - Environment variables and secrets
+- `supabase/functions/README.md` - Edge functions documentation
+
 ## Project Info
 
 **URL**: https://lovable.dev/projects/3be850d6-430e-4062-887d-a465d2abf643
