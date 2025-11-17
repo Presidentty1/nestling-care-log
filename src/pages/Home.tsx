@@ -224,7 +224,7 @@ export default function Home() {
         <QuickActions onActionSelect={handleQuickAction} />
 
         <div className="space-y-3">
-          <h2 className="text-[22px] leading-[28px] font-semibold">Today's Timeline</h2>
+          <h2 className="text-headline">Today's Timeline</h2>
           <TimelineList
             events={events}
             onEdit={handleEdit}

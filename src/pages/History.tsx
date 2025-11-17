@@ -98,7 +98,7 @@ export default function History() {
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">History</h1>
+          <h1 className="text-headline">History</h1>
         </div>
 
         {/* Day Strip with Calendar */}
@@ -139,8 +139,8 @@ export default function History() {
         {!loading && events.length === 0 && (
           <EmptyState
             icon={CalendarDays}
-            title="No Events"
-            description="No events recorded for this day"
+            title="Nothing logged this day"
+            description="Babies have calm days too! 🌙 It's perfectly normal to have quiet stretches."
           />
         )}
 
@@ -153,7 +153,7 @@ export default function History() {
         {!loading && events.length > 0 && (
           <Card>
             <CardHeader>
-              <h2 className="font-semibold">Timeline</h2>
+              <h2 className="text-title">Timeline</h2>
             </CardHeader>
             <CardContent>
               <TimelineList

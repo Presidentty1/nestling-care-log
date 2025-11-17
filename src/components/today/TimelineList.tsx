@@ -1,5 +1,5 @@
 import { EventRecord } from '@/services/eventsService';
-import { TimelineRow } from './TimelineRow';
+import { SwipeableTimelineRow } from './SwipeableTimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +16,7 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
       <EmptyState
         icon={Calendar}
         title="Your day is off to a quiet start ✨"
-        description="Tap + below to log your first event"
+        description="Tap the + button below to log your first event. Every baby's day is unique!"
       />
     );
   }
@@ -39,7 +39,7 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
               ease: "easeOut" 
             }}
           >
-            <TimelineRow
+            <SwipeableTimelineRow
               event={event}
               onEdit={() => onEdit(event)}
               onDelete={() => onDelete(event.id)}
