@@ -19,6 +19,7 @@ export default function History() {
   const [baby, setBaby] = useState<Baby | null>(null);
   const [dates, setDates] = useState<Date[]>([]);
   const [summary, setSummary] = useState<any>(null);
+  const safeSummary = summary ?? { sleepMinutes: 0, sleepCount: 0, feedCount: 0, diaperCount: 0 };
 
   useEffect(() => {
     loadBaby();
@@ -156,28 +157,28 @@ export default function History() {
             <CardContent className="pt-6 text-center">
               <Moon className="h-6 w-6 mx-auto mb-2 text-purple-500" />
               <p className="text-2xl font-bold">
-                {Math.floor(summary.sleepMinutes / 60)}h {Math.round(summary.sleepMinutes % 60)}m
+                {Math.floor(safeSummary.sleepMinutes / 60)}h {Math.round(safeSummary.sleepMinutes % 60)}m
               </p>
-              <p className="text-xs text-muted-foreground">{summary.sleepCount} naps</p>
+              <p className="text-xs text-muted-foreground">{safeSummary.sleepCount} naps</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
               <Milk className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-              <p className="text-2xl font-bold">{summary.feedCount}</p>
+              <p className="text-2xl font-bold">{safeSummary.feedCount}</p>
               <p className="text-xs text-muted-foreground">feeds</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
               <BabyIcon className="h-6 w-6 mx-auto mb-2 text-green-500" />
-              <p className="text-2xl font-bold">{summary.diaperCount}</p>
+              <p className="text-2xl font-bold">{safeSummary.diaperCount}</p>
               <p className="text-xs text-muted-foreground">diapers</p>
             </CardContent>
           </Card>
         </div>
 
-        <EventTimeline events={events} onEdit={() => {}} onDelete={() => {}} />
+        <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
       </div>
 
       <MobileNav />
