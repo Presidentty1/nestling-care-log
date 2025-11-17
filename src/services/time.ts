@@ -1,11 +1,23 @@
 import { differenceInMonths, differenceInDays, format } from 'date-fns';
 
-export function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
   
   if (hours > 0) {
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    if (mins > 0) {
+      return secs > 0 ? `${hours}h ${mins}m ${secs}s` : `${hours}h ${mins}m`;
+    }
+    return `${hours}h`;
+  }
+  
+  if (secs > 0) {
+    return `${mins}m ${secs}s`;
   }
   return `${mins}m`;
 }

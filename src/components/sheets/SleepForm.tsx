@@ -104,13 +104,15 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit }: S
       end = new Date(manualEnd);
     }
 
-    const durationMin = Math.floor((end.getTime() - start.getTime()) / 60000);
+    const durationSec = Math.floor((end.getTime() - start.getTime()) / 1000);
+    const durationMin = Math.floor(durationSec / 60);
 
     onSubmit({
       type: 'sleep',
       subtype,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
+      duration_sec: durationSec,
       duration_min: durationMin,
       note: note || undefined,
     });

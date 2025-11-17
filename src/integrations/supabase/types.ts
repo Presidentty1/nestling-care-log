@@ -519,6 +519,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           duration_min: number | null
+          duration_sec: number | null
           end_time: string | null
           family_id: string
           id: string
@@ -536,6 +537,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           duration_min?: number | null
+          duration_sec?: number | null
           end_time?: string | null
           family_id: string
           id?: string
@@ -553,6 +555,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           duration_min?: number | null
+          duration_sec?: number | null
           end_time?: string | null
           family_id?: string
           id?: string

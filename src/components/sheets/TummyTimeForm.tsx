@@ -90,20 +90,25 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit 
     let end: Date;
     let durationMin: number;
 
+    let durationSec: number;
+    
     if (mode === 'timer') {
       start = startTime!;
       end = endTime!;
-      durationMin = Math.floor((end.getTime() - start.getTime()) / 60000);
+      durationSec = Math.floor((end.getTime() - start.getTime()) / 1000);
+      durationMin = Math.floor(durationSec / 60);
     } else {
       durationMin = parseInt(manualDuration, 10);
+      durationSec = durationMin * 60;
       start = new Date();
-      end = new Date(start.getTime() + durationMin * 60000);
+      end = new Date(start.getTime() + durationSec * 1000);
     }
 
     onSubmit({
       type: 'tummy_time',
       start_time: start.toISOString(),
       end_time: end.toISOString(),
+      duration_sec: durationSec,
       duration_min: durationMin,
       note: note || undefined,
     });
