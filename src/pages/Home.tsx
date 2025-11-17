@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInMonths } from 'date-fns';
-import { EventType } from '@/types/events';
-import { NapPrediction, Baby } from '@/types/events';
+import { EventType, NapPrediction, Baby, EventRecord } from '@/types/events';
+import { BabyEvent } from '@/lib/types';
 import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventTimeline } from '@/components/EventTimeline';
@@ -23,7 +23,7 @@ export default function Home() {
   const { activeBabyId, setActiveBabyId } = useAppStore();
   const [babies, setBabies] = useState<Baby[]>([]);
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<BabyEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string }>({
     open: false,
@@ -34,110 +34,105 @@ export default function Home() {
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   useEffect(() => {
-    const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
-    if (!authLoading && !user && !skipAuth) {
-      navigate('/auth');
-    }
-    if (skipAuth && !user) {
-      setLoading(false);
-    }
-  }, [user, authLoading, navigate]);
+    loadBabies();
+  }, []);
 
   useEffect(() => {
-    if (user) {
-      loadBabies();
+    if (activeBabyId) {
+      loadBabyData();
     }
-  }, [user]);
+  }, [activeBabyId]);
+
+  useEffect(() => {
+    const unsubscribe = dataService.subscribe((action) => {
+      if (action === 'add' || action === 'update' || action === 'delete') {
+        loadTodayEvents();
+        loadSummary();
+        loadNapPrediction();
+      }
+    });
+    return unsubscribe;
+  }, [activeBabyId]);
 
   const loadBabies = async () => {
+    const babyList = await dataService.listBabies();
+    setBabies(babyList);
+    
+    if (babyList.length === 0) {
+      navigate('/onboarding-simple');
+      return;
+    }
+    
+    if (babyList.length > 0) {
+      const activeId = activeBabyId || babyList[0].id;
+      setActiveBabyId(activeId);
+    }
+    
+    setLoading(false);
+  };
+
+  const loadBabyData = async () => {
+    if (!activeBabyId) return;
+    
+    const baby = await dataService.getBaby(activeBabyId);
+    setSelectedBaby(baby);
+    
+    await Promise.all([
+      loadTodayEvents(),
+      loadSummary(),
+      loadNapPrediction(),
+    ]);
+  };
+
+  const loadTodayEvents = async () => {
+    if (!activeBabyId) return;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayEvents = await dataService.listEventsByDay(activeBabyId, today);
+    
+    // Map EventRecord to BabyEvent format for UI compatibility
+    const mappedEvents: BabyEvent[] = todayEvents.map(e => ({
+      id: e.id,
+      baby_id: e.babyId,
+      family_id: e.familyId,
+      type: e.type as any,
+      subtype: e.subtype,
+      start_time: e.startTime,
+      end_time: e.endTime,
+      amount: e.amount,
+      unit: e.unit,
+      note: e.notes,
+      created_at: e.createdAt,
+      updated_at: e.updatedAt,
+      created_by: null,
+    }));
+    
+    setEvents(mappedEvents);
+  };
+
+  const loadSummary = async () => {
+    if (!activeBabyId) return;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todaySummary = await dataService.getDaySummary(activeBabyId, today);
+    setSummary(todaySummary);
+  };
+
+  const loadNapPrediction = async () => {
+    if (!activeBabyId) return;
     try {
-      const skipAuth = localStorage.getItem('dev_skip_auth') === 'true';
-      if (skipAuth) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: familyMembers, error: fmError } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user!.id);
-
-      if (fmError) throw fmError;
-
-      if (!familyMembers || familyMembers.length === 0) {
-        navigate('/onboarding');
-        return;
-      }
-
-      const familyIds = familyMembers.map((fm) => fm.family_id);
-      const { data: babiesData, error: babiesError } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyIds);
-
-      if (babiesError) throw babiesError;
-
-      if (babiesData && babiesData.length > 0) {
-        setBabies(babiesData as BabyType[]);
-        
-        const savedBabyId = localStorage.getItem('selected_baby_id');
-        const selectedBabyData = savedBabyId 
-          ? babiesData.find(b => b.id === savedBabyId) || babiesData[0]
-          : babiesData[0];
-        
-        setSelectedBaby(selectedBabyData as BabyType);
-        setSelectedBabyId(selectedBabyData.id);
-      } else {
-        navigate('/onboarding');
-      }
+      const prediction = await napService.calculateNapWindow(activeBabyId);
+      setNapPrediction(prediction);
     } catch (error) {
-      console.error('Error loading babies:', error);
-    } finally {
-      setLoading(false);
+      console.error('Failed to calculate nap prediction:', error);
     }
   };
 
-  const loadTodayEvents = useCallback(async () => {
-    if (!selectedBaby) return;
-
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const events = await dataService.listEventsByDay(selectedBaby.id, today);
-      
-      // Map EventRecord to BabyEvent format for UI compatibility
-      const mappedEvents: BabyEvent[] = events.map(e => ({
-        id: e.id,
-        baby_id: e.babyId,
-        family_id: e.familyId,
-        type: e.type as any,
-        subtype: e.subtype,
-        start_time: e.startTime,
-        end_time: e.endTime,
-        amount: e.amount,
-        unit: e.unit,
-        note: e.notes,
-        created_at: e.createdAt,
-        updated_at: e.updatedAt,
-        created_by: null,
-      }));
-      
-      setEvents(mappedEvents);
-    } catch (error) {
-      console.error('Error loading events:', error);
-    }
-  }, [selectedBaby]);
-
-  const handleBabySelect = (babyId: string) => {
-    const baby = babies.find((b) => b.id === babyId);
-    if (baby) {
-      setSelectedBaby(baby);
-      setSelectedBabyId(babyId);
-      localStorage.setItem('selected_baby_id', babyId);
-    }
-  };
-
-  const openModal = (type: EventType) => {
+  const handleQuickAction = (type: EventType) => {
     setModalState({ open: true, type });
+  };
+
+  const handleBabySwitch = (babyId: string) => {
+    setActiveBabyId(babyId);
+    localStorage.setItem('selected_baby_id', babyId);
   };
 
   const handleEdit = (event: BabyEvent) => {
@@ -153,159 +148,93 @@ export default function Home() {
     }
   };
 
-  useRealtimeEvents(selectedBaby?.family_id, loadTodayEvents);
-
-  useEffect(() => {
-    if (selectedBaby) {
-      loadTodayEvents();
-    }
-  }, [selectedBaby, loadTodayEvents]);
-
-  // Subscribe to dataService changes for real-time updates
-  useEffect(() => {
-    if (!selectedBaby) return;
-    
-    const unsubscribe = dataService.subscribe((action, data) => {
-      if (action === 'add' || action === 'update' || action === 'delete') {
-        loadTodayEvents();
-      }
-    });
-    return unsubscribe;
-  }, [selectedBaby, loadTodayEvents]);
-
-  // Load summary when baby or events change
-  useEffect(() => {
-    if (selectedBaby) {
-      dataService.getTodaySummary(selectedBaby.id).then(setSummary);
-    }
-  }, [selectedBaby, events]);
-
-  // Load nap prediction
-  useEffect(() => {
-    if (!selectedBaby) return;
-
-    const loadNapPrediction = async () => {
-      try {
-        // Try to get cached prediction first
-        const cached = await dataService.getNapPrediction(selectedBaby.id);
-        if (cached) {
-          setNapPrediction(cached);
-          return;
-        }
-
-        // Calculate fresh prediction if no cache
-        const ageMonths = differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth));
-        const prediction = await napService.recalculate(selectedBaby.id, ageMonths);
-        if (prediction) {
-          setNapPrediction(prediction);
-          await dataService.storeNapPrediction(selectedBaby.id, prediction);
-        }
-      } catch (error) {
-        console.error('Failed to load nap prediction:', error);
-      }
-    };
-
-    loadNapPrediction();
-  }, [selectedBaby, events]);
-
-  const handleFeedbackSubmitted = async () => {
-    // Refresh prediction after feedback
-    if (selectedBaby) {
-      const ageMonths = differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth));
-      const prediction = await napService.recalculate(selectedBaby.id, ageMonths);
-      if (prediction) {
-        setNapPrediction(prediction);
-        await dataService.storeNapPrediction(selectedBaby.id, prediction);
-      }
-    }
-  };
+  if (loading) {
+    return <div className="min-h-screen bg-surface flex items-center justify-center">Loading...</div>;
+  }
 
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-surface pb-20 flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-surface pb-20">
-      <OfflineIndicator />
-      
-      <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">
-              {selectedBaby?.name || 'Welcome'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {format(new Date(), 'EEEE, MMMM d')}
-            </p>
-          </div>
-          {babies.length > 1 && selectedBaby && (
-            <button
+      <div className="max-w-2xl mx-auto p-4 space-y-4">
+        {selectedBaby && (
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2"
               onClick={() => setIsSwitcherOpen(true)}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getInitials(selectedBaby.name)}
-                </AvatarFallback>
+                <AvatarFallback>{getInitials(selectedBaby.name)}</AvatarFallback>
               </Avatar>
-            </button>
-          )}
-        </div>
+              <div className="text-left">
+                <div className="font-semibold">{selectedBaby.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {differenceInMonths(new Date(), new Date(selectedBaby.dobISO))} months
+                </div>
+              </div>
+            </Button>
+          </div>
+        )}
 
         {napPrediction && selectedBaby && (
-          <NapPredictionCard 
-            prediction={napPrediction} 
+          <NapPredictionCard
+            prediction={napPrediction}
             babyId={selectedBaby.id}
-            onFeedbackSubmitted={handleFeedbackSubmitted}
+            onFeedbackSubmitted={loadNapPrediction}
           />
         )}
 
-        <QuickActions onActionSelect={(type) => openModal(type)} />
+        {summary && (
+          <SummaryChips summary={summary} />
+        )}
 
-        {summary && <SummaryChips summary={summary} />}
+        <QuickActions onActionSelect={handleQuickAction} />
 
-        <EventTimeline events={events} onEdit={handleEdit} onDelete={handleDelete} />
+        <div>
+          <h2 className="text-xl font-semibold mb-3">Today's Timeline</h2>
+          {events.length > 0 ? (
+            <EventTimeline
+              events={events}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <p className="text-muted-foreground text-center py-8">No events logged today</p>
+          )}
+        </div>
       </div>
-
-      <EventSheet
-        isOpen={modalState.open}
-        onClose={() => setModalState({ open: false, type: 'feed' })}
-        eventType={modalState.type}
-        babyId={selectedBaby?.id ?? 'local-dev-baby'}
-        familyId={selectedBaby?.family_id ?? 'local-dev-family'}
-        editingEventId={modalState.editingId}
-      />
-
-      <BabySwitcher
-        babies={babies}
-        selectedBabyId={selectedBabyId}
-        onSelect={handleBabySelect}
-        isOpen={isSwitcherOpen}
-        onClose={() => setIsSwitcherOpen(false)}
-      />
 
       <FloatingActionButton
         onVoiceCommand={(command) => {
           if (command.type) {
-            openModal(command.type);
+            handleQuickAction(command.type);
           }
         }}
       />
-
       <MobileNav />
+
+      {selectedBaby && (
+        <EventSheet
+          isOpen={modalState.open}
+          onClose={() => setModalState({ open: false, type: 'feed' })}
+          eventType={modalState.type}
+          babyId={activeBabyId!}
+          familyId="local"
+          editingEventId={modalState.editingId}
+        />
+      )}
+
+      <BabySwitcherModal
+        babies={babies}
+        activeBabyId={activeBabyId}
+        isOpen={isSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
+        onSelect={handleBabySwitch}
+        onAddNew={() => navigate('/onboarding-simple')}
+      />
     </div>
   );
 }
