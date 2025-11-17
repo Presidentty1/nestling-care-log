@@ -43,11 +43,20 @@ export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
     if (event.amount && event.unit) {
       title += ` · ${event.amount} ${event.unit}`;
     } else if (event.type === 'feed' && event.subtype?.startsWith('breast')) {
-      const duration = event.end_time 
-        ? Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 60000)
-        : 0;
+      const duration = event.duration_sec || 
+        (event.end_time ? Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 1000) : 0);
       if (duration > 0) {
-        title += ` · ${duration}m`;
+        if (duration < 60) {
+          title += ` · ${duration}s`;
+        } else if (duration < 3600) {
+          const mins = Math.floor(duration / 60);
+          const secs = duration % 60;
+          title += secs > 0 ? ` · ${mins}m ${secs}s` : ` · ${mins}m`;
+        } else {
+          const hours = Math.floor(duration / 3600);
+          const mins = Math.floor((duration % 3600) / 60);
+          title += mins > 0 ? ` · ${hours}h ${mins}m` : ` · ${hours}h`;
+        }
       }
     }
     
@@ -59,10 +68,23 @@ export function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
     
     if (event.end_time && event.type === 'sleep') {
       const endTime = format(new Date(event.end_time), 'h:mm a');
-      const duration = Math.round(
-        (new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 60000
-      );
-      return `${startTime} - ${endTime} (${duration}m)`;
+      const duration = event.duration_sec || 
+        Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 1000);
+      
+      let durationStr = '';
+      if (duration < 60) {
+        durationStr = `${duration}s`;
+      } else if (duration < 3600) {
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        durationStr = secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+      } else {
+        const hours = Math.floor(duration / 3600);
+        const mins = Math.floor((duration % 3600) / 60);
+        durationStr = mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+      }
+      
+      return `${startTime} - ${endTime} (${durationStr})`;
     }
     
     return startTime;

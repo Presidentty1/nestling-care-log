@@ -46,6 +46,8 @@ export interface BabyEvent {
   subtype?: string | null;
   start_time: string;
   end_time?: string | null;
+  duration_min?: number | null;
+  duration_sec?: number | null;
   amount?: number | null;
   unit?: string | null;
   note?: string | null;

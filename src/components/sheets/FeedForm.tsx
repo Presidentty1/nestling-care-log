@@ -109,7 +109,9 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
       data.side = side;
       data.start_time = startTime!.toISOString();
       data.end_time = endTime!.toISOString();
-      data.duration_min = Math.floor((endTime!.getTime() - startTime!.getTime()) / 60000);
+      const durationSec = Math.floor((endTime!.getTime() - startTime!.getTime()) / 1000);
+      data.duration_sec = durationSec;
+      data.duration_min = Math.floor(durationSec / 60);
     } else {
       // bottle or pumping
       const amountNum = parseFloat(amount);

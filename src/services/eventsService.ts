@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { differenceInMinutes, startOfDay, endOfDay } from 'date-fns';
+import { differenceInMinutes, differenceInSeconds, startOfDay, endOfDay } from 'date-fns';
 
 export interface CreateEventData {
   baby_id: string;
@@ -12,6 +12,7 @@ export interface CreateEventData {
   start_time: string; // UTC ISO
   end_time?: string; // UTC ISO
   duration_min?: number;
+  duration_sec?: number;
   diaper_color?: string;
   diaper_texture?: string;
   note?: string;
@@ -44,16 +45,24 @@ class EventsService {
 
     // Calculate duration if both times provided
     let duration_min = data.duration_min;
-    if (data.start_time && data.end_time && !duration_min) {
-      duration_min = differenceInMinutes(
-        new Date(data.end_time),
-        new Date(data.start_time)
-      );
+    let duration_sec = data.duration_sec;
+    
+    if (data.start_time && data.end_time) {
+      if (!duration_sec) {
+        duration_sec = differenceInSeconds(
+          new Date(data.end_time),
+          new Date(data.start_time)
+        );
+      }
+      if (!duration_min) {
+        duration_min = Math.floor(duration_sec / 60);
+      }
     }
 
     const payload = {
       ...data,
       duration_min,
+      duration_sec,
       created_by: user.id,
     };
 
@@ -72,6 +81,8 @@ class EventsService {
   async updateEvent(id: string, updates: Partial<CreateEventData>): Promise<EventRecord> {
     // Recalculate duration if times changed
     let duration_min = updates.duration_min;
+    let duration_sec = updates.duration_sec;
+    
     if (updates.start_time || updates.end_time) {
       const { data: existing } = await supabase
         .from('events')
@@ -83,13 +94,14 @@ class EventsService {
       const endTime = updates.end_time || existing?.end_time;
 
       if (startTime && endTime) {
-        duration_min = differenceInMinutes(new Date(endTime), new Date(startTime));
+        duration_sec = differenceInSeconds(new Date(endTime), new Date(startTime));
+        duration_min = Math.floor(duration_sec / 60);
       }
     }
 
     const { data: event, error } = await supabase
       .from('events')
-      .update({ ...updates, duration_min })
+      .update({ ...updates, duration_min, duration_sec })
       .eq('id', id)
       .select('*')
       .single();

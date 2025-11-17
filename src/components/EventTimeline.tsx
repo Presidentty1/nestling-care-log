@@ -99,10 +99,20 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
     }
 
     if (event.end_time) {
-      const start = new Date(event.start_time);
-      const end = new Date(event.end_time);
-      const duration = Math.round((end.getTime() - start.getTime()) / 60000);
-      title += ` · ${duration} min`;
+      const duration = event.duration_sec || 
+        Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 1000);
+      
+      if (duration < 60) {
+        title += ` · ${duration}s`;
+      } else if (duration < 3600) {
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        title += secs > 0 ? ` · ${mins}m ${secs}s` : ` · ${mins}m`;
+      } else {
+        const hours = Math.floor(duration / 3600);
+        const mins = Math.floor((duration % 3600) / 60);
+        title += mins > 0 ? ` · ${hours}h ${mins}m` : ` · ${hours}h`;
+      }
     }
 
     return title;
