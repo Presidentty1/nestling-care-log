@@ -163,9 +163,9 @@ export default function Analytics() {
 
       <BabySwitcher
         babies={babies || []}
-        selectedBabyId={selectedBabyId}
+        selectedBabyId={selectedBabyId || ''}
         isOpen={isSwitcherOpen}
-        onOpenChange={setIsSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
         onSelect={(babyId) => {
           setSelectedBabyId(babyId);
           localStorage.setItem('selected_baby_id', babyId);

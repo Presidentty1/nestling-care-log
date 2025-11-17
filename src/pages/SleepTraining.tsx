@@ -40,35 +40,35 @@ export default function SleepTraining() {
   });
 
   const { data: sessions } = useQuery({
-    queryKey: ['sleep-training-sessions', selectedBaby?.id],
+    queryKey: ['sleep-training-sessions', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('sleep_training_sessions')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('created_at', { ascending: false });
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
   const { data: regressions } = useQuery({
-    queryKey: ['sleep-regressions', selectedBaby?.id],
+    queryKey: ['sleep-regressions', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('sleep_regressions')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('detected_at', { ascending: false });
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
-  if (babies && babies.length > 0 && !selectedBaby) {
-    setSelectedBaby(babies[0]);
+  if (babies && babies.length > 0 && !selectedBabyId) {
+    setSelectedBabyId(babies[0].id);
   }
 
   const activeSession = sessions?.find((s: any) => s.status === 'active');
@@ -93,15 +93,16 @@ export default function SleepTraining() {
               New Session
             </Button>
           </div>
-          {babies && babies.length > 0 && (
-            <BabySelector
-              babies={babies}
-              selectedBabyId={selectedBaby?.id || null}
-              onSelect={(babyId) => {
-                const baby = babies.find(b => b.id === babyId);
-                if (baby) setSelectedBaby(baby);
-              }}
-            />
+          {babies && babies.length > 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSwitcherOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <span>👶</span>
+              <span>{babies.find(b => b.id === selectedBabyId)?.name || 'Select Baby'}</span>
+            </Button>
           )}
         </div>
       </div>
@@ -224,9 +225,9 @@ export default function SleepTraining() {
 
       <BabySwitcher
         babies={babies || []}
-        selectedBabyId={selectedBabyId}
-        isOpen={isBabySwitcherOpen}
-        onClose={() => setIsBabySwitcherOpen(false)}
+        selectedBabyId={selectedBabyId || ''}
+        isOpen={isSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
         onSelect={setSelectedBabyId}
       />
       <MobileNav />

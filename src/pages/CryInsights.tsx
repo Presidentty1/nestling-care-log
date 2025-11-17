@@ -45,22 +45,22 @@ export default function CryInsights() {
   });
 
   const { data: cryLogs } = useQuery({
-    queryKey: ['cry-logs', selectedBaby?.id],
+    queryKey: ['cry-logs', selectedBabyId],
     queryFn: async () => {
-      if (!selectedBaby) return [];
+      if (!selectedBabyId) return [];
       const { data } = await supabase
         .from('cry_logs')
         .select('*')
-        .eq('baby_id', selectedBaby.id)
+        .eq('baby_id', selectedBabyId)
         .order('start_time', { ascending: false })
         .limit(20);
       return data || [];
     },
-    enabled: !!selectedBaby,
+    enabled: !!selectedBabyId,
   });
 
-  if (babies && babies.length > 0 && !selectedBaby) {
-    setSelectedBaby(babies[0]);
+  if (babies && babies.length > 0 && !selectedBabyId) {
+    setSelectedBabyId(babies[0].id);
   }
 
   if (!babies || babies.length === 0) {
@@ -90,14 +90,15 @@ export default function CryInsights() {
               <p className="text-sm text-muted-foreground">AI-powered cry pattern analysis</p>
             </div>
           </div>
-          <BabySelector
-            babies={babies}
-            selectedBabyId={selectedBaby?.id || null}
-            onSelect={(babyId) => {
-              const baby = babies.find(b => b.id === babyId);
-              if (baby) setSelectedBaby(baby);
-            }}
-          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSwitcherOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <span>👶</span>
+            <span>{babies?.find(b => b.id === selectedBabyId)?.name || 'Select Baby'}</span>
+          </Button>
         </div>
       </div>
 
@@ -117,9 +118,9 @@ export default function CryInsights() {
 
           <TabsContent value="timer" className="space-y-4">
             {!analysisResult ? (
-              selectedBaby && (
+              selectedBabyId && (
                 <CryRecorder
-                  babyId={selectedBaby.id}
+                  babyId={selectedBabyId}
                   onAnalysisComplete={setAnalysisResult}
                 />
               )
@@ -169,16 +170,16 @@ export default function CryInsights() {
           </TabsContent>
 
           <TabsContent value="patterns" className="space-y-4">
-            {selectedBaby && <PatternInsights babyId={selectedBaby.id} />}
+            {selectedBabyId && <PatternInsights babyId={selectedBabyId} />}
           </TabsContent>
         </Tabs>
       </div>
 
       <BabySwitcher
         babies={babies || []}
-        selectedBabyId={selectedBabyId}
-        isOpen={isBabySwitcherOpen}
-        onClose={() => setIsBabySwitcherOpen(false)}
+        selectedBabyId={selectedBabyId || ''}
+        isOpen={isSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
         onSelect={setSelectedBabyId}
       />
       <MobileNav />

@@ -83,7 +83,15 @@ export default function WeeklyReports() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Weekly Reports</h1>
-          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSwitcherOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <span>👶</span>
+            <span>{babies?.find(b => b.id === selectedBabyId)?.name || 'Select Baby'}</span>
+          </Button>
         </div>
 
         {selectedBabyId && (
