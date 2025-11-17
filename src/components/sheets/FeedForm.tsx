@@ -194,7 +194,13 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: Fe
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="120"
                 className="mt-1"
+                autoFocus
               />
+              {feedType === 'bottle' && !amount && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Amount is required
+                </p>
+              )}
             </div>
             <div className="w-24">
               <Label>Unit</Label>

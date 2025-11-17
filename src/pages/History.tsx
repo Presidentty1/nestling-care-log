@@ -7,8 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { MobileNav } from '@/components/MobileNav';
 import { EventTimeline } from '@/components/EventTimeline';
-import { SummaryChips } from '@/components/today/SummaryChips';
 import { DayStrip } from '@/components/history/DayStrip';
+import { DaySummary } from '@/components/history/DaySummary';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useAppStore } from '@/store/appStore';
@@ -155,7 +155,7 @@ export default function History() {
           />
         </Card>
 
-        {summary && <SummaryChips summary={summary} />}
+        {summary && <DaySummary date={selectedDate} summary={summary} />}
 
         {loading ? (
           <LoadingSpinner text="Loading events..." />

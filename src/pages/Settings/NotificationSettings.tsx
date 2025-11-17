@@ -93,9 +93,17 @@ export default function NotificationSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {!hasPermission && (
-              <Button onClick={requestPermission} className="w-full">
-                Enable Notifications
-              </Button>
+              <>
+                <div className="rounded-lg bg-muted p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    Notifications are currently in-app only. Enable browser notifications for alerts 
+                    when the app is in the background.
+                  </p>
+                </div>
+                <Button onClick={requestPermission} className="w-full">
+                  Enable Browser Notifications
+                </Button>
+              </>
             )}
             {hasPermission && (
               <Button onClick={testNotification} variant="outline" className="w-full">
