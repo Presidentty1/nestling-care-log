@@ -32,6 +32,12 @@ serve(async (req) => {
 
     console.log('Bootstrap request for user:', user.id);
 
+    // Parse request body for optional customization
+    const body = await req.json().catch(() => ({}));
+    const babyName = body.babyName || 'Demo Baby';
+    const dateOfBirth = body.dateOfBirth || format(subDays(new Date(), 60), 'yyyy-MM-dd');
+    const timezone = body.timezone || 'America/New_York';
+
     // Check if user already has a family membership (idempotent)
     const { data: existingMembership } = await supabase
       .from('family_members')
@@ -59,13 +65,36 @@ serve(async (req) => {
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-    }
 
-    // Parse request body for optional customization
-    const body = await req.json().catch(() => ({}));
-    const babyName = body.babyName || 'Demo Baby';
-    const dateOfBirth = body.dateOfBirth || format(subDays(new Date(), 60), 'yyyy-MM-dd');
-    const timezone = body.timezone || 'America/New_York';
+      // User has family but no babies - create just the baby
+      console.log('Creating baby for existing family');
+      const { data: baby, error: babyError } = await supabase
+        .from('babies')
+        .insert({
+          family_id: existingMembership.family_id,
+          name: babyName,
+          date_of_birth: dateOfBirth,
+          timezone: timezone
+        })
+        .select()
+        .single();
+
+      if (babyError) {
+        console.error('Baby creation error:', babyError);
+        throw new Error('Failed to create baby: ' + babyError.message);
+      }
+
+      console.log('Created baby:', baby.id);
+
+      return new Response(
+        JSON.stringify({ 
+          familyId: existingMembership.family_id, 
+          babyId: baby.id,
+          existed: false
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Creating new family and baby for user:', user.id);
 
