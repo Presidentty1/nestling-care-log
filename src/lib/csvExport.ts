@@ -15,6 +15,9 @@ export async function exportEventsCSV(
     endDate.toISOString()
   );
 
+  // Calculate daily summaries
+  const dailySummaries = calculateDailySummaries(events);
+
   // CSV headers
   const headers = [
     'Date',
@@ -51,8 +54,32 @@ export async function exportEventsCSV(
     ];
   });
 
-  // Create CSV content
-  const csv = [headers, ...rows]
+  // Add daily summary section
+  const summaryRows: string[][] = [
+    [],
+    ['DAILY SUMMARIES'],
+    ['Date', 'Total Feeds', 'Total Milk (ml)', 'Total Sleep (hrs)', 'Total Diapers', 'Wet Diapers', 'Dirty Diapers'],
+  ];
+
+  Object.entries(dailySummaries).forEach(([date, summary]) => {
+    summaryRows.push([
+      date,
+      summary.feedCount.toString(),
+      summary.totalMl.toString(),
+      (summary.sleepMinutes / 60).toFixed(1),
+      summary.diaperTotal.toString(),
+      summary.diaperWet.toString(),
+      summary.diaperDirty.toString(),
+    ]);
+  });
+
+  // Create CSV content with event details and summaries
+  const csv = [
+    ['EVENT LOG'],
+    headers,
+    ...rows,
+    ...summaryRows,
+  ]
     .map((row) => row.map((cell) => `"${cell}"`).join(','))
     .join('\n');
 
@@ -64,4 +91,47 @@ export async function exportEventsCSV(
   link.download = `nestling-export-${babyName}-${format(startDate, 'yyyy-MM-dd')}-to-${format(endDate, 'yyyy-MM-dd')}.csv`;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function calculateDailySummaries(events: EventRecord[]): Record<string, any> {
+  const summaries: Record<string, any> = {};
+
+  events.forEach((event) => {
+    const date = format(new Date(event.startTime), 'yyyy-MM-dd');
+    
+    if (!summaries[date]) {
+      summaries[date] = {
+        feedCount: 0,
+        totalMl: 0,
+        sleepMinutes: 0,
+        diaperTotal: 0,
+        diaperWet: 0,
+        diaperDirty: 0,
+      };
+    }
+
+    if (event.type === 'feed') {
+      summaries[date].feedCount++;
+      if (event.amount && event.unit === 'ml') {
+        summaries[date].totalMl += event.amount;
+      }
+    }
+
+    if (event.type === 'sleep' && event.endTime) {
+      const duration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000;
+      summaries[date].sleepMinutes += duration;
+    }
+
+    if (event.type === 'diaper') {
+      summaries[date].diaperTotal++;
+      if (event.subtype === 'wet' || event.subtype === 'mixed') {
+        summaries[date].diaperWet++;
+      }
+      if (event.subtype === 'dirty' || event.subtype === 'mixed') {
+        summaries[date].diaperDirty++;
+      }
+    }
+  });
+
+  return summaries;
 }

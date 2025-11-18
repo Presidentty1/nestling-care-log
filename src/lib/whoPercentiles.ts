@@ -1,5 +1,5 @@
-// Simplified WHO percentile calculator
-// In production, would use full LMS tables or WHO API
+// Simplified WHO growth percentiles for boys and girls
+// In production, use complete WHO datasets or API
 
 interface PercentileData {
   p3: number;
@@ -9,26 +9,44 @@ interface PercentileData {
   p97: number;
 }
 
-// Simplified weight percentiles (kg) for first 12 months - boys
+// Sample boy weight percentiles (kg) by age in days
 const boyWeightPercentiles: { [key: number]: PercentileData } = {
-  0: { p3: 2.5, p15: 2.9, p50: 3.3, p85: 3.9, p97: 4.3 },
-  30: { p3: 3.6, p15: 4.3, p50: 4.9, p85: 5.7, p97: 6.3 },
-  60: { p3: 4.8, p15: 5.6, p50: 6.4, p85: 7.4, p97: 8.2 },
-  90: { p3: 5.7, p15: 6.6, p50: 7.5, p85: 8.6, p97: 9.6 },
-  180: { p3: 7.4, p15: 8.4, p50: 9.6, p85: 11.0, p97: 12.2 },
-  270: { p3: 8.4, p15: 9.6, p50: 10.9, p85: 12.5, p97: 13.9 },
-  365: { p3: 9.0, p15: 10.3, p50: 11.8, p85: 13.5, p97: 15.0 },
+  0: { p3: 2.5, p15: 2.9, p50: 3.3, p85: 3.9, p97: 4.4 },
+  30: { p3: 3.4, p15: 3.9, p50: 4.5, p85: 5.1, p97: 5.8 },
+  60: { p3: 4.3, p15: 4.9, p50: 5.6, p85: 6.3, p97: 7.1 },
+  90: { p3: 5.0, p15: 5.7, p50: 6.4, p85: 7.2, p97: 8.0 },
+  180: { p3: 6.4, p15: 7.1, p50: 7.9, p85: 8.8, p97: 9.8 },
+  365: { p3: 7.7, p15: 8.6, p50: 9.6, p85: 10.8, p97: 11.9 },
 };
 
-// Simplified length percentiles (cm) for first 12 months - boys
+// Sample girl weight percentiles (kg) by age in days
+const girlWeightPercentiles: { [key: number]: PercentileData } = {
+  0: { p3: 2.4, p15: 2.8, p50: 3.2, p85: 3.7, p97: 4.2 },
+  30: { p3: 3.2, p15: 3.6, p50: 4.2, p85: 4.8, p97: 5.5 },
+  60: { p3: 3.9, p15: 4.5, p50: 5.1, p85: 5.8, p97: 6.6 },
+  90: { p3: 4.5, p15: 5.1, p50: 5.8, p85: 6.6, p97: 7.5 },
+  180: { p3: 5.7, p15: 6.5, p50: 7.3, p85: 8.2, p97: 9.3 },
+  365: { p3: 7.0, p15: 7.9, p50: 8.9, p85: 10.1, p97: 11.2 },
+};
+
+// Sample boy length percentiles (cm) by age in days
 const boyLengthPercentiles: { [key: number]: PercentileData } = {
-  0: { p3: 46.3, p15: 48.0, p50: 49.9, p85: 51.8, p97: 53.4 },
-  30: { p3: 51.1, p15: 53.0, p50: 55.0, p85: 57.1, p97: 58.9 },
-  60: { p3: 55.3, p15: 57.4, p50: 59.6, p85: 61.8, p97: 63.8 },
-  90: { p3: 58.5, p15: 60.7, p50: 63.0, p85: 65.3, p97: 67.4 },
-  180: { p3: 66.5, p15: 68.9, p50: 71.3, p85: 73.9, p97: 76.1 },
-  270: { p3: 71.3, p15: 73.9, p50: 76.5, p85: 79.2, p97: 81.7 },
-  365: { p3: 74.5, p15: 77.1, p50: 79.9, p85: 82.7, p97: 85.3 },
+  0: { p3: 46.1, p15: 48.0, p50: 49.9, p85: 51.8, p97: 53.7 },
+  30: { p3: 50.8, p15: 52.8, p50: 54.7, p85: 56.7, p97: 58.6 },
+  60: { p3: 54.4, p15: 56.4, p50: 58.4, p85: 60.4, p97: 62.4 },
+  90: { p3: 57.3, p15: 59.4, p50: 61.4, p85: 63.5, p97: 65.5 },
+  180: { p3: 63.3, p15: 65.5, p50: 67.6, p85: 69.8, p97: 71.9 },
+  365: { p3: 71.0, p15: 73.4, p50: 75.7, p85: 78.1, p97: 80.5 },
+};
+
+// Sample girl length percentiles (cm) by age in days
+const girlLengthPercentiles: { [key: number]: PercentileData } = {
+  0: { p3: 45.4, p15: 47.3, p50: 49.1, p85: 51.0, p97: 52.9 },
+  30: { p3: 49.8, p15: 51.7, p50: 53.7, p85: 55.6, p97: 57.6 },
+  60: { p3: 53.0, p15: 55.0, p50: 57.1, p85: 59.1, p97: 61.1 },
+  90: { p3: 55.6, p15: 57.8, p50: 59.8, p85: 61.9, p97: 64.0 },
+  180: { p3: 61.8, p15: 64.0, p50: 66.1, p85: 68.3, p97: 70.4 },
+  365: { p3: 68.9, p15: 71.4, p50: 73.7, p85: 76.0, p97: 78.4 },
 };
 
 function interpolate(age: number, data: { [key: number]: PercentileData }): PercentileData {
@@ -84,8 +102,8 @@ export function calculateWeightPercentile(
   sex: 'male' | 'female',
   weight: number
 ): number {
-  // For now, only boys data - in production would have both
-  const percentiles = interpolate(ageInDays, boyWeightPercentiles);
+  const data = sex === 'male' ? boyWeightPercentiles : girlWeightPercentiles;
+  const percentiles = interpolate(ageInDays, data);
   return Math.round(calculatePercentile(weight, percentiles));
 }
 
@@ -94,7 +112,8 @@ export function calculateLengthPercentile(
   sex: 'male' | 'female',
   length: number
 ): number {
-  const percentiles = interpolate(ageInDays, boyLengthPercentiles);
+  const data = sex === 'male' ? boyLengthPercentiles : girlLengthPercentiles;
+  const percentiles = interpolate(ageInDays, data);
   return Math.round(calculatePercentile(length, percentiles));
 }
 
@@ -112,7 +131,8 @@ export function getExpectedWeight(
   sex: 'male' | 'female',
   percentile: number
 ): number {
-  const percentiles = interpolate(ageInDays, boyWeightPercentiles);
+  const data = sex === 'male' ? boyWeightPercentiles : girlWeightPercentiles;
+  const percentiles = interpolate(ageInDays, data);
   
   if (percentile <= 3) return percentiles.p3;
   if (percentile <= 15) return percentiles.p15;

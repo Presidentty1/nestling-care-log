@@ -1047,6 +1047,84 @@ export type Database = {
           },
         ]
       }
+      parent_medications: {
+        Row: {
+          created_at: string | null
+          dosage: string | null
+          end_date: string | null
+          frequency: string | null
+          id: string
+          is_active: boolean | null
+          medication_name: string
+          note: string | null
+          start_date: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          medication_name: string
+          note?: string | null
+          start_date: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          medication_name?: string
+          note?: string | null
+          start_date?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parent_wellness_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          log_date: string
+          mood: string | null
+          note: string | null
+          sleep_quality: string | null
+          updated_at: string | null
+          user_id: string
+          water_intake_ml: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          log_date: string
+          mood?: string | null
+          note?: string | null
+          sleep_quality?: string | null
+          updated_at?: string | null
+          user_id: string
+          water_intake_ml?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          log_date?: string
+          mood?: string | null
+          note?: string | null
+          sleep_quality?: string | null
+          updated_at?: string | null
+          user_id?: string
+          water_intake_ml?: number | null
+        }
+        Relationships: []
+      }
       prediction_feedback: {
         Row: {
           comments: string | null
