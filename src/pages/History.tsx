@@ -16,6 +16,9 @@ import { babyService } from '@/services/babyService';
 import { toast } from 'sonner';
 import { startOfDay, endOfDay } from 'date-fns';
 import { DailySummary } from '@/types/summary';
+import { DoctorShareModal } from '@/components/DoctorShareModal';
+import { Share } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function History() {
   const { activeBabyId } = useAppStore();
@@ -23,8 +26,11 @@ export default function History() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [babyName, setBabyName] = useState<string>('');
+  const [babySex, setBabySex] = useState<string>('');
+  const [babyBirthDate, setBabyBirthDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [showDoctorShareModal, setShowDoctorShareModal] = useState(false);
 
   useEffect(() => {
     if (!activeBabyId) return;
@@ -39,7 +45,11 @@ export default function History() {
   const loadBaby = async () => {
     if (!activeBabyId) return;
     const baby = await babyService.getBaby(activeBabyId);
-    if (baby) setBabyName(baby.name);
+    if (baby) {
+      setBabyName(baby.name);
+      setBabySex(baby.sex || '');
+      setBabyBirthDate(baby.date_of_birth);
+    }
   };
 
   const loadDayData = async () => {
@@ -100,6 +110,14 @@ export default function History() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-headline">History</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDoctorShareModal(true)}
+          >
+            <Share className="h-4 w-4 mr-2" />
+            Share with Doctor
+          </Button>
         </div>
 
         {/* Day Strip with Calendar */}
@@ -167,6 +185,18 @@ export default function History() {
         )}
       </div>
       <MobileNav />
+
+      {/* Doctor Share Modal */}
+      {activeBabyId && (
+        <DoctorShareModal
+          open={showDoctorShareModal}
+          onOpenChange={setShowDoctorShareModal}
+          babyId={activeBabyId}
+          babyName={babyName}
+          babySex={babySex}
+          babyBirthDate={babyBirthDate}
+        />
+      )}
     </div>
   );
 }

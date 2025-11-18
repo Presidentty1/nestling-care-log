@@ -26,7 +26,10 @@ import { triggerConfetti } from '@/lib/confetti';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
 import { useLastUsedValues } from '@/hooks/useLastUsedValues';
-import { Lock, Users, X } from 'lucide-react';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
+import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
+import { ContextualTipCard } from '@/components/ContextualTipCard';
+import { getContextualTips } from '@/lib/contextualTips';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -48,6 +51,7 @@ export default function Home() {
   const privacyBanner = useDismissibleBanner('privacy_stance');
   const caregiverBanner = useDismissibleBanner('caregiver_invite');
   const { getLastUsed, saveLastUsed } = useLastUsedValues();
+  const [dismissedTips, setDismissedTips] = useState<string[]>([]);
 
   useKeyboardShortcuts({
     escape: () => setModalState({ open: false, type: 'feed' }),

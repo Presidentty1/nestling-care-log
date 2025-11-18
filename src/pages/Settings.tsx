@@ -5,8 +5,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store/appStore';
-import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles } from 'lucide-react';
+import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export default function Settings() {
   const navigate = useNavigate();

@@ -44,6 +44,7 @@ const Accessibility = lazy(() => import("./pages/Accessibility"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const PrivacyCenter = lazy(() => import("./pages/PrivacyCenter"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const ParentWellness = lazy(() => import("./pages/ParentWellness"));
 
 // Suspense wrapper for lazy loaded routes
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
@@ -129,6 +130,7 @@ function AppContent() {
         <Route path="/accessibility" element={<SuspenseWrapper><Accessibility /></SuspenseWrapper>} />
         <Route path="/feedback" element={<SuspenseWrapper><Feedback /></SuspenseWrapper>} />
         <Route path="/privacy" element={<SuspenseWrapper><Privacy /></SuspenseWrapper>} />
+        <Route path="/parent-wellness" element={<SuspenseWrapper><AuthGuard><ParentWellness /></AuthGuard></SuspenseWrapper>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
