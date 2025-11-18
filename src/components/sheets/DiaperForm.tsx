@@ -104,7 +104,11 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
           onChange={(e) => setNote(e.target.value)}
           placeholder="Any observations..."
           className="min-h-[100px] text-base resize-none"
+          maxLength={500}
         />
+        {note.length > 0 && (
+          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+        )}
       </div>
     </form>
   );

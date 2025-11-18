@@ -73,7 +73,7 @@
 ### Database Tables (Primary)
 
 #### Core Data
-- `profiles` - User profile information
+- `profiles` - User profile information (includes `ai_data_sharing_enabled` for consent)
 - `families` - Family groups for multi-caregiver support
 - `family_members` - User-to-family relationships with roles
 - `babies` - Baby profiles (name, DOB, settings)
@@ -84,6 +84,8 @@
 - `ai_messages` - Individual chat messages
 - `predictions` - AI-generated predictions (nap times, feeding)
 - `nap_feedback` - User feedback on nap prediction accuracy
+- `cry_logs` - Cry analysis sessions
+- `behavior_patterns` - Detected behavioral patterns
 
 #### Extended Features
 - `growth_records` - Weight, length, head circumference
@@ -95,25 +97,48 @@
 
 ### Edge Functions
 
-| Function | Purpose | Called From |
-|----------|---------|-------------|
-| `bootstrap-user` | Creates family and default baby on signup | Auth trigger |
-| `ai-assistant` | Handles AI chat via Lovable AI (Gemini) | `useAIChat` hook |
-| `calculate-nap-window` | Calculates next nap prediction | `napPredictorService.ts` |
-| `generate-predictions` | General prediction generation | `Predictions.tsx` |
-| `analyze-cry-pattern` | Analyzes cry audio (prototype) | `CryRecorder.tsx` |
-| `generate-weekly-summary` | Creates weekly recap | `WeeklyReports.tsx` |
-| `generate-monthly-recap` | Creates monthly recap | `WeeklyReports.tsx` |
-| `invite-caregiver` | Sends caregiver invite emails | `CaregiverManagement.tsx` |
-| `process-voice-command` | Parses voice logs (future) | `VoiceLogModal.tsx` |
+| Function | Purpose | Called From | AI Consent |
+|----------|---------|-------------|------------|
+| `bootstrap-user` | Creates family and default baby on signup | Auth trigger | N/A |
+| `ai-assistant` | Handles AI chat via Lovable AI (Gemini) | `useAIChat` hook | ✅ Required |
+| `calculate-nap-window` | Calculates next nap prediction | `napPredictorService.ts` | N/A |
+| `generate-predictions` | General prediction generation | `Predictions.tsx` | ✅ Required |
+| `analyze-cry-pattern` | Analyzes cry audio (prototype) | `CryRecorder.tsx` | ✅ Required |
+| `generate-weekly-summary` | Creates weekly recap | `WeeklyReports.tsx` | N/A |
+| `generate-monthly-recap` | Creates monthly recap | `WeeklyReports.tsx` | N/A |
+| `invite-caregiver` | Sends caregiver invite emails | `CaregiverManagement.tsx` | N/A |
+| `process-voice-command` | Parses voice logs | `VoiceLogModal.tsx` | N/A |
+
+**AI Consent Enforcement**: Edge functions marked with ✅ check the user's `ai_data_sharing_enabled` flag from the `profiles` table before processing. If disabled, they return an error message without calling external AI services.
 
 ### Storage Buckets
 - `journal-media` - Journal photos and videos (private)
 - `videos` - Generated recap videos (private)
 
 ### Real-time Subscriptions
-- Events table: Live updates for multi-caregiver sync
-- Implementation: `src/hooks/useRealtimeEvents.ts`
+- **Table**: `events`
+- **Purpose**: Multi-caregiver sync - when one caregiver logs an event, others see it instantly
+- **Implementation**: `src/hooks/useRealtimeEvents.ts`
+- Subscribes to postgres_changes on the events table
+- Filters by family_id to only receive relevant events
+
+### AI Data Sharing & Consent
+
+**Storage**: User consent is stored in `profiles.ai_data_sharing_enabled` (boolean, default true)
+
+**Service**: `src/services/aiPreferencesService.ts` manages consent in both localStorage and Supabase
+
+**Settings Page**: `/settings/ai-data-sharing` provides clear toggle with explanation of data usage
+
+**Enforcement**:
+- Edge functions check consent before processing (see table above)
+- Frontend pages show disabled UI when consent is off:
+  - `Predictions.tsx` - "Enable AI features" message with link
+  - `CryInsights.tsx` - Disabled cry analysis with explanation
+  - `AIAssistant.tsx` - Input disabled with inline message
+- Disabled states include clear explanations and links to settings
+
+**Medical Disclaimers**: Applied consistently across AI-powered pages using `<MedicalDisclaimer>` component with variants (`ai`, `sleep`, `predictions`)
 
 ## State Management
 
@@ -133,12 +158,20 @@
 
 ## Key Services
 
-- `src/services/eventsService.ts` - CRUD operations for baby events
-- `src/services/babyService.ts` - Baby profile management
-- `src/services/napPredictorService.ts` - Nap window calculations
-- `src/services/dataService.ts` - IndexedDB fallback (legacy)
-- `src/services/analyticsService.ts` - Event aggregation and analysis
-- `src/services/notificationManager.ts` - Local notification scheduling
+| Service | Purpose |
+|---------|---------|
+| `eventsService.ts` | CRUD operations for baby events (feed, diaper, sleep) |
+| `babyService.ts` | Baby profile management |
+| `napPredictorService.ts` | Calculate nap windows based on age/history |
+| `reminderService.ts` | Schedule local notifications |
+| `offlineQueue.ts` | Queue mutations when offline |
+| `dataService.ts` | Export/import data (CSV, JSON, IndexedDB fallback) |
+| `aiPreferencesService.ts` | Manage AI data sharing consent (localStorage + Supabase) |
+| `streakService.ts` | Track daily logging streaks |
+| `trialService.ts` | Manage free trial state |
+| `guestModeService.ts` | Handle guest/demo mode data |
+| `analyticsService.ts` | Event aggregation and analysis |
+| `notificationManager.ts` | Local notification scheduling |
 
 ## Design System
 

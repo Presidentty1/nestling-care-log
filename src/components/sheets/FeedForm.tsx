@@ -156,7 +156,9 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
             <Input
               id="amount"
               type="number"
+              inputMode="decimal"
               step="0.5"
+              min="0"
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -189,7 +191,11 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
           onChange={(e) => setNote(e.target.value)}
           placeholder="Any observations..."
           className="min-h-[100px] text-base resize-none"
+          maxLength={500}
         />
+        {note.length > 0 && (
+          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+        )}
       </div>
     </form>
   );
