@@ -16,6 +16,7 @@ export function useAIChat(baby: Baby | null) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const { data: messages = [] } = useQuery({
     queryKey: ['ai-messages', conversationId],
@@ -114,13 +115,25 @@ export function useAIChat(baby: Baby | null) {
       return data;
     },
     onSuccess: () => {
+      setError(null);
       queryClient.invalidateQueries({ queryKey: ['ai-messages', conversationId] });
     },
     onError: (error: any) => {
       console.error('Send message error:', error);
+      setError(error);
+      
+      const errorMessage = error.message?.toLowerCase() || '';
+      let description = "We couldn't send your message. Please try again.";
+      
+      if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        description = "Check your internet connection and try again.";
+      } else if (errorMessage.includes('not found')) {
+        description = "AI assistant is temporarily unavailable. Try again soon.";
+      }
+      
       toast({
-        title: 'Failed to send message',
-        description: error.message || 'Please try again.',
+        title: 'Message not sent',
+        description,
         variant: 'destructive',
       });
     },
@@ -134,5 +147,6 @@ export function useAIChat(baby: Baby | null) {
     messages,
     isLoading: sendMessageMutation.isPending,
     sendMessage,
+    error,
   };
 }

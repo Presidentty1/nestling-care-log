@@ -5,9 +5,12 @@ import { BabySelector } from '@/components/BabySelector';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Clock, TrendingUp, RefreshCw } from 'lucide-react';
+import { Clock, TrendingUp, RefreshCw, Baby as BabyIcon } from 'lucide-react';
 import { Baby } from '@/lib/types';
 import { format, formatDistanceToNow } from 'date-fns';
+import { LoadingCard } from '@/components/common/LoadingSpinner';
+import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorState } from '@/components/common/ErrorState';
 
 export default function NapPredictor() {
   const { toast } = useToast();
@@ -32,7 +35,7 @@ export default function NapPredictor() {
     },
   });
 
-  const { data: prediction, isLoading } = useQuery({
+  const { data: prediction, isLoading, error, refetch } = useQuery({
     queryKey: ['nap-prediction', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return null;
@@ -45,6 +48,7 @@ export default function NapPredictor() {
       return data;
     },
     enabled: !!selectedBabyId,
+    retry: 2,
   });
 
   const refreshMutation = useMutation({
@@ -92,16 +96,23 @@ export default function NapPredictor() {
         </div>
 
         {!selectedBabyId && (
-          <Card className="p-6 text-center text-muted-foreground">
-            Select a baby to view nap predictions
-          </Card>
+          <EmptyState
+            icon={BabyIcon}
+            title="Ready to predict naps?"
+            description="Select a baby above to see their personalized nap window predictions based on their sleep patterns."
+          />
         )}
 
         {selectedBabyId && isLoading && (
-          <Card className="p-6 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
-            <p>Calculating nap window...</p>
-          </Card>
+          <LoadingCard text="Analyzing sleep patterns..." />
+        )}
+
+        {selectedBabyId && error && (
+          <ErrorState
+            title="Can't load predictions right now"
+            message="We're having trouble analyzing the nap window. This happens sometimes—give it another try."
+            onRetry={() => refetch()}
+          />
         )}
 
         {selectedBabyId && prediction && (

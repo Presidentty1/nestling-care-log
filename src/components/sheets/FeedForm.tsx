@@ -3,9 +3,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Milk } from 'lucide-react';
+import { Milk, AlertCircle } from 'lucide-react';
 import { CreateEventData, eventsService } from '@/services/eventsService';
 import { unitConversion } from '@/services/unitConversion';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface FeedFormProps {
   babyId: string;
@@ -21,6 +23,7 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
   const [amount, setAmount] = useState<string>(prefillData?.amount?.toString() || '');
   const [unit, setUnit] = useState<'ml' | 'oz'>(prefillData?.unit || 'oz');
   const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingEventId) {
@@ -63,6 +66,7 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
     e.preventDefault();
     if (!validate()) return;
 
+    setError(null);
     const data: Partial<CreateEventData> = {
       type: 'feed',
       subtype: feedType,
@@ -79,11 +83,26 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
       data.unit = unit;
     }
 
-    onSubmit(data);
+    try {
+      onSubmit(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not save feeding';
+      setError(message);
+      toast.error('Failed to log feed');
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error}. Check your connection and try again.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Feed Type Selection */}
       <div className="space-y-3">
         <Label className="text-base font-medium">Feed Type</Label>
