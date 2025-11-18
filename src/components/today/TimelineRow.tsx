@@ -92,26 +92,30 @@ export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }
   };
 
   return (
-    <button
-      onClick={onEdit}
-      className="w-full min-h-[64px] flex items-center gap-4 px-4 py-3 rounded-md hover:bg-accent/50 active:scale-[0.99] transition-all duration-100 text-left"
+    <div
+      className="w-full min-h-[64px] flex items-center gap-4 px-4 py-3 rounded-md hover:bg-accent/50 active:scale-[0.99] transition-all duration-100 cursor-pointer"
       style={{ minHeight: '44px' }}
     >
-      <div className="flex-shrink-0">
-        {getIcon()}
-      </div>
-
-      <div className="flex-1 min-w-0 space-y-1">
-        <div className="text-[17px] leading-[24px] font-medium truncate">
-          {getTitle()}
+      <div 
+        className="flex-shrink-0 flex items-center gap-4 flex-1 min-w-0"
+        onClick={onEdit}
+      >
+        <div className="flex-shrink-0">
+          {getIcon()}
         </div>
-        {event.note && (
-          <Badge variant="secondary" className="text-[13px] leading-[18px] font-normal">
-            {event.note}
-          </Badge>
-        )}
-        <div className="text-[14px] leading-[20px] text-text-subtle">
-          {getTimeDisplay()}
+
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="text-[17px] leading-[24px] font-medium truncate">
+            {getTitle()}
+          </div>
+          {event.note && (
+            <Badge variant="secondary" className="text-[13px] leading-[18px] font-normal">
+              {event.note}
+            </Badge>
+          )}
+          <div className="text-[14px] leading-[20px] text-text-subtle">
+            {getTimeDisplay()}
+          </div>
         </div>
       </div>
 
@@ -120,11 +124,11 @@ export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }
           <Button
             variant="ghost"
             size="sm"
-            className="h-10 w-10 p-0"
+            className="h-10 w-10 p-0 flex-shrink-0"
             onClick={(e) => e.stopPropagation()}
+            aria-label="Event options"
           >
             <MoreVertical className="h-5 w-5" />
-            <span className="sr-only">Options</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -145,7 +149,7 @@ export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </button>
+    </div>
   );
 }, (prevProps, nextProps) => {
   return prevProps.event.id === nextProps.event.id &&
