@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Play, Square, Moon } from 'lucide-react';
+import { Play, Square, Moon, AlertCircle } from 'lucide-react';
 import { CreateEventData, eventsService } from '@/services/eventsService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface SleepFormProps {
   babyId: string;
@@ -21,6 +23,7 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [note, setNote] = useState('');
   const [elapsed, setElapsed] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingEventId) {
@@ -77,21 +80,28 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
     e.preventDefault();
     if (!validate()) return;
 
+    setError(null);
     const start = startTime!;
     const end = endTime!;
 
     const durationSec = Math.floor((end.getTime() - start.getTime()) / 1000);
     const durationMin = Math.floor(durationSec / 60);
 
-    onSubmit({
-      type: 'sleep',
-      subtype,
-      start_time: start.toISOString(),
-      end_time: end.toISOString(),
-      duration_sec: durationSec,
-      duration_min: durationMin,
-      note: note || undefined,
-    });
+    try {
+      onSubmit({
+        type: 'sleep',
+        subtype,
+        start_time: start.toISOString(),
+        end_time: end.toISOString(),
+        duration_sec: durationSec,
+        duration_min: durationMin,
+        note: note || undefined,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not save sleep log';
+      setError(message);
+      toast.error('Failed to log sleep');
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -103,6 +113,15 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error}. Please try saving again.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Type Selection */}
       <div className="space-y-2">
         <Label className="text-base font-medium">Sleep Type</Label>

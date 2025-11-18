@@ -3,7 +3,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { CreateEventData, eventsService } from '@/services/eventsService';
-import { Droplet, Circle } from 'lucide-react';
+import { Droplet, Circle, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface DiaperFormProps {
   babyId: string;
@@ -16,6 +18,7 @@ interface DiaperFormProps {
 export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: DiaperFormProps) {
   const [subtype, setSubtype] = useState<'wet' | 'dirty' | 'both'>(prefillData?.subtype || 'wet');
   const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingEventId) {
@@ -41,12 +44,19 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
     e.preventDefault();
     if (!validate()) return;
 
-    onSubmit({
-      type: 'diaper',
-      subtype,
-      start_time: new Date().toISOString(),
-      note: note || undefined,
-    });
+    setError(null);
+    try {
+      onSubmit({
+        type: 'diaper',
+        subtype,
+        start_time: new Date().toISOString(),
+        note: note || undefined,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not save diaper change';
+      setError(message);
+      toast.error('Failed to log diaper change');
+    }
   };
 
   const getIcon = (type: 'wet' | 'dirty' | 'both') => {
@@ -57,6 +67,15 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error}. Please try saving again.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Type Selection */}
       <div className="space-y-3">
         <Label className="text-base font-medium">Type</Label>

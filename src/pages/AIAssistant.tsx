@@ -10,8 +10,9 @@ import { QuickQuestions } from '@/components/QuickQuestions';
 import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { MobileNav } from '@/components/MobileNav';
 import { useAIChat } from '@/hooks/useAIChat';
-import { ArrowLeft, Send, Loader2, Bot, User } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Bot, User, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function AIAssistant() {
 
   const selectedBaby = babies?.find(b => b.id === selectedBabyId) || null;
 
-  const { messages, isLoading, sendMessage } = useAIChat(selectedBaby);
+  const { messages, isLoading, sendMessage, error: chatError } = useAIChat(selectedBaby);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -105,15 +106,23 @@ export default function AIAssistant() {
           <div className="space-y-4 mb-6">
             <Card className="p-6 text-center">
               <Bot className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <h3 className="font-semibold mb-2">Hi! I'm Nestling AI</h3>
-              <p className="text-sm text-muted-foreground">
-                I can help answer questions about baby sleep, feeding, development, and general care.
-                Ask me anything!
+              <h3 className="font-semibold mb-2 text-foreground">Hi! I'm here to help</h3>
+              <p className="text-caption text-muted-foreground max-w-md mx-auto">
+                Ask me anything about baby care, feeding schedules, sleep tips, or developmental milestones. I'm here to support you.
               </p>
             </Card>
 
             <QuickQuestions onQuestionSelect={handleQuickQuestion} />
           </div>
+        )}
+
+        {chatError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Having trouble connecting. Check your internet and try asking again.
+            </AlertDescription>
+          </Alert>
         )}
 
         <div className="space-y-4 mb-4">
