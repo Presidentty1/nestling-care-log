@@ -203,17 +203,19 @@ export default function Auth() {
             </TabsContent>
           </Tabs>
 
-          {/* TEMP: Development skip button */}
-          <div className="mt-4 pt-4 border-t">
-            <Button 
-              variant="ghost" 
-              className="w-full text-muted-foreground hover:text-foreground"
-              onClick={handleSkipLogin}
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Skip Login (Dev Only)'}
-            </Button>
-          </div>
+          {/* Development skip button - only shown in dev mode */}
+          {import.meta.env.DEV && (
+            <div className="mt-4 pt-4 border-t">
+              <Button 
+                variant="ghost" 
+                className="w-full text-muted-foreground hover:text-foreground"
+                onClick={handleSkipLogin}
+                disabled={loading}
+              >
+                {loading ? 'Signing in...' : 'Skip Login (Dev Only)'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

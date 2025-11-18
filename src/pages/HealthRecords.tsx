@@ -16,6 +16,7 @@ import { VaccineScheduleView } from '@/components/VaccineScheduleView';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Plus, Thermometer, Stethoscope, Syringe, AlertCircle } from 'lucide-react';
+import { validateHealthRecord } from '@/services/validation';
 
 export default function HealthRecords() {
   const { user } = useAuth();
@@ -108,7 +109,13 @@ export default function HealthRecords() {
         recordData.treatment = formData.treatment || null;
       }
 
-      const { error } = await supabase.from('health_records').insert(recordData);
+      const validationResult = validateHealthRecord(recordData);
+      if (!validationResult.success) {
+        toast.error(validationResult.error.issues[0].message);
+        return;
+      }
+
+      const { error } = await supabase.from('health_records').insert(validationResult.data);
 
       if (error) throw error;
 
