@@ -7,23 +7,51 @@ import { useAppStore } from '@/store/appStore';
 import { format, subDays } from 'date-fns';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { guestModeService } from '@/services/guestModeService';
+import { dataService } from '@/services/dataService';
 
 export function useOnboarding() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { setActiveBabyId } = useAppStore();
+  const { setActiveBabyId, setGuestMode } = useAppStore();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
     
+    // Check if guest mode
+    checkGuestMode();
+    
     if (!user) {
-      navigate('/auth');
+      // Allow guest mode - go to home
+      navigate('/home');
       return;
     }
 
     checkAndSetupUser();
   }, [user, authLoading]);
+
+  const checkGuestMode = async () => {
+    const isGuest = await guestModeService.isGuestMode();
+    if (isGuest) {
+      setGuestMode(true);
+      const guestBaby = await guestModeService.getGuestBaby();
+      if (!guestBaby) {
+        // Create guest baby
+        const baby = await dataService.addBaby({
+          name: 'Demo Baby',
+          dobISO: format(subDays(new Date(), 60), 'yyyy-MM-dd'),
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          units: 'imperial',
+        });
+        await guestModeService.setGuestBaby(baby);
+        setActiveBabyId(baby.id);
+      } else {
+        setActiveBabyId(guestBaby.id);
+      }
+      setChecking(false);
+    }
+  };
 
   const checkAndSetupUser = async () => {
     try {
