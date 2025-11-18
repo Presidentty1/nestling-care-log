@@ -4,8 +4,10 @@ import { persist } from 'zustand/middleware';
 interface AppState {
   activeBabyId: string | null;
   caregiverMode: boolean;
+  guestMode: boolean;
   setActiveBabyId: (id: string | null) => void;
   setCaregiverMode: (enabled: boolean) => void;
+  setGuestMode: (enabled: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -13,6 +15,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       activeBabyId: null,
       caregiverMode: false,
+      guestMode: false,
       setActiveBabyId: (id) => set({ activeBabyId: id }),
       setCaregiverMode: (enabled) => {
         set({ caregiverMode: enabled });
@@ -25,6 +28,7 @@ export const useAppStore = create<AppState>()(
           }
         }
       },
+      setGuestMode: (enabled) => set({ guestMode: enabled }),
     }),
     {
       name: 'nestling-app-store',

@@ -30,11 +30,21 @@ import { Lock, Users, X } from 'lucide-react';
 import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { ContextualTipCard } from '@/components/ContextualTipCard';
 import { getContextualTips } from '@/lib/contextualTips';
+import { GuestModeBanner } from '@/components/GuestModeBanner';
+import { StreakCounter } from '@/components/StreakCounter';
+import { DailyAffirmation } from '@/components/DailyAffirmation';
+import { TrialCountdown } from '@/components/TrialCountdown';
+import { TrialStartModal } from '@/components/TrialStartModal';
+import { guestModeService } from '@/services/guestModeService';
+import { streakService } from '@/services/streakService';
+import { achievementService } from '@/services/achievementService';
+import { trialService } from '@/services/trialService';
+import { dataService } from '@/services/dataService';
 
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { activeBabyId, setActiveBabyId } = useAppStore();
+  const { activeBabyId, setActiveBabyId, guestMode } = useAppStore();
   const [babies, setBabies] = useState<Baby[]>([]);
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
   const [events, setEvents] = useState<EventRecord[]>([]);
@@ -47,6 +57,10 @@ export default function Home() {
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
+  const [streakDays, setStreakDays] = useState(0);
+  const [showGuestBanner, setShowGuestBanner] = useState(false);
+  const [showAffirmation, setShowAffirmation] = useState(false);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState<number | null>(null);
   
   const privacyBanner = useDismissibleBanner('privacy_stance');
   const caregiverBanner = useDismissibleBanner('caregiver_invite');
@@ -59,14 +73,18 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (user) {
+    if (guestMode) {
+      loadGuestMode();
+    } else if (user) {
       loadBabies();
     }
-  }, [user]);
+  }, [user, guestMode]);
 
   useEffect(() => {
     if (activeBabyId) {
       loadBabyData();
+      loadStreakData();
+      checkTrialStatus();
     }
   }, [activeBabyId]);
 
@@ -77,6 +95,42 @@ export default function Home() {
         if (events.length === 0 && !hasShownConfetti) {
           triggerConfetti();
           setHasShownConfetti(true);
+        }
+        
+        // Increment guest event count and update streak
+        if (guestMode) {
+          guestModeService.incrementGuestEventCount().then(count => {
+            if (count >= 3) setShowGuestBanner(true);
+          });
+        }
+        
+        if (data && activeBabyId) {
+          const event = data as EventRecord;
+          // Update streak
+          const today = format(new Date(), 'yyyy-MM-dd');
+          streakService.markEventLogged(activeBabyId, today, event.type).then(() => {
+            streakService.updateStreak(activeBabyId).then(streak => {
+              setStreakDays(streak.currentStreak);
+              // Check for achievements
+              achievementService.checkAndUnlockAchievements(activeBabyId, {
+                streakDays: streak.currentStreak,
+                eventType: event.type,
+                eventTime: new Date(event.start_time),
+              }).then(newAchievements => {
+                newAchievements.forEach(achievement => {
+                  toast.success(`Achievement unlocked: ${achievement.title}!`, {
+                    description: achievement.description,
+                    icon: achievement.icon,
+                  });
+                });
+              });
+            });
+          });
+          
+          // Check for daily affirmation
+          streakService.shouldShowAffirmation(activeBabyId).then(should => {
+            if (should) setShowAffirmation(true);
+          });
         }
         
         // Save last used values for quick log
@@ -103,6 +157,39 @@ export default function Home() {
     });
     return unsubscribe;
   }, [activeBabyId, events.length, hasShownConfetti, modalState.editingId]);
+
+  const loadGuestMode = async () => {
+    const guestBaby = await guestModeService.getGuestBaby();
+    if (!guestBaby) {
+      await guestModeService.enableGuestMode();
+      const baby = await dataService.addBaby({
+        name: 'Demo Baby',
+        dobISO: format(subDays(new Date(), 60), 'yyyy-MM-dd'),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        units: 'imperial',
+      });
+      await guestModeService.setGuestBaby(baby);
+      setActiveBabyId(baby.id);
+    } else {
+      setActiveBabyId(guestBaby.id);
+    }
+    
+    const count = await guestModeService.getGuestEventCount();
+    setShowGuestBanner(count >= 3);
+    setLoading(false);
+  };
+
+  const loadStreakData = async () => {
+    if (!activeBabyId) return;
+    const streak = await streakService.getStreak(activeBabyId);
+    setStreakDays(streak.currentStreak);
+  };
+
+  const checkTrialStatus = async () => {
+    if (!activeBabyId || !selectedBaby) return;
+    const daysRemaining = await trialService.getTrialDaysRemaining();
+    setTrialDaysRemaining(daysRemaining);
+  };
 
   const loadBabies = async () => {
     try {
@@ -303,8 +390,14 @@ export default function Home() {
                 </div>
               </div>
             </Button>
+            <div className="flex items-center gap-2">
+              {trialDaysRemaining !== null && <TrialCountdown daysRemaining={trialDaysRemaining} />}
+              {streakDays > 0 && <StreakCounter days={streakDays} />}
+            </div>
           </div>
         )}
+
+        {guestMode && showGuestBanner && <GuestModeBanner />}
 
         {summary && (
           <SummaryChips summary={summary} />
