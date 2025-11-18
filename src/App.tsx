@@ -46,7 +46,6 @@ const PrivacyCenter = lazy(() => import("./pages/PrivacyCenter"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const ParentWellness = lazy(() => import("./pages/ParentWellness"));
 const Achievements = lazy(() => import("./pages/Achievements"));
-const Achievements = lazy(() => import("./pages/Achievements"));
 
 // Suspense wrapper for lazy loaded routes
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
