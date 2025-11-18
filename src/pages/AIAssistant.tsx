@@ -10,16 +10,28 @@ import { QuickQuestions } from '@/components/QuickQuestions';
 import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { MobileNav } from '@/components/MobileNav';
 import { useAIChat } from '@/hooks/useAIChat';
-import { ArrowLeft, Send, Loader2, Bot, User, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Bot, User, AlertCircle, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { aiPreferencesService } from '@/services/aiPreferencesService';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+
+  const { data: aiEnabled } = useQuery({
+    queryKey: ['ai-preferences', user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      return await aiPreferencesService.canUseAI(user.id);
+    },
+    enabled: !!user,
+  });
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -102,6 +114,24 @@ export default function AIAssistant() {
       <div className="container mx-auto p-4 max-w-3xl">
         <MedicalDisclaimer variant="ai" className="sticky top-0 z-10 bg-background/95 backdrop-blur" />
 
+        {aiEnabled === false && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>AI Assistant is disabled. Enable AI features in Settings to ask questions.</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/settings/ai-data-sharing')}
+                className="ml-2"
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                Settings
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {messages.length === 0 && (
           <div className="space-y-4 mb-6">
             <Card className="p-6 text-center">
@@ -176,10 +206,10 @@ export default function AIAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask a question..."
-            disabled={isLoading}
+            placeholder={aiEnabled === false ? "Enable AI features to chat..." : "Ask a question..."}
+            disabled={isLoading || aiEnabled === false}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading || aiEnabled === false}>
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>

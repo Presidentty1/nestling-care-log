@@ -109,9 +109,7 @@ export default function SleepTraining() {
       </div>
 
       <div className="container mx-auto p-4 space-y-4">
-        <MedicalDisclaimer variant="sleep" />
-
-        {unresolvedRegressions && unresolvedRegressions.length > 0 && (
+        {activeSession && (
           <Card className="p-4 border-orange-500 bg-orange-50 dark:bg-orange-950">
             <div className="flex items-start gap-3">
               <Moon className="h-5 w-5 text-orange-600 mt-0.5" />

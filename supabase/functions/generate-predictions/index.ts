@@ -19,6 +19,30 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
+    // Check AI consent from user
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabaseClient.auth.getUser(token);
+      
+      if (user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('ai_data_sharing_enabled')
+          .eq('id', user.id)
+          .single();
+        
+        if (!profile?.ai_data_sharing_enabled) {
+          return new Response(JSON.stringify({ 
+            error: 'AI features are disabled. Enable in Settings → AI & Data Sharing.' 
+          }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+
     // Get recent events for pattern analysis
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
