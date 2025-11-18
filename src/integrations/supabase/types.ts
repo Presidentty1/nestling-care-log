@@ -1671,7 +1671,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      refresh_daily_summaries: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "member" | "viewer"
