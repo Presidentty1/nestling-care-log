@@ -12,12 +12,26 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Settings } from 'lucide-react';
+import { aiPreferencesService } from '@/services/aiPreferencesService';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Predictions() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
+
+  const { data: aiEnabled } = useQuery({
+    queryKey: ['ai-preferences', user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      return await aiPreferencesService.canUseAI(user.id);
+    },
+    enabled: !!user,
+  });
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -120,10 +134,28 @@ export default function Predictions() {
       <div className="container mx-auto p-4 space-y-4 max-w-2xl">
         <MedicalDisclaimer variant="predictions" />
 
+        {aiEnabled === false && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>AI predictions are disabled. Enable in Settings to use this feature.</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/settings/ai-data-sharing')}
+                className="ml-2"
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                Settings
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => generatePredictionMutation.mutate('next_feed')}
-            disabled={generatePredictionMutation.isPending}
+            disabled={generatePredictionMutation.isPending || aiEnabled === false}
             variant="outline"
           >
             {generatePredictionMutation.isPending ? (
@@ -135,7 +167,7 @@ export default function Predictions() {
           </Button>
           <Button
             onClick={() => generatePredictionMutation.mutate('next_nap')}
-            disabled={generatePredictionMutation.isPending}
+            disabled={generatePredictionMutation.isPending || aiEnabled === false}
             variant="outline"
           >
             {generatePredictionMutation.isPending ? (
@@ -146,6 +178,11 @@ export default function Predictions() {
             Predict Next Nap
           </Button>
         </div>
+        {aiEnabled === false && (
+          <p className="text-xs text-muted-foreground text-center">
+            Enable AI in Settings to generate predictions
+          </p>
+        )}
 
         {predictions && predictions.length > 0 ? (
           predictions.map((prediction: any) => (

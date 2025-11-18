@@ -37,6 +37,22 @@ serve(async (req) => {
       });
     }
 
+    // Check AI consent
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('ai_data_sharing_enabled')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profile?.ai_data_sharing_enabled) {
+      return new Response(JSON.stringify({ 
+        error: 'AI Assistant is disabled. Enable AI features in Settings → AI & Data Sharing.' 
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // SECURITY: Validate input
     const body = await req.json();
     const { conversationId, messages, babyContext } = body;

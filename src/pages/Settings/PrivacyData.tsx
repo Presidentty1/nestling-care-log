@@ -104,6 +104,42 @@ export default function PrivacyData() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Your Data, Your Control</CardTitle>
+            <CardDescription>
+              Your baby's data is stored securely and never sold to third parties. 
+              You have full control to export, import, or delete your data at any time.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="pl-0 h-auto"
+              onClick={() => window.open('https://nestling.app/privacy', '_blank')}
+            >
+              Privacy Policy →
+            </Button>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="pl-0 h-auto"
+              onClick={() => window.open('https://nestling.app/terms', '_blank')}
+            >
+              Terms of Use →
+            </Button>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="pl-0 h-auto"
+              onClick={() => navigate('/settings/ai-data-sharing')}
+            >
+              AI & Data Sharing Settings →
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Download className="h-5 w-5" />
               Export Your Data (CSV)

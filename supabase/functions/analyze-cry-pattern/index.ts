@@ -14,6 +14,35 @@ serve(async (req) => {
   try {
     const { babyId, recentEvents, timeOfDay, timeSinceLastFeed, lastSleepDuration } = await req.json();
     
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    // Check AI consent from user
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabaseClient.auth.getUser(token);
+      
+      if (user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('ai_data_sharing_enabled')
+          .eq('id', user.id)
+          .single();
+        
+        if (!profile?.ai_data_sharing_enabled) {
+          return new Response(JSON.stringify({ 
+            error: 'Cry analysis is disabled. Enable AI features in Settings → AI & Data Sharing.' 
+          }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");

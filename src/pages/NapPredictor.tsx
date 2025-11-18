@@ -89,14 +89,14 @@ export default function NapPredictor() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 pb-20">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Nap Window Predictor</h1>
           <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
 
-        <MedicalDisclaimer variant="predictions" />
+        <MedicalDisclaimer variant="sleep" />
 
         {!selectedBabyId && (
           <EmptyState
