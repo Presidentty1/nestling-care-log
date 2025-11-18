@@ -13,10 +13,11 @@ interface DiaperFormProps {
   editingEventId?: string;
   onValidChange: (valid: boolean) => void;
   onSubmit: (data: Partial<CreateEventData>) => void;
+  prefillData?: any;
 }
 
-export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit }: DiaperFormProps) {
-  const [subtype, setSubtype] = useState<'wet' | 'dirty' | 'both'>('wet');
+export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: DiaperFormProps) {
+  const [subtype, setSubtype] = useState<'wet' | 'dirty' | 'both'>(prefillData?.subtype || 'wet');
   const [color, setColor] = useState('');
   const [texture, setTexture] = useState('');
   const [note, setNote] = useState('');

@@ -19,6 +19,7 @@ interface EventSheetProps {
   babyId: string;
   familyId: string;
   editingEventId?: string;
+  prefillData?: any;
 }
 
 export function EventSheet({
@@ -28,6 +29,7 @@ export function EventSheet({
   babyId,
   familyId,
   editingEventId,
+  prefillData,
 }: EventSheetProps) {
   const [isValid, setIsValid] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -93,6 +95,7 @@ export function EventSheet({
             editingEventId={editingEventId}
             onValidChange={setIsValid}
             onSubmit={handleSave}
+            prefillData={prefillData}
           />
         );
       case 'sleep':
@@ -102,6 +105,7 @@ export function EventSheet({
             editingEventId={editingEventId}
             onValidChange={setIsValid}
             onSubmit={handleSave}
+            prefillData={prefillData}
           />
         );
       case 'diaper':
@@ -111,6 +115,7 @@ export function EventSheet({
             editingEventId={editingEventId}
             onValidChange={setIsValid}
             onSubmit={handleSave}
+            prefillData={prefillData}
           />
         );
       case 'tummy_time':

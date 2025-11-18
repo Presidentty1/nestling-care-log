@@ -43,6 +43,7 @@ class NotificationManager {
           id: this.notificationIds.feed,
           schedule: { at: nextFeedTime },
           extra: { type: 'feed', babyId },
+          actionTypeId: 'FEED_ACTIONS',
         },
       ],
     });
@@ -67,6 +68,7 @@ class NotificationManager {
           id: this.notificationIds.nap,
           schedule: { at: reminderTime },
           extra: { type: 'nap', babyId },
+          actionTypeId: 'NAP_ACTIONS',
         },
       ],
     });
@@ -91,6 +93,7 @@ class NotificationManager {
           id: this.notificationIds.diaper,
           schedule: { at: nextReminderTime },
           extra: { type: 'diaper', babyId },
+          actionTypeId: 'DIAPER_ACTIONS',
         },
       ],
     });

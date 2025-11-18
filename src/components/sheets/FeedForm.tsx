@@ -16,9 +16,10 @@ interface FeedFormProps {
   editingEventId?: string;
   onValidChange: (valid: boolean) => void;
   onSubmit: (data: Partial<CreateEventData>) => void;
+  prefillData?: any;
 }
 
-export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit }: FeedFormProps) {
+export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: FeedFormProps) {
   const [segment, setSegment] = useState<'breast' | 'bottle' | 'pumping'>('breast');
   const [side, setSide] = useState<'left' | 'right' | 'both'>('left');
   const [bottleType, setBottleType] = useState<'formula' | 'breast_milk' | 'mixed'>('formula');
