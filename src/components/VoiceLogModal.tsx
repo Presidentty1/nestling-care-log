@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Mic, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,7 +28,8 @@ export function VoiceLogModal({ open, onOpenChange }: VoiceLogModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Voice Logging (Beta)
+            Voice Logging
+            <Badge variant="secondary">Coming Soon</Badge>
           </DialogTitle>
           <DialogDescription>
             Log activities hands-free using voice commands
