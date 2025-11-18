@@ -5,13 +5,43 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store/appStore';
-import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart } from 'lucide-react';
+import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart, MessageSquare, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { caregiverMode, setCaregiverMode } = useAppStore();
+  const { caregiverMode, setCaregiverMode, setActiveBabyId } = useAppStore();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear local state
+      localStorage.clear();
+      setActiveBabyId(null);
+      
+      toast.success('Signed out successfully');
+      navigate('/auth');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-surface pb-20">
@@ -85,6 +115,16 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Sparkles className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">AI Data Sharing</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/ai-assistant')}
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">AI Assistant Chat</span>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>

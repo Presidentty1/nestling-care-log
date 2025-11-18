@@ -85,11 +85,19 @@ export default function Predictions() {
         description: 'New prediction added successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Prediction error:', error);
+      
+      let errorMessage = 'Please try again later';
+      
+      // Check if it's a 404 or function not found error
+      if (error?.message?.includes('404') || error?.message?.includes('FunctionsRelayError')) {
+        errorMessage = 'Smart Predictions are still in development. This feature will be available soon!';
+      }
+      
       toast({
-        title: 'Failed to Generate Prediction',
-        description: 'Please try again later',
+        title: 'Prediction Unavailable',
+        description: errorMessage,
         variant: 'destructive',
       });
     },

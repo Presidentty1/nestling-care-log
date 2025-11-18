@@ -19,9 +19,12 @@ import { DailySummary } from '@/types/summary';
 import { DoctorShareModal } from '@/components/DoctorShareModal';
 import { Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EventSheet } from '@/components/sheets/EventSheet';
+import { EventType } from '@/types/events';
 
 export default function History() {
-  const { activeBabyId } = useAppStore();
+  const { activeBabyId, familyId: storeFamilyId } = useAppStore();
+  const [familyId, setFamilyId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [summary, setSummary] = useState<DailySummary | null>(null);
@@ -31,11 +34,16 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showDoctorShareModal, setShowDoctorShareModal] = useState(false);
+  const [editModalState, setEditModalState] = useState<{ open: boolean; event: EventRecord | null }>({
+    open: false,
+    event: null,
+  });
 
   useEffect(() => {
     if (!activeBabyId) return;
     loadBaby();
-  }, [activeBabyId]);
+    if (storeFamilyId) setFamilyId(storeFamilyId);
+  }, [activeBabyId, storeFamilyId]);
 
   useEffect(() => {
     if (!activeBabyId) return;
@@ -86,6 +94,15 @@ export default function History() {
     } catch (error) {
       toast.error("Couldn't remove that. Try again?");
     }
+  };
+
+  const handleEdit = (event: EventRecord) => {
+    setEditModalState({ open: true, event });
+  };
+
+  const handleEditClose = () => {
+    setEditModalState({ open: false, event: null });
+    loadDayData(); // Reload data after edit
   };
 
   if (!activeBabyId) {
@@ -177,7 +194,7 @@ export default function History() {
             <CardContent>
               <TimelineList
                 events={events}
-                onEdit={(eventId) => console.log('Edit:', eventId)}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
               />
             </CardContent>
@@ -195,6 +212,19 @@ export default function History() {
           babyName={babyName}
           babySex={babySex}
           babyBirthDate={babyBirthDate}
+        />
+      )}
+
+      {/* Edit Event Sheet */}
+      {activeBabyId && familyId && editModalState.event && (
+        <EventSheet
+          isOpen={editModalState.open}
+          onClose={handleEditClose}
+          eventType={editModalState.event.type as EventType}
+          babyId={activeBabyId}
+          familyId={familyId}
+          editingEventId={editModalState.event.id}
+          prefillData={editModalState.event}
         />
       )}
     </div>

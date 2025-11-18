@@ -1,16 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, X } from 'lucide-react';
 import { VoiceLogModal } from './VoiceLogModal';
 import { cn } from '@/lib/utils';
+import { aiPreferencesService } from '@/services/aiPreferencesService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FloatingActionButtonRadialProps {
   className?: string;
 }
 
 export function FloatingActionButtonRadial({ className }: FloatingActionButtonRadialProps) {
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
+
+  useEffect(() => {
+    const checkAIConsent = async () => {
+      if (!user) return;
+      const canUse = await aiPreferencesService.canUseAI(user.id);
+      setAiEnabled(canUse);
+    };
+    checkAIConsent();
+  }, [user]);
 
   const handleMainClick = () => {
     setIsExpanded(!isExpanded);
@@ -24,6 +37,11 @@ export function FloatingActionButtonRadial({ className }: FloatingActionButtonRa
   const handleCancel = () => {
     setIsExpanded(false);
   };
+
+  // Don't show FAB if AI is disabled
+  if (!aiEnabled) {
+    return null;
+  }
 
   return (
     <>
