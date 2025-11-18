@@ -3,11 +3,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mic, AlertCircle } from 'lucide-react';
+import { Mic, AlertCircle, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { aiPreferencesService } from '@/services/aiPreferencesService';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Labs() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const { data: aiEnabled } = useQuery({
+    queryKey: ['ai-preferences', user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      return await aiPreferencesService.canUseAI(user.id);
+    },
+    enabled: !!user,
+  });
+
   const handleRecordCry = () => {
+    if (!aiEnabled) {
+      toast.error('Enable AI features in Settings to use Cry Insights');
+      return;
+    }
     toast.info('Cry Insights recording will be available soon');
   };
 
@@ -29,6 +49,22 @@ export default function Labs() {
             contact your pediatrician or local emergency services.
           </AlertDescription>
         </Alert>
+
+        {!aiEnabled && (
+          <Alert>
+            <Settings className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>AI features are disabled. Enable them in Settings to use Cry Insights.</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/settings/ai-data-sharing')}
+              >
+                Enable
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
@@ -58,9 +94,10 @@ export default function Labs() {
               onClick={handleRecordCry}
               className="w-full h-16"
               variant="secondary"
+              disabled={!aiEnabled}
             >
               <Mic className="mr-2 h-5 w-5" />
-              Record Cry (10-20 sec)
+              Record Cry (10-20 sec) {!aiEnabled && '(Disabled)'}
             </Button>
 
             <Alert>

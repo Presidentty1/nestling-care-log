@@ -14,6 +14,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 // Core pages (eager loaded)
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import OnboardingSimple from "./pages/OnboardingSimple";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
