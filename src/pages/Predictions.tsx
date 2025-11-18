@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BabySelector } from '@/components/BabySelector';
 import { MobileNav } from '@/components/MobileNav';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { ArrowLeft, TrendingUp, Loader2, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -117,6 +118,8 @@ export default function Predictions() {
       </div>
 
       <div className="container mx-auto p-4 space-y-4 max-w-2xl">
+        <MedicalDisclaimer variant="predictions" />
+
         <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => generatePredictionMutation.mutate('next_feed')}

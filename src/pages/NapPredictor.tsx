@@ -11,6 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { LoadingCard } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 
 export default function NapPredictor() {
   const { toast } = useToast();
@@ -94,6 +95,8 @@ export default function NapPredictor() {
           <h1 className="text-3xl font-bold">Nap Window Predictor</h1>
           <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
         </div>
+
+        <MedicalDisclaimer variant="predictions" />
 
         {!selectedBabyId && (
           <EmptyState

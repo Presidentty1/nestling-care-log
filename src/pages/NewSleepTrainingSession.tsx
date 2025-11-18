@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { ArrowLeft, Moon } from 'lucide-react';
 
 const sleepMethods = [
@@ -99,6 +100,8 @@ export default function NewSleepTrainingSession() {
       </div>
 
       <div className="container mx-auto p-4 max-w-2xl space-y-6">
+        <MedicalDisclaimer variant="sleep" />
+
         <div className="space-y-3">
           <Label className="text-lg font-semibold">Select Method</Label>
           {sleepMethods.map((method) => (
