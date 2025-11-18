@@ -21,6 +21,7 @@ import ManageBabiesPage from "./pages/Settings/ManageBabies";
 import NotificationSettingsPage from "./pages/Settings/NotificationSettings";
 import ManageCaregiversPage from "./pages/Settings/ManageCaregivers";
 import PrivacyDataPage from "./pages/Settings/PrivacyData";
+import AIDataSharingPage from "./pages/Settings/AIDataSharing";
 import NotFound from "./pages/NotFound";
 
 // Heavy pages (lazy loaded for better performance)
@@ -108,7 +109,8 @@ function AppContent() {
         <Route path="/settings/babies" element={<ManageBabiesPage />} />
         <Route path="/settings/caregivers" element={<ManageCaregiversPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
-        <Route path="/settings/privacy" element={<PrivacyDataPage />} />
+        <Route path="/settings/privacy-data" element={<PrivacyDataPage />} />
+        <Route path="/settings/ai-data-sharing" element={<AIDataSharingPage />} />
         <Route path="/settings/shortcuts" element={<SuspenseWrapper><ShortcutsSettings /></SuspenseWrapper>} />
         
         {/* Lazy loaded routes for better performance */}

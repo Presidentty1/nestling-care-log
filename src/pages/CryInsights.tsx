@@ -16,6 +16,7 @@ import { ArrowLeft, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 
 export default function CryInsights() {
   const navigate = useNavigate();
