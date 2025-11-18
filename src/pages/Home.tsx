@@ -67,6 +67,10 @@ export default function Home() {
   const caregiverBanner = useDismissibleBanner('caregiver_invite');
   const { getLastUsed, saveLastUsed } = useLastUsedValues();
   const [dismissedTips, setDismissedTips] = useState<string[]>([]);
+  const [floatingButtonEnabled, setFloatingButtonEnabled] = useState(() => {
+    const stored = localStorage.getItem('floating_button_enabled');
+    return stored !== null ? JSON.parse(stored) : true;
+  });
 
   useKeyboardShortcuts({
     escape: () => setModalState({ open: false, type: 'feed' }),

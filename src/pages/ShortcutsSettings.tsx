@@ -10,17 +10,25 @@ import { toast } from 'sonner';
 
 export default function ShortcutsSettings() {
   const navigate = useNavigate();
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [quickActionsEnabled, setQuickActionsEnabled] = useState(true);
-  const [floatingButtonEnabled, setFloatingButtonEnabled] = useState(true);
+  const [voiceEnabled, setVoiceEnabled] = useState(() => {
+    const stored = localStorage.getItem('voice_enabled');
+    return stored !== null ? JSON.parse(stored) : true;
+  });
+  const [quickActionsEnabled, setQuickActionsEnabled] = useState(() => {
+    const stored = localStorage.getItem('quick_actions_enabled');
+    return stored !== null ? JSON.parse(stored) : true;
+  });
+  const [floatingButtonEnabled, setFloatingButtonEnabled] = useState(() => {
+    const stored = localStorage.getItem('floating_button_enabled');
+    return stored !== null ? JSON.parse(stored) : true;
+  });
 
   const handleSave = () => {
-    // In a real app, save to local storage or database
     localStorage.setItem('voice_enabled', JSON.stringify(voiceEnabled));
     localStorage.setItem('quick_actions_enabled', JSON.stringify(quickActionsEnabled));
     localStorage.setItem('floating_button_enabled', JSON.stringify(floatingButtonEnabled));
     
-    toast.success('Settings saved successfully');
+    toast.success('Settings saved');
   };
 
   return (

@@ -197,9 +197,13 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
           id="note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="How did they sleep?"
-          className="min-h-[80px] text-base"
+          placeholder="Sleep quality, environment, etc."
+          className="min-h-[80px] text-base resize-none"
+          maxLength={500}
         />
+        {note.length > 0 && (
+          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+        )}
       </div>
     </form>
   );
