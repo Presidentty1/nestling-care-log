@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, Camera } from 'lucide-react';
 import { format, differenceInMonths } from 'date-fns';
 import { MilestoneModal } from '@/components/MilestoneModal';
-import { MilestoneSuggestions } from '@/components/MilestoneSuggestions';
 
 export default function Milestones() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
@@ -67,7 +66,7 @@ export default function Milestones() {
 
   const filteredMilestones = activeCategory === 'all'
     ? milestones
-    : milestones.filter(m => m.category === activeCategory);
+    : milestones.filter(m => m.milestone_type === activeCategory);
 
   const upcomingMilestones = getUpcomingMilestones();
 
@@ -100,14 +99,6 @@ export default function Milestones() {
           ))}
         </TabsList>
       </Tabs>
-
-      {/* Smart Milestone Suggestions */}
-      <div className="mb-6">
-        <MilestoneSuggestions 
-          baby={selectedBaby} 
-          achievedMilestones={milestones.map(m => m.title)}
-        />
-      </div>
 
       {upcomingMilestones.length > 0 && (
         <Card className="mb-6">

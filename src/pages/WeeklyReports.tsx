@@ -5,10 +5,9 @@ import { BabySwitcher } from '@/components/BabySwitcher';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, TrendingUp, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Calendar, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Baby } from '@/lib/types';
-import { format, startOfWeek, subWeeks, addDays } from 'date-fns';
-import { WeeklySummaryCard } from '@/components/WeeklySummaryCard';
+import { format, startOfWeek, subWeeks } from 'date-fns';
 
 export default function WeeklyReports() {
   const { toast } = useToast();
@@ -51,8 +50,6 @@ export default function WeeklyReports() {
     },
     enabled: !!selectedBabyId,
   });
-
-  const selectedBaby = babies?.find(b => b.id === selectedBabyId);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -118,42 +115,85 @@ export default function WeeklyReports() {
         )}
 
         {summaries && summaries.length > 0 && (
-          <div className="space-y-6">
-            {summaries.map((summary, index) => {
-              const previousSummary = summaries[index + 1];
-              const weekStartDate = new Date(summary.week_start);
-              const weekEndDate = new Date(summary.week_end);
-              
-              return (
-                <WeeklySummaryCard
-                  key={summary.id}
-                  weekStart={weekStartDate}
-                  weekEnd={weekEndDate}
-                  babyName={selectedBaby?.name || 'Baby'}
-                  summaryData={summary.summary_data}
-                  previousWeekData={previousSummary?.summary_data}
-                  highlights={summary.highlights}
-                  concerns={summary.concerns}
-                />
-              );
-            })}
+          <div className="space-y-4">
+            {summaries.map((summary) => (
+              <Card key={summary.id} className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">
+                    {format(new Date(summary.week_start), 'MMM d')} -{' '}
+                    {format(new Date(summary.week_end), 'MMM d, yyyy')}
+                  </h3>
+                  <span className="text-sm text-muted-foreground">
+                    Generated {format(new Date(summary.generated_at), 'MMM d')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <h4 className="font-semibold mb-2">Feeding</h4>
+                    <p className="text-2xl font-bold">{summary.summary_data?.feeds?.total || 0}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {summary.summary_data?.feeds?.avgPerDay || 0} per day avg
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2">Sleep</h4>
+                    <p className="text-2xl font-bold">
+                      {summary.summary_data?.sleep?.totalHours || 0}h
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {summary.summary_data?.sleep?.avgHoursPerDay || 0}h per day avg
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2">Diapers</h4>
+                    <p className="text-2xl font-bold">{summary.summary_data?.diapers?.total || 0}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {summary.summary_data?.diapers?.wet || 0} wet,{' '}
+                      {summary.summary_data?.diapers?.dirty || 0} dirty
+                    </p>
+                  </div>
+                </div>
+
+                {summary.highlights && summary.highlights.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      Highlights
+                    </h4>
+                    <ul className="space-y-1">
+                      {summary.highlights.map((highlight: string, idx: number) => (
+                        <li key={idx} className="text-sm text-muted-foreground">• {highlight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {summary.concerns && summary.concerns.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-orange-600" />
+                      Areas to Monitor
+                    </h4>
+                    <ul className="space-y-1">
+                      {summary.concerns.map((concern: string, idx: number) => (
+                        <li key={idx} className="text-sm text-muted-foreground">• {concern}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+            ))}
           </div>
         )}
 
-        {summaries && summaries.length === 0 && selectedBabyId && (
+        {summaries && summaries.length === 0 && (
           <Card className="p-6 text-center text-muted-foreground">
             No weekly summaries yet. Generate your first report to see insights!
           </Card>
         )}
-        
-        <BabySwitcher
-          isOpen={isSwitcherOpen}
-          onClose={() => setIsSwitcherOpen(false)}
-          onSelectBaby={(baby) => {
-            setSelectedBabyId(baby.id);
-            setIsSwitcherOpen(false);
-          }}
-        />
       </div>
     </div>
   );
