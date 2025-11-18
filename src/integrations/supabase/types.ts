@@ -1223,6 +1223,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_data_sharing_enabled: boolean | null
+          ai_preferences_updated_at: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -1230,6 +1232,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_data_sharing_enabled?: boolean | null
+          ai_preferences_updated_at?: string | null
           created_at?: string | null
           email?: string | null
           id: string
@@ -1237,6 +1241,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_data_sharing_enabled?: boolean | null
+          ai_preferences_updated_at?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
