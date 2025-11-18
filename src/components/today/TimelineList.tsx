@@ -21,11 +21,15 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
     );
   }
 
-  // Sort events by start_time descending (most recent first)
+  // Sort events by effective time (end_time if present, else start_time), most recent first
   const sortedEvents = [...events].sort((a, b) => {
-    const timeA = new Date(a.start_time).getTime();
-    const timeB = new Date(b.start_time).getTime();
-    return timeB - timeA;
+    const timeA = new Date(a.end_time || a.start_time).getTime();
+    const timeB = new Date(b.end_time || b.start_time).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    // Tie-breaker: created_at if available
+    const ca = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const cb = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return cb - ca;
   });
 
   return (
