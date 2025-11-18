@@ -12,10 +12,10 @@ interface QuickActionsProps {
 
 export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: QuickActionsProps) {
   const actions = [
-    { type: 'feed' as EventType, label: 'Feed', icon: Milk },
-    { type: 'sleep' as EventType, label: 'Sleep', icon: Moon },
-    { type: 'diaper' as EventType, label: 'Diaper', icon: Baby },
-    { type: 'tummy_time' as EventType, label: 'Tummy', icon: Clock },
+    { type: 'feed' as EventType, label: 'Feed', icon: Milk, color: 'text-event-feed', borderColor: 'border-event-feed/20', bgColor: 'bg-event-feed/5' },
+    { type: 'sleep' as EventType, label: 'Sleep', icon: Moon, color: 'text-event-sleep', borderColor: 'border-event-sleep/20', bgColor: 'bg-event-sleep/5' },
+    { type: 'diaper' as EventType, label: 'Diaper', icon: Baby, color: 'text-event-diaper', borderColor: 'border-event-diaper/20', bgColor: 'bg-event-diaper/5' },
+    { type: 'tummy_time' as EventType, label: 'Tummy', icon: Clock, color: 'text-event-tummy', borderColor: 'border-event-tummy/20', bgColor: 'bg-event-tummy/5' },
   ];
 
   const getTimeSince = (type: EventType): string => {
@@ -49,10 +49,10 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
             handleLongPress(action.type);
           }}
           variant="outline"
-          className="h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 hover:bg-primary/5 hover:border-primary active:scale-[0.98] transition-all duration-100"
+          className={`h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 ${action.borderColor} ${action.bgColor} hover:${action.bgColor} hover:${action.borderColor} active:scale-[0.98] transition-all duration-100`}
           style={{ minHeight: '44px', minWidth: '44px' }}
         >
-          <action.icon className="h-8 w-8 text-primary" strokeWidth={2} />
+          <action.icon className={`h-8 w-8 ${action.color}`} strokeWidth={2} />
           <span className="text-[15px] leading-[20px] font-medium">{action.label}</span>
           <span className="text-xs text-muted-foreground">{getTimeSince(action.type)}</span>
         </Button>

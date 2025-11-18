@@ -39,6 +39,7 @@ A comprehensive design system for the Nestling baby tracking app, optimized for 
 --warning: hsl(38, 96%, 55%)           /* #F5A623 - Caution/attention */
 --destructive: hsl(0, 64%, 55%)        /* #D64545 - Errors/delete actions */
 --secondary: hsl(235, 100%, 70%)       /* #6A7DFF - Links & highlights */
+--info: hsl(207, 90%, 54%)             /* #2196F3 - Informational messages */
 ```
 
 #### Dark Mode
@@ -47,6 +48,47 @@ A comprehensive design system for the Nestling baby tracking app, optimized for 
 --warning: hsl(39, 100%, 70%)          /* #FFC266 - Lighter for dark backgrounds */
 --destructive: hsl(0, 100%, 75%)       /* #FF7D7D - Lighter for dark backgrounds */
 --secondary: hsl(235, 100%, 81%)       /* #9AA6FF - Lighter indigo */
+--info: hsl(207, 89%, 70%)             /* #64B5F6 - Lighter for dark backgrounds */
+```
+
+### Event-Specific Colors
+
+Used for color-coding different types of baby tracking events to improve scannability and visual hierarchy.
+
+#### Light Mode
+```css
+--event-feed: hsl(199, 89%, 48%)       /* #0BA5EC - Soft blue (nurturing, milk) */
+--event-sleep: hsl(250, 70%, 60%)      /* #8B5CF6 - Purple (rest, night) */
+--event-diaper: hsl(25, 95%, 53%)      /* #FB923C - Warm orange (attention) */
+--event-tummy: hsl(142, 71%, 45%)      /* #10B981 - Green (growth, activity) */
+--event-medication: hsl(0, 84%, 60%)   /* #EF4444 - Red (medical attention) */
+```
+
+#### Dark Mode
+```css
+--event-feed: hsl(199, 89%, 65%)       /* #52B5F5 - Lighter blue */
+--event-sleep: hsl(250, 70%, 75%)      /* #A78BFA - Lighter purple */
+--event-diaper: hsl(25, 95%, 65%)      /* #FDBA74 - Lighter orange */
+--event-tummy: hsl(142, 71%, 60%)      /* #34D399 - Lighter green */
+--event-medication: hsl(0, 84%, 75%)   /* #FCA5A5 - Lighter red */
+```
+
+#### Usage Guidelines
+- **Icons**: Use event colors for icons in timeline rows, quick actions, and summary chips
+- **Backgrounds**: Apply as subtle tints (`bg-event-{type}/5` or `/10`) for visual grouping
+- **Borders**: Use with 20% opacity (`border-event-{type}/20`) for card accents
+- **Text**: Avoid using event colors for body text; reserve for icons and accents only
+- **Consistency**: Always pair color with icons/labels (never rely on color alone for meaning)
+
+#### iOS/SwiftUI Mapping
+```swift
+extension Color {
+    static let eventFeed = Color("EventFeed")           // Blue
+    static let eventSleep = Color("EventSleep")         // Purple
+    static let eventDiaper = Color("EventDiaper")       // Orange
+    static let eventTummy = Color("EventTummy")         // Green
+    static let eventMedication = Color("EventMedication") // Red
+}
 ```
 
 ### Background Layers
@@ -205,6 +247,41 @@ fontSize: {
 ```
 
 **Sizes**: `sm`, `default`, `lg`, `icon`
+
+### Card Variants
+
+```typescript
+// Default - Standard card
+<Card variant="default">Content</Card>
+
+// Emphasis - Primary accent (e.g., nap predictions)
+<Card variant="emphasis">Important content</Card>
+
+// Success - Positive feedback
+<Card variant="success">Achievement unlocked</Card>
+
+// Warning - Attention needed
+<Card variant="warning">Check this out</Card>
+
+// Info - Informational content
+<Card variant="info">Helpful tip</Card>
+
+// Elevated - Extra shadow
+<Card variant="elevated">Elevated content</Card>
+
+// Outline - Stronger border
+<Card variant="outline">Outlined content</Card>
+
+// Ghost - No border
+<Card variant="ghost">Borderless content</Card>
+```
+
+**Usage Guidelines:**
+- Use `emphasis` for high-priority information (nap windows, predictions)
+- Use `success` for achievements, positive milestones
+- Use `warning` for reminders, upcoming deadlines
+- Use `info` for tips, contextual help
+- Reserve semantic variants (success/warning/info) for meaningful context only
 
 **Key Features**:
 - Minimum 44pt tap target on mobile

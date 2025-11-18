@@ -43,9 +43,20 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
+        },
+        event: {
+          feed: "hsl(var(--event-feed))",
+          sleep: "hsl(var(--event-sleep))",
+          diaper: "hsl(var(--event-diaper))",
+          tummy: "hsl(var(--event-tummy))",
+          medication: "hsl(var(--event-medication))",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",

@@ -12,6 +12,9 @@ const cardVariants = cva(
         elevated: "shadow-lg border border-border",
         outline: "border-2 border-border",
         ghost: "border-none",
+        success: "border border-success/20 bg-success/5",
+        warning: "border border-warning/20 bg-warning/5",
+        info: "border border-info/20 bg-info/5",
       },
     },
     defaultVariants: {
