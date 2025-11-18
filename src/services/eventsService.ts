@@ -146,6 +146,7 @@ class EventsService {
       .eq('baby_id', babyId)
       .gte('start_time', start)
       .lte('start_time', end)
+      .order('end_time', { ascending: false, nullsFirst: false })
       .order('start_time', { ascending: false });
 
     if (error) throw error;
@@ -162,6 +163,7 @@ class EventsService {
       .eq('baby_id', babyId)
       .gte('start_time', start)
       .lte('start_time', end)
+      .order('end_time', { ascending: false, nullsFirst: false })
       .order('start_time', { ascending: false });
 
     if (error) throw error;
@@ -175,6 +177,7 @@ class EventsService {
       .eq('baby_id', babyId)
       .gte('start_time', fromISO)
       .lte('start_time', toISO)
+      .order('end_time', { ascending: false, nullsFirst: false })
       .order('start_time', { ascending: false });
 
     if (error) throw error;
@@ -187,6 +190,7 @@ class EventsService {
       .select('*')
       .eq('baby_id', babyId)
       .eq('type', type)
+      .order('end_time', { ascending: false, nullsFirst: false })
       .order('start_time', { ascending: false })
       .limit(1)
       .single();
