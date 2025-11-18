@@ -23,7 +23,7 @@ import { EventSheet } from '@/components/sheets/EventSheet';
 import { EventType } from '@/types/events';
 
 export default function History() {
-  const { activeBabyId, familyId: storeFamilyId } = useAppStore();
+  const { activeBabyId } = useAppStore();
   const [familyId, setFamilyId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<EventRecord[]>([]);
@@ -42,8 +42,7 @@ export default function History() {
   useEffect(() => {
     if (!activeBabyId) return;
     loadBaby();
-    if (storeFamilyId) setFamilyId(storeFamilyId);
-  }, [activeBabyId, storeFamilyId]);
+  }, [activeBabyId]);
 
   useEffect(() => {
     if (!activeBabyId) return;
@@ -57,6 +56,7 @@ export default function History() {
       setBabyName(baby.name);
       setBabySex(baby.sex || '');
       setBabyBirthDate(baby.date_of_birth);
+      setFamilyId(baby.family_id); // Set familyId from baby data
     }
   };
 
