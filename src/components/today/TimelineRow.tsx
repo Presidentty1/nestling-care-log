@@ -21,13 +21,13 @@ export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }
   const getIcon = () => {
     switch (event.type) {
       case 'feed':
-        return <Milk className="h-6 w-6 text-primary" strokeWidth={2} />;
+        return <Milk className="h-6 w-6 text-event-feed" strokeWidth={2} />;
       case 'sleep':
-        return <Moon className="h-6 w-6 text-primary" strokeWidth={2} />;
+        return <Moon className="h-6 w-6 text-event-sleep" strokeWidth={2} />;
       case 'diaper':
-        return <Baby className="h-6 w-6 text-primary" strokeWidth={2} />;
+        return <Baby className="h-6 w-6 text-event-diaper" strokeWidth={2} />;
       case 'tummy_time':
-        return <ActivitySquare className="h-6 w-6 text-primary" strokeWidth={2} />;
+        return <ActivitySquare className="h-6 w-6 text-event-tummy" strokeWidth={2} />;
       default:
         return null;
     }

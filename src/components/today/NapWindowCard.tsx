@@ -13,12 +13,35 @@ interface NapWindowCardProps {
 export function NapWindowCard({ window }: NapWindowCardProps) {
   const formatTime = (date: Date) => format(date, 'h:mm a');
 
+  // Determine status based on current time
+  const now = new Date();
+  const isWithinWindow = now >= window.start && now <= window.end;
+  const isApproaching = !isWithinWindow && now < window.start && (window.start.getTime() - now.getTime()) < 30 * 60 * 1000; // Within 30 mins
+  const isOverdue = now > window.end;
+
+  // Status-aware styling
+  const borderColor = isWithinWindow 
+    ? 'border-success/30' 
+    : isApproaching 
+    ? 'border-warning/30' 
+    : isOverdue 
+    ? 'border-destructive/20' 
+    : 'border-primary/20';
+  
+  const bgColor = isWithinWindow 
+    ? 'bg-success/10' 
+    : isApproaching 
+    ? 'bg-warning/10' 
+    : isOverdue 
+    ? 'bg-destructive/5' 
+    : 'bg-primary/5';
+
   return (
-    <Card variant="emphasis">
+    <Card className={`border-2 ${borderColor} ${bgColor} shadow-md transition-colors`}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Moon className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-full bg-event-sleep/10 flex items-center justify-center flex-shrink-0">
+            <Moon className="h-5 w-5 text-event-sleep" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">

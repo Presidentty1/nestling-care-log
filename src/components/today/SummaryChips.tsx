@@ -23,9 +23,9 @@ export const SummaryChips = memo(function SummaryChips({ summary }: SummaryChips
   return (
     <div className="grid grid-cols-3 gap-md">
       {/* Feed Chip */}
-      <Card className="shadow-soft">
+      <Card className="shadow-soft border-event-feed/20 bg-event-feed/5">
         <CardContent className="p-md text-center space-y-sm">
-          <Milk className="h-6 w-6 mx-auto text-primary" />
+          <Milk className="h-6 w-6 mx-auto text-event-feed" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
               {summary.feedCount || 0}
@@ -41,9 +41,9 @@ export const SummaryChips = memo(function SummaryChips({ summary }: SummaryChips
       </Card>
 
       {/* Sleep Chip */}
-      <Card className="shadow-soft">
+      <Card className="shadow-soft border-event-sleep/20 bg-event-sleep/5">
         <CardContent className="p-md text-center space-y-sm">
-          <Moon className="h-6 w-6 mx-auto text-primary" />
+          <Moon className="h-6 w-6 mx-auto text-event-sleep" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
               {formatSleepTime()}
@@ -59,9 +59,9 @@ export const SummaryChips = memo(function SummaryChips({ summary }: SummaryChips
       </Card>
 
       {/* Diaper Chip */}
-      <Card className="shadow-soft">
+      <Card className="shadow-soft border-event-diaper/20 bg-event-diaper/5">
         <CardContent className="p-md text-center space-y-sm">
-          <Baby className="h-6 w-6 mx-auto text-primary" />
+          <Baby className="h-6 w-6 mx-auto text-event-diaper" />
           <div className="space-y-1">
             <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
               {summary.diaperTotal || 0}
