@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Save, Smile, Meh, Frown } from 'lucide-react';
+import { validateJournalEntry } from '@/services/validation';
 
 export default function JournalEntry() {
   const navigate = useNavigate();
@@ -72,13 +73,18 @@ export default function JournalEntry() {
         created_by: user.id,
       };
 
+      const validationResult = validateJournalEntry(entryData);
+      if (!validationResult.success) {
+        throw new Error(validationResult.error.issues[0].message);
+      }
+
       if (isNew) {
-        const { error } = await supabase.from('journal_entries').insert(entryData);
+        const { error } = await supabase.from('journal_entries').insert(validationResult.data);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('journal_entries')
-          .update(entryData)
+          .update(validationResult.data)
           .eq('id', id);
         if (error) throw error;
       }

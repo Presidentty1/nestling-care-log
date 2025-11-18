@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Square, Loader2 } from 'lucide-react';
+import { validateCryLog } from '@/services/validation';
 
 interface CryTimerProps {
   baby: Baby;
@@ -104,7 +105,7 @@ export function CryTimer({ baby }: CryTimerProps) {
 
       if (!familyMember) throw new Error('Family not found');
 
-      const { error } = await supabase.from('cry_logs').insert({
+      const cryLogData = {
         baby_id: baby.id,
         family_id: familyMember.family_id,
         start_time: startTime!.toISOString(),
@@ -114,7 +115,14 @@ export function CryTimer({ baby }: CryTimerProps) {
         resolved_by: resolvedBy,
         note: note || null,
         context: analysis,
-      });
+      };
+
+      const validationResult = validateCryLog(cryLogData);
+      if (!validationResult.success) {
+        throw new Error(validationResult.error.issues[0].message);
+      }
+
+      const { error } = await supabase.from('cry_logs').insert(validationResult.data);
 
       if (error) throw error;
     },

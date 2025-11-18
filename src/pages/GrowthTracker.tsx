@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Plus, TrendingUp, Ruler, Weight, Circle, Download } from 'lucide-react';
 import { calculateWeightPercentile, calculateLengthPercentile, calculateHeadPercentile } from '@/lib/whoPercentiles';
 import { generateDoctorReport, downloadDoctorReport } from '@/lib/doctorReportPDF';
+import { validateGrowthRecord } from '@/services/validation';
 
 export default function GrowthTracker() {
   const { user } = useAuth();
@@ -107,7 +108,13 @@ export default function GrowthTracker() {
         recordData.percentile_head = calculateHeadPercentile(ageInDays, baby.sex, headCirc);
       }
 
-      const { error } = await supabase.from('growth_records').insert(recordData);
+      const validationResult = validateGrowthRecord(recordData);
+      if (!validationResult.success) {
+        toast.error(validationResult.error.issues[0].message);
+        return;
+      }
+
+      const { error } = await supabase.from('growth_records').insert(validationResult.data);
 
       if (error) throw error;
 
