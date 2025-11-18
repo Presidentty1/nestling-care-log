@@ -3,6 +3,7 @@ import { Milk, Moon, Baby, Clock } from 'lucide-react';
 import { EventType } from '@/types/events';
 import { formatDistanceToNow } from 'date-fns';
 import { EventRecord } from '@/services/eventsService';
+import { useState, useRef, useEffect } from 'react';
 
 interface QuickActionsProps {
   onActionSelect: (type: EventType) => void;
@@ -11,6 +12,9 @@ interface QuickActionsProps {
 }
 
 export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: QuickActionsProps) {
+  const [longPressType, setLongPressType] = useState<EventType | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const actions = [
     { type: 'feed' as EventType, label: 'Feed', icon: Milk, color: 'text-event-feed', borderColor: 'border-event-feed/20', bgColor: 'bg-event-feed/5' },
     { type: 'sleep' as EventType, label: 'Sleep', icon: Moon, color: 'text-event-sleep', borderColor: 'border-event-sleep/20', bgColor: 'bg-event-sleep/5' },
@@ -38,25 +42,58 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
     onActionSelect(type);
   };
 
+  const handleTouchStart = (type: EventType) => {
+    longPressTimerRef.current = setTimeout(() => {
+      setLongPressType(type);
+      handleLongPress(type);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    setLongPressType(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {actions.map((action) => (
-        <Button
-          key={action.type}
-          onClick={() => handleClick(action.type)}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            handleLongPress(action.type);
-          }}
-          variant="outline"
-          className={`h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 ${action.borderColor} ${action.bgColor} hover:${action.bgColor} hover:${action.borderColor} active:scale-[0.98] transition-all duration-100`}
-          style={{ minHeight: '44px', minWidth: '44px' }}
-        >
-          <action.icon className={`h-8 w-8 ${action.color}`} strokeWidth={2} />
-          <span className="text-[15px] leading-[20px] font-medium">{action.label}</span>
-          <span className="text-xs text-muted-foreground">{getTimeSince(action.type)}</span>
-        </Button>
-      ))}
+    <div className="space-y-2">
+      {onQuickLog && (
+        <p className="text-xs text-muted-foreground text-center">
+          Tap to quick log • Hold for details
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-4">
+        {actions.map((action) => (
+          <Button
+            key={action.type}
+            onClick={() => handleClick(action.type)}
+            onTouchStart={() => handleTouchStart(action.type)}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              handleLongPress(action.type);
+            }}
+            variant="outline"
+            className={`h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 ${action.borderColor} ${action.bgColor} hover:${action.bgColor} hover:${action.borderColor} active:scale-[0.98] transition-all duration-100 ${longPressType === action.type ? 'scale-[0.98]' : ''}`}
+            style={{ minHeight: '44px', minWidth: '44px' }}
+          >
+            <action.icon className={`h-8 w-8 ${action.color}`} strokeWidth={2} />
+            <span className="text-[15px] leading-[20px] font-medium">{action.label}</span>
+            <span className="text-xs text-muted-foreground">{getTimeSince(action.type)}</span>
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
