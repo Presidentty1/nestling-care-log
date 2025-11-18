@@ -12,14 +12,46 @@ export function useNotificationHandler() {
       listenerHandle = await LocalNotifications.addListener(
         'localNotificationActionPerformed',
         (notification) => {
-          const { extra } = notification.notification;
+          const { actionId, notification: notif } = notification;
+          const { extra } = notif;
 
-          if (extra?.type === 'feed' || extra?.type === 'diaper') {
-            navigate('/');
-          } else if (extra?.type === 'nap') {
-            navigate('/nap-details');
-          } else if (extra?.type === 'medication') {
-            navigate('/health');
+          // Handle quick log actions from action buttons
+          if (actionId === 'log-feed') {
+            navigate('/', { 
+              state: { 
+                openSheet: 'feed',
+                babyId: extra?.babyId,
+                prefillData: {}
+              }
+            });
+          } else if (actionId === 'log-nap') {
+            navigate('/', { 
+              state: { 
+                openSheet: 'sleep',
+                babyId: extra?.babyId,
+                prefillData: { subtype: 'nap' }
+              }
+            });
+          } else if (actionId === 'log-diaper') {
+            navigate('/', { 
+              state: { 
+                openSheet: 'diaper',
+                babyId: extra?.babyId,
+                prefillData: {}
+              }
+            });
+          } else if (actionId === 'dismiss') {
+            // User dismissed, do nothing
+            return;
+          } else {
+            // Handle regular notification tap (no action button)
+            if (extra?.type === 'feed' || extra?.type === 'diaper') {
+              navigate('/');
+            } else if (extra?.type === 'nap') {
+              navigate('/nap-details');
+            } else if (extra?.type === 'medication') {
+              navigate('/health');
+            }
           }
         }
       );

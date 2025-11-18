@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { format, differenceInMonths, subDays } from 'date-fns';
 import { EventType } from '@/types/events';
 import { DailySummary } from '@/types/summary';
@@ -43,13 +43,14 @@ import { dataService } from '@/services/dataService';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { activeBabyId, setActiveBabyId, guestMode } = useAppStore();
   const [babies, setBabies] = useState<Baby[]>([]);
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string }>({
+  const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string; prefillData?: any }>({
     open: false,
     type: 'feed',
   });
@@ -79,6 +80,20 @@ export default function Home() {
       loadBabies();
     }
   }, [user, guestMode]);
+
+  // Handle notification quick actions
+  useEffect(() => {
+    if (location.state?.openSheet) {
+      setModalState({
+        open: true,
+        type: location.state.openSheet,
+        prefillData: location.state.prefillData || {},
+      });
+      
+      // Clear navigation state to prevent reopening
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (activeBabyId) {
@@ -526,6 +541,7 @@ export default function Home() {
           babyId={activeBabyId}
           familyId={selectedBaby.family_id}
           editingEventId={modalState.editingId}
+          prefillData={modalState.prefillData}
         />
       )}
 

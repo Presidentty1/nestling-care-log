@@ -13,11 +13,12 @@ interface SleepFormProps {
   editingEventId?: string;
   onValidChange: (valid: boolean) => void;
   onSubmit: (data: Partial<CreateEventData>) => void;
+  prefillData?: any;
 }
 
-export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit }: SleepFormProps) {
+export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: SleepFormProps) {
   const [mode, setMode] = useState<'timer' | 'manual'>('timer');
-  const [subtype, setSubtype] = useState<'nap' | 'night'>('nap');
+  const [subtype, setSubtype] = useState<'nap' | 'night'>(prefillData?.subtype || 'nap');
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
