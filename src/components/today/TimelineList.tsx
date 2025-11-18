@@ -3,14 +3,26 @@ import { SwipeableTimelineRow } from './SwipeableTimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { VirtualizedTimelineList } from './VirtualizedTimelineList';
 
 interface TimelineListProps {
   events: EventRecord[];
   onEdit: (event: EventRecord) => void;
   onDelete: (eventId: string) => void;
+  useVirtualization?: boolean; // Enable virtual scrolling for large lists
 }
 
-export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
+export function TimelineList({ events, onEdit, onDelete, useVirtualization = true }: TimelineListProps) {
+  // Use virtualized list for large datasets (50+ events)
+  if (useVirtualization && events.length >= 50) {
+    return (
+      <VirtualizedTimelineList
+        events={events}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
+  }
   if (events.length === 0) {
     return (
       <EmptyState

@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, UserPlus, Trash2, Mail, Clock } from 'lucide-react';
+import { ChevronLeft, UserPlus, Trash2, Mail, Clock, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { usePro } from '@/hooks/usePro';
 
 interface FamilyMember {
   id: string;
@@ -33,6 +34,7 @@ interface Invite {
 
 export default function ManageCaregivers() {
   const navigate = useNavigate();
+  const { isPro, loading: proLoading } = usePro();
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -48,6 +50,7 @@ export default function ManageCaregivers() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -58,20 +61,71 @@ export default function ManageCaregivers() {
         return;
       }
 
-      // Get user's family
+      // Get user's family - try to get first family membership
       const { data: familyMembers } = await supabase
         .from('family_members')
         .select('family_id, role')
         .eq('user_id', user.id)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (!familyMembers) {
-        toast.error('No family found');
-        navigate('/home');
-        return;
+      let currentFamilyId = familyMembers?.family_id;
+
+      // If no family exists, create one
+      if (!currentFamilyId) {
+        // Get user's first baby to use for family name
+        const { data: babies } = await supabase
+          .from('babies')
+          .select('id, name')
+          .limit(1)
+          .maybeSingle();
+
+        const familyName = babies?.name 
+          ? `${babies.name}'s Family`
+          : 'My Family';
+
+        // Create family
+        const { data: newFamily, error: familyError } = await supabase
+          .from('families')
+          .insert({ name: familyName })
+          .select('id')
+          .single();
+
+        if (familyError) {
+          console.error('Error creating family:', familyError);
+          toast.error('Failed to create family. Please try again.');
+          navigate('/home');
+          return;
+        }
+
+        currentFamilyId = newFamily.id;
+
+        // Add user as admin
+        const { error: memberError } = await supabase
+          .from('family_members')
+          .insert({
+            family_id: currentFamilyId,
+            user_id: user.id,
+            role: 'admin',
+          });
+
+        if (memberError) {
+          console.error('Error adding user to family:', memberError);
+          toast.error('Failed to set up family. Please try again.');
+          navigate('/home');
+          return;
+        }
+
+        // If we have a baby, update its family_id
+        if (babies) {
+          await supabase
+            .from('babies')
+            .update({ family_id: currentFamilyId })
+            .eq('id', babies.id);
+        }
       }
 
-      setFamilyId(familyMembers.family_id);
+      setFamilyId(currentFamilyId);
 
       // Load family members with profiles
       const { data: membersData } = await supabase
@@ -88,7 +142,13 @@ export default function ManageCaregivers() {
         .eq('family_id', familyMembers.family_id);
 
       // Transform the data
-      const transformedMembers = (membersData || []).map((m: any) => ({
+      type MemberData = {
+        id: string;
+        user_id: string;
+        role: string;
+        profiles: Array<{ name: string | null; email: string | null }> | { name: string | null; email: string | null } | null;
+      };
+      const transformedMembers = (membersData || []).map((m: MemberData) => ({
         id: m.id,
         user_id: m.user_id,
         role: m.role,
@@ -112,12 +172,28 @@ export default function ManageCaregivers() {
     }
   };
 
+  const handleInviteClick = () => {
+    if (!isPro) {
+      toast.error('Caregiver invites require Nestling Pro. Upgrade to invite partners and sync across devices.');
+      navigate('/settings');
+      return;
+    }
+    setIsInviteSheetOpen(true);
+  };
+
   const sendInvite = async () => {
     if (!familyId || !inviteEmail) return;
 
+    if (!isPro) {
+      toast.error('Caregiver invites require Nestling Pro');
+      setIsInviteSheetOpen(false);
+      navigate('/settings');
+      return;
+    }
+
     setInviting(true);
     try {
-      const { error } = await supabase.functions.invoke('invite-caregiver', {
+      const { data, error } = await supabase.functions.invoke('invite-caregiver', {
         body: {
           email: inviteEmail,
           familyId,
@@ -125,16 +201,25 @@ export default function ManageCaregivers() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('404') || error.message?.includes('FunctionsRelayError')) {
+          toast.error('Invite feature is temporarily unavailable. Please try again later.');
+          console.error('Edge function not found:', error);
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Invite sent!');
       setIsInviteSheetOpen(false);
       setInviteEmail('');
       setInviteRole('member');
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending invite:', error);
-      toast.error(error.message || 'Failed to send invite');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send invite. Please check the email address and try again.';
+      toast.error(errorMessage);
     } finally {
       setInviting(false);
     }
@@ -207,11 +292,21 @@ export default function ManageCaregivers() {
             <h1 className="text-[28px] leading-[34px] font-semibold">Caregivers</h1>
           </div>
           <Button
-            onClick={() => setIsInviteSheetOpen(true)}
+            onClick={handleInviteClick}
             className="gap-2 h-11 px-4 rounded-[14px]"
+            disabled={proLoading}
           >
-            <UserPlus className="h-4 w-4" />
-            Invite
+            {isPro ? (
+              <>
+                <UserPlus className="h-4 w-4" />
+                Invite
+              </>
+            ) : (
+              <>
+                <Lock className="h-4 w-4" />
+                Invite (Pro)
+              </>
+            )}
           </Button>
         </div>
 
@@ -296,10 +391,36 @@ export default function ManageCaregivers() {
           </Card>
         )}
 
+        {/* Pro Upgrade Banner */}
+        {!isPro && (
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium mb-1">Unlock Multi-Caregiver Sync</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Invite partners and family members to sync logs in real-time. Requires Nestling Pro.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/settings')}
+                    className="w-full"
+                  >
+                    Upgrade to Pro
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Info */}
         <Alert>
           <AlertDescription className="text-[15px] text-muted-foreground">
-            Caregivers can view and log events for your baby. Admins can also manage caregivers and settings.
+            {isPro 
+              ? 'Caregivers can view and log events for your baby. Admins can also manage caregivers and settings.'
+              : 'Upgrade to Pro to invite caregivers and sync logs across devices in real-time.'}
           </AlertDescription>
         </Alert>
       </div>
@@ -324,7 +445,7 @@ export default function ManageCaregivers() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="role" className="text-[15px] font-semibold">Role</Label>
-              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as any)}>
+              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as 'admin' | 'member' | 'viewer')}>
                 <SelectTrigger id="role" className="h-12 text-[17px] rounded-[12px]">
                   <SelectValue />
                 </SelectTrigger>

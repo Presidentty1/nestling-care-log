@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { identify, track } from '@/analytics/analytics';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -16,6 +17,18 @@ export function useAuth() {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Track auth events and identify user
+        if (session?.user) {
+          identify(session.user.id, {
+            email: session.user.email,
+            created_at: session.user.created_at
+          });
+          
+          if (event === 'SIGNED_IN') {
+            track('user_signed_in', { method: 'email' });
+          }
+        }
       }
     );
 
@@ -53,6 +66,12 @@ export function useAuth() {
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
+      } else {
+        // Track signup
+        track('user_signed_up', {
+          method: 'email',
+          has_baby: false // Will be updated if baby created during onboarding
+        });
       }
     }
 

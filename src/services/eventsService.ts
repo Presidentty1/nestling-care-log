@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { differenceInMinutes, differenceInSeconds, startOfDay, endOfDay } from 'date-fns';
 import { DailySummary } from '@/types/summary';
+import { track } from '@/analytics/analytics';
 
 export interface CreateEventData {
   baby_id: string;
@@ -75,6 +76,17 @@ class EventsService {
 
     if (error) throw error;
 
+    // Track analytics
+    track('event_logged', {
+      event_type: data.type,
+      subtype: data.subtype,
+      amount: data.amount,
+      unit: data.unit,
+      has_note: !!data.note,
+      baby_id: data.baby_id,
+      source: 'form'
+    });
+
     this.emit('add', event);
     return event as EventRecord;
   }
@@ -109,17 +121,34 @@ class EventsService {
 
     if (error) throw error;
 
+    // Track analytics
+    const changedFields = Object.keys(updates);
+    track('event_edited', {
+      event_type: event.type,
+      event_id: id,
+      changes: changedFields
+    });
+
     this.emit('update', event);
     return event as EventRecord;
   }
 
   async deleteEvent(id: string): Promise<void> {
+    // Fetch event before deleting for analytics
+    const existingEvent = await this.getEvent(id);
+
     const { error } = await supabase
       .from('events')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
+
+    // Track analytics
+    track('event_deleted', {
+      event_type: existingEvent?.type || 'unknown',
+      event_id: id
+    });
 
     this.emit('delete', { id });
   }

@@ -4,6 +4,7 @@ import { EventType } from '@/types/events';
 import { formatDistanceToNow } from 'date-fns';
 import { EventRecord } from '@/services/eventsService';
 import { useState, useRef, useEffect } from 'react';
+import { track } from '@/analytics/analytics';
 
 interface QuickActionsProps {
   onActionSelect: (type: EventType) => void;
@@ -31,6 +32,12 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
   };
 
   const handleClick = (type: EventType) => {
+    // Track analytics
+    track('quick_action_used', {
+      action_type: type,
+      method: onQuickLog ? 'quick_log' : 'open_form'
+    });
+    
     if (onQuickLog) {
       onQuickLog(type);
     } else {

@@ -28,8 +28,12 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
           setNote(event.note || '');
         }
       });
+    } else if (prefillData) {
+      // Use prefillData when creating new event (not editing)
+      if (prefillData.subtype) setSubtype(prefillData.subtype);
+      if (prefillData.note) setNote(prefillData.note);
     }
-  }, [editingEventId]);
+  }, [editingEventId, prefillData]);
 
   const validate = () => {
     onValidChange(true);

@@ -19,50 +19,77 @@
 
 ## Application Entry Points
 
-- **Main Entry**: `src/main.tsx` - Renders root `App` component with error boundary
-- **App Component**: `src/App.tsx` - Sets up routing, auth, and query client
-- **Root Route**: `src/pages/Index.tsx` - Landing/auth gate, redirects to Home or Auth
+- **Main Entry**: `src/main.tsx` - Renders root `App` component with error boundary and caregiver mode class management
+- **App Component**: `src/App.tsx` - Sets up routing, auth, query client, and lazy loading
+- **Root Route**: `/` redirects to `/home` (no Index.tsx page exists)
+- **Router**: React Router v6 with `BrowserRouter` in `App.tsx`
+- **Auth Guard**: `AuthGuard` component wraps protected routes, redirects to `/auth` if not authenticated
 
 ## Route Structure
 
-### Core Routes (P0 MVP)
+### Core Routes (P0 MVP - Eager Loaded)
 
-| Path | Component | Purpose |
-|------|-----------|---------|
-| `/` | `Index.tsx` | Landing page, redirects authenticated users to `/home` |
-| `/auth` | `Auth.tsx` | Sign up / Sign in with email/password |
-| `/home` | `Home.tsx` | Main dashboard: timeline, quick actions, nap prediction |
-| `/history` | `History.tsx` | Day-by-day event history with filtering |
-| `/nap-predictor` | `NapPredictor.tsx` | Next nap window prediction with feedback |
-| `/ai-assistant` | `AIAssistant.tsx` | AI chat for parenting questions |
+| Path | Component | Purpose | Auth Required |
+|------|-----------|---------|---------------|
+| `/` | Redirect | Redirects to `/home` | No |
+| `/auth` | `Auth.tsx` | Sign up / Sign in with email/password | No |
+| `/onboarding` | `Onboarding.tsx` | Initial baby profile setup | Yes |
+| `/home` | `Home.tsx` | Main dashboard: timeline, quick actions, nap prediction | Yes |
+| `/history` | `History.tsx` | Day-by-day event history with filtering | Yes |
+| `/settings` | `Settings.tsx` | App settings hub | Yes |
+| `/settings/babies` | `Settings/ManageBabies.tsx` | Add/edit baby profiles | Yes |
+| `/settings/caregivers` | `Settings/ManageCaregivers.tsx` | Family sharing and invites | Yes |
+| `/settings/notifications` | `Settings/NotificationSettings.tsx` | Notification preferences | Yes |
+| `/settings/privacy-data` | `Settings/PrivacyData.tsx` | Data export, deletion | Yes |
+| `/settings/ai-data-sharing` | `Settings/AIDataSharing.tsx` | AI consent toggle | Yes |
 
 ### Logging Sheets (Accessed via FAB or Quick Actions)
-- Feed logging: `src/components/sheets/FeedForm.tsx`
-- Diaper logging: `src/components/sheets/DiaperForm.tsx`
-- Sleep logging: `src/components/sheets/SleepForm.tsx`
-- Tummy time: `src/components/sheets/TummyTimeForm.tsx`
+- Feed logging: `src/components/sheets/FeedForm.tsx` (via `EventSheet` component)
+- Diaper logging: `src/components/sheets/DiaperForm.tsx` (via `EventSheet` component)
+- Sleep logging: `src/components/sheets/SleepForm.tsx` (via `EventSheet` component)
+- Tummy time: `src/components/sheets/TummyTimeForm.tsx` (via `EventSheet` component)
 
-### Additional Features (Phase 2+)
+### Additional Features (Phase 2+ - Lazy Loaded)
 
-| Path | Component | Purpose |
-|------|-----------|---------|
-| `/analytics` | `Analytics.tsx` | Charts and insights (feeding, sleep patterns) |
-| `/insights` | `Insights.tsx` | Pattern analysis and recommendations |
-| `/milestones` | `Milestones.tsx` | Developmental milestone tracking |
-| `/growth-tracker` | `GrowthTracker.tsx` | Weight, length, head circumference charts |
-| `/health-records` | `HealthRecords.tsx` | Vaccines, medications, doctor visits |
-| `/cry-insights` | `CryInsights.tsx` | Cry pattern analysis (prototype) |
-| `/sleep-training` | `SleepTraining.tsx` | Sleep training session management |
-| `/journal` | `Journal.tsx` | Daily journal entries with photos |
-| `/photo-gallery` | `PhotoGallery.tsx` | Photo gallery with albums |
-| `/parent-wellness` | `ParentWellness.tsx` | Parent mood, water intake tracking |
-| `/settings` | `Settings.tsx` | App settings and preferences |
-| `/settings/manage-babies` | `Settings/ManageBabies.tsx` | Add/edit babies |
-| `/settings/manage-caregivers` | `Settings/ManageCaregivers.tsx` | Family sharing and invites |
-| `/settings/notifications` | `Settings/NotificationSettings.tsx` | Notification preferences |
-| `/settings/privacy-data` | `Settings/PrivacyData.tsx` | Data export, deletion |
+| Path | Component | Purpose | Auth Required | Status |
+|------|-----------|---------|---------------|--------|
+| `/labs` | `Labs.tsx` | Experimental features hub (Cry Insights entry) | No | ✅ Working |
+| `/smart-predictions` | Redirect | Redirects to `/predictions` | Yes | ✅ Working |
+| `/predictions` | `Predictions.tsx` | Smart Predictions (next feed/nap) | Yes | ✅ Working |
+| `/cry-insights` | `CryInsights.tsx` | Cry pattern analysis (prototype) | Yes | ⚠️ Beta |
+| `/ai-assistant` | `AIAssistant.tsx` | AI chat for parenting questions | Yes | ✅ Working |
+| `/analytics` | `Analytics.tsx` | Charts and insights (feeding, sleep patterns) | Yes | ✅ Working |
+| `/growth` | `GrowthTracker.tsx` | Weight, length, head circumference charts | Yes | ✅ Working |
+| `/health` | `HealthRecords.tsx` | Vaccines, medications, doctor visits | Yes | ✅ Working |
+| `/milestones` | `Milestones.tsx` | Developmental milestone tracking | Yes | ✅ Working |
+| `/photos` | `PhotoGallery.tsx` | Photo gallery with albums | Yes | ✅ Working |
+| `/sleep-training` | `SleepTraining.tsx` | Sleep training session management | Yes | ✅ Working |
+| `/sleep-training/new-session` | `NewSleepTrainingSession.tsx` | Create training plans | Yes | ✅ Working |
+| `/journal` | `Journal.tsx` | Daily journal entries with photos | Yes | ✅ Working |
+| `/journal/new` | `JournalEntry.tsx` | Create new journal entry | Yes | ✅ Working |
+| `/journal/entry/:id` | `JournalEntry.tsx` | View/edit journal entry | Yes | ✅ Working |
+| `/activity-feed` | `ActivityFeed.tsx` | Family activity log | Yes | ✅ Working |
+| `/parent-wellness` | `ParentWellness.tsx` | Parent mood, water intake tracking | Yes | ✅ Working |
+| `/settings/shortcuts` | `ShortcutsSettings.tsx` | Keyboard shortcuts configuration | Yes | ✅ Working |
+| `/referrals` | `Referrals.tsx` | Referral program UI | No | ✅ Working |
+| `/accessibility` | `Accessibility.tsx` | Accessibility settings | No | ✅ Working |
+| `/feedback` | `Feedback.tsx` | User feedback form | No | ✅ Working |
+| `/privacy` | `Privacy.tsx` | Privacy policy | No | ✅ Working |
+| `/achievements` | `Achievements.tsx` | Logging streaks and badges | Yes | ✅ Working |
+
+**Status Legend:**
+- ✅ Working - Feature is functional
+- ⚠️ Beta - Feature exists but may have issues or incomplete functionality
+- ❌ Broken - Feature is broken or routes to 404
+
+**Note**: Route `/smart-predictions` does NOT exist - use `/predictions` instead. The Labs page (`/labs`) shows a placeholder button for Cry Insights that just displays a toast message.
 
 ## Supabase Integration
+
+**Client Configuration**: `src/integrations/supabase/client.ts`
+- Auto-generated file (do not edit directly)
+- Uses environment variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
+- Session stored in localStorage with auto-refresh enabled
 
 ### Authentication
 - **Implementation**: `src/hooks/useAuth.ts`

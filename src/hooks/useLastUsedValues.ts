@@ -53,11 +53,13 @@ export function useLastUsedValues() {
   const getDefaults = (type: EventType): any => {
     switch (type) {
       case 'feed':
+        // Default to 4oz (120ml) - ensure minimum meaningful amount
         return { subtype: 'bottle', amount: 4, unit: 'oz' };
       case 'diaper':
         return { subtype: 'wet' };
       case 'sleep':
-        return { note: '' };
+        // Default to 10 minutes for quick log naps
+        return { note: '', duration_min: 10 };
       case 'tummy_time':
         return { duration_min: 5 };
       default:

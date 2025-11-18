@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { queryClient } from "@/lib/queryClient";
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAppStore } from '@/store/appStore';
@@ -10,6 +10,7 @@ import { reminderService } from '@/services/reminderService';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { page } from '@/analytics/analytics';
 
 // Core pages (eager loaded)
 import Auth from "./pages/Auth";
@@ -34,6 +35,7 @@ const PhotoGallery = lazy(() => import("./pages/PhotoGallery"));
 const CryInsights = lazy(() => import("./pages/CryInsights"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const AnalyticsDashboard = lazy(() => import("./pages/AnalyticsDashboard"));
 const ShortcutsSettings = lazy(() => import("./pages/ShortcutsSettings"));
 const SleepTraining = lazy(() => import("./pages/SleepTraining"));
 const ActivityFeed = lazy(() => import("./pages/ActivityFeed"));
@@ -86,6 +88,15 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const { activeBabyId, caregiverMode } = useAppStore();
+  const location = useLocation();
+
+  // Track page views
+  useEffect(() => {
+    const pageName = location.pathname.replace('/', '') || 'home';
+    page(pageName, {
+      baby_id: activeBabyId || undefined
+    });
+  }, [location.pathname, activeBabyId]);
 
   useEffect(() => {
     if (activeBabyId) {
@@ -123,9 +134,11 @@ function AppContent() {
         <Route path="/cry-insights" element={<SuspenseWrapper><AuthGuard><CryInsights /></AuthGuard></SuspenseWrapper>} />
         <Route path="/ai-assistant" element={<SuspenseWrapper><AuthGuard><AIAssistant /></AuthGuard></SuspenseWrapper>} />
         <Route path="/analytics" element={<SuspenseWrapper><AuthGuard><Analytics /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/analytics-dashboard" element={<SuspenseWrapper><AuthGuard><AnalyticsDashboard /></AuthGuard></SuspenseWrapper>} />
         <Route path="/sleep-training" element={<SuspenseWrapper><AuthGuard><SleepTraining /></AuthGuard></SuspenseWrapper>} />
         <Route path="/sleep-training/new-session" element={<SuspenseWrapper><AuthGuard><NewSleepTrainingSession /></AuthGuard></SuspenseWrapper>} />
         <Route path="/activity-feed" element={<SuspenseWrapper><AuthGuard><ActivityFeed /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/smart-predictions" element={<Navigate to="/predictions" replace />} />
         <Route path="/predictions" element={<SuspenseWrapper><AuthGuard><Predictions /></AuthGuard></SuspenseWrapper>} />
         <Route path="/journal" element={<SuspenseWrapper><AuthGuard><Journal /></AuthGuard></SuspenseWrapper>} />
         <Route path="/journal/new" element={<SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>} />

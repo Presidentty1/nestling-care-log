@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { useAppStore } from './store/appStore';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { registerServiceWorker } from './lib/serviceWorker';
 
 function AppWrapper() {
   const caregiverMode = useAppStore((state) => state.caregiverMode);
@@ -24,3 +25,6 @@ createRoot(document.getElementById("root")!).render(
     <AppWrapper />
   </ErrorBoundary>
 );
+
+// Register service worker for offline support
+registerServiceWorker();

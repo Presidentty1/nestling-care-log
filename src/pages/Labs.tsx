@@ -26,9 +26,11 @@ export default function Labs() {
   const handleRecordCry = () => {
     if (!aiEnabled) {
       toast.error('Enable AI features in Settings to use Cry Insights');
+      navigate('/settings/ai-data-sharing');
       return;
     }
-    toast.info('Cry Insights recording will be available soon');
+    // Navigate to Cry Insights page
+    navigate('/cry-insights');
   };
 
   return (

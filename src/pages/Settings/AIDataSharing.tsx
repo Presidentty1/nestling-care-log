@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { aiPreferencesService } from '@/services/aiPreferencesService';
 import { toast } from 'sonner';
 import { MobileContainer } from '@/components/layout/MobileContainer';
+import { track } from '@/analytics/analytics';
 
 export default function AIDataSharing() {
   const navigate = useNavigate();
@@ -42,6 +43,13 @@ export default function AIDataSharing() {
     try {
       await aiPreferencesService.setPreferences(user.id, value);
       setEnabled(value);
+      
+      // Track analytics
+      track('ai_consent_changed', {
+        enabled: value,
+        source: 'settings'
+      });
+      
       toast.success(value ? 'AI features enabled' : 'AI features disabled');
     } catch (error) {
       console.error('Error saving AI preferences:', error);

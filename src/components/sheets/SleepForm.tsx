@@ -41,8 +41,18 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
           }
         }
       });
+    } else if (prefillData) {
+      // Use prefillData when creating new event (not editing)
+      if (prefillData.subtype) setSubtype(prefillData.subtype);
+      if (prefillData.note) setNote(prefillData.note);
+      if (prefillData.start_time) {
+        setStartTime(new Date(prefillData.start_time));
+      }
+      if (prefillData.end_time) {
+        setEndTime(new Date(prefillData.end_time));
+      }
     }
-  }, [editingEventId]);
+  }, [editingEventId, prefillData]);
 
   useEffect(() => {
     let interval: number;

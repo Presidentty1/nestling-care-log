@@ -446,6 +446,49 @@ Uses `Drawer` component from shadcn/ui:
 
 ---
 
+## Motion & Animation Guidelines
+
+### Principles
+- **Respect Reduce Motion**: All animations check `UIAccessibility.isReduceMotionEnabled` and fall back to instant state changes when enabled
+- **Subtle & Purposeful**: Animations should enhance understanding, not distract
+- **Consistent Timing**: Use standard durations (0.1s for micro-interactions, 0.2s for transitions, 0.3s for sheet presentations)
+
+### Haptic Feedback
+- **Success**: Save, complete actions (`Haptics.success()`)
+- **Error**: Validation failures, network errors (`Haptics.error()`)
+- **Warning**: Confirmations, important notices (`Haptics.warning()`)
+- **Light Impact**: Button taps, subtle interactions (`Haptics.light()`)
+- **Medium Impact**: Primary actions (`Haptics.medium()`)
+- **Heavy Impact**: Significant actions like delete (`Haptics.heavy()`)
+- **Selection**: Picker changes, toggle switches (`Haptics.selection()`)
+
+### Transitions
+- **Sheet Presentation**: Bottom slide-up with opacity (`AnyTransition.sheetSlide`)
+- **Quick Action Confirmation**: Subtle scale + opacity (`AnyTransition.quickAction`)
+- **Timeline Row Edit**: Opacity fade (`AnyTransition.opacity`)
+
+### Implementation
+```swift
+// Respect Reduce Motion
+if MotionModifiers.reduceMotion {
+    // Instant state change
+} else {
+    // Animated transition
+}
+
+// Use motion modifiers
+.gentlePress()  // Subtle press animation
+.motionTransition(.opacity)  // Respects Reduce Motion
+.motionAnimation(.easeInOut(duration: 0.2), value: someValue)
+```
+
+### Sheet Detents
+- Use `.presentationDetents([.medium, .large])` for bottom sheets
+- Add `.presentationDragIndicator(.visible)` for better UX
+- Forms should default to `.medium`, expandable to `.large`
+
+---
+
 ## SwiftUI Mapping
 
 For future native iOS implementation:

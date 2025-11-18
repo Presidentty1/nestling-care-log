@@ -12,13 +12,16 @@ User profile information.
 | `id` | uuid (PK) | User ID, references `auth.users` |
 | `email` | text | User's email address |
 | `name` | text | Display name |
+| `ai_data_sharing_enabled` | boolean | User consent for AI features (default: true) |
+| `ai_preferences_updated_at` | timestamptz | When AI preferences were last updated |
 | `created_at` | timestamptz | Account creation timestamp |
 | `updated_at` | timestamptz | Last profile update |
 
 **Used By:**
-- Settings pages for profile management
+- Settings pages for profile management (`/settings/ai-data-sharing`)
 - Family member displays
 - Activity feed attribution
+- AI consent checks in edge functions
 
 ---
 
@@ -91,20 +94,18 @@ All baby care events (feeds, diapers, sleep, tummy time).
 | `id` | uuid (PK) | Unique event identifier |
 | `family_id` | uuid (FK) | References `families.id` |
 | `baby_id` | uuid (FK) | References `babies.id` |
-| `type` | text | 'feed', 'diaper', 'sleep', 'tummy_time' |
+| `type` | text | 'feed', 'diaper', 'sleep', 'tummy_time', 'medication', 'other' |
 | `subtype` | text | Specific variant (e.g., 'breast', 'wet') |
 | `start_time` | timestamptz | Event start time |
 | `end_time` | timestamptz | Event end time (optional) |
-| `duration_sec` | integer | Duration in seconds |
-| `duration_min` | integer | Duration in minutes |
-| `side` | text | 'left', 'right', or 'both' (for feeds) |
-| `amount` | numeric | Quantity (always in ml for bottles) |
-| `unit` | text | Display unit ('ml' or 'oz') |
-| `bottle_type` | text | Bottle content (e.g., 'formula', 'breast_milk') |
+| `amount` | decimal | Quantity (ml for feeds, duration for sleep) |
+| `unit` | text | Display unit ('ml', 'oz', 'min', 'hr') |
 | `note` | text | Optional notes |
 | `created_by` | uuid (FK) | User who logged the event |
 | `created_at` | timestamptz | When event was logged |
 | `updated_at` | timestamptz | Last modification timestamp |
+
+**Note**: Duration is calculated from `start_time` and `end_time` in the application layer. The `amount` field stores feed quantities or sleep durations.
 
 **Used By:**
 - **Home/Dashboard**: Timeline, last feed/diaper display, summary chips
@@ -393,7 +394,7 @@ Pending family member invitations.
 | `id` | uuid (PK) | Unique invite identifier |
 | `family_id` | uuid (FK) | References `families.id` |
 | `email` | text | Invitee email address |
-| `role` | text | Role to assign ('admin' or 'member') |
+| `role` | text | Role to assign ('admin', 'member', or 'viewer') |
 | `token` | uuid | Unique invite token |
 | `status` | text | 'pending', 'accepted', 'expired' |
 | `invited_by` | uuid (FK) | User who sent invite |
@@ -402,8 +403,8 @@ Pending family member invitations.
 | `updated_at` | timestamptz | Last status update |
 
 **Used By:**
-- **Caregiver Management**: Send and manage family invites
-- **Accept Invite**: Process invite acceptance
+- **Caregiver Management** (`/settings/caregivers`): Send and manage family invites
+- **Accept Invite** (`/accept-invite/:token`): Process invite acceptance
 
 ---
 
@@ -427,11 +428,65 @@ Activity log for family coordination.
 
 ---
 
+### `subscriptions`
+User subscription and billing information.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | uuid (PK) | Unique subscription identifier |
+| `user_id` | uuid (FK) | References `auth.users.id` (unique) |
+| `stripe_customer_id` | text | Stripe customer ID (unique) |
+| `stripe_subscription_id` | text | Stripe subscription ID (unique, nullable) |
+| `stripe_price_id` | text | Stripe price ID |
+| `status` | text | Subscription status (default: 'trialing') |
+| `current_period_start` | timestamptz | Current billing period start |
+| `current_period_end` | timestamptz | Current billing period end |
+| `cancel_at_period_end` | boolean | Whether subscription cancels at period end |
+| `created_at` | timestamptz | Subscription creation timestamp |
+| `updated_at` | timestamptz | Last update timestamp |
+
+**Used By:**
+- Trial and subscription management
+- Feature gating (premium features)
+
+### `app_settings`
+User application preferences.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | uuid (PK) | Unique setting identifier |
+| `user_id` | uuid (FK) | References `auth.users.id` |
+| `key` | text | Setting key |
+| `value` | jsonb | Setting value |
+| `created_at` | timestamptz | Setting creation timestamp |
+| `updated_at` | timestamptz | Last update timestamp |
+
+**Used By:**
+- User preferences storage
+- Feature flags
+
+### `user_feedback`
+User feedback and feature requests.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | uuid (PK) | Unique feedback identifier |
+| `user_id` | uuid (FK) | References `auth.users.id` |
+| `feedback_type` | text | Type of feedback |
+| `content` | text | Feedback content |
+| `rating` | integer | Rating (1-5) |
+| `created_at` | timestamptz | Feedback submission timestamp |
+
+**Used By:**
+- Feedback form (`/feedback`)
+- Feature improvement tracking
+
 ## Relationships Summary
 
 ```
 families
   ├── family_members (many) → auth.users
+  ├── caregiver_invites (many)
   └── babies (many)
        ├── events (many)
        ├── nap_feedback (many)
@@ -442,10 +497,16 @@ families
        ├── milestones (many)
        ├── journal_entries (many)
        ├── cry_logs (many)
-       └── cry_insight_sessions (many)
+       ├── cry_insight_sessions (many)
+       ├── sleep_training_sessions (many)
+       ├── wake_windows (many)
+       └── behavior_patterns (many)
 
 auth.users
   ├── profiles (one)
+  ├── subscriptions (one)
+  ├── app_settings (many)
+  ├── user_feedback (many)
   ├── parent_wellness_logs (many)
   └── parent_medications (many)
 ```

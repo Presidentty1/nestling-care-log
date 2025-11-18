@@ -125,6 +125,7 @@ export function EventSheet({
             editingEventId={editingEventId}
             onValidChange={setIsValid}
             onSubmit={handleSave}
+            prefillData={prefillData}
           />
         );
       default:

@@ -307,15 +307,33 @@ export default function Home() {
     const lastUsed = getLastUsed(type);
     const now = new Date();
     
+    // Ensure meaningful defaults for quick logging
+    let feedAmount = lastUsed.amount || 4;
+    let feedUnit = lastUsed.unit || 'oz';
+    
+    // Convert oz to ml if needed, and ensure minimum 10ml
+    if (feedUnit === 'oz') {
+      const mlAmount = feedAmount * 30; // 1oz = 30ml
+      if (mlAmount < 10) {
+        feedAmount = 4; // Default to 4oz (120ml)
+      }
+    } else if (feedUnit === 'ml' && feedAmount < 10) {
+      feedAmount = 120; // Minimum 120ml
+    }
+    
+    // For sleep, use default 10 minutes if no duration specified
+    const sleepDurationMinutes = lastUsed.duration_min || 10;
+    const sleepStartTime = new Date(now.getTime() - sleepDurationMinutes * 60000);
+    
     const quickEvent: Partial<EventRecord> = {
       baby_id: selectedBaby.id,
       family_id: selectedBaby.family_id,
       type,
-      start_time: now.toISOString(),
+      start_time: type === 'sleep' ? sleepStartTime.toISOString() : now.toISOString(),
       ...(type === 'feed' && {
         subtype: lastUsed.subtype || 'bottle',
-        amount: lastUsed.amount || 4,
-        unit: lastUsed.unit || 'oz',
+        amount: feedAmount,
+        unit: feedUnit,
         side: lastUsed.side,
       }),
       ...(type === 'diaper' && {
@@ -323,6 +341,8 @@ export default function Home() {
       }),
       ...(type === 'sleep' && {
         end_time: now.toISOString(),
+        // Note indicating this was a quick log
+        note: `Quick log nap (${sleepDurationMinutes} min)`,
       }),
       ...(type === 'tummy_time' && {
         duration_min: lastUsed.duration_min || 5,
@@ -336,11 +356,13 @@ export default function Home() {
       const formattedTime = format(now, 'h:mm a');
       let details = '';
       if (type === 'feed') {
-        details = ` • ${lastUsed.amount || 4}${lastUsed.unit || 'oz'}`;
+        details = ` • ${feedAmount}${feedUnit}`;
+      } else if (type === 'sleep') {
+        details = ` • ${sleepDurationMinutes} min`;
       }
       
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} logged`, {
-        description: `${formattedTime}${details} (last used)`,
+        description: `${formattedTime}${details}`,
       });
 
       // Check if this is the first event
@@ -371,6 +393,7 @@ export default function Home() {
     try {
       await eventsService.deleteEvent(eventId);
       toast.success('Event deleted');
+      loadTodayEvents(); // Reload events after deletion
     } catch (error) {
       console.error('Failed to delete event:', error);
       toast.error('Failed to delete event');

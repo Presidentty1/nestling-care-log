@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Plus } from 'lucide-react';
 import { differenceInMonths, differenceInWeeks } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { track } from '@/analytics/analytics';
 
 interface BabySwitcherProps {
   babies: Baby[];
@@ -48,6 +49,14 @@ export function BabySwitcher({ babies, selectedBabyId, onSelect, isOpen, onClose
   };
 
   const handleSelect = (babyId: string) => {
+    // Track analytics
+    if (selectedBabyId && selectedBabyId !== babyId) {
+      track('baby_switched', {
+        from_baby_id: selectedBabyId,
+        to_baby_id: babyId
+      });
+    }
+    
     onSelect(babyId);
     onClose();
   };

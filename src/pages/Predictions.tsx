@@ -70,16 +70,30 @@ export default function Predictions() {
   const generatePredictionMutation = useMutation({
     mutationFn: async (predictionType: string) => {
       if (!selectedBaby) throw new Error('No baby selected');
+      if (aiEnabled === false) {
+        throw new Error('AI_DATA_SHARING_DISABLED');
+      }
       
       const { data, error } = await supabase.functions.invoke('generate-predictions', {
         body: { babyId: selectedBaby.id, predictionType },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('404') || error.message?.includes('FunctionsRelayError')) {
+          throw new Error('FUNCTION_NOT_FOUND');
+        }
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from prediction service');
+      }
+      
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['predictions'] });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['predictions', selectedBaby?.id] });
       toast({
         title: 'Prediction Generated',
         description: 'New prediction added successfully',
@@ -88,15 +102,22 @@ export default function Predictions() {
     onError: (error: any) => {
       console.error('Prediction error:', error);
       
+      let errorTitle = 'Prediction Unavailable';
       let errorMessage = 'Please try again later';
       
-      // Check if it's a 404 or function not found error
-      if (error?.message?.includes('404') || error?.message?.includes('FunctionsRelayError')) {
+      // Handle specific error cases
+      if (error?.message === 'AI_DATA_SHARING_DISABLED') {
+        errorTitle = 'AI Features Disabled';
+        errorMessage = 'Enable AI Data Sharing in Settings to use predictions';
+      } else if (error?.message === 'FUNCTION_NOT_FOUND' || error?.message?.includes('404') || error?.message?.includes('FunctionsRelayError')) {
+        errorTitle = 'Feature Coming Soon';
         errorMessage = 'Smart Predictions are still in development. This feature will be available soon!';
+      } else if (error?.message) {
+        errorMessage = error.message;
       }
       
       toast({
-        title: 'Prediction Unavailable',
+        title: errorTitle,
         description: errorMessage,
         variant: 'destructive',
       });
@@ -163,36 +184,45 @@ export default function Predictions() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={() => generatePredictionMutation.mutate('next_feed')}
-            disabled={generatePredictionMutation.isPending || aiEnabled === false}
-            variant="outline"
-          >
-            {generatePredictionMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <TrendingUp className="mr-2 h-4 w-4" />
-            )}
-            Predict Next Feed
-          </Button>
-          <Button
-            onClick={() => generatePredictionMutation.mutate('next_nap')}
-            disabled={generatePredictionMutation.isPending || aiEnabled === false}
-            variant="outline"
-          >
-            {generatePredictionMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="mr-2 h-4 w-4" />
-            )}
-            Predict Next Nap
-          </Button>
-        </div>
-        {aiEnabled === false && (
-          <p className="text-xs text-muted-foreground text-center">
-            Enable AI in Settings to generate predictions
-          </p>
+        {aiEnabled !== false && (
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => generatePredictionMutation.mutate('next_feed')}
+              disabled={generatePredictionMutation.isPending || !selectedBaby}
+              variant="outline"
+              className="h-auto py-4"
+            >
+              {generatePredictionMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Predict Next Feed
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={() => generatePredictionMutation.mutate('next_nap')}
+              disabled={generatePredictionMutation.isPending || !selectedBaby}
+              variant="outline"
+              className="h-auto py-4"
+            >
+              {generatePredictionMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Predict Next Nap
+                </>
+              )}
+            </Button>
+          </div>
         )}
 
         {predictions && predictions.length > 0 ? (

@@ -40,8 +40,17 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
           setNote(event.note || '');
         }
       });
+    } else if (prefillData) {
+      // Use prefillData when creating new event (not editing)
+      if (prefillData.subtype) setFeedType(prefillData.subtype === 'bottle' ? 'bottle' : 'breast');
+      if (prefillData.side) setSide(prefillData.side);
+      if (prefillData.amount !== undefined) {
+        setAmount(prefillData.amount.toString());
+        if (prefillData.unit) setUnit(prefillData.unit);
+      }
+      if (prefillData.note) setNote(prefillData.note);
     }
-  }, [editingEventId]);
+  }, [editingEventId, prefillData]);
 
   const validate = () => {
     if (feedType === 'breast') {

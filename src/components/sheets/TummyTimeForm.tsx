@@ -12,9 +12,10 @@ interface TummyTimeFormProps {
   editingEventId?: string;
   onValidChange: (valid: boolean) => void;
   onSubmit: (data: Partial<CreateEventData>) => void;
+  prefillData?: any;
 }
 
-export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit }: TummyTimeFormProps) {
+export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: TummyTimeFormProps) {
   const [mode, setMode] = useState<'timer' | 'manual'>('timer');
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -40,8 +41,21 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit 
           }
         }
       });
+    } else if (prefillData) {
+      // Use prefillData when creating new event (not editing)
+      if (prefillData.note) setNote(prefillData.note);
+      if (prefillData.duration_min) {
+        setManualDuration(prefillData.duration_min.toString());
+        setMode('manual');
+      }
+      if (prefillData.start_time) {
+        setStartTime(new Date(prefillData.start_time));
+      }
+      if (prefillData.end_time) {
+        setEndTime(new Date(prefillData.end_time));
+      }
     }
-  }, [editingEventId]);
+  }, [editingEventId, prefillData]);
 
   useEffect(() => {
     let interval: number;

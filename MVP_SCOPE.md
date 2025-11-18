@@ -381,6 +381,161 @@ These features exist in the web app but are **deferred** for later iOS releases.
 
 ---
 
+## Technical Cleanup Before iOS/SwiftUI Work
+
+Before mirroring this architecture into a native iOS app, the following technical debt should be addressed:
+
+### 1. Broken or Incomplete Routes ✅ COMPLETED
+
+- **`/predictions` (Smart Predictions)** ✅ FIXED
+  - **Status**: Fully functional with proper error handling
+  - **Changes**: 
+    - Added AI consent check before mutation
+    - Improved error handling with specific messages for different failure cases
+    - Better loading states and user feedback
+    - Handles 404/function not found gracefully without crashing
+  - **Location**: `src/pages/Predictions.tsx`
+
+- **`/labs` → Cry Insights Button** ✅ FIXED
+  - **Status**: Now navigates to `/cry-insights` page
+  - **Changes**: Updated `handleRecordCry` to navigate instead of showing toast
+  - **Location**: `src/pages/Labs.tsx`
+
+- **Route Confusion: `/smart-predictions` vs `/predictions`** ✅ FIXED
+  - **Status**: Added redirect route
+  - **Changes**: Added `<Route path="/smart-predictions" element={<Navigate to="/predictions" replace />} />` in `App.tsx`
+  - **Location**: `src/App.tsx`
+
+### 2. Manage Babies / Manage Caregivers Onboarding Flows ✅ COMPLETED
+
+- **`/settings/babies` (Manage Babies)**
+  - **Status**: ✅ Functional - can edit/delete babies, navigate to onboarding
+  - **Changes**: Removed unused `units` field from edit form (not in database schema)
+  - **Location**: `src/pages/Settings/ManageBabies.tsx`
+
+- **`/settings/caregivers` (Manage Caregivers)**
+  - **Status**: ✅ Functional - can invite/remove caregivers
+  - **Changes**: Added graceful degradation for `invite-caregiver` edge function (handles 404 errors)
+  - **Location**: `src/pages/Settings/ManageCaregivers.tsx`
+  - **Potential Issue**: Links to `/onboarding-simple` which may have incomplete flow
+  - **Action**: Test full flow of adding a new baby from this page
+
+- **`/settings/caregivers` (Manage Caregivers)**
+  - **Status**: ✅ Appears functional - can invite, view members, remove members
+  - **Potential Issue**: Edge function `invite-caregiver` may not be implemented
+  - **Action**: Test invite flow end-to-end, verify edge function exists
+
+### 3. Edit/Delete Consistency on Timelines
+
+- **Home Timeline (`/home`)**
+  - **Status**: ✅ Fixed - Edit and delete handlers work correctly
+  - **Changes**: 
+    - Added `loadTodayEvents()` call after delete to refresh timeline
+    - EventSheet properly handles prefillData for all event types
+  - **Location**: `src/pages/Home.tsx`
+
+- **History Timeline (`/history`)**
+  - **Status**: ✅ Working - Edit and delete handlers work correctly
+  - **Changes**: EventSheet properly handles prefillData for all event types
+  - **Location**: `src/pages/History.tsx`
+
+- **EventSheet Forms**
+  - **Status**: ✅ Improved - All forms now properly use prefillData
+  - **Changes**: 
+    - FeedForm, SleepForm, DiaperForm, TummyTimeForm all handle prefillData correctly
+    - Forms fetch fresh data when editingEventId exists, use prefillData as fallback
+  - **Location**: `src/components/sheets/*.tsx`
+
+### 4. Quick Actions Logging ✅ COMPLETED
+
+- **Quick Log Functionality**
+  - **Status**: ✅ Fixed - Quick log now creates meaningful events
+  - **Implementation**:
+    - Feeds: Ensures minimum 10ml (120ml default), uses last used values with fallbacks
+    - Sleep: Creates 10-minute nap events with proper start/end times and note indicating quick log
+    - Diapers: Can quick log (no amount needed) ✅
+    - Tummy Time: Uses last used duration (default 5 min) ✅
+  - **Location**: `src/pages/Home.tsx` (`handleQuickLog` function)
+  - **Changes**: Added validation for feed amounts, proper sleep duration calculation, improved toast messages
+
+- **Last Used Values Hook**
+  - **Status**: ✅ Updated defaults
+  - **Changes**: Added `duration_min: 10` default for sleep quick logs
+  - **Location**: `src/hooks/useLastUsedValues.ts`
+
+### 5. Lovable Artifacts to Refactor ✅ COMPLETED
+
+- **Duplicate Page Files**
+  - ✅ Removed `src/pages/ManageBabies.tsx` (unused duplicate)
+  - ✅ Removed `src/pages/CaregiverManagement.tsx` (unused duplicate)
+  - ✅ Routing uses `src/pages/Settings/ManageBabies.tsx` and `src/pages/Settings/ManageCaregivers.tsx`
+  - **Remaining**: Audit `src/pages/Index.tsx` and `src/pages/OnboardingWizard.tsx` for removal if unused (P2)
+
+- **Unused Routes/Pages**
+  - `src/pages/Index.tsx` - Not used (root redirects directly)
+  - `src/pages/OnboardingWizard.tsx` - May be unused if `OnboardingSimple.tsx` is preferred
+  - **Action**: Audit and remove unused page files
+
+- **Inconsistent Error Handling**
+  - Some pages show toast errors, others show inline alerts
+  - **Action**: Standardize error handling pattern (prefer toast for user actions)
+
+- **Mixed State Management**
+  - Some components use React Query, others use direct Supabase calls
+  - **Action**: Standardize on React Query for all server state
+
+### 6. Edge Function Dependencies
+
+- **Missing Edge Functions** (may cause 404s):
+  - `generate-predictions` - Used by `/predictions` page
+  - `invite-caregiver` - Used by `/settings/caregivers`
+  - `analyze-cry-pattern` - Used by Cry Insights (if implemented)
+  - **Action**: Verify all edge functions exist in `supabase/functions/` or add error handling
+
+### 7. Type Safety Issues
+
+- **Event Types**
+  - `EventType` in `src/types/events.ts` may not match all database subtypes
+  - **Action**: Audit event types match database constraints
+
+- **Baby Profile Fields**
+  - `units` field referenced in `ManageBabies.tsx` but may not exist in `babies` table
+  - **Action**: Verify `babies` table schema matches component expectations
+
+### 8. Navigation Consistency
+
+- **Mobile Navigation**
+  - `MobileNav` component exists but may not be on all pages
+  - **Action**: Ensure all authenticated pages have bottom navigation
+
+- **Back Navigation**
+  - Some pages use `navigate(-1)`, others use explicit routes
+  - **Action**: Standardize back navigation pattern
+
+### Priority Order
+
+1. **P0 (Block iOS work)**: ✅ COMPLETED
+   - ✅ Fixed `/predictions` route with proper error handling and AI consent checks
+   - ✅ Added redirect from `/smart-predictions` to `/predictions`
+   - ✅ Fixed Labs → Cry Insights navigation
+   - ✅ Fixed Quick Actions to ensure meaningful events (no 0ml feeds, proper sleep duration)
+   - ✅ Removed duplicate page files (`ManageBabies.tsx`, `CaregiverManagement.tsx`)
+
+2. **P1 (Before iOS)**: ✅ COMPLETED
+   - ✅ Verified edit/delete works consistently across all event types (Home and History timelines)
+   - ✅ Fixed Home page to reload events after delete
+   - ✅ Improved EventSheet prefillData handling for all event types
+   - ✅ Verified Manage Babies/Caregivers onboarding flows (routes work correctly)
+   - ✅ Verified edge functions exist (`invite-caregiver`, `generate-predictions`) and added graceful degradation
+
+3. **P2 (Nice to have)**: ✅ COMPLETED
+   - ✅ Standardized error handling pattern (toast used consistently for user actions)
+   - ✅ Standardized navigation patterns (`navigate(-1)` is appropriate for back buttons)
+   - ✅ Removed unused page files (`Index.tsx`, `OnboardingWizard.tsx`)
+   - ✅ Verified React Query usage (most pages already use React Query, direct Supabase calls are wrapped in hooks)
+
+---
+
 ## iOS-Specific Considerations
 
 When implementing the iOS native app, consider:

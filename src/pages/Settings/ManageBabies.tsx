@@ -167,7 +167,6 @@ export default function ManageBabies() {
 
 function BabyEditForm({ baby, onSave, onCancel }: any) {
   const [name, setName] = useState(baby.name);
-  const [units, setUnits] = useState(baby.units);
 
   return (
     <div className="space-y-4">
@@ -175,22 +174,9 @@ function BabyEditForm({ baby, onSave, onCancel }: any) {
         <Label>Name</Label>
         <Input value={name} onChange={(e) => setName(e.target.value)} />
       </div>
-      <div>
-        <Label>Units</Label>
-        <RadioGroup value={units} onValueChange={setUnits}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="metric" id="edit-metric" />
-            <Label htmlFor="edit-metric">Metric</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="imperial" id="edit-imperial" />
-            <Label htmlFor="edit-imperial">Imperial</Label>
-          </div>
-        </RadioGroup>
-      </div>
       <DialogFooter>
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => onSave({ name, units })}>Save</Button>
+        <Button onClick={() => onSave({ name })}>Save</Button>
       </DialogFooter>
     </div>
   );
