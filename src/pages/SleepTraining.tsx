@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BabySwitcher } from '@/components/BabySwitcher';
 import { MobileNav } from '@/components/MobileNav';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { ArrowLeft, Plus, Moon, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -108,6 +109,8 @@ export default function SleepTraining() {
       </div>
 
       <div className="container mx-auto p-4 space-y-4">
+        <MedicalDisclaimer variant="sleep" />
+
         {unresolvedRegressions && unresolvedRegressions.length > 0 && (
           <Card className="p-4 border-orange-500 bg-orange-50 dark:bg-orange-950">
             <div className="flex items-start gap-3">

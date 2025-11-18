@@ -10,6 +10,7 @@ import { predictNextNap } from '@/lib/napPredictor';
 import { format, formatDistanceToNow, isBefore, isAfter } from 'date-fns';
 import { ArrowLeft, Moon } from 'lucide-react';
 import { toast } from 'sonner';
+import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 
 export default function NapDetails() {
   const navigate = useNavigate();
@@ -140,6 +141,8 @@ export default function NapDetails() {
           </Button>
           <h1 className="text-2xl font-bold">Nap Prediction</h1>
         </div>
+
+        <MedicalDisclaimer variant="predictions" />
 
         <Card>
           <CardHeader>

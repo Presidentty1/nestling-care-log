@@ -100,7 +100,7 @@ export default function AIAssistant() {
       </div>
 
       <div className="container mx-auto p-4 max-w-3xl">
-        <MedicalDisclaimer />
+        <MedicalDisclaimer variant="ai" className="sticky top-0 z-10 bg-background/95 backdrop-blur" />
 
         {messages.length === 0 && (
           <div className="space-y-4 mb-6">
