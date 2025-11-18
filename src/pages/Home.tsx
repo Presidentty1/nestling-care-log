@@ -26,8 +26,8 @@ import { triggerConfetti } from '@/lib/confetti';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
 import { useLastUsedValues } from '@/hooks/useLastUsedValues';
+import { Lock, Users, X } from 'lucide-react';
 import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
-import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
 import { ContextualTipCard } from '@/components/ContextualTipCard';
 import { getContextualTips } from '@/lib/contextualTips';
 
@@ -323,6 +323,30 @@ export default function Home() {
             />
           </div>
         )}
+
+        {/* AI Contextual Tips */}
+        {selectedBaby && (() => {
+          const tips = getContextualTips(selectedBaby.date_of_birth, events);
+          const visibleTips = tips.filter(tip => !dismissedTips.includes(tip.id));
+          
+          return visibleTips.length > 0 ? (
+            <div className="space-y-2">
+              {visibleTips.map(tip => (
+                <ContextualTipCard
+                  key={tip.id}
+                  tip={tip}
+                  onDismiss={(tipId) => {
+                    setDismissedTips(prev => {
+                      const newDismissed = [...prev, tipId];
+                      localStorage.setItem('dismissedTips', JSON.stringify(newDismissed));
+                      return newDismissed;
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          ) : null;
+        })()}
 
         {!privacyBanner.isDismissed && (
           <Card className="bg-primary/5 border-primary/20">
