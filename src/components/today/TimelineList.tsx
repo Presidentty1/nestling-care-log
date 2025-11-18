@@ -21,8 +21,12 @@ export function TimelineList({ events, onEdit, onDelete }: TimelineListProps) {
     );
   }
 
-  // Events already sorted from service
-  const sortedEvents = events;
+  // Sort events by start_time descending (most recent first)
+  const sortedEvents = [...events].sort((a, b) => {
+    const timeA = new Date(a.start_time).getTime();
+    const timeB = new Date(b.start_time).getTime();
+    return timeB - timeA;
+  });
 
   return (
     <div className="space-y-2">
