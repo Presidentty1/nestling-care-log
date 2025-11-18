@@ -72,15 +72,27 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius-lg)", /* 20px for sheets */
-        md: "var(--radius-md)", /* 16px for cards */
-        sm: "var(--radius-button)", /* 14px for buttons */
-        DEFAULT: "var(--radius)",
+        xs: "var(--radius-xs)", /* 8px small elements */
+        sm: "var(--radius-sm)", /* 12px chips/pills */
+        DEFAULT: "var(--radius)", /* 14px buttons */
+        md: "var(--radius-md)", /* 16px cards */
+        lg: "var(--radius-lg)", /* 20px sheets */
+        xl: "var(--radius-xl)", /* 24px modals */
       },
       boxShadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
         soft: "var(--shadow-soft)",
       },
       spacing: {
+        xs: "var(--spacing-xs)", /* 4px */
+        sm: "var(--spacing-sm)", /* 8px */
+        md: "var(--spacing-md)", /* 16px */
+        lg: "var(--spacing-lg)", /* 24px */
+        xl: "var(--spacing-xl)", /* 32px */
+        '2xl': "var(--spacing-2xl)", /* 48px */
         '18': '4.5rem', /* 72px */
         '22': '5.5rem', /* 88px */
       },

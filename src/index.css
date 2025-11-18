@@ -53,12 +53,26 @@ All colors MUST be HSL.
     --ring: 168 46% 34%;
 
     /* Radii - iOS style */
-    --radius: 1rem; /* 16px default */
+    --radius-xs: 0.5rem; /* 8px small elements */
+    --radius-sm: 0.75rem; /* 12px chips/pills */
+    --radius: 0.875rem; /* 14px buttons */
     --radius-md: 1rem; /* 16px cards */
     --radius-lg: 1.25rem; /* 20px sheets */
-    --radius-button: 0.875rem; /* 14px buttons */
+    --radius-xl: 1.5rem; /* 24px modals */
 
-    /* Shadows */
+    /* Spacing scale - iOS style */
+    --spacing-xs: 0.25rem; /* 4px */
+    --spacing-sm: 0.5rem; /* 8px */
+    --spacing-md: 1rem; /* 16px */
+    --spacing-lg: 1.5rem; /* 24px */
+    --spacing-xl: 2rem; /* 32px */
+    --spacing-2xl: 3rem; /* 48px */
+
+    /* Shadows - Layered elevation */
+    --shadow-sm: 0 1px 2px rgba(13, 27, 30, 0.04);
+    --shadow-md: 0 4px 12px rgba(13, 27, 30, 0.08);
+    --shadow-lg: 0 8px 24px rgba(13, 27, 30, 0.12);
+    --shadow-xl: 0 12px 32px rgba(13, 27, 30, 0.16);
     --shadow-soft: 0 6px 24px rgba(13, 27, 30, 0.06);
 
     /* Caregiver Mode - UI Scaling */
@@ -114,6 +128,11 @@ All colors MUST be HSL.
     --input: 204 22% 19%;
     --ring: 168 36% 64%;
 
+    /* Shadows - Dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.5);
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 
     /* Caregiver Mode - UI Scaling */

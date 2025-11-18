@@ -14,7 +14,7 @@ export function NapWindowCard({ window }: NapWindowCardProps) {
   const formatTime = (date: Date) => format(date, 'h:mm a');
 
   return (
-    <Card className="bg-primary/5 border-primary/20">
+    <Card variant="emphasis">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -24,11 +24,11 @@ export function NapWindowCard({ window }: NapWindowCardProps) {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-foreground">Nap Window</h3>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <div className="flex items-center gap-2 text-caption text-muted-foreground mb-2">
               <Clock className="h-4 w-4" />
               <span>{formatTime(window.start)} – {formatTime(window.end)}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{window.reason}</p>
+            <p className="text-caption text-muted-foreground">{window.reason}</p>
           </div>
         </div>
       </CardContent>

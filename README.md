@@ -14,6 +14,29 @@ A comprehensive baby care logging app with local-first architecture. Track feedi
 - ♿ **Caregiver Mode** - Enhanced accessibility
 - 🔒 **Privacy First** - All data stays local
 
+## 🎨 Design System
+
+This project uses a comprehensive design system optimized for mobile-first experiences with iOS-quality patterns. All design tokens, components, and spacing scales are documented in **[DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)**.
+
+**Key Features:**
+- **Semantic Tokens** - Single source of truth for colors, spacing, shadows
+- **Component Variants** - Standardized Button, Card, Chip components
+- **Typography Scale** - iOS-style text hierarchy
+- **SwiftUI Ready** - Token mappings for native iOS implementation
+
+**Quick Example:**
+```tsx
+// Use semantic tokens
+<Card variant="emphasis" className="shadow-lg">
+  <CardContent className="p-md space-y-sm">
+    <Button variant="default" size="lg">Primary Action</Button>
+    <Chip variant="success">Active</Chip>
+  </CardContent>
+</Card>
+```
+
+See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete documentation.
+
 ## 🚀 Quick Start
 
 ```bash
@@ -78,6 +101,7 @@ See `DEPLOYMENT.md` for:
 
 ## 📚 Documentation
 
+- **`DESIGN_SYSTEM.md`** - Complete design system with tokens, components, and SwiftUI mappings
 - `DEVELOPMENT.md` - Complete local development guide
 - `DEPLOYMENT.md` - Production deployment instructions
 - `TESTING_CHECKLIST.md` - Pre-deployment testing steps
