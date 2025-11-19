@@ -5,7 +5,11 @@ import Combine
 class HomeViewModel: ObservableObject {
     @Published var events: [Event] = []
     @Published var summary: DaySummary?
-    @Published var isLoading = false
+    @Published var isLoading = false {
+        didSet {
+            print("🔵 HomeViewModel.isLoading changed: \(oldValue) -> \(isLoading) [Thread: \(Thread.isMainThread ? "Main" : "Background")]")
+        }
+    }
     @Published var errorMessage: String?
     @Published var activeSleep: Event?
     @Published var searchText: String = ""
@@ -114,16 +118,36 @@ class HomeViewModel: ObservableObject {
     
     func loadTodayEvents() {
         // Cancel any existing load task first
+        let wasAlreadyLoading = isLoadingTask != nil
         isLoadingTask?.cancel()
         isLoadingTask = nil
         
-        print("loadTodayEvents called for baby: \(baby.id)")
-        isLoading = true
+        print("loadTodayEvents called for baby: \(baby.id), wasAlreadyLoading: \(wasAlreadyLoading)")
+        
+        // Only set isLoading = true if we weren't already loading
+        // This prevents rapid calls from keeping isLoading stuck at true
+        if !wasAlreadyLoading {
+            isLoading = true
+            // Force SwiftUI update
+            objectWillChange.send()
+        }
         errorMessage = nil
         
         let signpostID = SignpostLogger.beginInterval("TimelineLoad", log: SignpostLogger.ui)
         
         isLoadingTask = Task { @MainActor in
+            // Use defer to ALWAYS reset isLoading and clear task reference
+            // This ensures isLoading is reset even if task is cancelled or errors occur
+            defer {
+                print("[Task] loadTodayEvents defer block executing, setting isLoading = false")
+                // Ensure we're on MainActor and force SwiftUI update
+                assert(Thread.isMainThread, "Defer block must run on main thread")
+                self.isLoading = false
+                self.isLoadingTask = nil
+                // Force SwiftUI to update by sending objectWillChange
+                self.objectWillChange.send()
+            }
+            
             print("Starting fetchEvents task...")
             let startTime = Date()
             let taskID = UUID()
@@ -150,9 +174,7 @@ class HomeViewModel: ObservableObject {
                 if Task.isCancelled {
                     print("[\(taskID)] loadTodayEvents was cancelled after fetch")
                     timeoutTask.cancel()
-                    // Ensure isLoading is reset even if cancelled
-                    self.isLoading = false
-                    return
+                    return // defer block will handle isLoading reset
                 }
                 
                 timeoutTask.cancel()
@@ -163,8 +185,8 @@ class HomeViewModel: ObservableObject {
                 // Update UI on MainActor (we're already on MainActor, but be explicit)
                 self.events = todayEvents
                 self.summary = calculateSummary(from: todayEvents)
-                self.isLoading = false
-                print("[\(taskID)] UI updated with \(todayEvents.count) events, isLoading = false")
+                print("[\(taskID)] UI updated with \(todayEvents.count) events")
+                // isLoading will be set to false in defer block
                 
                 // Index events in Spotlight (non-blocking)
                 Task {
@@ -186,17 +208,14 @@ class HomeViewModel: ObservableObject {
                 if Task.isCancelled {
                     print("[\(taskID)] loadTodayEvents was cancelled during error handling")
                     timeoutTask.cancel()
-                    // Ensure isLoading is reset even if cancelled
-                    self.isLoading = false
-                    return
+                    return // defer block will handle isLoading reset
                 }
                 
                 timeoutTask.cancel()
                 let elapsed = Date().timeIntervalSince(startTime)
                 print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
-                self.isLoading = false
-                print("[\(taskID)] Error set, isLoading = false")
+                print("[\(taskID)] Error set")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
         }
