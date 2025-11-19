@@ -9,13 +9,31 @@ class CoreDataDataStore: DataStore {
     
     init(stack: CoreDataStack = .shared) {
         self.stack = stack
+        // Ensure CoreData stack is initialized
+        _ = stack.persistentContainer
+    }
+    
+    /// Ensure CoreData store is ready before performing operations
+    private func ensureStoreReady() async throws {
+        if !stack.isStoreReady {
+            print("WARNING: CoreData store not ready yet, waiting...")
+            // Wait up to 2 seconds for store to be ready
+            for _ in 0..<20 {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                if stack.isStoreReady {
+                    print("CoreData store is now ready")
+                    return
+                }
+            }
+            throw NSError(domain: "CoreDataDataStore", code: -1, userInfo: [NSLocalizedDescriptionKey: "CoreData store not ready after waiting"])
+        }
     }
     
     // MARK: - Babies
     
     func fetchBabies() async throws -> [Baby] {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<BabyEntity>(entityName: "BabyEntity")
                 do {
@@ -30,14 +48,14 @@ class CoreDataDataStore: DataStore {
     }
     
     func addBaby(_ baby: Baby) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let entity = BabyEntity(context: context)
                 entity.update(from: baby)
                 
                 do {
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -47,8 +65,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func updateBaby(_ baby: Baby) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<BabyEntity>(entityName: "BabyEntity")
                 request.predicate = NSPredicate(format: "id == %@", baby.id as CVarArg)
@@ -56,7 +74,7 @@ class CoreDataDataStore: DataStore {
                 do {
                     if let entity = try context.fetch(request).first {
                         entity.update(from: baby)
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                     }
                     continuation.resume()
                 } catch {
@@ -67,8 +85,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func deleteBaby(_ baby: Baby) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<BabyEntity>(entityName: "BabyEntity")
                 request.predicate = NSPredicate(format: "id == %@", baby.id as CVarArg)
@@ -82,7 +100,7 @@ class CoreDataDataStore: DataStore {
                         let events = try context.fetch(eventRequest)
                         events.forEach { context.delete($0) }
                         
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                     }
                     continuation.resume()
                 } catch {
@@ -95,23 +113,84 @@ class CoreDataDataStore: DataStore {
     // MARK: - Events
     
     func fetchEvents(for baby: Baby, on date: Date) async throws -> [Event] {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        print("CoreDataDataStore.fetchEvents called for baby: \(baby.id), date: \(date)")
+        let startTime = Date()
+        
+        // Ensure store is ready before using contexts
+        try await ensureStoreReady()
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
+            print("Created background context, calling perform...")
+            
+            // Add timeout wrapper
+            var hasResumed = false
+            let lock = NSLock()
+            
+            // Timeout task
+            let timeoutTask = DispatchWorkItem {
+                lock.lock()
+                if !hasResumed {
+                    hasResumed = true
+                    lock.unlock()
+                    print("ERROR: fetchEvents timed out - context.perform never executed")
+                    continuation.resume(throwing: NSError(domain: "CoreDataDataStore", code: -2, userInfo: [NSLocalizedDescriptionKey: "Fetch timed out - CoreData store may not be ready"]))
+                } else {
+                    lock.unlock()
+                }
+            }
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 5.0, execute: timeoutTask)
+            
             context.perform {
-                let calendar = Calendar.current
-                let startOfDay = calendar.startOfDay(for: date)
-                let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? date
+                lock.lock()
+                if hasResumed {
+                    lock.unlock()
+                    print("WARNING: fetchEvents continuation already resumed (timeout or cancelled)")
+                    return
+                }
+                hasResumed = true
+                lock.unlock()
+                timeoutTask.cancel()
                 
-                let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
-                request.predicate = NSPredicate(format: "babyId == %@ AND startTime >= %@ AND startTime < %@", 
-                                               baby.id as CVarArg, startOfDay as NSDate, endOfDay as NSDate)
-                request.sortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
-                
+                print("Inside context.perform block")
                 do {
+                    let calendar = Calendar.current
+                    let startOfDay = calendar.startOfDay(for: date)
+                    let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? date
+                    
+                    print("Date range: \(startOfDay) to \(endOfDay)")
+                    
+                    let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
+                    request.predicate = NSPredicate(format: "babyId == %@ AND startTime >= %@ AND startTime < %@", 
+                                                   baby.id as CVarArg, startOfDay as NSDate, endOfDay as NSDate)
+                    request.sortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
+                    
+                    // Add fetch limit to prevent hanging on large datasets
+                    request.fetchLimit = 1000
+                    
+                    print("Executing fetch request...")
                     let entities = try context.fetch(request)
-                    let events = entities.map { $0.toEvent() }
+                    print("Fetch completed, got \(entities.count) entities")
+                    
+                    let events = entities.compactMap { entity -> Event? in
+                        // Use compactMap to filter out any invalid entities
+                        do {
+                            return entity.toEvent()
+                        } catch {
+                            print("Warning: Failed to convert EventEntity to Event: \(error)")
+                            return nil
+                        }
+                    }
+                    
+                    let elapsed = Date().timeIntervalSince(startTime)
+                    print("fetchEvents completed successfully in \(elapsed) seconds, returning \(events.count) events")
+                    if events.count > 0 {
+                        print("Sample event: type=\(events.first!.type), startTime=\(events.first!.startTime), babyId=\(events.first!.babyId)")
+                    }
                     continuation.resume(returning: events)
                 } catch {
+                    let elapsed = Date().timeIntervalSince(startTime)
+                    print("ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                     continuation.resume(throwing: error)
                 }
             }
@@ -119,8 +198,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event] {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                 request.predicate = NSPredicate(format: "babyId == %@ AND startTime >= %@ AND startTime <= %@",
@@ -139,19 +218,52 @@ class CoreDataDataStore: DataStore {
     }
     
     func addEvent(_ event: Event) async throws {
+        print("CoreDataDataStore.addEvent called: type=\(event.type), babyId=\(event.babyId), startTime=\(event.startTime)")
         // Domain-level validation
         try EventValidator.validate(event)
         
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        // Ensure store is ready before using contexts
+        try await ensureStoreReady()
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
+            
+            // Add timeout wrapper
+            var hasResumed = false
+            let lock = NSLock()
+            let timeoutTask = DispatchWorkItem {
+                lock.lock()
+                if !hasResumed {
+                    hasResumed = true
+                    lock.unlock()
+                    print("ERROR: addEvent timed out - context.perform never executed")
+                    continuation.resume(throwing: NSError(domain: "CoreDataDataStore", code: -2, userInfo: [NSLocalizedDescriptionKey: "Save timed out - CoreData store may not be ready"]))
+                } else {
+                    lock.unlock()
+                }
+            }
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 5.0, execute: timeoutTask)
+            
             context.perform {
+                lock.lock()
+                if hasResumed {
+                    lock.unlock()
+                    print("WARNING: addEvent continuation already resumed (timeout or cancelled)")
+                    return
+                }
+                hasResumed = true
+                lock.unlock()
+                timeoutTask.cancel()
+                
                 let entity = EventEntity(context: context)
                 entity.update(from: event)
                 
                 do {
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
+                    print("CoreDataDataStore.addEvent: Event saved successfully with id=\(event.id)")
                     continuation.resume()
                 } catch {
+                    print("CoreDataDataStore.addEvent ERROR: Failed to save event: \(error)")
                     continuation.resume(throwing: error)
                 }
             }
@@ -162,8 +274,8 @@ class CoreDataDataStore: DataStore {
         // Domain-level validation
         try EventValidator.validate(event)
         
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                 request.predicate = NSPredicate(format: "id == %@", event.id as CVarArg)
@@ -171,7 +283,7 @@ class CoreDataDataStore: DataStore {
                 do {
                     if let entity = try context.fetch(request).first {
                         entity.update(from: event)
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                     }
                     continuation.resume()
                 } catch {
@@ -182,8 +294,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func deleteEvent(_ event: Event) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                 request.predicate = NSPredicate(format: "id == %@", event.id as CVarArg)
@@ -191,7 +303,7 @@ class CoreDataDataStore: DataStore {
                 do {
                     if let entity = try context.fetch(request).first {
                         context.delete(entity)
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                     }
                     continuation.resume()
                 } catch {
@@ -204,8 +316,8 @@ class CoreDataDataStore: DataStore {
     // MARK: - Predictions
     
     func fetchPredictions(for baby: Baby, type: PredictionType) async throws -> Prediction? {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Prediction?, Error>) in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<PredictionCacheEntity>(entityName: "PredictionCacheEntity")
                 request.predicate = NSPredicate(format: "babyId == %@ AND type == %@",
@@ -242,8 +354,8 @@ class CoreDataDataStore: DataStore {
     }
     
     private func savePrediction(_ prediction: Prediction) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<PredictionCacheEntity>(entityName: "PredictionCacheEntity")
                 request.predicate = NSPredicate(format: "babyId == %@ AND type == %@",
@@ -256,7 +368,7 @@ class CoreDataDataStore: DataStore {
                         let entity = PredictionCacheEntity(context: context)
                         entity.update(from: prediction)
                     }
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -268,8 +380,8 @@ class CoreDataDataStore: DataStore {
     // MARK: - Settings
     
     func fetchAppSettings() async throws -> AppSettings {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<AppSettingsEntity>(entityName: "AppSettingsEntity")
                 request.fetchLimit = 1
@@ -282,19 +394,19 @@ class CoreDataDataStore: DataStore {
                         let defaults = AppSettings.default()
                         let entity = AppSettingsEntity(context: context)
                         entity.update(from: defaults)
-                        try? stack.save(context: context)
+                        try? self.stack.save(context: context)
                         continuation.resume(returning: defaults)
                     }
                 } catch {
-                    continuation.resume(returning: AppSettings.default())
+                    continuation.resume(throwing: error)
                 }
             }
         }
     }
     
     func saveAppSettings(_ settings: AppSettings) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<AppSettingsEntity>(entityName: "AppSettingsEntity")
                 request.fetchLimit = 1
@@ -306,7 +418,7 @@ class CoreDataDataStore: DataStore {
                         let entity = AppSettingsEntity(context: context)
                         entity.update(from: settings)
                     }
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -318,8 +430,8 @@ class CoreDataDataStore: DataStore {
     // MARK: - Active Sleep
     
     func getActiveSleep(for baby: Baby) async throws -> Event? {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Event?, Error>) in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                 request.predicate = NSPredicate(format: "babyId == %@ AND type == %@ AND endTime == nil",
@@ -340,8 +452,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func startActiveSleep(for baby: Baby) async throws -> Event {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let entity = EventEntity(context: context)
                 let sleepEvent = Event(
@@ -354,7 +466,7 @@ class CoreDataDataStore: DataStore {
                 entity.update(from: sleepEvent)
                 
                 do {
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
                     continuation.resume(returning: sleepEvent)
                 } catch {
                     continuation.resume(throwing: error)
@@ -364,8 +476,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func stopActiveSleep(for baby: Baby) async throws -> Event {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                 request.predicate = NSPredicate(format: "babyId == %@ AND type == %@ AND endTime == nil",
@@ -376,7 +488,7 @@ class CoreDataDataStore: DataStore {
                     if let entity = try context.fetch(request).first {
                         entity.endTime = Date()
                         let event = entity.toEvent()
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                         continuation.resume(returning: event)
                     } else {
                         // Create default sleep event
@@ -392,7 +504,7 @@ class CoreDataDataStore: DataStore {
                         )
                         let newEntity = EventEntity(context: context)
                         newEntity.update(from: sleepEvent)
-                        try stack.save(context: context)
+                        try self.stack.save(context: context)
                         continuation.resume(returning: sleepEvent)
                     }
                 } catch {
@@ -405,8 +517,8 @@ class CoreDataDataStore: DataStore {
     // MARK: - Last Used Values
     
     func getLastUsedValues(for eventType: EventType) async throws -> LastUsedValues? {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<LastUsedValues?, Error>) in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<LastUsedValuesEntity>(entityName: "LastUsedValuesEntity")
                 request.predicate = NSPredicate(format: "eventType == %@", eventType.rawValue)
@@ -426,8 +538,8 @@ class CoreDataDataStore: DataStore {
     }
     
     func saveLastUsedValues(for eventType: EventType, values: LastUsedValues) async throws {
-        return await withCheckedContinuation { continuation in
-            let context = stack.newBackgroundContext()
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
             context.perform {
                 let request = NSFetchRequest<LastUsedValuesEntity>(entityName: "LastUsedValuesEntity")
                 request.predicate = NSPredicate(format: "eventType == %@", eventType.rawValue)
@@ -440,7 +552,7 @@ class CoreDataDataStore: DataStore {
                         entity.eventType = eventType.rawValue
                         entity.update(from: values)
                     }
-                    try stack.save(context: context)
+                    try self.stack.save(context: context)
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)

@@ -54,23 +54,21 @@ class AppEnvironment: ObservableObject {
         }
     }
     
-    func refreshBabies() {
-        Task {
-            do {
-                let loadedBabies = try await dataStore.fetchBabies()
-                await MainActor.run {
-                    self.babies = loadedBabies
-                    // Update current baby if it still exists
-                    if let currentId = currentBaby?.id,
-                       let updatedBaby = loadedBabies.first(where: { $0.id == currentId }) {
-                        self.currentBaby = updatedBaby
-                    } else if currentBaby == nil, let firstBaby = loadedBabies.first {
-                        self.currentBaby = firstBaby
-                    }
+    func refreshBabies() async {
+        do {
+            let loadedBabies = try await dataStore.fetchBabies()
+            await MainActor.run {
+                self.babies = loadedBabies
+                // Update current baby if it still exists
+                if let currentId = currentBaby?.id,
+                   let updatedBaby = loadedBabies.first(where: { $0.id == currentId }) {
+                    self.currentBaby = updatedBaby
+                } else if currentBaby == nil, let firstBaby = loadedBabies.first {
+                    self.currentBaby = firstBaby
                 }
-            } catch {
-                print("Error refreshing babies: \(error)")
             }
+        } catch {
+            print("Error refreshing babies: \(error)")
         }
     }
     

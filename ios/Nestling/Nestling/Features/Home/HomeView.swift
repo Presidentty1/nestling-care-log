@@ -31,13 +31,25 @@ struct HomeView: View {
                                     .padding(.horizontal, .spacingMD)
                             }
                             
-                            // Quick Actions
+                            // Quick Actions - Always show, even during loading
                             QuickActionsSection(
                                 activeSleep: viewModel.activeSleep,
-                                onFeed: { viewModel.quickLogFeed() },
-                                onSleep: { viewModel.quickLogSleep() },
-                                onDiaper: { viewModel.quickLogDiaper() },
-                                onTummyTime: { viewModel.quickLogTummyTime() },
+                                onFeed: { 
+                                    print("Quick action Feed tapped")
+                                    viewModel.quickLogFeed() 
+                                },
+                                onSleep: { 
+                                    print("Quick action Sleep tapped")
+                                    viewModel.quickLogSleep() 
+                                },
+                                onDiaper: { 
+                                    print("Quick action Diaper tapped")
+                                    viewModel.quickLogDiaper() 
+                                },
+                                onTummyTime: { 
+                                    print("Quick action TummyTime tapped")
+                                    viewModel.quickLogTummyTime() 
+                                },
                                 onOpenFeedForm: { showFeedForm = true },
                                 onOpenSleepForm: { showSleepForm = true },
                                 onOpenDiaperForm: { showDiaperForm = true },
@@ -46,87 +58,64 @@ struct HomeView: View {
                             .padding(.horizontal, .spacingMD)
                             
                             // Timeline
-                            if viewModel.isLoading {
-                                LoadingStateView(message: "Loading events...")
-                                    .frame(height: 200)
-                            } else if viewModel.filteredEvents.isEmpty {
-                                EmptyStateView(
-                                    icon: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "calendar" : "magnifyingglass",
-                                    title: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "No events logged today" : "No matching events",
-                                    message: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "Start logging events to see them here" : "Try adjusting your search or filter"
-                                )
-                                .frame(height: 200)
-                            } else {
-                                // Filter chips
-                                FilterChipsView(
-                                    selectedFilter: $viewModel.selectedFilter,
-                                    filters: EventTypeFilter.allCases
-                                )
-                                .padding(.vertical, .spacingSM)
-                                
-                                TimelineSection(
-                                    events: viewModel.filteredEvents,
-                                    onEdit: { event in
-                                        editingEvent = event
-                                        showFormForEvent(event)
-                                    },
-                                    onDelete: { event in
-                                        viewModel.deleteEvent(event)
-                                        // Show undo toast
-                                        showToast = ToastMessage(
-                                            message: "Event deleted",
-                                            type: .success,
-                                            undoAction: {
-                                                Task {
-                                                    do {
-                                                        try await viewModel.undoDeletion()
-                                                        showToast = ToastMessage(message: "Event restored", type: .success)
-                                                    } catch {
-                                                        showToast = ToastMessage(message: "Could not undo: \(error.localizedDescription)", type: .error)
-                                                    }
-                                                }
-                                            }
-                                        )
-                                        // Auto-dismiss after 7 seconds
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-                                            if showToast?.id == showToast?.id {
-                                                showToast = nil
-                                            }
-                                        }
-                                    },
-                                    onDuplicate: { event in
-                                        viewModel.duplicateEvent(event)
-                                        showToast = ToastMessage(message: "Event duplicated", type: .success)
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                            showToast = nil
-                                        }
-                                    }
-                                )
-                                .padding(.horizontal, .spacingMD)
-                            }
+                            timelineContent(for: viewModel)
                         }
-                        .padding(.vertical, .spacingMD)
+                        .padding(.bottom, .spacingLG)
                     }
+                } else if environment.babies.isEmpty {
+                    // No babies - show empty state
+                    VStack(spacing: .spacingMD) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.system(size: 60))
+                            .foregroundColor(.mutedForeground)
+                        Text("No babies yet")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+                        Text("Add a baby in Settings to get started")
+                            .font(.body)
+                            .foregroundColor(.mutedForeground)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
+                    // Still loading
                     ProgressView()
                 }
             }
-            .navigationTitle("Today")
+            .navigationTitle("Home")
             .background(Color.background)
-            .searchable(text: $viewModel.searchText, suggestions: {
-                ForEach(viewModel.searchSuggestions, id: \.self) { suggestion in
+            .searchable(text: Binding(
+                get: { viewModel?.searchText ?? "" },
+                set: { viewModel?.searchText = $0 }
+            ), suggestions: {
+                ForEach(viewModel?.searchSuggestions ?? [], id: \.self) { suggestion in
                     Text(suggestion)
                         .searchCompletion(suggestion)
                 }
             })
-            .onChange(of: viewModel.searchText) { _, newValue in
+            .onChange(of: viewModel?.searchText ?? "") { _, newValue in
                 if newValue.isEmpty {
-                    viewModel.selectedFilter = .all
+                    viewModel?.selectedFilter = .all
                 }
             }
             .task {
-                if let baby = environment.currentBaby, viewModel == nil {
-                    updateViewModel(for: baby)
+                // Wait a bit for environment to load babies, then create viewModel
+                if viewModel == nil {
+                    if let baby = environment.currentBaby {
+                        updateViewModel(for: baby)
+                    } else {
+                        // Wait for babies to load
+                        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                        if let baby = environment.currentBaby {
+                            updateViewModel(for: baby)
+                        } else if !environment.babies.isEmpty {
+                            // If babies exist but currentBaby isn't set, use first one
+                            environment.currentBaby = environment.babies.first
+                            if let baby = environment.currentBaby {
+                                updateViewModel(for: baby)
+                            }
+                        }
+                    }
                 }
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
@@ -134,24 +123,11 @@ struct HomeView: View {
                     updateViewModel(for: baby)
                 }
             }
-            .onChange(of: environment.navigationCoordinator.showFeedForm) { _, newValue in
-                if newValue {
-                    showFeedForm = true
-                }
-            }
-            .onChange(of: environment.navigationCoordinator.showSleepForm) { _, newValue in
-                if newValue {
-                    showSleepForm = true
-                }
-            }
-            .onChange(of: environment.navigationCoordinator.showDiaperForm) { _, newValue in
-                if newValue {
-                    showDiaperForm = true
-                }
-            }
-            .onChange(of: environment.navigationCoordinator.showTummyForm) { _, newValue in
-                if newValue {
-                    showTummyForm = true
+            .onChange(of: environment.babies.count) { _, _ in
+                // If babies were loaded but currentBaby is nil, set it
+                if environment.currentBaby == nil, let firstBaby = environment.babies.first {
+                    environment.currentBaby = firstBaby
+                    updateViewModel(for: firstBaby)
                 }
             }
             .sheet(isPresented: $showFeedForm) {
@@ -242,7 +218,86 @@ struct HomeView: View {
         }
     }
     
+    @ViewBuilder
+    private func timelineContent(for viewModel: HomeViewModel) -> some View {
+        if viewModel.isLoading {
+            LoadingStateView(message: "Loading events...")
+                .frame(height: 200)
+        } else {
+            let isEmpty = viewModel.filteredEvents.isEmpty
+            let noSearch = viewModel.searchText.isEmpty
+            let allFilter = viewModel.selectedFilter == .all
+            
+            if isEmpty {
+                EmptyStateView(
+                    icon: noSearch && allFilter ? "calendar" : "magnifyingglass",
+                    title: noSearch && allFilter ? "No events logged today" : "No matching events",
+                    message: noSearch && allFilter ? "Start logging events to see them here" : "Try adjusting your search or filter"
+                )
+                .frame(height: 200)
+            } else {
+                // Filter chips
+                FilterChipsView(
+                    selectedFilter: Binding(
+                        get: { viewModel.selectedFilter },
+                        set: { viewModel.selectedFilter = $0 }
+                    ),
+                    filters: EventTypeFilter.allCases
+                )
+                .padding(.vertical, .spacingSM)
+                
+                TimelineSection(
+                    events: viewModel.filteredEvents,
+                    onEdit: { event in
+                        editingEvent = event
+                        showFormForEvent(event)
+                    },
+                    onDelete: { event in
+                        viewModel.deleteEvent(event)
+                        // Show undo toast
+                        let toastId = UUID()
+                        showToast = ToastMessage(
+                            id: toastId,
+                            message: "Event deleted",
+                            type: .success,
+                            undoAction: {
+                                Task {
+                                    do {
+                                        try await viewModel.undoDeletion()
+                                        showToast = ToastMessage(message: "Event restored", type: .success)
+                                    } catch {
+                                        showToast = ToastMessage(message: "Could not undo: \(error.localizedDescription)", type: .error)
+                                    }
+                                }
+                            }
+                        )
+                        // Auto-dismiss after 7 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+                            if showToast?.id == toastId {
+                                showToast = nil
+                            }
+                        }
+                    },
+                    onDuplicate: { event in
+                        viewModel.duplicateEvent(event)
+                        showToast = ToastMessage(message: "Event duplicated", type: .success)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            showToast = nil
+                        }
+                    }
+                )
+                .padding(.horizontal, .spacingMD)
+            }
+        }
+    }
+    
     private func updateViewModel(for baby: Baby) {
+        // Only create a new viewModel if we don't have one, or if the baby changed
+        if let existingViewModel = viewModel, existingViewModel.baby.id == baby.id {
+            print("updateViewModel: Keeping existing viewModel for baby \(baby.id)")
+            return
+        }
+        print("updateViewModel: Creating new viewModel for baby \(baby.id)")
         viewModel = HomeViewModel(dataStore: environment.dataStore, baby: baby)
     }
     

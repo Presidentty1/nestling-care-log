@@ -1,10 +1,12 @@
 import SwiftUI
 import os.signpost
+import CoreSpotlight
 
 @main
 struct NestlingApp: App {
     @StateObject private var environment: AppEnvironment
     @State private var showOnboarding = false
+    @State private var isCheckingOnboarding = true
     
     private let launchSignpostID: OSSignpostID
     
@@ -21,11 +23,21 @@ struct NestlingApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if showOnboarding {
+                if isCheckingOnboarding {
+                    // Show loading screen while checking onboarding status
+                    Color.background
+                        .ignoresSafeArea()
+                        .overlay {
+                            ProgressView()
+                        }
+                } else if showOnboarding {
                     OnboardingView(dataStore: environment.dataStore) {
                         showOnboarding = false
-                        environment.refreshBabies()
-                        environment.refreshSettings()
+                        // Refresh babies and settings after onboarding completes
+                        Task {
+                            await environment.refreshBabies()
+                            await environment.refreshSettings()
+                        }
                     }
                 } else {
                     ContentView()
@@ -40,17 +52,13 @@ struct NestlingApp: App {
                         }
                         .onOpenURL { url in
                             let route = DeepLinkRouter.parse(url: url)
-                            if let coordinator = environment.navigationCoordinator {
-                                coordinator.handleDeepLink(route)
-                            }
+                            environment.navigationCoordinator.handleDeepLink(route)
                         }
                         .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
                             // Handle Universal Links
                             if let url = userActivity.webpageURL {
                                 let route = DeepLinkRouter.parse(url: url)
-                                if let coordinator = environment.navigationCoordinator {
-                                    coordinator.handleDeepLink(route)
-                                }
+                                environment.navigationCoordinator.handleDeepLink(route)
                             }
                         }
                         .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
@@ -72,8 +80,11 @@ struct NestlingApp: App {
                 // Check if onboarding is needed
                 let onboardingService = OnboardingService(dataStore: environment.dataStore)
                 let completed = await onboardingService.isOnboardingCompleted()
-                if !completed {
-                    showOnboarding = true
+                await MainActor.run {
+                    isCheckingOnboarding = false
+                    if !completed {
+                        showOnboarding = true
+                    }
                 }
             }
         }
@@ -87,21 +98,23 @@ struct NestlingApp: App {
         }
         
         // Extract event ID from identifier
-        let eventId = String(identifier.dropFirst("com.nestling.events.".count))
+        let eventIdString = String(identifier.dropFirst("com.nestling.events.".count))
+        guard let eventId = UUID(uuidString: eventIdString) else {
+            return
+        }
         
         // Navigate to History tab and scroll to event
         Task {
-            if let coordinator = environment.navigationCoordinator {
-                coordinator.selectedTab = 1 // History tab
-                
-                // Find event and navigate to its date
-                if let baby = environment.currentBaby {
-                    let events = try? await environment.dataStore.fetchEvents(for: baby)
-                    if let event = events?.first(where: { $0.id == eventId }) {
-                        // Navigate to the date of the event
-                        // This would be handled by HistoryViewModel
-                        coordinator.navigateToEvent(event)
-                    }
+            environment.navigationCoordinator.selectedTab = 1 // History tab
+            
+            // Find event and navigate to its date
+            if let baby = environment.currentBaby {
+                let startDate = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? Date()
+                let events = try? await environment.dataStore.fetchEvents(for: baby, from: startDate, to: Date())
+                if let event = events?.first(where: { $0.id == eventId }) {
+                    // Navigate to the date of the event
+                    // This would be handled by HistoryViewModel
+                    environment.navigationCoordinator.navigateToEvent(event)
                 }
             }
         }
@@ -121,15 +134,11 @@ struct NestlingApp: App {
                 let amount = parameters["amount"] as? Double ?? 120
                 let unit = parameters["unit"] as? String ?? "ml"
                 // Trigger feed form with prefill
-                if let coordinator = environment.navigationCoordinator {
-                    coordinator.feedPrefillAmount = amount
-                    coordinator.feedPrefillUnit = unit
-                    coordinator.showFeedForm = true
-                }
+                environment.navigationCoordinator.feedPrefillAmount = amount
+                environment.navigationCoordinator.feedPrefillUnit = unit
+                environment.navigationCoordinator.showFeedForm = true
             case .startSleep:
-                if let coordinator = environment.navigationCoordinator {
-                    coordinator.showSleepForm = true
-                }
+                environment.navigationCoordinator.showSleepForm = true
             case .stopSleep:
                 // Stop active sleep - handled by HomeViewModel
                 break
@@ -169,37 +178,6 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
                 .tag(3)
-        }
-        .commands {
-            CommandMenu("Quick Actions") {
-                Button("Log Feed") {
-                    if let coordinator = environment.navigationCoordinator {
-                        coordinator.showFeedForm = true
-                    }
-                }
-                .keyboardShortcut("n", modifiers: .command)
-                
-                Button("Start/Stop Sleep") {
-                    if let coordinator = environment.navigationCoordinator {
-                        coordinator.showSleepForm = true
-                    }
-                }
-                .keyboardShortcut("s", modifiers: .command)
-                
-                Button("Log Diaper") {
-                    if let coordinator = environment.navigationCoordinator {
-                        coordinator.showDiaperForm = true
-                    }
-                }
-                .keyboardShortcut("d", modifiers: .command)
-                
-                Button("Start Tummy Timer") {
-                    if let coordinator = environment.navigationCoordinator {
-                        coordinator.showTummyForm = true
-                    }
-                }
-                .keyboardShortcut("t", modifiers: .command)
-            }
         }
     }
 }

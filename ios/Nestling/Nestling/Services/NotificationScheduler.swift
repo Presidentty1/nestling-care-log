@@ -123,9 +123,8 @@ class NotificationScheduler {
     
     // MARK: - Test Notifications
     
-    func sendTestNotification(category: String = "TEST") {
-        sendTestNotification(category: category)
-    }
+    // Note: sendTestNotification is already defined above (line 35)
+    // This duplicate was removed to fix the redeclaration error
     
     // MARK: - Cancel All
     

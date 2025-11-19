@@ -1,5 +1,17 @@
 import SwiftUI
 
+struct PickerStyleModifier: ViewModifier {
+    let isCaregiverMode: Bool
+    
+    func body(content: Content) -> some View {
+        if isCaregiverMode {
+            content.pickerStyle(SegmentedPickerStyle())
+        } else {
+            content.pickerStyle(MenuPickerStyle())
+        }
+    }
+}
+
 struct DiaperFormView: View {
     @ObservedObject var viewModel: DiaperFormViewModel
     @Environment(\.dismiss) var dismiss
@@ -22,7 +34,7 @@ struct DiaperFormView: View {
                                 .tag(type)
                         }
                     }
-                    .pickerStyle(isCaregiverMode ? .segmented : .menu)
+                    .modifier(PickerStyleModifier(isCaregiverMode: isCaregiverMode))
                 }
                 
                 if !isCaregiverMode || showAdvancedOptions {

@@ -58,8 +58,7 @@ struct QuickActionButton: View {
             .background(Color.surface)
             .cornerRadius(.radiusMD)
         }
-        .buttonStyle(PlainButtonStyle())
-        .gentlePress()
+        .buttonStyle(QuickActionButtonStyle(isActive: isActive))
         .motionAnimation(.easeInOut(duration: 0.2), value: isActive)
         .onLongPressGesture(minimumDuration: 0.5) {
             if let longPressAction = longPressAction {
@@ -69,6 +68,16 @@ struct QuickActionButton: View {
         }
         .accessibilityLabel("\(title) quick action")
         .accessibilityHint(isActive ? "Active. Double tap to stop, long press for detailed form" : "Double tap to log \(title.lowercased()), long press for detailed form")
+    }
+}
+
+struct QuickActionButtonStyle: ButtonStyle {
+    let isActive: Bool
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !MotionModifiers.reduceMotion ? 0.96 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

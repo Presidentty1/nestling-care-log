@@ -1,5 +1,6 @@
 import Foundation
 import StoreKit
+import Combine
 
 /// Pro subscription service using StoreKit 2.
 /// 

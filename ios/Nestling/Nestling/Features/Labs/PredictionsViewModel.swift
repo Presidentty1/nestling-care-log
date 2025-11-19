@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 class PredictionsViewModel: ObservableObject {
@@ -71,7 +72,7 @@ class PredictionsViewModel: ObservableObject {
                 Task {
                     await Analytics.shared.log("prediction_generated", parameters: [
                         "prediction_type": type.rawValue,
-                        "confidence": prediction.confidence.rawValue
+                        "confidence": prediction.confidence
                     ])
                 }
             } catch {

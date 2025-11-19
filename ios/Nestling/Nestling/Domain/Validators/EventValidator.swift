@@ -31,8 +31,8 @@ struct EventValidator {
     /// Validate an event before saving
     static func validate(_ event: Event) throws {
         // Validate time relationships
-        if let startTime = event.startTime, let endTime = event.endTime {
-            if endTime < startTime {
+        if let endTime = event.endTime {
+            if endTime < event.startTime {
                 throw EventValidationError.endBeforeStart
             }
         }
@@ -63,11 +63,9 @@ struct EventValidator {
         }
         
         // Validate date range (not too far in future)
-        if let startTime = event.startTime {
-            let maxFutureDate = Date().addingTimeInterval(24 * 3600) // 24 hours in future
-            if startTime > maxFutureDate {
-                throw EventValidationError.invalidDateRange
-            }
+        let maxFutureDate = Date().addingTimeInterval(24 * 3600) // 24 hours in future
+        if event.startTime > maxFutureDate {
+            throw EventValidationError.invalidDateRange
         }
     }
     

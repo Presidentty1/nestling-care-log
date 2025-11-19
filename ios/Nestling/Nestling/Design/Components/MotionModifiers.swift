@@ -44,10 +44,12 @@ struct GentlePressModifier: ViewModifier {
         content
             .scaleEffect(isPressed && !MotionModifiers.reduceMotion ? 0.96 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: isPressed)
-            .simultaneousGesture(
+            .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
-                        isPressed = true
+                        if !isPressed {
+                            isPressed = true
+                        }
                     }
                     .onEnded { _ in
                         isPressed = false

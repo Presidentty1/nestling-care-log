@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 class FeedFormViewModel: ObservableObject {
@@ -14,7 +15,7 @@ class FeedFormViewModel: ObservableObject {
     
     private let dataStore: DataStore
     private let baby: Baby
-    private let editingEvent: Event?
+    let editingEvent: Event?
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore

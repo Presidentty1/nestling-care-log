@@ -1,4 +1,5 @@
 import Foundation
+import CoreData
 
 enum DataStoreType {
     case inMemory
@@ -24,7 +25,17 @@ class DataStoreSelector {
         return JSONBackedDataStore()
         #else
         // Default: Use Core Data if available, fallback to JSON
-        if FileManager.default.fileExists(atPath: CoreDataStack.shared.persistentContainer.persistentStoreDescriptions.first?.url?.path ?? "") {
+        // Check if CoreData store file exists without triggering lazy initialization
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let coreDataURL = documentsPath.appendingPathComponent("Nestling.sqlite")
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
+            .appendingPathComponent("Nestling.sqlite")
+        
+        // Check both possible locations
+        let coreDataExists = FileManager.default.fileExists(atPath: coreDataURL.path) ||
+                            (appGroupURL != nil && FileManager.default.fileExists(atPath: appGroupURL!.path))
+        
+        if coreDataExists {
             return CoreDataDataStore()
         } else {
             return JSONBackedDataStore()

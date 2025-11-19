@@ -12,7 +12,8 @@ class HomeViewModel: ObservableObject {
     @Published var selectedFilter: EventTypeFilter = .all
     
     private let dataStore: DataStore
-    private let baby: Baby
+    let baby: Baby // Made internal so HomeView can check if baby changed
+    private var isLoadingTask: Task<Void, Never>?
     
     /// Filtered events based on search text and selected filter
     var filteredEvents: [Event] {
@@ -88,8 +89,17 @@ class HomeViewModel: ObservableObject {
     init(dataStore: DataStore, baby: Baby) {
         self.dataStore = dataStore
         self.baby = baby
+        print("HomeViewModel.init: Created for baby \(baby.id)")
         loadTodayEvents()
         checkActiveSleep()
+    }
+    
+    deinit {
+        print("HomeViewModel.deinit: Cleaning up for baby \(baby.id)")
+        isLoadingTask?.cancel()
+        Task { @MainActor in
+            self.isLoading = false
+        }
     }
     
     func checkActiveSleep() {
@@ -103,32 +113,90 @@ class HomeViewModel: ObservableObject {
     }
     
     func loadTodayEvents() {
+        // Cancel any existing load task first
+        isLoadingTask?.cancel()
+        isLoadingTask = nil
+        
+        print("loadTodayEvents called for baby: \(baby.id)")
         isLoading = true
         errorMessage = nil
         
         let signpostID = SignpostLogger.beginInterval("TimelineLoad", log: SignpostLogger.ui)
         
-        Task {
+        isLoadingTask = Task { @MainActor in
+            print("Starting fetchEvents task...")
+            let startTime = Date()
+            let taskID = UUID()
+            print("Task ID: \(taskID)")
+            
+            // Add timeout to prevent infinite loading
+            let timeoutTask = Task {
+                try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                await MainActor.run {
+                    if self.isLoading && !Task.isCancelled {
+                        let elapsed = Date().timeIntervalSince(startTime)
+                        print("ERROR [\(taskID)]: loadTodayEvents timed out after \(elapsed) seconds")
+                        self.isLoading = false
+                        self.errorMessage = "Loading took too long. Please try again."
+                    }
+                }
+            }
+            
             do {
+                print("[\(taskID)] Calling dataStore.fetchEvents for date: \(Date())")
                 let todayEvents = try await dataStore.fetchEvents(for: baby, on: Date())
-                self.events = todayEvents
                 
-                // Index events in Spotlight
-                if let settings = try? await dataStore.fetchAppSettings() {
-                    SpotlightIndexer.shared.indexEvents(todayEvents, for: baby, settings: settings)
+                // Check if task was cancelled
+                if Task.isCancelled {
+                    print("[\(taskID)] loadTodayEvents was cancelled after fetch")
+                    timeoutTask.cancel()
+                    // Ensure isLoading is reset even if cancelled
+                    self.isLoading = false
+                    return
                 }
                 
-                // Restore active sleep on launch (persisted across app kills)
-                await restoreActiveSleep()
+                timeoutTask.cancel()
                 
-                checkActiveSleep()
+                let elapsed = Date().timeIntervalSince(startTime)
+                print("[\(taskID)] fetchEvents completed in \(elapsed) seconds, got \(todayEvents.count) events")
+                
+                // Update UI on MainActor (we're already on MainActor, but be explicit)
+                self.events = todayEvents
                 self.summary = calculateSummary(from: todayEvents)
                 self.isLoading = false
+                print("[\(taskID)] UI updated with \(todayEvents.count) events, isLoading = false")
+                
+                // Index events in Spotlight (non-blocking)
+                Task {
+                    if let settings = try? await dataStore.fetchAppSettings() {
+                        SpotlightIndexer.shared.indexEvents(todayEvents, for: baby, settings: settings)
+                    }
+                }
+                
+                // Restore active sleep on launch (non-blocking, don't wait for it)
+                Task {
+                    await restoreActiveSleep()
+                    await MainActor.run {
+                        checkActiveSleep()
+                    }
+                }
                 
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             } catch {
+                if Task.isCancelled {
+                    print("[\(taskID)] loadTodayEvents was cancelled during error handling")
+                    timeoutTask.cancel()
+                    // Ensure isLoading is reset even if cancelled
+                    self.isLoading = false
+                    return
+                }
+                
+                timeoutTask.cancel()
+                let elapsed = Date().timeIntervalSince(startTime)
+                print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
                 self.isLoading = false
+                print("[\(taskID)] Error set, isLoading = false")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
         }
@@ -150,7 +218,9 @@ class HomeViewModel: ObservableObject {
     }
     
     func quickLogFeed() {
-        Task {
+        print("quickLogFeed called")
+        // Reload events after adding
+        Task { @MainActor in
             do {
                 // Get last used values or use defaults
                 var amount = AppConstants.defaultFeedAmountML
@@ -177,7 +247,9 @@ class HomeViewModel: ObservableObject {
                     unit: finalUnit,
                     note: nil
                 )
+                print("Adding feed event: \(finalAmount) \(finalUnit)")
                 try await dataStore.addEvent(event)
+                print("Feed event added successfully")
                 
                 // Save last used
                 let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
@@ -194,16 +266,24 @@ class HomeViewModel: ObservableObject {
                 }
                 
                 Haptics.success()
+                
+                // Small delay to ensure CoreData save is complete, then reload
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                print("Reloading events after feed...")
                 loadTodayEvents()
             } catch {
+                print("Error logging feed: \(error)")
                 Haptics.error()
-                errorMessage = "Failed to log feed: \(error.localizedDescription)"
+                await MainActor.run {
+                    errorMessage = "Failed to log feed: \(error.localizedDescription)"
+                }
             }
         }
     }
     
     func quickLogSleep() {
-        Task {
+        print("quickLogSleep called")
+        Task { @MainActor in
             do {
                 if let active = activeSleep {
                     // Stop active sleep
@@ -218,6 +298,10 @@ class HomeViewModel: ObservableObject {
                     }
                     
                     Haptics.success()
+                    
+                    // Small delay to ensure CoreData save is complete, then reload
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                    print("Reloading events after sleep stop...")
                     loadTodayEvents()
                 } else {
                     // Start new sleep
@@ -234,14 +318,18 @@ class HomeViewModel: ObservableObject {
                     Haptics.light()
                 }
             } catch {
+                print("Error logging sleep: \(error)")
                 Haptics.error()
-                errorMessage = "Failed to log sleep: \(error.localizedDescription)"
+                await MainActor.run {
+                    errorMessage = "Failed to log sleep: \(error.localizedDescription)"
+                }
             }
         }
     }
     
     func quickLogDiaper() {
-        Task {
+        print("quickLogDiaper called")
+        Task { @MainActor in
             do {
                 // Get last used subtype or default to wet
                 var subtype = "wet"
@@ -264,16 +352,24 @@ class HomeViewModel: ObservableObject {
                 try? await dataStore.saveLastUsedValues(for: .diaper, values: lastUsed)
                 
                 Haptics.success()
+                
+                // Small delay to ensure CoreData save is complete, then reload
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                print("Reloading events after diaper...")
                 loadTodayEvents()
             } catch {
+                print("Error logging diaper: \(error)")
                 Haptics.error()
-                errorMessage = "Failed to log diaper: \(error.localizedDescription)"
+                await MainActor.run {
+                    errorMessage = "Failed to log diaper: \(error.localizedDescription)"
+                }
             }
         }
     }
     
     func quickLogTummyTime() {
-        Task {
+        print("quickLogTummyTime called")
+        Task { @MainActor in
             do {
                 // Get last used duration or default
                 var duration = AppConstants.defaultTummyTimeDurationMinutes
@@ -297,10 +393,17 @@ class HomeViewModel: ObservableObject {
                 try? await dataStore.saveLastUsedValues(for: .tummyTime, values: lastUsed)
                 
                 Haptics.success()
+                
+                // Small delay to ensure CoreData save is complete, then reload
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                print("Reloading events after tummy time...")
                 loadTodayEvents()
             } catch {
+                print("Error logging tummy time: \(error)")
                 Haptics.error()
-                errorMessage = "Failed to log tummy time: \(error.localizedDescription)"
+                await MainActor.run {
+                    errorMessage = "Failed to log tummy time: \(error.localizedDescription)"
+                }
             }
         }
     }
@@ -357,12 +460,11 @@ class HomeViewModel: ObservableObject {
                     babyId: event.babyId,
                     type: event.type,
                     subtype: event.subtype,
+                    startTime: Date(), // Use current time
+                    endTime: event.durationMinutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) },
                     amount: event.amount,
                     unit: event.unit,
                     side: event.side,
-                    startTime: Date(), // Use current time
-                    endTime: event.durationMinutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) },
-                    durationMinutes: event.durationMinutes,
                     note: event.note,
                     createdAt: Date(),
                     updatedAt: Date()

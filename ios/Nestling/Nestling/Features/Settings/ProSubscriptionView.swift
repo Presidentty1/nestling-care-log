@@ -9,6 +9,10 @@ struct ProSubscriptionView: View {
     @State private var showRestoreAlert = false
     @State private var restoreMessage = ""
     
+    private var proFeatures: [ProFeature] {
+        ProFeature.allCases.filter { proService.requiresPro($0) }
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -31,7 +35,7 @@ struct ProSubscriptionView: View {
                     
                     // Features List
                     VStack(alignment: .leading, spacing: .spacingMD) {
-                        ForEach(ProFeature.allCases.filter { proService.requiresPro($0) }, id: \.self) { feature in
+                        ForEach(proFeatures, id: \.self) { feature in
                             HStack(spacing: .spacingMD) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.primary)
@@ -71,8 +75,7 @@ struct ProSubscriptionView: View {
                         // Purchase Button
                         PrimaryButton(
                             "Subscribe",
-                            icon: "star.fill",
-                            isLoading: isPurchasing
+                            icon: "star.fill"
                         ) {
                             if let productID = selectedProductID {
                                 Task {
@@ -87,6 +90,12 @@ struct ProSubscriptionView: View {
                             }
                         }
                         .disabled(selectedProductID == nil || isPurchasing)
+                        .overlay {
+                            if isPurchasing {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            }
+                        }
                         .padding(.horizontal, .spacingMD)
                         
                         // Restore Purchases

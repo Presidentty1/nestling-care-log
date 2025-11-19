@@ -8,6 +8,86 @@ struct HistoryView: View {
     @State private var showDiaperForm = false
     @State private var showTummyForm = false
     @State private var editingEvent: Event?
+    @State private var showToast: ToastMessage?
+    
+    @ViewBuilder
+    private func timelineContent(for viewModel: HistoryViewModel) -> some View {
+        if viewModel.isLoading {
+            LoadingStateView(message: "Loading events...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            let isEmpty = viewModel.filteredEvents.isEmpty
+            let noSearch = viewModel.searchText.isEmpty
+            let allFilter = viewModel.selectedFilter == .all
+            
+            if isEmpty {
+                EmptyStateView(
+                    icon: "magnifyingglass",
+                    title: noSearch && allFilter ? "No events logged" : "No matching events",
+                    message: noSearch && allFilter ? "Nothing logged on this day" : "Try adjusting your search or filter"
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    VStack(spacing: .spacingSM) {
+                        // Filter chips
+                        FilterChipsView(
+                            selectedFilter: Binding(
+                                get: { viewModel.selectedFilter },
+                                set: { viewModel.selectedFilter = $0 }
+                            ),
+                            filters: EventTypeFilter.allCases
+                        )
+                        .padding(.top, .spacingSM)
+                        
+                        ForEach(viewModel.filteredEvents) { event in
+                            TimelineRow(
+                                event: event,
+                                onEdit: { editingEvent = event; showFormForEvent(event) },
+                                onDelete: {
+                                    viewModel.deleteEvent(event)
+                                    // Show undo toast
+                                    let toastId = UUID()
+                                    showToast = ToastMessage(
+                                        id: toastId,
+                                        message: "Event deleted",
+                                        type: .success,
+                                        undoAction: {
+                                            Task {
+                                                do {
+                                                    try await viewModel.undoDeletion()
+                                                    showToast = ToastMessage(message: "Event restored", type: .success)
+                                                } catch {
+                                                    showToast = ToastMessage(message: "Could not undo: \(error.localizedDescription)", type: .error)
+                                                }
+                                            }
+                                        }
+                                    )
+                                    // Auto-dismiss after 7 seconds
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+                                        if showToast?.id == toastId {
+                                            showToast = nil
+                                        }
+                                    }
+                                },
+                                onDuplicate: {
+                                    viewModel.duplicateEvent(event)
+                                    showToast = ToastMessage(message: "Event duplicated", type: .success)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        showToast = nil
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, .spacingMD)
+                }
+                .refreshable {
+                    viewModel.loadEvents()
+                }
+            }
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -24,75 +104,25 @@ struct HistoryView: View {
                         .padding(.horizontal, .spacingMD)
                         
                         // Timeline
-                        if viewModel.isLoading {
-                            LoadingStateView(message: "Loading events...")
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        } else if viewModel?.filteredEvents.isEmpty ?? true {
-                            EmptyStateView(
-                                icon: "magnifyingglass",
-                                title: (viewModel?.searchText.isEmpty ?? true) && (viewModel?.selectedFilter == .all ?? true) ? "No events logged" : "No matching events",
-                                message: (viewModel?.searchText.isEmpty ?? true) && (viewModel?.selectedFilter == .all ?? true) ? "Nothing logged on this day" : "Try adjusting your search or filter"
-                            )
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        } else {
-                            ScrollView {
-                                VStack(spacing: .spacingSM) {
-                                    // Filter chips
-                                    FilterChipsView(
-                                        selectedFilter: Binding(
-                                            get: { viewModel?.selectedFilter ?? .all },
-                                            set: { viewModel?.selectedFilter = $0 }
-                                        ),
-                                        filters: EventTypeFilter.allCases
-                                    )
-                                    .padding(.top, .spacingSM)
-                                    
-                                    ForEach(viewModel?.filteredEvents ?? []) { event in
-                                        TimelineRow(
-                                            event: event,
-                                            onEdit: { editingEvent = event; showFormForEvent(event) },
-                                            onDelete: {
-                                                viewModel?.deleteEvent(event)
-                                                // Show undo toast
-                                                showToast = ToastMessage(
-                                                    message: "Event deleted",
-                                                    type: .success,
-                                                    undoAction: {
-                                                        Task {
-                                                            do {
-                                                                try await viewModel?.undoDeletion()
-                                                                showToast = ToastMessage(message: "Event restored", type: .success)
-                                                            } catch {
-                                                                showToast = ToastMessage(message: "Could not undo: \(error.localizedDescription)", type: .error)
-                                                            }
-                                                        }
-                                                    }
-                                                )
-                                                // Auto-dismiss after 7 seconds
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-                                                    if showToast?.id == showToast?.id {
-                                                        showToast = nil
-                                                    }
-                                                }
-                                            },
-                                            onDuplicate: { event in
-                                                viewModel?.duplicateEvent(event)
-                                                showToast = ToastMessage(message: "Event duplicated", type: .success)
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                    showToast = nil
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, .spacingMD)
-                            }
-                            .refreshable {
-                                viewModel?.loadEvents()
-                            }
-                        }
+                        timelineContent(for: viewModel)
                     }
+                } else if environment.babies.isEmpty {
+                    // No babies - show empty state
+                    VStack(spacing: .spacingMD) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.system(size: 60))
+                            .foregroundColor(.mutedForeground)
+                        Text("No babies yet")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+                        Text("Add a baby in Settings to get started")
+                            .font(.body)
+                            .foregroundColor(.mutedForeground)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
+                    // Still loading
                     ProgressView()
                 }
             }
@@ -113,13 +143,35 @@ struct HistoryView: View {
                 }
             }
             .task {
-                if let baby = environment.currentBaby, viewModel == nil {
-                    updateViewModel(for: baby)
+                // Wait a bit for environment to load babies, then create viewModel
+                if viewModel == nil {
+                    if let baby = environment.currentBaby {
+                        updateViewModel(for: baby)
+                    } else {
+                        // Wait for babies to load
+                        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                        if let baby = environment.currentBaby {
+                            updateViewModel(for: baby)
+                        } else if !environment.babies.isEmpty {
+                            // If babies exist but currentBaby isn't set, use first one
+                            environment.currentBaby = environment.babies.first
+                            if let baby = environment.currentBaby {
+                                updateViewModel(for: baby)
+                            }
+                        }
+                    }
                 }
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
                 if let baby = environment.currentBaby {
                     updateViewModel(for: baby)
+                }
+            }
+            .onChange(of: environment.babies.count) { _, _ in
+                // If babies were loaded but currentBaby is nil, set it
+                if environment.currentBaby == nil, let firstBaby = environment.babies.first {
+                    environment.currentBaby = firstBaby
+                    updateViewModel(for: firstBaby)
                 }
             }
             .sheet(isPresented: $showFeedForm) {
@@ -198,10 +250,17 @@ struct HistoryView: View {
                     }
                 }
             }
+            .toast($showToast)
         }
     }
     
     private func updateViewModel(for baby: Baby) {
+        // Only create a new viewModel if we don't have one, or if the baby changed
+        if let existingViewModel = viewModel, existingViewModel.baby.id == baby.id {
+            print("updateViewModel: Keeping existing viewModel for baby \(baby.id)")
+            return
+        }
+        print("updateViewModel: Creating new viewModel for baby \(baby.id)")
         viewModel = HistoryViewModel(dataStore: environment.dataStore, baby: baby)
     }
     

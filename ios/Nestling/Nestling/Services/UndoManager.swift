@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Manages undo operations for deletions.
 /// Provides a lightweight undo queue with expiration.

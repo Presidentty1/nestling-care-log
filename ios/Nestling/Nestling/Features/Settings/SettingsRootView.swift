@@ -184,7 +184,7 @@ struct SettingsRootView: View {
                                 Task {
                                     let seeder = ScenarioSeeder(dataStore: environment.dataStore)
                                     try? await seeder.applyScenario(scenario)
-                                    environment.refreshBabies()
+                                    await environment.refreshBabies()
                                 }
                             }
                         }

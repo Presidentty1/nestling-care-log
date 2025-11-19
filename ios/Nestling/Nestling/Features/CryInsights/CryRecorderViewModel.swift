@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Combine
 
 @MainActor
 class CryRecorderViewModel: ObservableObject {
@@ -36,7 +37,11 @@ class CryRecorderViewModel: ObservableObject {
             permissionDenied = true
             return false
         case .undetermined:
-            return await AVAudioSession.sharedInstance().requestRecordPermission()
+            return await withCheckedContinuation { continuation in
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
         @unknown default:
             return false
         }
@@ -83,9 +88,11 @@ class CryRecorderViewModel: ObservableObject {
         guard let classification = classification else { return }
         
         // Create an event note with the classification
+        // Note: Using .feed as placeholder since EventType doesn't have .other
+        // The note field contains the actual cry insight information
         let event = Event(
             babyId: baby.id,
-            type: .other,
+            type: .feed,
             subtype: "cry_insight",
             startTime: Date(),
             note: "Cry analysis: \(classification.displayName) (confidence: \(Int(confidence * 100))%). \(explanation)"

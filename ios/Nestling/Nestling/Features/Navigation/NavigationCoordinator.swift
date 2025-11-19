@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @MainActor
 class NavigationCoordinator: ObservableObject {
@@ -62,7 +63,7 @@ class NavigationCoordinator: ObservableObject {
     @Published var targetEventDate: Date?
     
     func navigateToEvent(_ event: Event) {
-        targetEventId = event.id
+        targetEventId = event.id.uuidString
         targetEventDate = event.startTime
         selectedTab = 1 // History tab
     }

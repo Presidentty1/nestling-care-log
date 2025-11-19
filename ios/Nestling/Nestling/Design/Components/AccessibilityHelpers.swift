@@ -4,7 +4,7 @@ import SwiftUI
 struct AccessibilityHelpers {
     /// Check if High Contrast is enabled
     static var isHighContrastEnabled: Bool {
-        UIAccessibility.isDarkerSystemColorsEnabled || UIAccessibility.isIncreaseContrastEnabled
+        UIAccessibility.isDarkerSystemColorsEnabled
     }
     
     /// Enhanced contrast color for high contrast mode
@@ -27,7 +27,7 @@ extension View {
 struct HighContrastModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .environment(\.accessibilityHighContrastEnabled, AccessibilityHelpers.isHighContrastEnabled)
+            // High contrast adjustments applied via color opacity
     }
 }
 

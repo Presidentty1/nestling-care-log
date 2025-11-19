@@ -41,7 +41,7 @@ struct ManageBabiesView: View {
                             Button(role: .destructive, action: {
                                 Task {
                                     try? await environment.dataStore.deleteBaby(baby)
-                                    environment.refreshBabies()
+                                    await environment.refreshBabies()
                                 }
                             }) {
                                 Label("Delete", systemImage: "trash")
@@ -55,16 +55,45 @@ struct ManageBabiesView: View {
             }
             .navigationTitle("Manage Babies")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Add Baby") {
-                        showAddBaby = true
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: {
+                            showAddBaby = true
+                        }) {
+                            Image(systemName: "plus")
+                                .fontWeight(.semibold)
+                        }
+                        
+                        Button("Done") {
+                            dismiss()
+                        }
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+            }
+            .overlay(alignment: .bottom) {
+                if environment.babies.isEmpty {
+                    VStack(spacing: .spacingMD) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.system(size: 60))
+                            .foregroundColor(.mutedForeground)
+                        
+                        Text("No babies yet")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+                        
+                        Text("Tap the + button above to add your first baby")
+                            .font(.body)
+                            .foregroundColor(.mutedForeground)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, .spacingMD)
+                        
+                        PrimaryButton("Add Baby", icon: "plus") {
+                            showAddBaby = true
+                        }
+                        .padding(.horizontal, .spacingMD)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.background)
                 }
             }
             .sheet(isPresented: $showAddBaby) {
@@ -75,7 +104,7 @@ struct ManageBabiesView: View {
                     AddEditBabyView(onSave: { baby in
                         Task {
                             try? await environment.dataStore.addBaby(baby)
-                            environment.refreshBabies()
+                            await environment.refreshBabies()
                             if environment.currentBaby == nil {
                                 environment.currentBaby = baby
                             }
@@ -93,7 +122,7 @@ struct ManageBabiesView: View {
                         AddEditBabyView(baby: baby, onSave: { updatedBaby in
                             Task {
                                 try? await environment.dataStore.updateBaby(updatedBaby)
-                                environment.refreshBabies()
+                                await environment.refreshBabies()
                             }
                             editingBaby = nil
                             showEditBaby = false

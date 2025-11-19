@@ -22,7 +22,7 @@ struct SleepFormView: View {
                                 .tag(type)
                         }
                     }
-                    .pickerStyle(isCaregiverMode ? .segmented : .menu)
+                    .modifier(PickerStyleModifier(isCaregiverMode: isCaregiverMode))
                 }
                 
                 Section("Mode") {

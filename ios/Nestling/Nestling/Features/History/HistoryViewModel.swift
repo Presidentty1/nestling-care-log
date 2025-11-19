@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 class HistoryViewModel: ObservableObject {
@@ -10,7 +11,8 @@ class HistoryViewModel: ObservableObject {
     @Published var selectedFilter: EventTypeFilter = .all
     
     private let dataStore: DataStore
-    private let baby: Baby
+    let baby: Baby // Made internal so HistoryView can check if baby changed
+    private var isLoadingTask: Task<Void, Never>?
     
     /// Filtered events based on search text and selected filter
     var filteredEvents: [Event] {
@@ -86,27 +88,87 @@ class HistoryViewModel: ObservableObject {
     init(dataStore: DataStore, baby: Baby) {
         self.dataStore = dataStore
         self.baby = baby
+        print("HistoryViewModel.init: Created for baby \(baby.id)")
         loadEvents()
     }
     
+    deinit {
+        print("HistoryViewModel.deinit: Cleaning up for baby \(baby.id)")
+        isLoadingTask?.cancel()
+        Task { @MainActor in
+            self.isLoading = false
+        }
+    }
+    
     func loadEvents() {
+        // Cancel any existing load task first
+        isLoadingTask?.cancel()
+        isLoadingTask = nil
+        
+        print("HistoryViewModel.loadEvents called for baby: \(baby.id), date: \(selectedDate)")
         isLoading = true
         errorMessage = nil
         
-        Task {
+        isLoadingTask = Task { @MainActor in
+            print("Starting fetchEvents task...")
+            let startTime = Date()
+            let taskID = UUID()
+            print("Task ID: \(taskID)")
+            
+            // Add timeout to prevent infinite loading
+            let timeoutTask = Task {
+                try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                await MainActor.run {
+                    if self.isLoading && !Task.isCancelled {
+                        let elapsed = Date().timeIntervalSince(startTime)
+                        print("ERROR [\(taskID)]: loadEvents timed out after \(elapsed) seconds")
+                        self.isLoading = false
+                        self.errorMessage = "Loading took too long. Please try again."
+                    }
+                }
+            }
+            
             do {
+                print("[\(taskID)] Calling dataStore.fetchEvents for date: \(selectedDate)")
                 let dayEvents = try await dataStore.fetchEvents(for: baby, on: selectedDate)
-                self.events = dayEvents
                 
-                // Index events in Spotlight
-                if let settings = try? await dataStore.fetchAppSettings() {
-                    SpotlightIndexer.shared.indexEvents(dayEvents, for: baby, settings: settings)
+                // Check if task was cancelled
+                if Task.isCancelled {
+                    print("[\(taskID)] loadEvents was cancelled after fetch")
+                    timeoutTask.cancel()
+                    self.isLoading = false
+                    return
                 }
                 
+                timeoutTask.cancel()
+                
+                let elapsed = Date().timeIntervalSince(startTime)
+                print("[\(taskID)] fetchEvents completed in \(elapsed) seconds, got \(dayEvents.count) events")
+                
+                self.events = dayEvents
                 self.isLoading = false
+                print("[\(taskID)] UI updated with \(dayEvents.count) events, isLoading = false")
+                
+                // Index events in Spotlight (non-blocking)
+                Task {
+                    if let settings = try? await dataStore.fetchAppSettings() {
+                        SpotlightIndexer.shared.indexEvents(dayEvents, for: baby, settings: settings)
+                    }
+                }
             } catch {
+                if Task.isCancelled {
+                    print("[\(taskID)] loadEvents was cancelled during error handling")
+                    timeoutTask.cancel()
+                    self.isLoading = false
+                    return
+                }
+                
+                timeoutTask.cancel()
+                let elapsed = Date().timeIntervalSince(startTime)
+                print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
                 self.isLoading = false
+                print("[\(taskID)] Error set, isLoading = false")
             }
         }
     }
@@ -156,12 +218,11 @@ class HistoryViewModel: ObservableObject {
                     babyId: event.babyId,
                     type: event.type,
                     subtype: event.subtype,
+                    startTime: Date(), // Use current time
+                    endTime: event.durationMinutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) },
                     amount: event.amount,
                     unit: event.unit,
                     side: event.side,
-                    startTime: Date(), // Use current time
-                    endTime: event.durationMinutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) },
-                    durationMinutes: event.durationMinutes,
                     note: event.note,
                     createdAt: Date(),
                     updatedAt: Date()

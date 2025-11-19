@@ -54,10 +54,10 @@ struct ToastModifier: ViewModifier {
                     if let toast = toast {
                         VStack {
                             Spacer()
-                            ToastView(message: toast.message, type: toast.type, undoAction: toast.undoAction)
+                            ToastView(message: toast.message, type: toast.type)
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
-                        .animation(.spring(response: 0.3), value: toast)
+                        .animation(.spring(response: 0.3), value: toast.id)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(toast.type == .success ? "Success" : toast.type == .error ? "Error" : "Information"): \(toast.message)")
                         .accessibilityAddTraits(.isModal)
@@ -75,15 +75,22 @@ struct ToastModifier: ViewModifier {
 }
 
 struct ToastMessage: Identifiable {
-    let id = UUID()
+    let id: UUID
     let message: String
     let type: ToastType
     var undoAction: (() -> Void)? = nil
+    
+    init(id: UUID = UUID(), message: String, type: ToastType, undoAction: (() -> Void)? = nil) {
+        self.id = id
+        self.message = message
+        self.type = type
+        self.undoAction = undoAction
+    }
 }
 
 extension View {
     func toast(_ toast: Binding<ToastMessage?>) -> some View {
-        modifier(ToastModifier(toast: $toast))
+        modifier(ToastModifier(toast: toast))
     }
 }
 

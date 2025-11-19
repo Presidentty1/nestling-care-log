@@ -11,7 +11,7 @@ extension LastUsedValuesEntity {
     @NSManaged public var unit: String?
     @NSManaged public var side: String?
     @NSManaged public var subtype: String?
-    @NSManaged public var durationMinutes: Int16?
+    @NSManaged public var durationMinutes: Int16
 }
 
 extension LastUsedValuesEntity : Identifiable {

@@ -79,9 +79,9 @@ struct DataMigrationView: View {
                     isMigrating = false
                     migrationStatus = "Migration completed successfully"
                     showSuccess = true
-                    environment.refreshBabies()
-                    environment.refreshSettings()
                 }
+                await environment.refreshBabies()
+                await environment.refreshSettings()
                 
                 Haptics.success()
             } catch {

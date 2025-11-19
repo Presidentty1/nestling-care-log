@@ -30,16 +30,9 @@ struct OnboardingView: View {
             }
             .transition(.slide)
         }
-        .onChange(of: coordinator.currentStep) { _, newStep in
-            if newStep == .notificationsIntro {
-                // Check if onboarding is complete
-                Task {
-                    if try await OnboardingService(dataStore: environment.dataStore).isOnboardingCompleted() {
-                        await MainActor.run {
-                            onComplete()
-                        }
-                    }
-                }
+        .onChange(of: coordinator.isCompleted) { _, completed in
+            if completed {
+                onComplete()
             }
         }
     }

@@ -21,12 +21,14 @@ class DiagnosticsService {
         // 1. App Info
         let appInfo = generateAppInfo()
         let appInfoURL = contentsDir.appendingPathComponent("app_info.json")
-        try JSONEncoder().encode(appInfo).write(to: appInfoURL)
+        let appInfoData = try JSONSerialization.data(withJSONObject: appInfo, options: .prettyPrinted)
+        try appInfoData.write(to: appInfoURL)
         
         // 2. Device Info
         let deviceInfo = generateDeviceInfo()
         let deviceInfoURL = contentsDir.appendingPathComponent("device_info.json")
-        try JSONEncoder().encode(deviceInfo).write(to: deviceInfoURL)
+        let deviceInfoData = try JSONSerialization.data(withJSONObject: deviceInfo, options: .prettyPrinted)
+        try deviceInfoData.write(to: deviceInfoURL)
         
         // 3. Settings Snapshot
         do {
@@ -43,15 +45,16 @@ class DiagnosticsService {
         // 4. Data Summary (no PII)
         let summary = await generateDataSummary(dataStore: dataStore)
         let summaryURL = contentsDir.appendingPathComponent("data_summary.json")
-        try JSONEncoder().encode(summary).write(to: summaryURL)
+        let summaryData = try JSONSerialization.data(withJSONObject: summary, options: .prettyPrinted)
+        try summaryData.write(to: summaryURL)
         
         // 5. Create ZIP
-        try createZipArchive(source: contentsDir, destination: bundleURL)
+        // TODO: Add ZipArchive Swift Package for ZIP creation
+        // For now, return the directory URL instead of ZIP
+        // In production, use ZipArchive: SSZipArchive.createZipFile(atPath: bundleURL.path, withContentsOfDirectory: contentsDir.path)
         
-        // Cleanup
-        try? FileManager.default.removeItem(at: contentsDir)
-        
-        return bundleURL
+        // Return directory URL for now (ZIP creation disabled)
+        return contentsDir
     }
     
     private func generateAppInfo() -> [String: Any] {
@@ -100,32 +103,24 @@ class DiagnosticsService {
                 }
             }
             
+            var hasActiveSleep = false
+            for baby in babies {
+                if let _ = try? await dataStore.getActiveSleep(for: baby) {
+                    hasActiveSleep = true
+                    break
+                }
+            }
+            
             return [
                 "baby_count": babies.count,
                 "total_events_last_7_days": totalEvents,
                 "event_counts": eventCounts,
-                "has_active_sleep": babies.contains { baby in
-                    (try? await dataStore.getActiveSleep(for: baby)) != nil
-                }
+                "has_active_sleep": hasActiveSleep
             ]
         } catch {
             return ["error": "Failed to generate summary: \(error.localizedDescription)"]
         }
     }
     
-    private func createZipArchive(source: URL, destination: URL) throws {
-        let fileManager = FileManager.default
-        let zipProcess = Process()
-        zipProcess.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-        zipProcess.arguments = ["-r", destination.path, source.lastPathComponent]
-        zipProcess.currentDirectoryPath = source.deletingLastPathComponent().path
-        
-        try zipProcess.run()
-        zipProcess.waitUntilExit()
-        
-        guard zipProcess.terminationStatus == 0 else {
-            throw NSError(domain: "DiagnosticsService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create ZIP archive"])
-        }
-    }
 }
 

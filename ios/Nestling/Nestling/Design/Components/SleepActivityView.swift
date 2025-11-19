@@ -1,6 +1,7 @@
 import SwiftUI
 import WidgetKit
 import ActivityKit
+import AppIntents
 
 /// Live Activity view for sleep tracking (Dynamic Island + Lock Screen)
 @available(iOS 16.1, *)
@@ -67,7 +68,11 @@ struct SleepActivityExpandedView: View {
                     .foregroundColor(.secondary)
             }
             
-            Button(intent: StopSleepIntent()) {
+            // TODO: Add StopSleepIntent from NestlingIntents target
+            // For now, using a simple action button
+            Button(action: {
+                WidgetActionService.shared.queueAction(.stopSleep)
+            }) {
                 Image(systemName: "stop.fill")
                     .foregroundColor(.white)
                     .padding(8)

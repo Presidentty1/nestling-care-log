@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 class PrivacyManager: ObservableObject {
     @Published var isAppPrivacyEnabled = false

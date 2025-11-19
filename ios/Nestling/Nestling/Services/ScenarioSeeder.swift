@@ -183,9 +183,9 @@ class ScenarioSeeder {
             babyId: baby.id,
             type: .feed,
             subtype: "bottle",
+            startTime: time,
             amount: amount,
-            unit: "ml",
-            startTime: time
+            unit: "ml"
         )
         try await dataStore.addEvent(event)
     }
@@ -207,18 +207,18 @@ class ScenarioSeeder {
             type: .sleep,
             subtype: "nap",
             startTime: start,
-            endTime: end,
-            durationMinutes: duration
+            endTime: end
         )
         try await dataStore.addEvent(event)
     }
     
     private func addTummyTime(baby: Baby, time: Date, duration: Int) async throws {
+        let endTime = time.addingTimeInterval(TimeInterval(duration * 60))
         let event = Event(
             babyId: baby.id,
             type: .tummyTime,
             startTime: time,
-            durationMinutes: duration
+            endTime: endTime
         )
         try await dataStore.addEvent(event)
     }

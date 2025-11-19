@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 class TummyTimeFormViewModel: ObservableObject {
@@ -14,8 +15,8 @@ class TummyTimeFormViewModel: ObservableObject {
     
     private let dataStore: DataStore
     private let baby: Baby
-    private let editingEvent: Event?
-    private var timer: Timer?
+    let editingEvent: Event?
+    var timer: Timer?
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore

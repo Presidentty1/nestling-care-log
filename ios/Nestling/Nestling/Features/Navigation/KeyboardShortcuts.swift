@@ -9,25 +9,25 @@ struct KeyboardShortcutsModifier: ViewModifier {
         content
             .keyboardShortcut("n", modifiers: .command) {
                 // ⌘N: Quick Log Feed
-                if let baby = environment.currentBaby {
+                if environment.currentBaby != nil {
                     navigationCoordinator.showFeedForm = true
                 }
             }
             .keyboardShortcut("s", modifiers: .command) {
                 // ⌘S: Start/Stop Sleep
-                if let baby = environment.currentBaby {
+                if environment.currentBaby != nil {
                     navigationCoordinator.showSleepForm = true
                 }
             }
             .keyboardShortcut("d", modifiers: .command) {
                 // ⌘D: Log Diaper
-                if let baby = environment.currentBaby {
+                if environment.currentBaby != nil {
                     navigationCoordinator.showDiaperForm = true
                 }
             }
             .keyboardShortcut("t", modifiers: .command) {
                 // ⌘T: Start Tummy Timer
-                if let baby = environment.currentBaby {
+                if environment.currentBaby != nil {
                     navigationCoordinator.showTummyForm = true
                 }
             }
@@ -49,9 +49,12 @@ struct KeyboardShortcutModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .onKeyPress(key, modifiers: modifiers) {
-                action()
-                return .handled
+            .onKeyPress(key, phases: .down) { _ in
+                if modifiers.contains(.command) {
+                    action()
+                    return .handled
+                }
+                return .ignored
             }
     }
 }

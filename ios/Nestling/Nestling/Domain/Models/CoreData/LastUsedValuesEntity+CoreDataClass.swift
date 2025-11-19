@@ -8,7 +8,7 @@ public class LastUsedValuesEntity: NSManagedObject {
         self.unit = values.unit
         self.side = values.side
         self.subtype = values.subtype
-        self.durationMinutes = values.durationMinutes.map { Int16($0) }
+        self.durationMinutes = values.durationMinutes.map { Int16($0) } ?? 0
     }
     
     func toLastUsedValues() -> LastUsedValues {
@@ -17,7 +17,7 @@ public class LastUsedValuesEntity: NSManagedObject {
             unit: unit,
             side: side,
             subtype: subtype,
-            durationMinutes: durationMinutes.map { Int($0) }
+            durationMinutes: durationMinutes > 0 ? Int(durationMinutes) : nil
         )
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 enum OnboardingStep {
     case welcome
@@ -17,6 +18,7 @@ class OnboardingCoordinator: ObservableObject {
     @Published var preferredUnit: String = "ml"
     @Published var timeFormat24Hour: Bool = false
     @Published var aiDataSharingEnabled: Bool = true
+    @Published var isCompleted: Bool = false
     
     private let dataStore: DataStore
     private let onboardingService: OnboardingService
@@ -49,12 +51,13 @@ class OnboardingCoordinator: ObservableObject {
         }
     }
     
-    private func completeOnboarding() {
+    func completeOnboarding() {
         Task {
             do {
-                // Create baby
+                // Create baby - use default name if empty (user skipped setup)
+                let finalBabyName = babyName.trimmingCharacters(in: .whitespaces).isEmpty ? "Baby" : babyName
                 let baby = Baby(
-                    name: babyName,
+                    name: finalBabyName,
                     dateOfBirth: dateOfBirth,
                     sex: sex,
                     timezone: TimeZone.current.identifier
@@ -70,7 +73,8 @@ class OnboardingCoordinator: ObservableObject {
                 try await dataStore.saveAppSettings(settings)
                 
                 await MainActor.run {
-                    // Onboarding completion will be handled by parent view
+                    // Mark as completed so parent view can react
+                    isCompleted = true
                 }
             } catch {
                 print("Error completing onboarding: \(error)")

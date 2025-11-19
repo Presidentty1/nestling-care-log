@@ -1,5 +1,5 @@
 import Foundation
-import ZipArchive
+import Compression
 
 class BackupService {
     static func createBackup(dataStore: DataStore, baby: Baby) async throws -> URL {
@@ -35,23 +35,16 @@ class BackupService {
             try? FileManager.default.copyItem(at: pdfURL, to: pdfDest)
         }
         
-        // Create ZIP archive
-        let zipURL = tempDir.appendingPathComponent("nestling_backup_\(Date().timeIntervalSince1970).zip")
-        SSZipArchive.createZipFile(atPath: zipURL.path, withContentsOfDirectory: backupDir.path)
-        
-        // Cleanup
-        try? FileManager.default.removeItem(at: backupDir)
-        
-        return zipURL
+        // TODO: Add ZipArchive Swift Package for ZIP creation
+        // For now, return the directory URL
+        // In production, use ZipArchive: SSZipArchive.createZipFile(atPath: zipURL.path, withContentsOfDirectory: backupDir.path)
+        return backupDir
     }
     
     static func restoreFromBackup(url: URL, dataStore: DataStore) async throws {
-        // Extract ZIP
-        let tempDir = FileManager.default.temporaryDirectory
-        let extractDir = tempDir.appendingPathComponent("nestling_restore_\(Date().timeIntervalSince1970)")
-        try FileManager.default.createDirectory(at: extractDir, withIntermediateDirectories: true)
-        
-        SSZipArchive.unzipFile(atPath: url.path, toDestination: extractDir.path)
+        // TODO: Add ZipArchive Swift Package for ZIP extraction
+        // For now, assume url is already a directory
+        let extractDir = url
         
         // Load JSON
         let jsonURL = extractDir.appendingPathComponent("data.json")

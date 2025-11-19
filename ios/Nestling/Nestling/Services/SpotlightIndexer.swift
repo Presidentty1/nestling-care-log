@@ -122,7 +122,7 @@ class SpotlightIndexer {
     
     // MARK: - Helpers
     
-    private func eventTypeDisplayName(_ type: Event.EventType) -> String {
+    private func eventTypeDisplayName(_ type: EventType) -> String {
         switch type {
         case .feed: return "Feed"
         case .diaper: return "Diaper Change"

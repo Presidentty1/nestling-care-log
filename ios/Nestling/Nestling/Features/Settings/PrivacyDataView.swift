@@ -274,15 +274,19 @@ struct PrivacyDataView: View {
     }
     
     private func deleteAllData() {
-        if let jsonStore = environment.dataStore as? JSONBackedDataStore {
-            jsonStore.reset()
-        } else if let inMemoryStore = environment.dataStore as? InMemoryDataStore {
-            inMemoryStore.reset()
+        Task {
+            if let jsonStore = environment.dataStore as? JSONBackedDataStore {
+                jsonStore.reset()
+            } else if let inMemoryStore = environment.dataStore as? InMemoryDataStore {
+                inMemoryStore.reset()
+            }
+            await environment.refreshBabies()
+            await environment.refreshSettings()
+            Haptics.error()
+            await MainActor.run {
+                dismiss()
+            }
         }
-        environment.refreshBabies()
-        environment.refreshSettings()
-        Haptics.error()
-        dismiss()
     }
 }
 
