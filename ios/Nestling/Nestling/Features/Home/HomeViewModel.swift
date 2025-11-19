@@ -128,8 +128,6 @@ class HomeViewModel: ObservableObject {
         // This prevents rapid calls from keeping isLoading stuck at true
         if !wasAlreadyLoading {
             isLoading = true
-            // Force SwiftUI update
-            objectWillChange.send()
         }
         errorMessage = nil
         
@@ -140,12 +138,12 @@ class HomeViewModel: ObservableObject {
             // This ensures isLoading is reset even if task is cancelled or errors occur
             defer {
                 print("[Task] loadTodayEvents defer block executing, setting isLoading = false")
-                // Ensure we're on MainActor and force SwiftUI update
+                // Ensure we're on MainActor
                 assert(Thread.isMainThread, "Defer block must run on main thread")
+                // Set isLoading to false and clear task reference
+                // @Published will automatically trigger SwiftUI updates
                 self.isLoading = false
                 self.isLoadingTask = nil
-                // Force SwiftUI to update by sending objectWillChange
-                self.objectWillChange.send()
             }
             
             print("Starting fetchEvents task...")
@@ -157,7 +155,8 @@ class HomeViewModel: ObservableObject {
             let timeoutTask = Task {
                 try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
                 await MainActor.run {
-                    if self.isLoading && !Task.isCancelled {
+                    // Check if this task is still the active one
+                    if self.isLoadingTask?.isCancelled == false && self.isLoading {
                         let elapsed = Date().timeIntervalSince(startTime)
                         print("ERROR [\(taskID)]: loadTodayEvents timed out after \(elapsed) seconds")
                         self.isLoading = false
@@ -185,8 +184,10 @@ class HomeViewModel: ObservableObject {
                 // Update UI on MainActor (we're already on MainActor, but be explicit)
                 self.events = todayEvents
                 self.summary = calculateSummary(from: todayEvents)
-                print("[\(taskID)] UI updated with \(todayEvents.count) events")
-                // isLoading will be set to false in defer block
+                // Set isLoading to false BEFORE defer block to ensure immediate UI update
+                self.isLoading = false
+                print("[\(taskID)] UI updated with \(todayEvents.count) events, isLoading = false")
+                // Note: defer block will also set it, but setting it here ensures immediate update
                 
                 // Index events in Spotlight (non-blocking)
                 Task {
@@ -215,7 +216,9 @@ class HomeViewModel: ObservableObject {
                 let elapsed = Date().timeIntervalSince(startTime)
                 print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
-                print("[\(taskID)] Error set")
+                // Set isLoading to false on error as well
+                self.isLoading = false
+                print("[\(taskID)] Error set, isLoading = false")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
         }
