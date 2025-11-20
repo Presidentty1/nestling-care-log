@@ -49,8 +49,8 @@ class DataStoreSelector {
     
     /// Create RemoteDataStore if Supabase is configured, otherwise fallback
     static func createWithRemoteFallback(supabaseURL: String? = nil, anonKey: String? = nil) -> DataStore {
-        // RemoteDataStore now uses Secrets.swift automatically
-        // If credentials are provided, they should be set in Secrets.swift
+        // RemoteDataStore now uses environment variables automatically
+        // If credentials are provided, they should be set via SUPABASE_URL and SUPABASE_ANON_KEY environment variables
         if SupabaseClientProvider.shared.isConfigured {
             return RemoteDataStore()
         }

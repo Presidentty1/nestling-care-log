@@ -243,7 +243,7 @@ enum AuthError: LocalizedError {
         case .invalidInput(let message):
             return message
         case .notConfigured:
-            return "Supabase is not configured. Please check Secrets.swift"
+            return "Supabase is not configured. Please check environment variables SUPABASE_URL and SUPABASE_ANON_KEY"
         case .authenticationFailed(let message):
             return "Authentication failed: \(message)"
         case .emailConfirmationRequired:

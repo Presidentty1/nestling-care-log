@@ -13,7 +13,7 @@ import Foundation
 ///
 /// Setup Steps:
 /// 1. Add Supabase Swift SDK via SPM (see SUPABASE_SETUP.md)
-/// 2. Configure Secrets.swift with your Supabase URL and anon key
+/// 2. Configure SUPABASE_URL and SUPABASE_ANON_KEY environment variables
 /// 3. Uncomment import Supabase and client initialization code
 /// 4. Implement authentication flow (see Phase 1.2)
 class RemoteDataStore: DataStore {
@@ -34,7 +34,7 @@ class RemoteDataStore: DataStore {
     init() {
         // Verify Supabase is configured
         if !provider.isConfigured {
-            print("⚠️ WARNING: SupabaseClientProvider is not configured. Please check Secrets.swift")
+            print("⚠️ WARNING: SupabaseClientProvider is not configured. Please check SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
         }
     }
     

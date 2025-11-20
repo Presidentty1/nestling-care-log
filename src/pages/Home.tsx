@@ -331,7 +331,7 @@ export default function Home() {
     
     // Ensure meaningful defaults for quick logging
     let feedAmount = lastUsed.amount || 4;
-    let feedUnit = lastUsed.unit || 'oz';
+    const feedUnit = lastUsed.unit || 'oz';
     
     // Convert oz to ml if needed, and ensure minimum 10ml
     if (feedUnit === 'oz') {

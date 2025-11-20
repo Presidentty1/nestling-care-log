@@ -83,7 +83,7 @@ serve(async (req) => {
 
     const lowerTranscript = transcript.toLowerCase();
     
-    let parsedCommand: any = { action: 'unknown' };
+    const parsedCommand: any = { action: 'unknown' };
     let wasSuccessful = false;
     let errorMessage = '';
 

@@ -271,7 +271,7 @@ enum AIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConfigured:
-            return "Supabase is not configured. Please check Secrets.swift"
+            return "Supabase is not configured. Please check SUPABASE_URL and SUPABASE_ANON_KEY environment variables"
         case .consentRequired:
             return "AI features are disabled. Enable in Settings → AI & Data Sharing."
         case .authenticationRequired:

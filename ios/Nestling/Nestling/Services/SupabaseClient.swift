@@ -31,12 +31,12 @@ final class SupabaseClientProvider {
     private var configured = false
     
     private init() {
-        // Load credentials from Secrets
-        let url = Secrets.supabaseURL
-        let anonKey = Secrets.supabaseAnonKey
-        
+        // Load credentials from environment variables
+        let url = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? ""
+        let anonKey = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"] ?? ""
+
         guard !url.isEmpty, !anonKey.isEmpty else {
-            print("⚠️ WARNING: Supabase credentials not configured in Secrets.swift")
+            print("⚠️ WARNING: Supabase credentials not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY environment variables or build settings.")
             return
         }
         
@@ -53,14 +53,14 @@ final class SupabaseClientProvider {
     
     /// Check if Supabase is configured and ready to use
     var isConfigured: Bool {
-        configured && !Secrets.supabaseURL.isEmpty && !Secrets.supabaseAnonKey.isEmpty
+        configured
     }
     
-    /// Legacy configure method (deprecated - now uses Secrets.swift automatically)
-    @available(*, deprecated, message: "Credentials are now loaded automatically from Secrets.swift")
+    /// Legacy configure method (deprecated - now uses environment variables automatically)
+    @available(*, deprecated, message: "Credentials are now loaded automatically from environment variables")
     func configure(url: String, anonKey: String) {
         // This method is kept for backward compatibility but does nothing
-        // Credentials are loaded from Secrets.swift in init()
+        // Credentials are loaded from environment variables in init()
     }
     
     /// Get current user session
