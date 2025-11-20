@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { CreateEventData, eventsService } from '@/services/eventsService';
-import { Droplet, Circle, AlertCircle } from 'lucide-react';
+import { Droplet, Circle, AlertCircle, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
@@ -19,6 +19,7 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
   const [subtype, setSubtype] = useState<'wet' | 'dirty' | 'both'>(prefillData?.subtype || 'wet');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [quickMode, setQuickMode] = useState(false);
 
   useEffect(() => {
     if (editingEventId) {
@@ -80,6 +81,24 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
         </Alert>
       )}
 
+      {/* Quick Log Toggle */}
+      {!editingEventId && (
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Quick log</span>
+          </div>
+          <Button
+            type="button"
+            variant={quickMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setQuickMode(!quickMode)}
+          >
+            {quickMode ? "On" : "Off"}
+          </Button>
+        </div>
+      )}
+
       {/* Type Selection */}
       <div className="space-y-3">
         <Label className="text-base font-medium">Type</Label>
@@ -89,7 +108,7 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
               key={type}
               type="button"
               variant={subtype === type ? 'default' : 'outline'}
-              className="h-16 text-base font-semibold capitalize flex flex-col gap-1"
+              className="h-20 text-lg font-semibold capitalize flex flex-col gap-1"
               onClick={() => setSubtype(type)}
             >
               {getIcon(type)}
@@ -100,20 +119,22 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
       </div>
 
       {/* Optional Notes */}
-      <div className="space-y-3">
-        <Label htmlFor="note" className="text-base">Notes (optional)</Label>
-        <Textarea
-          id="note"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Any observations..."
-          className="min-h-[100px] text-base resize-none"
-          maxLength={500}
-        />
-        {note.length > 0 && (
-          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
-        )}
-      </div>
+      {!quickMode && (
+        <div className="space-y-3">
+          <Label htmlFor="note" className="text-base">Notes (optional)</Label>
+          <Textarea
+            id="note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Any observations..."
+            className="min-h-[100px] text-base resize-none"
+            maxLength={500}
+          />
+          {note.length > 0 && (
+            <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+          )}
+        </div>
+      )}
     </form>
   );
 }

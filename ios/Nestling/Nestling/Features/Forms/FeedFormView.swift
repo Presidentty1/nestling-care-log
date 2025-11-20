@@ -38,7 +38,7 @@ struct FeedFormView: View {
                             Haptics.selection()
                         }
                     }
-                } else {
+                } else if viewModel.feedType == .bottle || viewModel.feedType == .pumping {
                     Section("Amount") {
                         HStack {
                             TextField("Amount", text: $viewModel.amount)
@@ -63,7 +63,7 @@ struct FeedFormView: View {
                             }
                         }
                         
-                        if !viewModel.isValid && viewModel.feedType != .breast {
+                        if !viewModel.isValid && (viewModel.feedType == .bottle || viewModel.feedType == .pumping) {
                             Text("Minimum \(Int(AppConstants.minimumFeedAmountML))ml required")
                                 .font(.caption)
                                 .foregroundColor(.destructive)
@@ -81,7 +81,7 @@ struct FeedFormView: View {
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle(viewModel.editingEvent != nil ? "Edit Feed" : "Log Feed")
+            .navigationTitle(viewModel.editingEvent != nil ? "Edit Feed" : "New Feed")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

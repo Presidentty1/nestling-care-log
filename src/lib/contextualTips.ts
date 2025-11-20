@@ -134,6 +134,13 @@ export function getContextualTips(
 
   // General parenting tips
   tips.push({
+    id: 'loose-logging',
+    content: 'It\'s okay if you miss logs. We\'ll still use what you have and stay conservative if we\'re unsure.',
+    icon: '✨',
+    category: 'general',
+  });
+
+  tips.push({
     id: 'trust-yourself',
     content: 'You know your baby best. Trust your instincts—they\'re usually right!',
     icon: '💪',

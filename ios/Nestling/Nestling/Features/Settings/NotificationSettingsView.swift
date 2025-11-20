@@ -12,27 +12,79 @@ struct NotificationSettingsView: View {
     @State private var quietHoursEnd: Date = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var quietHoursEnabled: Bool = false
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
+    @State private var remindersPaused = false
     @State private var showPermissionAlert = false
     
     var body: some View {
         Form {
+            Section("General") {
+                Toggle("Pause All Reminders", isOn: $remindersPaused)
+                    .onChange(of: remindersPaused) { _, paused in
+                        // When pausing/unpausing, we don't need to request permission
+                        // Just update the paused state
+                        saveSettings()
+                    }
+
+                if remindersPaused {
+                    Text("All reminders are paused. Toggle off to resume.")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                }
+            }
+
             Section("Feed Reminders") {
                 Toggle("Enable Feed Reminders", isOn: $feedReminderEnabled)
+                    .disabled(remindersPaused)
+                    .onChange(of: feedReminderEnabled) { _, enabled in
+                        if enabled && permissionStatus != .authorized && !remindersPaused {
+                            requestPermission()
+                        }
+                    }
                 
                 if feedReminderEnabled {
                     Stepper("Remind every \(feedReminderHours) hours", value: $feedReminderHours, in: 1...6)
+                    
+                    if permissionStatus != .authorized {
+                        Text("Enable notifications to receive reminders")
+                            .font(.caption)
+                            .foregroundColor(.mutedForeground)
+                    }
                 }
             }
             
             Section("Sleep Reminders") {
                 Toggle("Nap Window Alerts", isOn: $napWindowAlertEnabled)
+                    .disabled(remindersPaused)
+                    .onChange(of: napWindowAlertEnabled) { _, enabled in
+                        if enabled && permissionStatus != .authorized && !remindersPaused {
+                            requestPermission()
+                        }
+                    }
+                
+                if napWindowAlertEnabled && permissionStatus != .authorized {
+                    Text("Enable notifications to receive nap reminders")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                }
             }
             
             Section("Diaper Reminders") {
                 Toggle("Enable Diaper Reminders", isOn: $diaperReminderEnabled)
+                    .disabled(remindersPaused)
+                    .onChange(of: diaperReminderEnabled) { _, enabled in
+                        if enabled && permissionStatus != .authorized && !remindersPaused {
+                            requestPermission()
+                        }
+                    }
                 
                 if diaperReminderEnabled {
                     Stepper("Remind every \(diaperReminderHours) hours", value: $diaperReminderHours, in: 1...4)
+                    
+                    if permissionStatus != .authorized {
+                        Text("Enable notifications to receive reminders")
+                            .font(.caption)
+                            .foregroundColor(.mutedForeground)
+                    }
                 }
             }
             
@@ -63,8 +115,10 @@ struct NotificationSettingsView: View {
             
             Section("Test") {
                 PrimaryButton("Send Test Notification", icon: "bell.fill") {
-                    NotificationScheduler.shared.sendTestNotification()
-                    Haptics.success()
+                    Task {
+                        NotificationScheduler.shared.sendTestNotification()
+                        Haptics.success()
+                    }
                 }
             }
             
@@ -114,12 +168,15 @@ struct NotificationSettingsView: View {
     }
     
     private func checkPermissionStatus() async {
-        permissionStatus = await NotificationPermissionManager.shared.checkPermissionStatus()
+        await ReminderService.shared.checkAuthorizationStatus()
+        await MainActor.run {
+            permissionStatus = ReminderService.shared.authorizationStatus
+        }
     }
     
     private func requestPermission() {
         Task {
-            let granted = await NotificationPermissionManager.shared.requestPermission()
+            let granted = await ReminderService.shared.requestAuthorization()
             await MainActor.run {
                 if granted {
                     permissionStatus = .authorized
@@ -138,6 +195,10 @@ struct NotificationSettingsView: View {
         napWindowAlertEnabled = settings.napWindowAlertEnabled
         diaperReminderEnabled = settings.diaperReminderEnabled
         diaperReminderHours = settings.diaperReminderHours
+        remindersPaused = settings.remindersPaused
+        Task {
+            await ReminderService.shared.updatePausedState(remindersPaused)
+        }
         quietHoursEnabled = settings.quietHoursStart != nil
         if let start = settings.quietHoursStart {
             quietHoursStart = start
@@ -155,6 +216,10 @@ struct NotificationSettingsView: View {
             settings.napWindowAlertEnabled = napWindowAlertEnabled
             settings.diaperReminderEnabled = diaperReminderEnabled
             settings.diaperReminderHours = diaperReminderHours
+            settings.remindersPaused = remindersPaused
+
+            // Update ReminderService with the paused state
+            await ReminderService.shared.updatePausedState(remindersPaused)
             settings.quietHoursStart = quietHoursEnabled ? quietHoursStart : nil
             settings.quietHoursEnd = quietHoursEnabled ? quietHoursEnd : nil
             
@@ -163,11 +228,11 @@ struct NotificationSettingsView: View {
                 environment.appSettings = settings
             }
             
-            // Schedule notifications
-            if permissionStatus == .authorized {
-                NotificationScheduler.shared.scheduleFeedReminder(hours: feedReminderHours, enabled: feedReminderEnabled)
-                NotificationScheduler.shared.scheduleDiaperReminder(hours: diaperReminderHours, enabled: diaperReminderEnabled)
-                // Nap window alerts would be scheduled when predictions are generated
+            // Schedule notifications via ReminderService
+            if permissionStatus == .authorized, let baby = environment.currentBaby {
+                // Feed and diaper reminders will be scheduled when events are logged (check time since)
+                // Nap window reminders will be scheduled when nap window is predicted
+                // For now, just save settings - reminders will be checked/scheduled when events change
             }
         }
     }

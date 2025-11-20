@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct NotificationsIntroView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
@@ -11,11 +12,12 @@ struct NotificationsIntroView: View {
                         .font(.system(size: 60))
                         .foregroundColor(.primary)
                     
-                    Text("Stay on Track")
+                    Text("Gentle reminders, when you want them")
                         .font(.headline)
                         .foregroundColor(.foreground)
+                        .multilineTextAlignment(.center)
                     
-                    Text("Get gentle reminders for feeds, diaper changes, and nap windows. You can customize these in Settings.")
+                    Text("Choose which reminders work for you. You're always in control.")
                         .font(.body)
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
@@ -25,45 +27,38 @@ struct NotificationsIntroView: View {
                 
                 CardView {
                     VStack(alignment: .leading, spacing: .spacingMD) {
-                        HStack {
+                        HStack(spacing: .spacingSM) {
                             Image(systemName: "drop.fill")
                                 .foregroundColor(.eventFeed)
-                            Text("Feed reminders")
+                            Text("Feed reminders when it's been a while")
                                 .font(.body)
                         }
                         
-                        HStack {
+                        HStack(spacing: .spacingSM) {
                             Image(systemName: "moon.fill")
                                 .foregroundColor(.eventSleep)
-                            Text("Nap window alerts")
+                            Text("Nap window alerts based on wake time")
                                 .font(.body)
                         }
                         
-                        HStack {
+                        HStack(spacing: .spacingSM) {
                             Image(systemName: "drop.circle.fill")
                                 .foregroundColor(.eventDiaper)
-                            Text("Diaper change reminders")
+                            Text("Diaper reminders if it's been a long stretch")
                                 .font(.body)
                         }
                     }
                 }
                 .padding(.horizontal, .spacingMD)
                 
-                InfoBanner(
-                    title: "Note",
-                    message: "We'll ask for notification permission when you're ready. You can enable or disable reminders anytime in Settings.",
-                    variant: .info
-                )
-                .padding(.horizontal, .spacingMD)
-                
                 VStack(spacing: .spacingSM) {
-                    PrimaryButton("Get Started") {
-                        coordinator.completeOnboarding()
+                    PrimaryButton("Allow notifications") {
+                        requestNotificationPermission()
                     }
                     .padding(.horizontal, .spacingMD)
                     
-                    Button("Skip") {
-                        coordinator.skip()
+                    Button("Not now") {
+                        coordinator.completeOnboarding()
                     }
                     .foregroundColor(.mutedForeground)
                 }
@@ -71,6 +66,14 @@ struct NotificationsIntroView: View {
             }
         }
         .background(Color.background)
+    }
+    
+    private func requestNotificationPermission() {
+        Task {
+            let granted = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+            // Proceed with onboarding regardless of permission result
+            coordinator.completeOnboarding()
+        }
     }
 }
 

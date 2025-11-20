@@ -36,6 +36,7 @@ const CryInsights = lazy(() => import("./pages/CryInsights"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const AnalyticsDashboard = lazy(() => import("./pages/AnalyticsDashboard"));
+const Patterns = lazy(() => import("./pages/Patterns"));
 const ShortcutsSettings = lazy(() => import("./pages/ShortcutsSettings"));
 const SleepTraining = lazy(() => import("./pages/SleepTraining"));
 const ActivityFeed = lazy(() => import("./pages/ActivityFeed"));
@@ -135,6 +136,7 @@ function AppContent() {
         <Route path="/ai-assistant" element={<SuspenseWrapper><AuthGuard><AIAssistant /></AuthGuard></SuspenseWrapper>} />
         <Route path="/analytics" element={<SuspenseWrapper><AuthGuard><Analytics /></AuthGuard></SuspenseWrapper>} />
         <Route path="/analytics-dashboard" element={<SuspenseWrapper><AuthGuard><AnalyticsDashboard /></AuthGuard></SuspenseWrapper>} />
+        <Route path="/patterns" element={<SuspenseWrapper><AuthGuard><Patterns /></AuthGuard></SuspenseWrapper>} />
         <Route path="/sleep-training" element={<SuspenseWrapper><AuthGuard><SleepTraining /></AuthGuard></SuspenseWrapper>} />
         <Route path="/sleep-training/new-session" element={<SuspenseWrapper><AuthGuard><NewSleepTrainingSession /></AuthGuard></SuspenseWrapper>} />
         <Route path="/activity-feed" element={<SuspenseWrapper><AuthGuard><ActivityFeed /></AuthGuard></SuspenseWrapper>} />

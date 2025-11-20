@@ -3,6 +3,11 @@ import SwiftUI
 struct BabySetupView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
     @State private var showError = false
+    @State private var dobError: String?
+    
+    private var isDOBValid: Bool {
+        coordinator.dateOfBirth <= Date()
+    }
     
     var body: some View {
         ScrollView {
@@ -26,31 +31,53 @@ struct BabySetupView: View {
                     }
                     
                     Section("Date of Birth") {
-                        DatePicker("Date of Birth", selection: $coordinator.dateOfBirth, displayedComponents: .date)
-                            .datePickerStyle(.compact)
+                        DatePicker(
+                            "Date of Birth",
+                            selection: $coordinator.dateOfBirth,
+                            in: ...Date(), // Prevent future dates
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.compact)
+                        .onChange(of: coordinator.dateOfBirth) { _, newDate in
+                            if newDate > Date() {
+                                dobError = "Birth date can't be in the future"
+                            } else {
+                                dobError = nil
+                            }
+                        }
+                        
+                        if let dobError = dobError {
+                            Text(dobError)
+                                .font(.caption)
+                                .foregroundColor(.destructive)
+                        }
                     }
                     
                     Section("Sex (Optional)") {
                         Picker("Sex", selection: $coordinator.sex) {
                             Text("Not specified").tag(nil as Sex?)
-                            ForEach(Sex.allCases, id: \.self) { s in
-                                Text(s.displayName).tag(s as Sex?)
-                            }
+                            Text("Girl").tag(Sex.female as Sex?)
+                            Text("Boy").tag(Sex.male as Sex?)
+                            Text("Intersex").tag(Sex.intersex as Sex?)
+                            Text("Prefer not to say").tag(Sex.preferNotToSay as Sex?)
                         }
                     }
                 }
-                .frame(height: 300)
+                .frame(height: 320)
+                .scrollDismissesKeyboard(.interactively)
                 
                 VStack(spacing: .spacingSM) {
-                    PrimaryButton("Continue", isDisabled: coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty) {
-                        coordinator.next()
+                    PrimaryButton(
+                        "Continue",
+                        isDisabled: coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid
+                    ) {
+                        if !isDOBValid {
+                            dobError = "Birth date can't be in the future"
+                        } else {
+                            coordinator.next()
+                        }
                     }
                     .padding(.horizontal, .spacingMD)
-                    
-                    Button("Skip") {
-                        coordinator.skip()
-                    }
-                    .foregroundColor(.mutedForeground)
                 }
                 .padding(.bottom, .spacing2XL)
             }

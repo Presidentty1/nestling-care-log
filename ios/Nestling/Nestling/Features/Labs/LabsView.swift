@@ -3,25 +3,33 @@ import SwiftUI
 struct LabsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var showPredictions = false
+    @State private var showProSubscription = false
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: .spacingLG) {
-                    Text("Experimental Features")
-                        .font(.headline)
-                        .foregroundColor(.foreground)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    // Disclaimer text
+                    Text("Experimental features. These may change as we learn from feedback.")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal, .spacingMD)
+                        .padding(.top, .spacingSM)
                     
                     // Smart Predictions Card
                     LabsCard(
                         title: "Smart Predictions",
-                        description: "AI-powered predictions for next feed and nap times",
+                        description: "Get suggested nap and feed times based on your baby's logs",
                         icon: "brain.head.profile",
-                        color: .primary
+                        color: .primary,
+                        badge: !ProSubscriptionService.shared.isProUser ? "Pro" : nil
                     ) {
-                        showPredictions = true
+                        if ProSubscriptionService.shared.isProUser {
+                            showPredictions = true
+                        } else {
+                            showProSubscription = true
+                        }
                     }
                     .padding(.horizontal, .spacingMD)
                     
@@ -35,9 +43,10 @@ struct LabsView: View {
                     }) {
                         LabsCard(
                             title: "Cry Insights",
-                            description: "Analyze baby's cry patterns (Beta)",
+                            description: "Analyze baby's cry patterns",
                             icon: "waveform",
-                            color: .primary
+                            color: .primary,
+                            badge: "Beta"
                         ) { }
                     }
                     .padding(.horizontal, .spacingMD)
@@ -45,6 +54,18 @@ struct LabsView: View {
                 .padding(.vertical, .spacingMD)
             }
             .navigationTitle("Labs")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack {
+                        Text("Labs")
+                            .font(.headline)
+                        Text("AI & Experimental Features")
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                    }
+                }
+            }
             .background(Color.background)
             .onChange(of: environment.navigationCoordinator.showPredictions) { _, newValue in
                 if newValue {
@@ -66,7 +87,24 @@ struct LabsCard: View {
     let description: String
     let icon: String
     let color: Color
+    let badge: String?
     let action: () -> Void
+    
+    init(
+        title: String,
+        description: String,
+        icon: String,
+        color: Color,
+        badge: String? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.description = description
+        self.icon = icon
+        self.color = color
+        self.badge = badge
+        self.action = action
+    }
     
     var body: some View {
         Button(action: action) {
@@ -77,9 +115,22 @@ struct LabsCard: View {
                     .frame(width: 40)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.title)
-                        .foregroundColor(.foreground)
+                    HStack(spacing: .spacingXS) {
+                        Text(title)
+                            .font(.title)
+                            .foregroundColor(.foreground)
+                        
+                        if let badge = badge {
+                            Text(badge)
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(badge == "Pro" ? .white : .mutedForeground)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(badge == "Pro" ? Color.primary : Color.surface)
+                                .cornerRadius(8)
+                        }
+                    }
                     
                     Text(description)
                         .font(.caption)

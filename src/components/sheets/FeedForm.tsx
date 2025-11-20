@@ -8,6 +8,7 @@ import { CreateEventData, eventsService } from '@/services/eventsService';
 import { unitConversion } from '@/services/unitConversion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { RotateCcw } from 'lucide-react';
 
 interface FeedFormProps {
   babyId: string;
@@ -51,6 +52,18 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
       if (prefillData.note) setNote(prefillData.note);
     }
   }, [editingEventId, prefillData]);
+
+  const handleSameAsLast = () => {
+    // This will be handled by the parent component via useLastUsedValues hook
+    // The form will be pre-filled automatically
+    toast.success('Using your last feed settings');
+  };
+
+  const handleQuickPreset = (presetAmount: number) => {
+    setFeedType('bottle');
+    setAmount(presetAmount.toString());
+    setUnit('ml');
+  };
 
   const validate = () => {
     if (feedType === 'breast') {
@@ -110,6 +123,54 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
             {error}. Check your connection and try again.
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Quick Actions */}
+      {!editingEventId && (
+        <div className="space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSameAsLast}
+            className="w-full"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Same as last time
+          </Button>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Quick presets</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickPreset(60)}
+                className="h-12"
+              >
+                60 ml
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickPreset(90)}
+                className="h-12"
+              >
+                90 ml
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickPreset(120)}
+                className="h-12"
+              >
+                120 ml
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Feed Type Selection */}

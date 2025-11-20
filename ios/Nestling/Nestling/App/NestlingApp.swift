@@ -5,17 +5,22 @@ import CoreSpotlight
 @main
 struct NestlingApp: App {
     @StateObject private var environment: AppEnvironment
+    @StateObject private var authViewModel = AuthViewModel()
     @State private var showOnboarding = false
+    @State private var isCheckingAuth = true
     @State private var isCheckingOnboarding = true
     
     private let launchSignpostID: OSSignpostID
     
     init() {
+        // Initialize crash reporting
+        _ = CrashReportingService.shared
+
         // Use DataStoreSelector to choose implementation
         // Defaults to Core Data if available, falls back to JSON
         let dataStore = DataStoreSelector.create()
         _environment = StateObject(wrappedValue: AppEnvironment(dataStore: dataStore))
-        
+
         // Start launch signpost
         launchSignpostID = SignpostLogger.beginInterval("AppLaunch", log: SignpostLogger.ui)
     }
@@ -23,12 +28,56 @@ struct NestlingApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if isCheckingOnboarding {
-                    // Show loading screen while checking onboarding status
+                if isCheckingAuth {
+                    // Show loading screen while checking auth status
                     Color.background
                         .ignoresSafeArea()
                         .overlay {
                             ProgressView()
+                        }
+                        .task {
+                            // Check for existing session
+                            await authViewModel.restoreSession()
+                            await MainActor.run {
+                                isCheckingAuth = false
+                                // If no session, we'll show AuthView
+                                // If session exists, check onboarding
+                                if authViewModel.session != nil {
+                                    isCheckingOnboarding = true
+                                    checkOnboarding()
+                                }
+                            }
+                        }
+                } else if authViewModel.session == nil {
+                    // No session - show Auth
+                    AuthView(viewModel: authViewModel) {
+                        // On authenticated, check onboarding
+                        Task { @MainActor in
+                            // Small delay to ensure session state propagates
+                            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+                            isCheckingOnboarding = true
+                            checkOnboarding()
+                        }
+                    }
+                } else if isCheckingOnboarding {
+                    // Show loading screen while checking onboarding status
+                    Color.background
+                        .ignoresSafeArea()
+                        .overlay {
+                            VStack(spacing: .spacingMD) {
+                                ProgressView()
+                                Text("Checking setup...")
+                                    .font(.caption)
+                                    .foregroundColor(.mutedForeground)
+                            }
+                        }
+                        .task {
+                            // Fallback timeout - if checkOnboarding doesn't complete in 5 seconds, proceed anyway
+                            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                            if isCheckingOnboarding {
+                                print("⚠️ WARNING: Onboarding check timed out, proceeding to app")
+                                isCheckingOnboarding = false
+                            }
                         }
                 } else if showOnboarding {
                     OnboardingView(dataStore: environment.dataStore) {
@@ -76,16 +125,49 @@ struct NestlingApp: App {
                         }
                 }
             }
-            .task {
-                // Check if onboarding is needed
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func checkOnboarding() {
+        Task { @MainActor in
+            // Add timeout to prevent infinite loading
+            let timeoutTask = Task {
+                try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+                if isCheckingOnboarding {
+                    print("⚠️ WARNING: checkOnboarding timed out after 3 seconds, proceeding anyway")
+                    isCheckingOnboarding = false
+                }
+            }
+            
+            // Check if onboarding is needed
+            do {
                 let onboardingService = OnboardingService(dataStore: environment.dataStore)
                 let completed = await onboardingService.isOnboardingCompleted()
-                await MainActor.run {
-                    isCheckingOnboarding = false
-                    if !completed {
-                        showOnboarding = true
-                    }
+                
+                // Also check if user has any babies - if not, force onboarding
+                let babies = try await environment.dataStore.fetchBabies()
+                let hasBabies = !babies.isEmpty
+                
+                timeoutTask.cancel()
+                isCheckingOnboarding = false
+                
+                // Show onboarding if:
+                // 1. Onboarding was never completed, OR
+                // 2. Onboarding was completed but no babies exist (data might have been cleared)
+                if !completed || !hasBabies {
+                    showOnboarding = true
+                } else {
+                    // Refresh babies list in environment
+                    await environment.refreshBabies()
                 }
+            } catch {
+                print("⚠️ ERROR: Failed to check onboarding status: \(error)")
+                timeoutTask.cancel()
+                isCheckingOnboarding = false
+                // On error, assume onboarding is needed to be safe
+                showOnboarding = true
             }
         }
     }

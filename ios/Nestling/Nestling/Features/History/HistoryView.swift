@@ -13,7 +13,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func timelineContent(for viewModel: HistoryViewModel) -> some View {
         if viewModel.isLoading {
-            LoadingStateView(message: "Loading events...")
+            LoadingStateView(message: "Loading events...", useSkeleton: true)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             let isEmpty = viewModel.filteredEvents.isEmpty
@@ -21,12 +21,19 @@ struct HistoryView: View {
             let allFilter = viewModel.selectedFilter == .all
             
             if isEmpty {
-                EmptyStateView(
-                    icon: "magnifyingglass",
-                    title: noSearch && allFilter ? "No events logged" : "No matching events",
-                    message: noSearch && allFilter ? "Nothing logged on this day" : "Try adjusting your search or filter"
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: .spacingMD) {
+                    EmptyStateView(
+                        icon: "magnifyingglass",
+                        title: noSearch && allFilter ? "No events logged" : "No matching events",
+                        message: noSearch && allFilter ? "Logs are created from Home. Tap 'Home' to start logging." : "Try adjusting your search or filter",
+                        actionTitle: noSearch && allFilter ? "Go to Home" : nil,
+                        action: noSearch && allFilter ? {
+                            // Switch to Home tab
+                            environment.navigationCoordinator.selectedTab = 0
+                        } : nil
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             } else {
                 ScrollView {
                     VStack(spacing: .spacingSM) {
@@ -45,7 +52,9 @@ struct HistoryView: View {
                                 event: event,
                                 onEdit: { editingEvent = event; showFormForEvent(event) },
                                 onDelete: {
-                                    viewModel.deleteEvent(event)
+                                    Task {
+                                        await viewModel.deleteEvent(event)
+                                    }
                                     // Show undo toast
                                     let toastId = UUID()
                                     showToast = ToastMessage(
@@ -63,8 +72,8 @@ struct HistoryView: View {
                                             }
                                         }
                                     )
-                                    // Auto-dismiss after 7 seconds
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+                                    // Auto-dismiss after 3 seconds (reduced from 7)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                         if showToast?.id == toastId {
                                             showToast = nil
                                         }
@@ -83,7 +92,7 @@ struct HistoryView: View {
                     .padding(.horizontal, .spacingMD)
                 }
                 .refreshable {
-                    viewModel.loadEvents()
+                    await viewModel.loadEvents()
                 }
             }
         }
@@ -93,18 +102,20 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if let viewModel = viewModel {
-                    VStack(spacing: .spacingMD) {
-                        // Date Picker
-                        DatePickerView(selectedDate: Binding(
-                            get: { viewModel.selectedDate },
-                            set: { viewModel.selectDate($0) }
-                        )) { date in
-                            viewModel.selectDate(date)
+                    ObservedViewModel(viewModel) { viewModel in
+                        VStack(spacing: .spacingMD) {
+                            // Date Picker
+                            DatePickerView(selectedDate: Binding(
+                                get: { viewModel.selectedDate },
+                                set: { viewModel.selectDate($0) }
+                            )) { date in
+                                viewModel.selectDate(date)
+                            }
+                            .padding(.horizontal, .spacingMD)
+                            
+                            // Timeline
+                            timelineContent(for: viewModel)
                         }
-                        .padding(.horizontal, .spacingMD)
-                        
-                        // Timeline
-                        timelineContent(for: viewModel)
                     }
                 } else if environment.babies.isEmpty {
                     // No babies - show empty state
@@ -185,10 +196,12 @@ struct HistoryView: View {
                         preferMedium: environment.appSettings.preferMediumSheet,
                         isSaving: feedViewModel.isSaving
                     ) {
-                        FeedFormView(viewModel: feedViewModel)
+                            FeedFormView(viewModel: feedViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadEvents()
+                                Task {
+                                    await viewModel?.loadEvents()
+                                }
                             }
                     }
                 }
@@ -207,7 +220,9 @@ struct HistoryView: View {
                         SleepFormView(viewModel: sleepViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadEvents()
+                                Task {
+                                    await viewModel?.loadEvents()
+                                }
                             }
                     }
                 }
@@ -226,7 +241,9 @@ struct HistoryView: View {
                         DiaperFormView(viewModel: diaperViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadEvents()
+                                Task {
+                                    await viewModel?.loadEvents()
+                                }
                             }
                     }
                 }
@@ -245,7 +262,9 @@ struct HistoryView: View {
                         TummyTimeFormView(viewModel: tummyViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadEvents()
+                                Task {
+                                    await viewModel?.loadEvents()
+                                }
                             }
                     }
                 }
@@ -295,6 +314,7 @@ struct DatePickerView: View {
                     }
                 }
             }
+            .padding(.horizontal, .spacingMD) // Add horizontal padding so last chip has breathing room
         }
     }
     

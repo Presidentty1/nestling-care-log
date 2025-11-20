@@ -70,6 +70,23 @@ class TrialService {
       await trialStore.setItem('trial', trial);
     }
   }
+
+  async getFreeCryInsightsUsed(): Promise<number> {
+    const count = await trialStore.getItem<number>('free_cry_insights_used');
+    return count || 0;
+  }
+
+  async incrementFreeCryInsights(): Promise<number> {
+    const currentCount = await this.getFreeCryInsightsUsed();
+    const newCount = currentCount + 1;
+    await trialStore.setItem('free_cry_insights_used', newCount);
+    return newCount;
+  }
+
+  async hasFreeCryInsightsLeft(): Promise<boolean> {
+    const used = await this.getFreeCryInsightsUsed();
+    return used < 3; // Allow 3 free analyses
+  }
 }
 
 export const trialService = new TrialService();

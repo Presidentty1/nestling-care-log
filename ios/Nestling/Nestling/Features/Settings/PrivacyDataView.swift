@@ -233,23 +233,47 @@ struct PrivacyDataView: View {
                 let startDate = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? Date()
                 let events = try await environment.dataStore.fetchEvents(for: baby, from: startDate, to: Date())
                 
-                // Generate CSV
+                // Get user preferences for formatting
+                let settings = try? await environment.dataStore.fetchAppSettings()
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .medium
+                dateFormatter.timeStyle = .none
+                
+                let timeFormatter = DateFormatter()
+                timeFormatter.timeStyle = .short
+                timeFormatter.dateStyle = .none
+                
+                // Generate CSV with header
                 var csv = "Date,Time,Type,Subtype,Amount,Unit,Duration (min),Note\n"
                 
-                for event in events.sorted(by: { $0.startTime > $1.startTime }) {
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd"
-                    let timeFormatter = DateFormatter()
-                    timeFormatter.dateFormat = "HH:mm"
-                    
+                // Sort events chronologically (oldest first for CSV)
+                for event in events.sorted(by: { $0.startTime < $1.startTime }) {
                     let date = dateFormatter.string(from: event.startTime)
                     let time = timeFormatter.string(from: event.startTime)
                     let type = event.type.displayName
                     let subtype = event.subtype ?? ""
-                    let amount = event.amount.map { String(Int($0)) } ?? ""
+                    
+                    // Format amount based on unit
+                    let amount: String
+                    if let eventAmount = event.amount {
+                        if let settings = settings, settings.preferredUnit == "oz", event.unit == "ml" {
+                            // Convert ml to oz for display if user prefers imperial
+                            amount = String(format: "%.2f", eventAmount / AppConstants.mlPerOz)
+                        } else {
+                            amount = String(format: "%.0f", eventAmount)
+                        }
+                    } else {
+                        amount = ""
+                    }
+                    
                     let unit = event.unit ?? ""
                     let duration = event.durationMinutes.map { String($0) } ?? ""
-                    let note = (event.note ?? "").replacingOccurrences(of: ",", with: ";")
+                    
+                    // Escape note (replace commas with semicolons, escape quotes)
+                    var note = (event.note ?? "").replacingOccurrences(of: ",", with: ";")
+                    if note.contains("\"") {
+                        note = "\"" + note.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+                    }
                     
                     csv += "\(date),\(time),\(type),\(subtype),\(amount),\(unit),\(duration),\(note)\n"
                 }
@@ -275,16 +299,29 @@ struct PrivacyDataView: View {
     
     private func deleteAllData() {
         Task {
-            if let jsonStore = environment.dataStore as? JSONBackedDataStore {
-                jsonStore.reset()
-            } else if let inMemoryStore = environment.dataStore as? InMemoryDataStore {
-                inMemoryStore.reset()
-            }
-            await environment.refreshBabies()
-            await environment.refreshSettings()
-            Haptics.error()
-            await MainActor.run {
-                dismiss()
+            do {
+                // Delete all data based on the data store type
+                if let jsonStore = environment.dataStore as? JSONBackedDataStore {
+                    jsonStore.reset()
+                } else if let inMemoryStore = environment.dataStore as? InMemoryDataStore {
+                    inMemoryStore.reset()
+                } else if let coreDataStore = environment.dataStore as? CoreDataDataStore {
+                    try await coreDataStore.deleteAllData()
+                }
+                
+                // Refresh app state
+                await environment.refreshBabies()
+                await environment.refreshSettings()
+                
+                Haptics.error()
+                
+                await MainActor.run {
+                    dismiss()
+                    // App will show onboarding on next launch since no babies exist
+                }
+            } catch {
+                print("Error deleting all data: \(error)")
+                Haptics.error()
             }
         }
     }

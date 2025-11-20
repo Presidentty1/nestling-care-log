@@ -1,5 +1,7 @@
 import Foundation
 import Combine
+import os.signpost
+import UserNotifications
 
 @MainActor
 class HomeViewModel: ObservableObject {
@@ -18,6 +20,36 @@ class HomeViewModel: ObservableObject {
     private let dataStore: DataStore
     let baby: Baby // Made internal so HomeView can check if baby changed
     private var isLoadingTask: Task<Void, Never>?
+    private let showToast: (String, String) -> Void // (message, type)
+    
+    // Today Status data
+    var lastFeed: Event? {
+        events.filter { $0.type == .feed }
+            .sorted { $0.startTime > $1.startTime }
+            .first
+    }
+    
+    var lastDiaper: Event? {
+        events.filter { $0.type == .diaper }
+            .sorted { $0.startTime > $1.startTime }
+            .first
+    }
+    
+    var lastSleep: Event? {
+        events.filter { $0.type == .sleep && $0.endTime != nil }
+            .sorted { ($0.endTime ?? $0.startTime) > ($1.endTime ?? $1.startTime) }
+            .first
+    }
+    
+    var nextNapWindow: NapWindow? {
+        // Note: For now, using basic calculation. Pro personalization would require async call to PredictionsEngine
+        // This is a simplified version - full Pro personalization would be in PredictionsEngine
+        calculateNextNapWindow()
+    }
+    
+    var nextFeedSuggestion: Date? {
+        calculateNextFeedSuggestion()
+    }
     
     /// Filtered events based on search text and selected filter
     var filteredEvents: [Event] {
@@ -90,11 +122,14 @@ class HomeViewModel: ObservableObject {
         return Array(suggestions.prefix(5))
     }
     
-    init(dataStore: DataStore, baby: Baby) {
+    init(dataStore: DataStore, baby: Baby, showToast: @escaping (String, String) -> Void) {
         self.dataStore = dataStore
         self.baby = baby
+        self.showToast = showToast
         print("HomeViewModel.init: Created for baby \(baby.id)")
-        loadTodayEvents()
+        Task { @MainActor in
+            await loadTodayEvents()
+        }
         checkActiveSleep()
     }
     
@@ -116,7 +151,7 @@ class HomeViewModel: ObservableObject {
         }
     }
     
-    func loadTodayEvents() {
+    func loadTodayEvents() async {
         // Cancel any existing load task first
         let wasAlreadyLoading = isLoadingTask != nil
         isLoadingTask?.cancel()
@@ -133,6 +168,14 @@ class HomeViewModel: ObservableObject {
         
         let signpostID = SignpostLogger.beginInterval("TimelineLoad", log: SignpostLogger.ui)
         
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { @MainActor in
+                await self.loadTodayEventsInternal(signpostID: signpostID)
+            }
+        }
+    }
+    
+    private func loadTodayEventsInternal(signpostID: OSSignpostID) async {
         isLoadingTask = Task { @MainActor in
             // Use defer to ALWAYS reset isLoading and clear task reference
             // This ensures isLoading is reset even if task is cancelled or errors occur
@@ -204,6 +247,11 @@ class HomeViewModel: ObservableObject {
                     }
                 }
                 
+                // Schedule reminders based on latest events
+                Task {
+                    await scheduleReminders()
+                }
+                
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             } catch {
                 if Task.isCancelled {
@@ -221,7 +269,11 @@ class HomeViewModel: ObservableObject {
                 print("[\(taskID)] Error set, isLoading = false")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
+            
+            self.isLoadingTask = nil
         }
+        
+        await isLoadingTask?.value
     }
     
     /// Restore active sleep state on app launch
@@ -272,7 +324,10 @@ class HomeViewModel: ObservableObject {
                 print("Adding feed event: \(finalAmount) \(finalUnit)")
                 try await dataStore.addEvent(event)
                 print("Feed event added successfully")
-                
+
+                // Check if this is the first event and show onboarding toast
+                await checkAndShowFirstEventToast(eventType: "feed")
+
                 // Save last used
                 let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
                 try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
@@ -292,7 +347,7 @@ class HomeViewModel: ObservableObject {
                 // Small delay to ensure CoreData save is complete, then reload
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                 print("Reloading events after feed...")
-                loadTodayEvents()
+                await loadTodayEvents()
             } catch {
                 print("Error logging feed: \(error)")
                 Haptics.error()
@@ -313,7 +368,10 @@ class HomeViewModel: ObservableObject {
                     await MainActor.run {
                         self.activeSleep = nil
                     }
-                    
+
+                    // Check if this is the first event and show onboarding toast
+                    await checkAndShowFirstEventToast(eventType: "sleep")
+
                     // Stop Live Activity
                     if #available(iOS 16.1, *) {
                         LiveActivityManager.shared.stopSleepActivity()
@@ -324,7 +382,7 @@ class HomeViewModel: ObservableObject {
                     // Small delay to ensure CoreData save is complete, then reload
                     try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                     print("Reloading events after sleep stop...")
-                    loadTodayEvents()
+                    await loadTodayEvents()
                 } else {
                     // Start new sleep
                     let newSleep = try await dataStore.startActiveSleep(for: baby)
@@ -341,6 +399,7 @@ class HomeViewModel: ObservableObject {
                 }
             } catch {
                 print("Error logging sleep: \(error)")
+                CrashReportingService.shared.logError(error, context: ["action": "log_sleep"])
                 Haptics.error()
                 await MainActor.run {
                     errorMessage = "Failed to log sleep: \(error.localizedDescription)"
@@ -368,7 +427,10 @@ class HomeViewModel: ObservableObject {
                     note: nil
                 )
                 try await dataStore.addEvent(event)
-                
+
+                // Check if this is the first event and show onboarding toast
+                await checkAndShowFirstEventToast(eventType: "diaper")
+
                 // Save last used
                 let lastUsed = LastUsedValues(subtype: subtype)
                 try? await dataStore.saveLastUsedValues(for: .diaper, values: lastUsed)
@@ -378,9 +440,10 @@ class HomeViewModel: ObservableObject {
                 // Small delay to ensure CoreData save is complete, then reload
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                 print("Reloading events after diaper...")
-                loadTodayEvents()
+                await loadTodayEvents()
             } catch {
                 print("Error logging diaper: \(error)")
+                CrashReportingService.shared.logError(error, context: ["action": "log_diaper"])
                 Haptics.error()
                 await MainActor.run {
                     errorMessage = "Failed to log diaper: \(error.localizedDescription)"
@@ -393,35 +456,41 @@ class HomeViewModel: ObservableObject {
         print("quickLogTummyTime called")
         Task { @MainActor in
             do {
-                // Get last used duration or default
-                var duration = AppConstants.defaultTummyTimeDurationMinutes
-                if let lastUsed = try? await dataStore.getLastUsedValues(for: .tummyTime),
-                   let lastDuration = lastUsed.durationMinutes {
-                    duration = lastDuration
-                }
-                
-                let startTime = Date().addingTimeInterval(-Double(duration * 60))
+                // For quick log, use current time (not backdated)
+                // User can edit duration later if needed via the form
+                let now = Date()
                 let event = Event(
                     babyId: baby.id,
                     type: .tummyTime,
-                    startTime: startTime,
-                    endTime: Date(),
+                    startTime: now,
+                    endTime: nil, // No end time for quick log - user can add duration later
                     note: nil
                 )
+                print("Adding tummy time event at: \(now)")
                 try await dataStore.addEvent(event)
-                
-                // Save last used
-                let lastUsed = LastUsedValues(durationMinutes: duration)
-                try? await dataStore.saveLastUsedValues(for: .tummyTime, values: lastUsed)
+
+                // Check if this is the first event and show onboarding toast
+                await checkAndShowFirstEventToast(eventType: "tummy_time")
+
+                // Save last used duration for future reference (but don't use it for quick log timestamp)
+                if let lastUsed = try? await dataStore.getLastUsedValues(for: .tummyTime),
+                   let lastDuration = lastUsed.durationMinutes {
+                    // Keep existing last used values
+                } else {
+                    // Save default duration for future reference
+                    let lastUsed = LastUsedValues(durationMinutes: AppConstants.defaultTummyTimeDurationMinutes)
+                    try? await dataStore.saveLastUsedValues(for: .tummyTime, values: lastUsed)
+                }
                 
                 Haptics.success()
                 
                 // Small delay to ensure CoreData save is complete, then reload
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                 print("Reloading events after tummy time...")
-                loadTodayEvents()
+                await loadTodayEvents()
             } catch {
                 print("Error logging tummy time: \(error)")
+                CrashReportingService.shared.logError(error, context: ["action": "log_tummy_time"])
                 Haptics.error()
                 await MainActor.run {
                     errorMessage = "Failed to log tummy time: \(error.localizedDescription)"
@@ -435,14 +504,22 @@ class HomeViewModel: ObservableObject {
             do {
                 // Store event for potential undo
                 let eventToDelete = event
+                
+                // Remove from Spotlight index
+                SpotlightIndexer.shared.removeEvent(event)
+                
                 try await dataStore.deleteEvent(event)
                 
                 // Register for undo
                 UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
                     guard let self = self else { return }
-                    try await self.dataStore.addEvent(eventToDelete)
-                    await MainActor.run {
-                        self.loadTodayEvents()
+                    Task {
+                        try? await self.dataStore.addEvent(eventToDelete)
+                        await MainActor.run {
+                            Task {
+                                await self.loadTodayEvents()
+                            }
+                        }
                     }
                 }
                 
@@ -454,9 +531,7 @@ class HomeViewModel: ObservableObject {
                     ])
                 }
                 
-                await MainActor.run {
-                    loadTodayEvents()
-                }
+                await loadTodayEvents()
             } catch {
                 errorMessage = "Failed to delete event: \(error.localizedDescription)"
             }
@@ -469,7 +544,7 @@ class HomeViewModel: ObservableObject {
         // Analytics
         await Analytics.shared.log("event_undo", parameters: [:])
         
-        loadTodayEvents()
+        await loadTodayEvents()
     }
     
     /// Duplicate an event with current time
@@ -494,7 +569,7 @@ class HomeViewModel: ObservableObject {
                 
                 try await dataStore.addEvent(duplicatedEvent)
                 Haptics.success()
-                loadTodayEvents()
+                await loadTodayEvents()
                 
                 // Analytics
                 await Analytics.shared.log("event_duplicated", parameters: ["type": event.type.rawValue])
@@ -568,6 +643,162 @@ struct DaySummary {
         } else {
             // No sleep logged
             return "0"
+        }
+    }
+}
+
+// MARK: - Nap Window Calculation
+
+extension HomeViewModel {
+    /// Calculate next nap window based on baby age and last wake time
+    func calculateNextNapWindow() -> NapWindow? {
+        // Get last wake time (end of last sleep or now if no sleep)
+        let lastWakeTime: Date
+        if let lastSleep = lastSleep, let endTime = lastSleep.endTime {
+            lastWakeTime = endTime
+        } else {
+            // If no sleep logged, use current time minus average wake window
+            lastWakeTime = Date()
+        }
+        
+        // Calculate baby age in months
+        let calendar = Calendar.current
+        let ageMonths = calendar.dateComponents([.month], from: baby.dateOfBirth, to: Date()).month ?? 0
+        
+        // Get wake window based on age
+        let wakeWindow = getWakeWindowForAge(ageMonths)
+        
+        // Calculate nap window
+        let windowStart = calendar.date(byAdding: .minute, value: wakeWindow.min, to: lastWakeTime) ?? lastWakeTime
+        let windowEnd = calendar.date(byAdding: .minute, value: wakeWindow.max, to: lastWakeTime) ?? lastWakeTime
+        
+        let now = Date()
+        
+        // Only show if window is in the future or currently active
+        if windowEnd >= now {
+            let reason = "Based on age (\(ageMonths) mo) + last wake"
+            return NapWindow(
+                start: windowStart,
+                end: windowEnd,
+                confidence: lastSleep != nil ? 0.7 : 0.5,
+                reason: reason
+            )
+        }
+        
+        return nil
+    }
+    
+    private func getWakeWindowForAge(_ ageMonths: Int) -> (min: Int, max: Int) {
+        if ageMonths < 3 {
+            return (min: 45, max: 75)
+        } else if ageMonths < 5 {
+            return (min: 75, max: 120)
+        } else if ageMonths < 8 {
+            return (min: 120, max: 150)
+        } else if ageMonths < 11 {
+            return (min: 150, max: 180)
+        } else if ageMonths < 16 {
+            return (min: 180, max: 210)
+        } else {
+            return (min: 210, max: 240)
+        }
+    }
+
+    /// Calculate next feed suggestion based on last feed and baby age
+    func calculateNextFeedSuggestion() -> Date? {
+        guard let lastFeed = lastFeed else { return nil }
+
+        let nextFeedTime = FeedSpacingCalculator.nextFeedTime(lastFeed: lastFeed.startTime, baby: baby)
+        let now = Date()
+
+        // Only show if suggestion is in the future (not overdue)
+        if nextFeedTime > now {
+            return nextFeedTime
+        }
+
+        // If overdue, still show the time but it's "now"
+        return nextFeedTime
+    }
+    
+    // MARK: - Reminders
+    
+    func scheduleReminders() async {
+        guard let settings = try? await dataStore.fetchAppSettings() else { return }
+        
+        let reminderService = ReminderService.shared
+        
+        // Check authorization
+        await reminderService.checkAuthorizationStatus()
+        guard reminderService.authorizationStatus == .authorized else { return }
+        
+        // Feed reminders
+        if settings.feedReminderEnabled, let lastFeed = lastFeed {
+            let hoursSinceLastFeed = Date().timeIntervalSince(lastFeed.startTime) / 3600
+            if hoursSinceLastFeed >= Double(settings.feedReminderHours) {
+                await reminderService.scheduleFeedReminder(
+                    babyId: baby.id,
+                    hoursSinceLastFeed: hoursSinceLastFeed,
+                    reminderHours: settings.feedReminderHours
+                )
+            } else {
+                // Cancel if not yet time
+                reminderService.cancelFeedReminder(babyId: baby.id)
+            }
+        } else if settings.feedReminderEnabled {
+            // No last feed - cancel reminders (user should log one)
+            reminderService.cancelFeedReminder(babyId: baby.id)
+        }
+        
+        // Diaper reminders
+        if settings.diaperReminderEnabled, let lastDiaper = lastDiaper {
+            let hoursSinceLastDiaper = Date().timeIntervalSince(lastDiaper.startTime) / 3600
+            if hoursSinceLastDiaper >= Double(settings.diaperReminderHours) {
+                await reminderService.scheduleDiaperReminder(
+                    babyId: baby.id,
+                    hoursSinceLastDiaper: hoursSinceLastDiaper,
+                    reminderHours: settings.diaperReminderHours
+                )
+            } else {
+                // Cancel if not yet time
+                reminderService.cancelDiaperReminder(babyId: baby.id)
+            }
+        } else if settings.diaperReminderEnabled {
+            // No last diaper - cancel reminders (user should log one)
+            reminderService.cancelDiaperReminder(babyId: baby.id)
+        }
+        
+        // Nap window reminders
+        if settings.napWindowAlertEnabled, let napWindow = nextNapWindow {
+            // Check if reminder should respect quiet hours
+            let reminderAtMidpoint = false // Can be made configurable later
+            await reminderService.scheduleNapWindowReminder(
+                babyId: baby.id,
+                windowStart: napWindow.start,
+                windowEnd: napWindow.end,
+                reminderAtMidpoint: reminderAtMidpoint
+            )
+        } else {
+            reminderService.cancelNapWindowReminders(babyId: baby.id)
+        }
+    }
+
+    private func checkAndShowFirstEventToast(eventType: String) async {
+        do {
+            // Check if this is the first event ever for this baby
+            let allEvents = try await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            if allEvents.count == 1 { // Just added the first event
+                // Analytics: first log created
+                await Analytics.shared.logFirstLogCreated(eventType: eventType, babyId: baby.id.uuidString)
+
+                // Check if user has seen this toast before
+                let hasSeenFirstEventToast = UserDefaults.standard.bool(forKey: "hasSeenFirstEventToast")
+                if !hasSeenFirstEventToast {
+                    UserDefaults.standard.set(true, forKey: "hasSeenFirstEventToast")
+                    showToast("Got it 👍 We'll use this to suggest naps and feeds", "success")
+                }
+            }
+        } catch {
+            print("Error checking for first event toast: \(error)")
         }
     }
 }

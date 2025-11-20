@@ -60,7 +60,7 @@ struct DiaperFormView: View {
                     }
                 }
             }
-            .navigationTitle(viewModel.editingEvent != nil ? "Edit Diaper" : "Log Diaper")
+            .navigationTitle(viewModel.editingEvent != nil ? "Edit Diaper" : "New Diaper")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

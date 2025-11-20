@@ -153,7 +153,7 @@ For local testing, consider mocking AI responses or using your own API keys.
 ### Issue: Type errors in Cursor
 ```bash
 # Regenerate types from Supabase
-npx supabase gen types typescript --project-id tzvkwhznmkzfpenzxbfz > src/integrations/supabase/types.ts
+npx supabase gen types typescript --project-id your-project-id > src/integrations/supabase/types.ts
 ```
 
 ### Issue: Hot-reload not working in iOS

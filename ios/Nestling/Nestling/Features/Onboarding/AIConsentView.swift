@@ -15,7 +15,7 @@ struct AIConsentView: View {
                         .font(.headline)
                         .foregroundColor(.foreground)
                     
-                    Text("Enable AI features to get smart predictions for feeds and naps. Your data is used only to improve predictions and is never shared with third parties.")
+                    Text("Turn on Smart Predictions to get suggested nap windows and feeding times based on your baby's patterns. Your data is used only to improve these suggestions and is never sold.")
                         .font(.body)
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
@@ -23,9 +23,9 @@ struct AIConsentView: View {
                 }
                 .padding(.top, .spacing2XL)
                 
-                CardView {
+                    CardView {
                     VStack(alignment: .leading, spacing: .spacingMD) {
-                        Toggle("Enable AI Data Sharing", isOn: $coordinator.aiDataSharingEnabled)
+                        Toggle("Enable Smart Predictions", isOn: $coordinator.aiDataSharingEnabled)
                         
                         if coordinator.aiDataSharingEnabled {
                             Text("AI features will help predict nap windows and feeding times based on your baby's patterns.")
@@ -36,12 +36,18 @@ struct AIConsentView: View {
                                 .font(.caption)
                                 .foregroundColor(.mutedForeground)
                         }
+                        
+                        Text("You can change this anytime in Settings → AI & Smart Features.")
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                            .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal, .spacingMD)
                 
                 MedicalDisclaimer(variant: .ai)
                     .padding(.horizontal, .spacingMD)
+                    .scaleEffect(0.95) // Make disclaimer slightly smaller
                 
                 VStack(spacing: .spacingSM) {
                     PrimaryButton("Continue") {

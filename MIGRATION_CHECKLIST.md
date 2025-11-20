@@ -78,7 +78,7 @@
 ## Edge Functions Configuration
 - [ ] Install Supabase CLI: `brew install supabase/tap/supabase`
 - [ ] Login to Supabase: `supabase login`
-- [ ] Link project: `supabase link --project-ref tzvkwhznmkzfpenzxbfz`
+- [ ] Link project: `supabase link --project-ref your-project-id`
 - [ ] Test local function: `supabase functions serve ai-assistant`
 - [ ] Deploy functions: `supabase functions deploy`
 - [ ] Verify functions work in production

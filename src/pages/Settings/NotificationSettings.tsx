@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronLeft, Users } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { dataService } from '@/services/dataService';
 import { notifyService } from '@/services/notifyService';
@@ -25,6 +26,8 @@ export default function NotificationSettingsPage() {
     quietHoursEnd: '06:00',
   });
   const [hasPermission, setHasPermission] = useState(false);
+  const [caregiverRole, setCaregiverRole] = useState<'primary_daytime' | 'evening' | 'summaries_only'>('primary_daytime');
+  const [withBabyNow, setWithBabyNow] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -241,6 +244,51 @@ export default function NotificationSettingsPage() {
                 value={settings.quietHoursEnd}
                 onChange={(e) => updateSettings({ quietHoursEnd: e.target.value })}
                 className="h-12 text-[17px] rounded-[12px]"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Caregiver Preferences */}
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="text-[17px] font-semibold flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Caregiver Preferences
+            </CardTitle>
+            <CardDescription className="text-[15px]">
+              Customize how you receive notifications when sharing care
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[15px] font-semibold">Your Role</Label>
+              <Select value={caregiverRole} onValueChange={(value: any) => setCaregiverRole(value)}>
+                <SelectTrigger className="h-12 text-[17px] rounded-[12px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary_daytime">Primary daytime caregiver</SelectItem>
+                  <SelectItem value="evening">Evening caregiver</SelectItem>
+                  <SelectItem value="summaries_only">Just want summaries</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                This helps customize when you receive reminders
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-[15px] font-semibold">With baby now</Label>
+                <p className="text-xs text-muted-foreground">
+                  Reminders will be sent to whoever is currently with the baby
+                </p>
+              </div>
+              <Switch
+                checked={withBabyNow}
+                onCheckedChange={setWithBabyNow}
+                className="data-[state=checked]:bg-primary"
               />
             </div>
           </CardContent>

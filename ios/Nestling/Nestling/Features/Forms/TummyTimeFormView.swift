@@ -37,6 +37,16 @@ struct TummyTimeFormView: View {
                                 Button("Stop") {
                                     viewModel.stopTimer()
                                 }
+                                .alert("Discard this session?", isPresented: $viewModel.showDiscardPrompt) {
+                                    Button("Discard", role: .destructive) {
+                                        viewModel.discardTimer()
+                                    }
+                                    Button("Keep", role: .cancel) {
+                                        viewModel.keepTimer()
+                                    }
+                                } message: {
+                                    Text("This session was very short. Would you like to discard it or save it as 1 minute?")
+                                }
                                 .font(isCaregiverMode ? .caregiverBody : .body)
                                 .buttonStyle(.borderedProminent)
                                 .frame(minHeight: isCaregiverMode ? .caregiverMinTouchTarget : nil)
@@ -92,7 +102,7 @@ struct TummyTimeFormView: View {
                     }
                 }
             }
-            .navigationTitle(viewModel.editingEvent != nil ? "Edit Tummy Time" : "Log Tummy Time")
+            .navigationTitle(viewModel.editingEvent != nil ? "Edit Tummy Time" : "New Tummy Time")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

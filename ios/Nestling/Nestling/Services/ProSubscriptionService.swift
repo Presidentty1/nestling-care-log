@@ -22,32 +22,23 @@ import Combine
 /// ```
 
 enum ProFeature: String, CaseIterable {
+    case smartPredictions = "smart_predictions"
+    case cryInsights = "cry_insights"
     case advancedAnalytics = "advanced_analytics"
-    case unlimitedBabies = "unlimited_babies"
-    case caregiverInvites = "caregiver_invites"
-    case prioritySupport = "priority_support"
-    case csvExport = "csv_export"
-    case pdfReports = "pdf_reports"
     
     var displayName: String {
         switch self {
-        case .advancedAnalytics: return "Advanced Analytics"
-        case .unlimitedBabies: return "Unlimited Babies"
-        case .caregiverInvites: return "Family Sharing"
-        case .prioritySupport: return "Priority Support"
-        case .csvExport: return "CSV Export"
-        case .pdfReports: return "PDF Reports"
+        case .smartPredictions: return "Smarter nap & feed predictions"
+        case .cryInsights: return "Cry insights (Beta)"
+        case .advancedAnalytics: return "Advanced analytics"
         }
     }
     
     var description: String {
         switch self {
-        case .advancedAnalytics: return "Detailed charts and insights"
-        case .unlimitedBabies: return "Track multiple babies"
-        case .caregiverInvites: return "Share with family members"
-        case .prioritySupport: return "Faster response times"
-        case .csvExport: return "Export data as CSV"
-        case .pdfReports: return "Generate PDF reports"
+        case .smartPredictions: return "AI-powered predictions for next nap and feed times"
+        case .cryInsights: return "Analyze your baby's cry patterns to identify possible causes"
+        case .advancedAnalytics: return "Detailed charts and insights about your baby's patterns"
         }
     }
 }
@@ -75,10 +66,61 @@ class ProSubscriptionService: ObservableObject {
     private var products: [Product] = []
     private var currentSubscription: Product?
     
+    private var transactionListener: Task<Void, Never>?
+    
     private init() {
         Task {
             await loadProducts()
             await checkSubscriptionStatus()
+            startTransactionListener()
+        }
+    }
+    
+    // MARK: - Transaction Monitoring
+    
+    /// Start monitoring for transaction updates (renewals, cancellations, etc.)
+    private func startTransactionListener() {
+        transactionListener = Task {
+            for await result in Transaction.updates {
+                do {
+                    let transaction = try checkVerified(result)
+                    
+                    // Handle transaction update
+                    await handleTransactionUpdate(transaction)
+                    
+                    // Finish transaction
+                    await transaction.finish()
+                } catch {
+                    print("[Pro] Transaction verification failed: \(error)")
+                }
+            }
+        }
+    }
+    
+    /// Handle transaction update (renewal, cancellation, etc.)
+    private func handleTransactionUpdate(_ transaction: Transaction) async {
+        if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+            if transaction.revocationDate == nil {
+                // Subscription is active
+                subscriptionStatus = .subscribed
+                isProUser = true
+            } else {
+                // Subscription was revoked/cancelled
+                subscriptionStatus = .expired
+                isProUser = false
+            }
+            
+            await checkSubscriptionStatus()
+        }
+    }
+    
+    /// Verify transaction
+    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+        switch result {
+        case .verified(let safe):
+            return safe
+        case .unverified(_, let error):
+            throw error
         }
     }
     
@@ -146,6 +188,15 @@ class ProSubscriptionService: ObservableObject {
                     // Purchase successful
                     await transaction.finish()
                     await checkSubscriptionStatus()
+
+                    // Analytics: subscription started
+                    Task {
+                        await Analytics.shared.logSubscriptionStarted(
+                            productId: productID,
+                            price: product.displayPrice
+                        )
+                    }
+
                     return true
                 case .unverified(_, let error):
                     print("[Pro] Unverified transaction: \(error)")
@@ -182,13 +233,7 @@ class ProSubscriptionService: ObservableObject {
     /// - Parameter feature: Feature to check
     /// - Returns: True if user has access
     func hasAccess(to feature: ProFeature) -> Bool {
-        // Free tier includes basic features
-        let freeFeatures: [ProFeature] = [.csvExport]
-        
-        if freeFeatures.contains(feature) {
-            return true
-        }
-        
+        // All Pro features require subscription (no free tier for these)
         return isProUser
     }
     
@@ -202,6 +247,20 @@ class ProSubscriptionService: ObservableObject {
     /// - Returns: Formatted price string
     func getPrice(for productID: String) -> String? {
         return products.first(where: { $0.id == productID })?.displayPrice
+    }
+    
+    /// Get monthly product
+    func getMonthlyProduct() -> Product? {
+        return products.first(where: { $0.id == monthlyProductID })
+    }
+    
+    /// Get yearly product
+    func getYearlyProduct() -> Product? {
+        return products.first(where: { $0.id == yearlyProductID })
+    }
+    
+    deinit {
+        transactionListener?.cancel()
     }
 }
 

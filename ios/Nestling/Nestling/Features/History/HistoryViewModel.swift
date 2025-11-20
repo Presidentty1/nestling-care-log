@@ -89,7 +89,9 @@ class HistoryViewModel: ObservableObject {
         self.dataStore = dataStore
         self.baby = baby
         print("HistoryViewModel.init: Created for baby \(baby.id)")
-        loadEvents()
+        Task { @MainActor in
+            await loadEvents()
+        }
     }
     
     deinit {
@@ -100,7 +102,7 @@ class HistoryViewModel: ObservableObject {
         }
     }
     
-    func loadEvents() {
+    func loadEvents() async {
         // Cancel any existing load task first
         isLoadingTask?.cancel()
         isLoadingTask = nil
@@ -109,6 +111,14 @@ class HistoryViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { @MainActor in
+                await self.loadEventsInternal()
+            }
+        }
+    }
+    
+    private func loadEventsInternal() async {
         isLoadingTask = Task { @MainActor in
             print("Starting fetchEvents task...")
             let startTime = Date()
@@ -170,19 +180,29 @@ class HistoryViewModel: ObservableObject {
                 self.isLoading = false
                 print("[\(taskID)] Error set, isLoading = false")
             }
+            
+            self.isLoadingTask = nil
         }
+        
+        await isLoadingTask?.value
     }
     
     func selectDate(_ date: Date) {
         selectedDate = date
-        loadEvents()
+        Task {
+            await loadEvents()
+        }
     }
     
-    func deleteEvent(_ event: Event) {
+    func deleteEvent(_ event: Event) async {
         Task {
             do {
                 // Store event for potential undo
                 let eventToDelete = event
+                
+                // Remove from Spotlight index
+                SpotlightIndexer.shared.removeEvent(event)
+                
                 try await dataStore.deleteEvent(event)
                 
                 // Register for undo
@@ -190,12 +210,16 @@ class HistoryViewModel: ObservableObject {
                     guard let self = self else { return }
                     try await self.dataStore.addEvent(eventToDelete)
                     await MainActor.run {
-                        self.loadEvents()
+                        Task {
+                            await self.loadEvents()
+                        }
                     }
                 }
                 
                 await MainActor.run {
-                    loadEvents()
+                    Task {
+                        await loadEvents()
+                    }
                 }
             } catch {
                 errorMessage = "Failed to delete event: \(error.localizedDescription)"
@@ -205,7 +229,7 @@ class HistoryViewModel: ObservableObject {
     
     func undoDeletion() async throws {
         try await UndoManager.shared.undo()
-        loadEvents()
+        await loadEvents()
     }
     
     /// Duplicate an event with current time
@@ -230,7 +254,7 @@ class HistoryViewModel: ObservableObject {
                 
                 try await dataStore.addEvent(duplicatedEvent)
                 Haptics.success()
-                loadEvents()
+                await loadEvents()
             } catch {
                 Haptics.error()
                 errorMessage = "Failed to duplicate event: \(error.localizedDescription)"

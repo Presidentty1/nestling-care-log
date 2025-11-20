@@ -4,8 +4,8 @@ Complete reference for all Supabase Edge Functions and their contracts.
 
 ## Base Configuration
 
-**Supabase Project URL:** `https://tzvkwhznmkzfpenzxbfz.supabase.co`  
-**Functions Base URL:** `https://tzvkwhznmkzfpenzxbfz.supabase.co/functions/v1`
+**Supabase Project URL:** `https://your-project-id.supabase.co`  
+**Functions Base URL:** `https://your-project-id.supabase.co/functions/v1`
 
 All requests require:
 ```typescript
@@ -504,7 +504,7 @@ Use these cURL examples for testing:
 ### Test AI Assistant
 ```bash
 curl -X POST \
-  https://tzvkwhznmkzfpenzxbfz.supabase.co/functions/v1/ai-assistant \
+  https://your-project-id.supabase.co/functions/v1/ai-assistant \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -516,7 +516,7 @@ curl -X POST \
 ### Test Nap Prediction
 ```bash
 curl -X POST \
-  https://tzvkwhznmkzfpenzxbfz.supabase.co/functions/v1/calculate-nap-window \
+  https://your-project-id.supabase.co/functions/v1/calculate-nap-window \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{

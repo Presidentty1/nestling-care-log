@@ -12,6 +12,7 @@ import { PatternInsights } from '@/components/PatternInsights';
 import { MobileNav } from '@/components/MobileNav';
 import { CryRecorder } from '@/components/CryRecorder';
 import { CryAnalysisResult } from '@/components/CryAnalysisResult';
+import { CryInsightsOnboarding } from '@/components/CryInsightsOnboarding';
 import { ArrowLeft, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +27,9 @@ export default function CryInsights() {
   const [activeTab, setActiveTab] = useState('timer');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('has_seen_cry_explainer');
+  });
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
@@ -77,6 +81,10 @@ export default function CryInsights() {
         </Card>
       </div>
     );
+  }
+
+  if (showOnboarding) {
+    return <CryInsightsOnboarding onComplete={() => setShowOnboarding(false)} />;
   }
 
   return (

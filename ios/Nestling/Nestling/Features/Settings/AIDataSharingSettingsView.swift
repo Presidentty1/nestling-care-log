@@ -17,11 +17,16 @@ struct AIDataSharingSettingsView: View {
                         .font(.headline)
                         .foregroundColor(.foreground)
                     
-                    Text("Enable AI features to get smart predictions for feeds and naps. Your data is used only to improve predictions and is never shared with third parties.")
+                    Text("Turn on Smart Predictions to get suggested nap windows and feeding times based on your baby's patterns. Your data is used only to improve these suggestions and is never sold.")
                         .font(.body)
                         .foregroundColor(.mutedForeground)
                     
-                    Toggle("Enable AI Data Sharing", isOn: $aiEnabled)
+                    Text("Data is never sold, never shared with third parties for advertising")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .padding(.bottom, .spacingSM)
+                    
+                    Toggle("Enable Smart Predictions", isOn: $aiEnabled)
                         .padding(.spacingMD)
                         .background(Color.surface)
                         .cornerRadius(.radiusMD)

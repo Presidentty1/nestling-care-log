@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct DataMigrationView: View {
     @EnvironmentObject var environment: AppEnvironment
@@ -69,11 +70,25 @@ struct DataMigrationView: View {
         
         Task {
             do {
+                // TODO: Implement JSON to CoreData migration
+                // This requires manual copying of data from JSONBackedDataStore to CoreDataDataStore
                 let jsonStore = JSONBackedDataStore()
                 let coreDataStore = CoreDataDataStore()
-                let migrationService = DataMigrationService(jsonStore: jsonStore, coreDataStore: coreDataStore)
                 
-                try await migrationService.migrateJSONToCoreData()
+                // Fetch all babies and events from JSON store
+                let babies = try await jsonStore.fetchBabies()
+                migrationStatus = "Found \(babies.count) babies to migrate"
+                
+                // Add each baby and its events to CoreData
+                for baby in babies {
+                    try await coreDataStore.addBaby(baby)
+                    let events = try await jsonStore.fetchEvents(for: baby, from: .distantPast, to: .distantFuture)
+                    for event in events {
+                        try await coreDataStore.addEvent(event)
+                    }
+                }
+                
+                migrationStatus = "Migration completed successfully"
                 
                 await MainActor.run {
                     isMigrating = false

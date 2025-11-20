@@ -62,8 +62,8 @@ struct EventValidator {
             }
         }
         
-        // Validate date range (not too far in future)
-        let maxFutureDate = Date().addingTimeInterval(24 * 3600) // 24 hours in future
+        // Validate date range (prevent future dates - allow up to 5 minutes for clock drift)
+        let maxFutureDate = Date().addingTimeInterval(5 * 60) // 5 minutes in future for clock drift
         if event.startTime > maxFutureDate {
             throw EventValidationError.invalidDateRange
         }

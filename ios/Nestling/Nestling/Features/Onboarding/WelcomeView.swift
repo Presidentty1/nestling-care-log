@@ -16,11 +16,24 @@ struct WelcomeView: View {
                     .font(.headline)
                     .foregroundColor(.foreground)
                 
-                Text("The fastest way to track your baby's daily care. Log feeds, sleep, diapers, and more with just a tap.")
+                Text("Know what happened last and what's coming next.")
                     .font(.body)
                     .foregroundColor(.mutedForeground)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, .spacingMD)
+                
+                Text("Track feeds, sleep, diapers, and more with just a tap.")
+                    .font(.body)
+                    .foregroundColor(.mutedForeground)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, .spacingMD)
+                
+                Text("Takes about a minute. You can skip anytime.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, .spacingMD)
+                    .padding(.top, 4)
             }
             
             Spacer()

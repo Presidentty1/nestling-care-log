@@ -208,7 +208,7 @@ sudo xcodebuild -license accept
 
 ### Type errors in Cursor
 ```bash
-npx supabase gen types typescript --project-id tzvkwhznmkzfpenzxbfz > src/integrations/supabase/types.ts
+npx supabase gen types typescript --project-id your-project-id > src/integrations/supabase/types.ts
 ```
 
 ## Next Steps

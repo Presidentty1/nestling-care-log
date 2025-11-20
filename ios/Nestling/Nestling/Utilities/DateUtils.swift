@@ -30,6 +30,7 @@ struct DateUtils {
     }
     
     /// Format relative time: "2h ago", "5m ago", "Just now"
+    /// For detailed format (e.g., "1h 20m ago"), use formatDetailedRelativeTime
     static func formatRelativeTime(_ date: Date) -> String {
         let now = Date()
         let interval = now.timeIntervalSince(date)
@@ -45,6 +46,28 @@ struct DateUtils {
         } else {
             let days = Int(interval / 86400)
             return "\(days)d ago"
+        }
+    }
+    
+    /// Format detailed relative time for chips: "1h 20m ago", "45m ago", "Just now"
+    static func formatDetailedRelativeTime(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+        
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes)m ago"
+        } else {
+            let totalMinutes = Int(interval / 60)
+            let hours = totalMinutes / 60
+            let minutes = totalMinutes % 60
+            if minutes == 0 {
+                return "\(hours)h ago"
+            } else {
+                return "\(hours)h \(minutes)m ago"
+            }
         }
     }
     
@@ -95,6 +118,34 @@ struct DateUtils {
     /// Check if date is yesterday (in local timezone)
     static func isYesterday(_ date: Date) -> Bool {
         calendar.isDateInYesterday(date)
+    }
+    
+    /// Calculate baby age in weeks from date of birth
+    static func ageInWeeks(dateOfBirth: Date) -> Int {
+        let now = Date()
+        let interval = now.timeIntervalSince(dateOfBirth)
+        return Int(interval / (7 * 24 * 60 * 60))
+    }
+    
+    /// Format baby age display: "2 weeks", "3 months", "1 year"
+    static func formatBabyAge(dateOfBirth: Date) -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .weekOfYear, .day], from: dateOfBirth, to: Date())
+        
+        if let years = components.year, years > 0 {
+            if let months = components.month, months > 0 {
+                return "\(years)y \(months)m"
+            }
+            return years == 1 ? "1 year" : "\(years) years"
+        } else if let months = components.month, months > 0 {
+            return months == 1 ? "1 month" : "\(months) months"
+        } else if let weeks = components.weekOfYear, weeks > 0 {
+            return weeks == 1 ? "1 week" : "\(weeks) weeks"
+        } else if let days = components.day, days > 0 {
+            return days == 1 ? "1 day" : "\(days) days"
+        } else {
+            return "Just born"
+        }
     }
     
     /// Get last N days including today (in local timezone)

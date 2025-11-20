@@ -12,11 +12,14 @@ class TummyTimeFormViewModel: ObservableObject {
     @Published var elapsedSeconds: Int = 0
     @Published var isValid: Bool = false
     @Published var isSaving: Bool = false
+    @Published var showDiscardPrompt: Bool = false
     
     private let dataStore: DataStore
     private let baby: Baby
     let editingEvent: Event?
     var timer: Timer?
+    
+    private let minimumTimerSeconds = 10 // Prompt to discard if stopped before this
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore
@@ -61,13 +64,45 @@ class TummyTimeFormViewModel: ObservableObject {
     }
     
     func stopTimer() {
-        guard isTimerRunning else { return }
-        let endTime = Date()
-        let duration = Int(endTime.timeIntervalSince(timerStartTime ?? Date()) / 60)
-        durationMinutes = String(max(1, duration))
+        guard isTimerRunning, let startTime = timerStartTime else { return }
+        
+        let elapsedSeconds = Int(Date().timeIntervalSince(startTime))
+        
+        // If stopped before minimum duration, prompt to discard
+        if elapsedSeconds < minimumTimerSeconds {
+            // Pause timer but don't save yet
+            isTimerRunning = false
+            timer?.invalidate()
+            timer = nil
+            
+            // Show discard prompt
+            showDiscardPrompt = true
+            return
+        }
+        
+        // Normal stop - save with minimum 1 minute
+        let duration = max(1, elapsedSeconds / 60)
+        durationMinutes = String(duration)
         isTimerRunning = false
         timer?.invalidate()
         timer = nil
+        validate()
+    }
+    
+    func discardTimer() {
+        // Clear timer state without saving
+        isTimerRunning = false
+        timer?.invalidate()
+        timer = nil
+        timerStartTime = nil
+        elapsedSeconds = 0
+        durationMinutes = "5" // Reset to default
+        validate()
+    }
+    
+    func keepTimer() {
+        // Save with minimum 1 minute duration
+        durationMinutes = "1"
         validate()
     }
     

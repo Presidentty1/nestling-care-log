@@ -3,15 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mic, AlertCircle, Settings } from 'lucide-react';
+import { Mic, AlertCircle, Settings, TrendingUp, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { aiPreferencesService } from '@/services/aiPreferencesService';
 import { useAuth } from '@/hooks/useAuth';
+import { usePro } from '@/hooks/usePro';
 import { useNavigate } from 'react-router-dom';
 
 export default function Labs() {
   const { user } = useAuth();
+  const { isPro } = usePro();
   const navigate = useNavigate();
   
   const { data: aiEnabled } = useQuery({
@@ -67,6 +69,49 @@ export default function Labs() {
             </AlertDescription>
           </Alert>
         )}
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Patterns</CardTitle>
+                  {isPro ? (
+                    <Badge variant="secondary">Pro</Badge>
+                  ) : (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Lock className="h-3 w-3" />
+                      Pro
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription>
+                  See sleep, feeding, and diaper patterns over the past week
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-surface rounded-lg p-4 space-y-2">
+              <h4 className="font-medium text-sm">What you'll see</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Average sleep duration and nap timing</li>
+                <li>• Feeding volume and spacing trends</li>
+                <li>• Diaper count patterns</li>
+                <li>• Shareable doctor reports</li>
+              </ul>
+            </div>
+
+            <Button
+              onClick={() => navigate('/patterns')}
+              className="w-full"
+              variant={isPro ? "default" : "outline"}
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              {isPro ? 'View Patterns' : 'Upgrade to View Patterns'}
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

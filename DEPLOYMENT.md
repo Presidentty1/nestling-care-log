@@ -82,7 +82,7 @@ brew install supabase/tap/supabase
 supabase login
 
 # Link project
-supabase link --project-ref tzvkwhznmkzfpenzxbfz
+supabase link --project-ref your-project-id
 
 # Deploy all functions
 supabase functions deploy
@@ -95,9 +95,9 @@ supabase functions deploy ai-assistant
 
 ### Required for All Deployments
 ```env
-VITE_SUPABASE_URL=https://tzvkwhznmkzfpenzxbfz.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-VITE_SUPABASE_PROJECT_ID=tzvkwhznmkzfpenzxbfz
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
+VITE_SUPABASE_PROJECT_ID=your-project-id
 ```
 
 ### Edge Function Secrets (Production)

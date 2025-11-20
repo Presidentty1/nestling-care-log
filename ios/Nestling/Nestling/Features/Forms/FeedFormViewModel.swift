@@ -39,6 +39,8 @@ class FeedFormViewModel: ObservableObject {
                 feedType = .bottle
             } else if subtype == "pumping" {
                 feedType = .pumping
+            } else if subtype == "other" {
+                feedType = .other
             }
         }
         
@@ -93,7 +95,7 @@ class FeedFormViewModel: ObservableObject {
     }
     
     func validate() {
-        if feedType == .breast {
+        if feedType == .breast || feedType == .other {
             isValid = true
         } else {
             let amountValue = Double(amount) ?? 0
@@ -174,12 +176,14 @@ enum FeedSubtype: String, CaseIterable {
     case breast
     case bottle
     case pumping
+    case other
     
     var displayName: String {
         switch self {
         case .breast: return "Breast"
         case .bottle: return "Bottle"
-        case .pumping: return "Pumping"
+        case .pumping: return "Pump"
+        case .other: return "Other"
         }
     }
 }

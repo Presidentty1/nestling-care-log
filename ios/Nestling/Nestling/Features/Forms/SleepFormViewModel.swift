@@ -13,11 +13,14 @@ class SleepFormViewModel: ObservableObject {
     @Published var elapsedSeconds: Int = 0
     @Published var isValid: Bool = false
     @Published var isSaving: Bool = false
+    @Published var showDiscardPrompt: Bool = false
     
     private let dataStore: DataStore
     private let baby: Baby
     let editingEvent: Event?
     var timer: Timer?
+    
+    private let minimumTimerSeconds = 10 // Prompt to discard if stopped before this
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore
@@ -70,7 +73,28 @@ class SleepFormViewModel: ObservableObject {
     }
     
     func stopTimer() {
-        guard isTimerRunning else { return }
+        guard isTimerRunning, let startTime = timerStartTime else { return }
+        
+        let elapsedSeconds = Int(Date().timeIntervalSince(startTime))
+        
+        // If stopped before minimum duration, prompt to discard
+        if elapsedSeconds < minimumTimerSeconds {
+            // Pause timer but don't save yet
+            isTimerRunning = false
+            timer?.invalidate()
+            timer = nil
+            
+            // Stop Live Activity
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.stopSleepActivity()
+            }
+            
+            // Show discard prompt
+            showDiscardPrompt = true
+            return
+        }
+        
+        // Normal stop - save with minimum 1 minute
         endTime = Date()
         isTimerRunning = false
         timer?.invalidate()
@@ -81,6 +105,32 @@ class SleepFormViewModel: ObservableObject {
         if #available(iOS 16.1, *) {
             LiveActivityManager.shared.stopSleepActivity()
         }
+    }
+    
+    func discardTimer() {
+        // Clear timer state without saving
+        isTimerRunning = false
+        timer?.invalidate()
+        timer = nil
+        timerStartTime = nil
+        elapsedSeconds = 0
+        endTime = nil
+        startTime = Date()
+        validate()
+        
+        // Stop Live Activity
+        if #available(iOS 16.1, *) {
+            LiveActivityManager.shared.stopSleepActivity()
+        }
+    }
+    
+    func keepTimer() {
+        // Save with minimum 1 minute duration
+        guard let startTime = timerStartTime else { return }
+        let finalEndTime = startTime.addingTimeInterval(60) // Minimum 1 minute
+        endTime = finalEndTime
+        elapsedSeconds = 60
+        validate()
     }
     
     private func startTimeUpdates() {
@@ -97,10 +147,36 @@ class SleepFormViewModel: ObservableObject {
         }
     }
     
+    @Published var validationError: String?
+    
     func validate() {
+        validationError = nil
+        
+        // Check for future dates
+        let maxFutureDate = Date().addingTimeInterval(5 * 60) // 5 minutes for clock drift
+        if startTime > maxFutureDate {
+            validationError = "Start time cannot be in the future"
+            isValid = false
+            return
+        }
+        
+        if let endTime = endTime, endTime > maxFutureDate {
+            validationError = "End time cannot be in the future"
+            isValid = false
+            return
+        }
+        
+        // Validate time relationships
         if isTimerMode {
             isValid = isTimerRunning && endTime != nil
         } else {
+            if let endTime = endTime {
+                if endTime <= startTime {
+                    validationError = "End time must be after start time"
+                    isValid = false
+                    return
+                }
+            }
             isValid = endTime != nil && endTime! > startTime
         }
     }
@@ -125,6 +201,29 @@ class SleepFormViewModel: ObservableObject {
         
         // Domain-level validation
         try EventValidator.validateSleep(startTime: startTime, endTime: finalEndTime)
+        
+        // If starting a new sleep (not editing), auto-end any existing active sleep
+        if editingEvent == nil {
+            if let activeSleep = try? await dataStore.getActiveSleep(for: baby) {
+                // Auto-end the previous active sleep when new one starts
+                let autoEndTime = startTime // End previous sleep when new one starts
+                let previousEvent = Event(
+                    id: activeSleep.id,
+                    babyId: activeSleep.babyId,
+                    type: activeSleep.type,
+                    subtype: activeSleep.subtype,
+                    startTime: activeSleep.startTime,
+                    endTime: autoEndTime,
+                    amount: Double(DateUtils.durationMinutes(from: activeSleep.startTime, to: autoEndTime)),
+                    unit: "min",
+                    side: activeSleep.side,
+                    note: activeSleep.note,
+                    createdAt: activeSleep.createdAt,
+                    updatedAt: Date()
+                )
+                try await dataStore.updateEvent(previousEvent)
+            }
+        }
         
         let eventData = Event(
             id: editingEvent?.id ?? IDGenerator.generate(),

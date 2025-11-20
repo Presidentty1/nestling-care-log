@@ -21,11 +21,45 @@ struct EmptyStateView: View {
         self.action = action
     }
     
+    @State private var isAnimating = false
+    
     var body: some View {
         VStack(spacing: .spacingMD) {
-            Image(systemName: icon)
-                .font(.system(size: 48))
-                .foregroundColor(.mutedForeground)
+            ZStack {
+                // Gradient background circle
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.eventFeed.opacity(0.1),
+                                Color.eventSleep.opacity(0.1)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 20)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 48))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [
+                                Color.eventFeed,
+                                Color.eventSleep
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .symbolEffect(.bounce, value: isAnimating)
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    isAnimating = true
+                }
+            }
             
             Text(title)
                 .font(.headline)

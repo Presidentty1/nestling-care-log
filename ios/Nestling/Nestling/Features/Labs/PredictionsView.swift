@@ -17,10 +17,10 @@ struct PredictionsView: View {
                                 .accessibilityLabel("Medical disclaimer: This information is not medical advice. Consult your healthcare provider for medical decisions.")
                             
                             if !viewModel.aiEnabled {
-                                InfoBanner(
-                                    title: "AI Features Disabled",
-                                    message: "Enable AI Data Sharing in Settings to use predictions",
-                                    variant: .warning,
+                                EmptyStateView(
+                                    icon: "brain.head.profile",
+                                    title: "Turn on Smart Predictions",
+                                    message: "Turn on Smart Predictions to get suggested nap and feed times based on your baby's logs.",
                                     actionTitle: "Go to Settings",
                                     action: {
                                         dismiss()

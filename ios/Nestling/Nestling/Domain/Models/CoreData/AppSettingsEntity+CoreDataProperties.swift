@@ -19,6 +19,10 @@ extension AppSettingsEntity {
     @NSManaged public var preferredUnit: String?
     @NSManaged public var timeFormat24Hour: Bool
     @NSManaged public var preferMediumSheet: Bool
+    @NSManaged public var spotlightIndexingEnabled: Bool
+    @NSManaged public var cryInsightsWeeklyCount: Int16
+    @NSManaged public var cryInsightsWeekStart: Date?
+    @NSManaged public var remindersPaused: Bool
     @NSManaged public var version: Int16
 }
 

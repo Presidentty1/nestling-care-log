@@ -20,20 +20,20 @@ struct PreferencesView: View {
                 
                 Form {
                     Section("Measurement Units") {
-                        Picker("Units", selection: $coordinator.preferredUnit) {
+                        Picker("Feeding units", selection: $coordinator.preferredUnit) {
                             Text("Milliliters (ml)").tag("ml")
                             Text("Ounces (oz)").tag("oz")
                         }
                     }
                     
                     Section("Time Format") {
-                        Picker("Time Format", selection: $coordinator.timeFormat24Hour) {
+                        Picker("Time format", selection: $coordinator.timeFormat24Hour) {
                             Text("12-hour (3:00 PM)").tag(false)
                             Text("24-hour (15:00)").tag(true)
                         }
                     }
                 }
-                .frame(height: 200)
+                .frame(height: 260)
                 
                 VStack(spacing: .spacingSM) {
                     PrimaryButton("Continue") {

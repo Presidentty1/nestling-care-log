@@ -7,6 +7,7 @@ import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import { SummaryChips } from '@/components/today/SummaryChips';
+import { TodayPlanStrip } from '@/components/today/TodayPlanStrip';
 import { FloatingActionButtonRadial } from '@/components/FloatingActionButtonRadial';
 import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -58,6 +59,10 @@ export default function Home() {
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
+  const [hasShownFirstLogCelebration, setHasShownFirstLogCelebration] = useState(() => {
+    const stored = localStorage.getItem(`first_log_celebration_${activeBabyId}`);
+    return stored !== null ? JSON.parse(stored) : false;
+  });
   const [streakDays, setStreakDays] = useState(0);
   const [showGuestBanner, setShowGuestBanner] = useState(false);
   const [showAffirmation, setShowAffirmation] = useState(false);
@@ -115,7 +120,24 @@ export default function Home() {
           triggerConfetti();
           setHasShownConfetti(true);
         }
-        
+
+        // Show first-log celebration after 2-3 logs with feeds and naps
+        if (!hasShownFirstLogCelebration && activeBabyId) {
+          const hasFeeds = events.some(e => e.type === 'feed');
+          const hasNaps = events.some(e => e.type === 'sleep');
+          const totalLogs = events.length;
+
+          if (totalLogs >= 2 && hasFeeds && hasNaps) {
+            setTimeout(() => {
+              toast.success('Great! With feeds + naps logged, we can now predict your next nap. Keep logging for a more accurate plan.', {
+                duration: 6000,
+              });
+              setHasShownFirstLogCelebration(true);
+              localStorage.setItem(`first_log_celebration_${activeBabyId}`, 'true');
+            }, 1000); // Small delay to ensure UI has updated
+          }
+        }
+
         // Increment guest event count and update streak
         if (guestMode) {
           guestModeService.incrementGuestEventCount().then(count => {
@@ -175,7 +197,7 @@ export default function Home() {
       }
     });
     return unsubscribe;
-  }, [activeBabyId, events.length, hasShownConfetti, modalState.editingId]);
+  }, [activeBabyId, events.length, hasShownConfetti, hasShownFirstLogCelebration, modalState.editingId]);
 
   const loadGuestMode = async () => {
     const guestBaby = await guestModeService.getGuestBaby();
@@ -443,6 +465,10 @@ export default function Home() {
         )}
 
         {guestMode && showGuestBanner && <GuestModeBanner />}
+
+        {(summary || napWindow) && (
+          <TodayPlanStrip events={events} napWindow={napWindow} summary={summary} />
+        )}
 
         {summary && (
           <SummaryChips summary={summary} />

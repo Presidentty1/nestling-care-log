@@ -13,6 +13,10 @@
         <attribute name="onboardingCompleted" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="preferredUnit" optional="YES" attributeType="String"/>
         <attribute name="timeFormat24Hour" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="preferMediumSheet" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="spotlightIndexingEnabled" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="cryInsightsWeeklyCount" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="cryInsightsWeekStart" optional="YES" attributeType="Date"/>
         <attribute name="version" optional="YES" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
     </entity>
     <entity name="BabyEntity" representedClassName="BabyEntity" syncable="YES" codeGenerationType="manual">

@@ -1,58 +1,66 @@
 import Foundation
+// TODO: Uncomment when Supabase Swift SDK is added via SPM
+// import Supabase
 
-/// Supabase client wrapper for iOS.
-/// 
-/// This is a placeholder that shows how to integrate Supabase Swift SDK.
-/// 
-/// To use:
-/// 1. Add Supabase Swift SDK via Swift Package Manager:
+/// Supabase client provider singleton.
+///
+/// Handles initialization and configuration of the Supabase Swift SDK.
+/// Loads credentials from environment variables or build configuration.
+///
+/// Setup Steps:
+/// 1. Add Supabase Swift SDK via Swift Package Manager in Xcode:
 ///    - File → Add Package Dependencies
 ///    - URL: https://github.com/supabase/supabase-swift
 ///    - Version: Latest
+///    - Add to Nestling target
 ///
-/// 2. Configure in AppEnvironment or AppDelegate:
-/// ```swift
-/// let supabaseURL = "https://your-project.supabase.co"
-/// let supabaseKey = "your-anon-key"
-/// SupabaseClient.shared.configure(url: supabaseURL, key: supabaseKey)
-/// ```
+/// 2. Uncomment the `import Supabase` line above
+/// 3. Uncomment the client initialization code below
 ///
-/// 3. Use in RemoteDataStore:
+/// Usage:
 /// ```swift
-/// let remoteStore = RemoteDataStore(supabaseClient: SupabaseClient.shared.client)
+/// let provider = SupabaseClientProvider.shared
+/// let client = provider.client
 /// ```
-class SupabaseClient {
-    static let shared = SupabaseClient()
+final class SupabaseClientProvider {
+    static let shared = SupabaseClientProvider()
+    
+    // TODO: Uncomment when Supabase Swift SDK is added
+    // let client: SupabaseClient
     
     private var configured = false
-    private var url: String?
-    private var anonKey: String?
     
-    // TODO: Replace with actual SupabaseClient when SDK is added
-    // var client: SupabaseClient { ... }
-    
-    private init() {}
-    
-    /// Configure Supabase client with project URL and anonymous key
-    /// - Parameters:
-    ///   - url: Your Supabase project URL (e.g., "https://xxx.supabase.co")
-    ///   - anonKey: Your Supabase anonymous key
-    func configure(url: String, anonKey: String) {
-        self.url = url
-        self.anonKey = anonKey
-        self.configured = true
+    private init() {
+        // Load credentials from Secrets
+        let url = Secrets.supabaseURL
+        let anonKey = Secrets.supabaseAnonKey
         
-        // TODO: Initialize Supabase client
-        // Example (when SDK is added):
+        guard !url.isEmpty, !anonKey.isEmpty else {
+            print("⚠️ WARNING: Supabase credentials not configured in Secrets.swift")
+            return
+        }
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // Initialize Supabase client
         // self.client = SupabaseClient(
         //     supabaseURL: URL(string: url)!,
         //     supabaseKey: anonKey
         // )
+        
+        self.configured = true
+        print("✅ SupabaseClientProvider initialized with URL: \(url)")
     }
     
-    /// Check if Supabase is configured
+    /// Check if Supabase is configured and ready to use
     var isConfigured: Bool {
-        configured && url != nil && anonKey != nil
+        configured && !Secrets.supabaseURL.isEmpty && !Secrets.supabaseAnonKey.isEmpty
+    }
+    
+    /// Legacy configure method (deprecated - now uses Secrets.swift automatically)
+    @available(*, deprecated, message: "Credentials are now loaded automatically from Secrets.swift")
+    func configure(url: String, anonKey: String) {
+        // This method is kept for backward compatibility but does nothing
+        // Credentials are loaded from Secrets.swift in init()
     }
     
     /// Get current user session
@@ -62,8 +70,7 @@ class SupabaseClient {
             throw SupabaseError.notConfigured
         }
         
-        // TODO: Implement with Supabase SDK
-        // Example:
+        // TODO: Uncomment when Supabase Swift SDK is added
         // return try await client.auth.session
         
         return nil
@@ -75,8 +82,7 @@ class SupabaseClient {
             throw SupabaseError.notConfigured
         }
         
-        // TODO: Implement with Supabase SDK
-        // Example:
+        // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.auth.signIn(email: email, password: password)
     }
     
@@ -86,8 +92,7 @@ class SupabaseClient {
             throw SupabaseError.notConfigured
         }
         
-        // TODO: Implement with Supabase SDK
-        // Example:
+        // TODO: Uncomment when Supabase Swift SDK is added
         // let response = try await client.auth.signUp(
         //     email: email,
         //     password: password,
@@ -101,11 +106,13 @@ class SupabaseClient {
             throw SupabaseError.notConfigured
         }
         
-        // TODO: Implement with Supabase SDK
-        // Example:
+        // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.auth.signOut()
     }
 }
+
+// Backward compatibility alias
+typealias SupabaseClient = SupabaseClientProvider
 
 enum SupabaseError: LocalizedError {
     case notConfigured

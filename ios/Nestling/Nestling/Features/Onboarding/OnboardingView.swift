@@ -14,21 +14,29 @@ struct OnboardingView: View {
         ZStack {
             Color.background.ignoresSafeArea()
             
-            Group {
-                switch coordinator.currentStep {
-                case .welcome:
-                    WelcomeView(coordinator: coordinator)
-                case .babySetup:
-                    BabySetupView(coordinator: coordinator)
-                case .preferences:
-                    PreferencesView(coordinator: coordinator)
-                case .aiConsent:
-                    AIConsentView(coordinator: coordinator)
-                case .notificationsIntro:
-                    NotificationsIntroView(coordinator: coordinator)
+            VStack(spacing: 0) {
+                // Progress indicator
+                OnboardingProgressIndicator(currentStep: coordinator.currentStep)
+                    .padding(.top, .spacingMD)
+                
+                Group {
+                    switch coordinator.currentStep {
+                    case .welcome:
+                        WelcomeView(coordinator: coordinator)
+                    case .babySetup:
+                        BabySetupView(coordinator: coordinator)
+                    case .preferences:
+                        PreferencesView(coordinator: coordinator)
+                    case .aiConsent:
+                        AIConsentView(coordinator: coordinator)
+                    case .notificationsIntro:
+                        NotificationsIntroView(coordinator: coordinator)
+                    case .proTrial:
+                        ProTrialView(coordinator: coordinator)
+                    }
                 }
+                .transition(.slide)
             }
-            .transition(.slide)
         }
         .onChange(of: coordinator.isCompleted) { _, completed in
             if completed {

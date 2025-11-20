@@ -310,6 +310,21 @@ export default function ManageCaregivers() {
           </Button>
         </div>
 
+        {/* Caregiver Explanation */}
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <UserPlus className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-medium text-primary mb-1">Share with your team</h3>
+                <p className="text-sm text-muted-foreground">
+                  Invite partners, family, or nannies. One Pro subscription covers everyone in your baby's care team.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Current Caregivers */}
         <Card className="shadow-soft">
           <CardHeader>

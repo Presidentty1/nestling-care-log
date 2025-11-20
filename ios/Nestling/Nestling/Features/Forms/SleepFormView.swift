@@ -48,6 +48,16 @@ struct SleepFormView: View {
                                 Button("Stop Sleep") {
                                     viewModel.stopTimer()
                                 }
+                                .alert("Discard this session?", isPresented: $viewModel.showDiscardPrompt) {
+                                    Button("Discard", role: .destructive) {
+                                        viewModel.discardTimer()
+                                    }
+                                    Button("Keep", role: .cancel) {
+                                        viewModel.keepTimer()
+                                    }
+                                } message: {
+                                    Text("This session was very short. Would you like to discard it or save it as 1 minute?")
+                                }
                                 .font(isCaregiverMode ? .caregiverBody : .body)
                                 .buttonStyle(.borderedProminent)
                                 .frame(minHeight: isCaregiverMode ? .caregiverMinTouchTarget : nil)
@@ -66,15 +76,24 @@ struct SleepFormView: View {
                 } else {
                     if !isCaregiverMode || showAdvancedOptions {
                         Section("Times") {
-                            DatePicker("Start Time", selection: $viewModel.startTime, displayedComponents: [.date, .hourAndMinute])
+                            DatePicker("Start Time", selection: $viewModel.startTime, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
                                 .font(isCaregiverMode ? .caregiverBody : .body)
+                                .onChange(of: viewModel.startTime) { _, _ in
+                                    viewModel.validate()
+                                }
                             DatePicker("End Time", selection: Binding(
                                 get: { viewModel.endTime ?? Date() },
                                 set: { viewModel.endTime = $0 }
-                            ), displayedComponents: [.date, .hourAndMinute])
+                            ), in: viewModel.startTime..., displayedComponents: [.date, .hourAndMinute])
                             .font(isCaregiverMode ? .caregiverBody : .body)
                             .onChange(of: viewModel.endTime) { _, _ in
                                 viewModel.validate()
+                            }
+                            
+                            if let error = viewModel.validationError {
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundColor(.destructive)
                             }
                         }
                     }
@@ -98,7 +117,7 @@ struct SleepFormView: View {
                     }
                 }
             }
-            .navigationTitle(viewModel.editingEvent != nil ? "Edit Sleep" : "Log Sleep")
+            .navigationTitle(viewModel.editingEvent != nil ? "Edit Sleep" : "New Sleep")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

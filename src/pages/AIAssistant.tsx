@@ -112,6 +112,14 @@ export default function AIAssistant() {
       </div>
 
       <div className="container mx-auto p-4 max-w-3xl">
+        {/* Trust messaging banner */}
+        <Alert className="mb-4 border-primary/20 bg-primary/5">
+          <AlertCircle className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-primary font-medium">
+            General guidance only; not a replacement for your pediatrician
+          </AlertDescription>
+        </Alert>
+
         <MedicalDisclaimer variant="ai" className="sticky top-0 z-10 bg-background/95 backdrop-blur" />
 
         {aiEnabled === false && (

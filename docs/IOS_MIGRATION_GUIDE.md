@@ -77,8 +77,8 @@ class SupabaseClient: ObservableObject {
     
     private init() {
         self.client = SupabaseClient(
-            supabaseURL: URL(string: "https://tzvkwhznmkzfpenzxbfz.supabase.co")!,
-            supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6dmt3aHpubWt6ZnBlbnp4YmZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNjc5MjIsImV4cCI6MjA3ODY0MzkyMn0.OihzLKsB663MqotEGX9xxr6lNBCMjKDjcxTLwnDdTMA"
+            supabaseURL: URL(string: "https://your-project-id.supabase.co")!,
+            supabaseKey: "your-supabase-anon-key"
         )
     }
 }

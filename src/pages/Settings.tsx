@@ -170,25 +170,48 @@ export default function Settings() {
             </CardTitle>
             <CardDescription>Unlock advanced features</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <ul className="space-y-2">
-              <li className="flex items-start gap-2 text-sm">
-                <span className="text-primary">✓</span>
-                <span>AI nap predictions with wake window analysis</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <span className="text-primary">✓</span>
-                <span>Advanced reminders & notifications</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <span className="text-primary">✓</span>
-                <span>CSV export to share with pediatrician</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm">
-                <span className="text-primary">✓</span>
-                <span>Priority support</span>
-              </li>
-            </ul>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-primary rounded-full"></span>
+                  Know what to do next
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Personalized nap & feed predictions tuned to your baby's unique patterns
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-primary rounded-full"></span>
+                  Understand the bigger picture
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  See sleep, feeding, and diaper patterns over the past week with insights
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-primary rounded-full"></span>
+                  Keep caregivers in sync
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  One subscription covers all caregivers. Share patterns and doctor reports
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-primary rounded-full"></span>
+                  Extra help on tough days
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Cry Insights (Beta) and AI guidance when you need support
+                </p>
+              </div>
+            </div>
             <div className="pt-2">
               <p className="text-sm text-muted-foreground mb-3">
                 <strong className="text-primary">$39.99/yr</strong> (founder launch special)

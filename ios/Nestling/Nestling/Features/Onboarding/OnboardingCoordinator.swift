@@ -7,6 +7,7 @@ enum OnboardingStep {
     case preferences
     case aiConsent
     case notificationsIntro
+    case proTrial
 }
 
 @MainActor
@@ -39,12 +40,14 @@ class OnboardingCoordinator: ObservableObject {
         case .aiConsent:
             currentStep = .notificationsIntro
         case .notificationsIntro:
+            currentStep = .proTrial
+        case .proTrial:
             completeOnboarding()
         }
     }
     
     func skip() {
-        if currentStep == .aiConsent || currentStep == .notificationsIntro {
+        if currentStep == .aiConsent || currentStep == .notificationsIntro || currentStep == .proTrial {
             completeOnboarding()
         } else {
             next()
@@ -63,7 +66,10 @@ class OnboardingCoordinator: ObservableObject {
                     timezone: TimeZone.current.identifier
                 )
                 try await dataStore.addBaby(baby)
-                
+
+                // Analytics: onboarding completed
+                await Analytics.shared.logOnboardingCompleted(babyId: baby.id.uuidString)
+
                 // Save preferences
                 var settings = try await dataStore.fetchAppSettings()
                 settings.preferredUnit = preferredUnit

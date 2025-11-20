@@ -75,7 +75,7 @@ export default function OnboardingSimple() {
       
       const baby = await dataService.addBaby(babyData);
       setActiveBabyId(baby.id);
-      toast.success(`Welcome, ${baby.name}!`);
+      toast.success(`Welcome, ${baby.name}! Log what you can, when you can. We'll work with whatever you provide.`);
       navigate('/home');
     } catch (error) {
       console.error('Failed to create baby:', error);

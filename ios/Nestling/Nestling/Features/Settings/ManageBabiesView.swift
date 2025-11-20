@@ -6,6 +6,7 @@ struct ManageBabiesView: View {
     @State private var showAddBaby = false
     @State private var editingBaby: Baby?
     @State private var showEditBaby = false
+    @State private var showProUpgrade = false
     
     var body: some View {
         NavigationStack {
@@ -58,7 +59,13 @@ struct ManageBabiesView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button(action: {
-                            showAddBaby = true
+                            // Check if user can add another baby (free tier: 1 baby max)
+                            if BabyLimitGate.canAddBaby(currentBabyCount: environment.babies.count) {
+                                showAddBaby = true
+                            } else {
+                                // Show paywall
+                                showProUpgrade = true
+                            }
                         }) {
                             Image(systemName: "plus")
                                 .fontWeight(.semibold)
@@ -69,6 +76,9 @@ struct ManageBabiesView: View {
                         }
                     }
                 }
+            }
+            .sheet(isPresented: $showProUpgrade) {
+                ProSubscriptionView()
             }
             .overlay(alignment: .bottom) {
                 if environment.babies.isEmpty {
@@ -88,7 +98,13 @@ struct ManageBabiesView: View {
                             .padding(.horizontal, .spacingMD)
                         
                         PrimaryButton("Add Baby", icon: "plus") {
-                            showAddBaby = true
+                            // Check if user can add another baby (free tier: 1 baby max)
+                            if BabyLimitGate.canAddBaby(currentBabyCount: environment.babies.count) {
+                                showAddBaby = true
+                            } else {
+                                // Show paywall
+                                showProUpgrade = true
+                            }
                         }
                         .padding(.horizontal, .spacingMD)
                     }

@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mic, Square, Loader2, AlertCircle } from 'lucide-react';
+import { Mic, Square, Loader2, AlertCircle, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { usePro } from '@/hooks/usePro';
+import { trialService } from '@/services/trialService';
 
 interface CryRecorderProps {
   babyId: string;
@@ -13,13 +15,23 @@ interface CryRecorderProps {
 }
 
 export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
+  const { isPro } = usePro();
   const [isRecording, setIsRecording] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [freeUsesLeft, setFreeUsesLeft] = useState<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const timerRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (!isPro) {
+      trialService.getFreeCryInsightsUsed().then(used => {
+        setFreeUsesLeft(3 - used);
+      });
+    }
+  }, [isPro]);
 
   useEffect(() => {
     return () => {
@@ -29,6 +41,15 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
   }, []);
 
   const startRecording = async () => {
+    // Check Pro status and free usage
+    if (!isPro) {
+      const hasFreeLeft = await trialService.hasFreeCryInsightsLeft();
+      if (!hasFreeLeft) {
+        toast.error('Free Cry Insights used up. Upgrade to Pro for unlimited access.');
+        return;
+      }
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
@@ -111,6 +132,12 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
             return;
           }
 
+          // Increment free usage counter for non-Pro users
+          if (!isPro) {
+            await trialService.incrementFreeCryInsights();
+            setFreeUsesLeft(prev => prev ? prev - 1 : null);
+          }
+
           onAnalysisComplete(data);
           toast.success('Analysis complete!');
         } catch (error) {
@@ -139,6 +166,22 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
           Record 10-20 seconds of your baby crying for AI analysis
         </AlertDescription>
       </Alert>
+
+      {!isPro && freeUsesLeft !== null && (
+        <Alert className={freeUsesLeft > 0 ? "border-primary/20 bg-primary/5" : "border-destructive/20 bg-destructive/5"}>
+          {freeUsesLeft > 0 ? (
+            <Mic className="h-4 w-4 text-primary" />
+          ) : (
+            <Lock className="h-4 w-4 text-destructive" />
+          )}
+          <AlertDescription className={freeUsesLeft > 0 ? "text-primary" : "text-destructive"}>
+            {freeUsesLeft > 0
+              ? `${freeUsesLeft} free Cry Insight${freeUsesLeft !== 1 ? 's' : ''} remaining`
+              : 'Free Cry Insights used up. Upgrade to Pro for unlimited access.'
+            }
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex flex-col items-center gap-4">
         {isRecording && (

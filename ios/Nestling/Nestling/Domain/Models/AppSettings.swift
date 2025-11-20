@@ -15,7 +15,30 @@ struct AppSettings: Codable, Equatable {
     var timeFormat24Hour: Bool
     var preferMediumSheet: Bool // Prefer medium detent by default
     var spotlightIndexingEnabled: Bool // Index events in Spotlight
-    
+    var cryInsightsWeeklyCount: Int // Number of Cry Insights recordings this week
+    var cryInsightsWeekStart: Date? // Start date of current week for quota tracking
+    var remindersPaused: Bool // Whether all reminders are temporarily paused
+
+    enum CodingKeys: String, CodingKey {
+        case aiDataSharingEnabled
+        case feedReminderEnabled
+        case feedReminderHours
+        case napWindowAlertEnabled
+        case diaperReminderEnabled
+        case diaperReminderHours
+        case quietHoursStart
+        case quietHoursEnd
+        case cryInsightsNotifyMe
+        case onboardingCompleted
+        case preferredUnit
+        case timeFormat24Hour
+        case preferMediumSheet
+        case spotlightIndexingEnabled
+        case cryInsightsWeeklyCount
+        case cryInsightsWeekStart
+        case remindersPaused
+    }
+
     init(
         aiDataSharingEnabled: Bool = true,
         feedReminderEnabled: Bool = true,
@@ -30,7 +53,10 @@ struct AppSettings: Codable, Equatable {
         preferredUnit: String = "ml",
         timeFormat24Hour: Bool = false,
         preferMediumSheet: Bool = true,
-        spotlightIndexingEnabled: Bool = true
+        spotlightIndexingEnabled: Bool = true,
+        cryInsightsWeeklyCount: Int = 0,
+        cryInsightsWeekStart: Date? = nil,
+        remindersPaused: Bool = false
     ) {
         self.aiDataSharingEnabled = aiDataSharingEnabled
         self.feedReminderEnabled = feedReminderEnabled
@@ -46,12 +72,14 @@ struct AppSettings: Codable, Equatable {
         self.timeFormat24Hour = timeFormat24Hour
         self.preferMediumSheet = preferMediumSheet
         self.spotlightIndexingEnabled = spotlightIndexingEnabled
+        self.cryInsightsWeeklyCount = cryInsightsWeeklyCount
+        self.cryInsightsWeekStart = cryInsightsWeekStart
+        self.remindersPaused = remindersPaused
     }
-    
+
     // MARK: - Default Settings
-    
+
     static func `default`() -> AppSettings {
         AppSettings()
     }
 }
-

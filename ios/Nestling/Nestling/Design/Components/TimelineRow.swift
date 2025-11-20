@@ -16,11 +16,23 @@ struct TimelineRow: View {
     
     var body: some View {
         HStack(spacing: .spacingMD) {
-            // Icon
-            Image(systemName: event.type.iconName)
-                .foregroundColor(colorForEventType(event.type))
-                .frame(width: 32, height: 32)
-                .accessibilityHidden(true)
+            // Color indicator bar (for colorblind accessibility)
+            Rectangle()
+                .fill(colorForEventType(event.type))
+                .frame(width: 3)
+                .opacity(0.6)
+            
+            // Icon with background circle
+            ZStack {
+                Circle()
+                    .fill(colorForEventType(event.type).opacity(0.1))
+                    .frame(width: 36, height: 36)
+                
+                Image(systemName: event.type.iconName)
+                    .foregroundColor(colorForEventType(event.type))
+                    .font(.system(size: 16, weight: .medium))
+            }
+            .accessibilityHidden(true)
             
             // Content
             VStack(alignment: .leading, spacing: 4) {
@@ -82,8 +94,22 @@ struct TimelineRow: View {
             .accessibilityLabel("More options for \(event.type.displayName)")
         }
         .padding(.spacingMD)
-        .background(Color.surface)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.surface,
+                    Color.surface.opacity(0.98)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
         .cornerRadius(.radiusMD)
+        .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusMD)
+                .stroke(Color.separator, lineWidth: 0.5)
+        )
         .contextMenu {
             Button(action: {
                 Haptics.medium()
@@ -171,11 +197,14 @@ struct TimelineRow: View {
             return event.subtype?.capitalized ?? ""
         case .diaper:
             return event.subtype?.capitalized ?? ""
-        case .sleep:
-            if let duration = event.durationMinutes {
-                return "\(duration) min"
-            }
-            return event.subtype ?? ""
+            case .sleep:
+                if let duration = event.durationMinutes {
+                    if duration < 1 {
+                        return "Just now" // Don't show "0 min" for instant sleeps
+                    }
+                    return "\(duration) min"
+                }
+                return event.subtype ?? ""
         case .tummyTime:
             if let duration = event.durationMinutes {
                 return "\(duration) min"
@@ -191,11 +220,44 @@ struct TimelineRow: View {
     }
     
     private var accessibilityLabel: String {
-        var label = "\(event.type.displayName) event"
-        if let details = formatEventDetails(event) as String? {
-            label += ", \(details)"
+        var label = "\(event.type.displayName)"
+        
+        // Add type-specific details
+        switch event.type {
+        case .feed:
+            if let amount = event.amount, let unit = event.unit {
+                let displayAmount: Int
+                let displayUnit: String
+                if unit == "oz" {
+                    displayAmount = Int(amount / 30.0)
+                    displayUnit = "ounces"
+                } else {
+                    displayAmount = Int(amount)
+                    displayUnit = "milliliters"
+                }
+                label += ", \(displayAmount) \(displayUnit)"
+            }
+        case .diaper:
+            if let subtype = event.subtype {
+                label += ", \(subtype)"
+            }
+        case .sleep:
+            if let duration = event.durationMinutes {
+                if duration < 1 {
+                    label += ", logged just now"
+                } else {
+                    label += ", \(duration) minutes"
+                }
+            }
+        case .tummyTime:
+            if let duration = event.durationMinutes {
+                label += ", \(duration) minutes"
+            }
         }
-        label += ", at \(formatTime(event.startTime))"
+        
+        let timeAgo = DateUtils.formatRelativeTime(event.startTime)
+        label += ", logged \(timeAgo)"
+        
         return label
     }
     

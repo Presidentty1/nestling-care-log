@@ -1,69 +1,184 @@
 import Foundation
+// TODO: Uncomment when Supabase Swift SDK is added via SPM
+// import Supabase
 
 /// Supabase-backed implementation of DataStore for cloud sync.
 /// Requires Supabase Swift SDK and authentication.
 ///
 /// Usage:
 /// ```swift
-/// let remoteStore = RemoteDataStore(supabaseClient: supabaseClient)
+/// let remoteStore = RemoteDataStore()
 /// let environment = AppEnvironment(dataStore: remoteStore)
 /// ```
 ///
-/// Note: This is a placeholder implementation. To use:
-/// 1. Add Supabase Swift SDK: `https://github.com/supabase/supabase-swift`
-/// 2. Configure Supabase client with URL and anon key
-/// 3. Implement authentication flow
-/// 4. Replace placeholder methods with real Supabase calls
+/// Setup Steps:
+/// 1. Add Supabase Swift SDK via SPM (see SUPABASE_SETUP.md)
+/// 2. Configure Secrets.swift with your Supabase URL and anon key
+/// 3. Uncomment import Supabase and client initialization code
+/// 4. Implement authentication flow (see Phase 1.2)
 class RemoteDataStore: DataStore {
     // MARK: - Properties
     
-    private let supabaseClient: Any? // Replace with SupabaseClient when SDK is added
-    private let baseURL: String
-    private let anonKey: String
+    private let provider = SupabaseClientProvider.shared
+    
+    // TODO: Uncomment when Supabase Swift SDK is added
+    // private var client: SupabaseClient {
+    //     provider.client
+    // }
+    
+    private var currentUserId: UUID? // Set after authentication
+    private var currentFamilyId: UUID? // Set after authentication
     
     // MARK: - Initialization
     
-    /// Initialize with Supabase configuration
-    /// - Parameters:
-    ///   - supabaseURL: Your Supabase project URL
-    ///   - anonKey: Your Supabase anonymous key
-    init(supabaseURL: String, anonKey: String) {
-        self.baseURL = supabaseURL
-        self.anonKey = anonKey
-        self.supabaseClient = nil // Initialize Supabase client here when SDK is added
+    init() {
+        // Verify Supabase is configured
+        if !provider.isConfigured {
+            print("⚠️ WARNING: SupabaseClientProvider is not configured. Please check Secrets.swift")
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Get current user ID from session
+    private func getCurrentUserId() async throws -> UUID {
+        guard let userId = currentUserId else {
+            // TODO: Get from auth session when SDK is added
+            // let session = try await provider.getCurrentSession()
+            // guard let session = session as? Session else {
+            //     throw DataStoreError.authenticationRequired
+            // }
+            // currentUserId = UUID(uuidString: session.user.id.uuidString)
+            // return currentUserId!
+            
+            throw DataStoreError.authenticationRequired
+        }
+        return userId
+    }
+    
+    /// Get current family ID (fetched once and cached)
+    private func getCurrentFamilyId() async throws -> UUID {
+        if let familyId = currentFamilyId {
+            return familyId
+        }
         
-        // TODO: Initialize Supabase client
-        // Example (when SDK is added):
-        // self.supabaseClient = SupabaseClient(supabaseURL: URL(string: supabaseURL)!, supabaseKey: anonKey)
+        // TODO: Query family_members table to get user's family_id when SDK is added
+        // let userId = try await getCurrentUserId()
+        // let response = try await client.database
+        //     .from("family_members")
+        //     .select("family_id")
+        //     .eq("user_id", userId.uuidString)
+        //     .single()
+        //     .execute()
+        // let familyMember = try JSONDecoder().decode(FamilyMemberDTO.self, from: response.data)
+        // currentFamilyId = familyMember.familyId
+        // return currentFamilyId!
+        
+        throw DataStoreError.authenticationRequired
+    }
+    
+    /// JSON encoder configured for Supabase
+    private var jsonEncoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+    
+    /// JSON decoder configured for Supabase
+    private var jsonDecoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
     
     // MARK: - Babies
     
     func fetchBabies() async throws -> [Baby] {
-        // TODO: Implement Supabase query
-        // Example:
-        // let response = try await supabaseClient.database
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // let response = try await client.database
         //     .from("babies")
         //     .select()
+        //     .eq("family_id", value: familyId.uuidString)
+        //     .order("created_at", ascending: false)
         //     .execute()
-        // return try JSONDecoder().decode([Baby].self, from: response.data)
+        // 
+        // let babyDTOs = try jsonDecoder.decode([BabyDTO].self, from: response.data)
+        // return babyDTOs.map { $0.toBaby() }
         
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func addBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase insert
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        let babyDTO = BabyDTO.from(baby, familyId: familyId)
+        let babyData = try jsonEncoder.encode(babyDTO)
+        let babyDict = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
+        //     .from("babies")
+        //     .insert(babyDict)
+        //     .execute()
+        
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func updateBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase update
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        var babyDTO = BabyDTO.from(baby, familyId: familyId)
+        babyDTO = BabyDTO(
+            id: babyDTO.id,
+            familyId: babyDTO.familyId,
+            name: babyDTO.name,
+            dateOfBirth: babyDTO.dateOfBirth,
+            dueDate: babyDTO.dueDate,
+            sex: babyDTO.sex,
+            timezone: babyDTO.timezone,
+            primaryFeedingStyle: babyDTO.primaryFeedingStyle,
+            createdAt: babyDTO.createdAt,
+            updatedAt: Date() // Update timestamp
+        )
+        
+        let babyData = try jsonEncoder.encode(babyDTO)
+        let babyDict = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
+        //     .from("babies")
+        //     .update(babyDict)
+        //     .eq("id", value: baby.id.uuidString)
+        //     .execute()
+        
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func deleteBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase delete
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
+        //     .from("babies")
+        //     .delete()
+        //     .eq("id", value: baby.id.uuidString)
+        //     .execute()
+        
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     // MARK: - Events
@@ -76,58 +191,112 @@ class RemoteDataStore: DataStore {
     }
     
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event] {
-        // TODO: Implement Supabase query with date range
-        // Example:
-        // let response = try await supabaseClient.database
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        let userId = try await getCurrentUserId()
+        
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // let response = try await client.database
         //     .from("events")
         //     .select()
-        //     .eq("baby_id", baby.id.uuidString)
-        //     .gte("start_time", ISO8601DateFormatter().string(from: startDate))
-        //     .lt("start_time", ISO8601DateFormatter().string(from: endDate))
+        //     .eq("baby_id", value: baby.id.uuidString)
+        //     .eq("family_id", value: familyId.uuidString)
+        //     .gte("start_time", value: dateFormatter.string(from: startDate))
+        //     .lt("start_time", value: dateFormatter.string(from: endDate))
         //     .order("start_time", ascending: false)
         //     .execute()
-        // return try JSONDecoder().decode([Event].self, from: response.data)
+        // 
+        // let eventDTOs = try jsonDecoder.decode([EventDTO].self, from: response.data)
+        // return eventDTOs.map { $0.toEvent() }
         
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func addEvent(_ event: Event) async throws {
         // Validate event before saving
         try EventValidator.validate(event)
         
-        // TODO: Implement Supabase insert
-        // Example:
-        // let encoder = JSONEncoder()
-        // encoder.dateEncodingStrategy = .iso8601
-        // let eventData = try encoder.encode(event)
-        // let eventDict = try JSONSerialization.jsonObject(with: eventData) as? [String: Any]
-        // 
-        // let response = try await supabaseClient.database
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        let userId = try await getCurrentUserId()
+        let eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
+        let eventData = try jsonEncoder.encode(eventDTO)
+        let eventDict = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
         //     .from("events")
         //     .insert(eventDict)
         //     .execute()
         
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func updateEvent(_ event: Event) async throws {
         // Validate event before saving
         try EventValidator.validate(event)
         
-        // TODO: Implement Supabase update
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        let familyId = try await getCurrentFamilyId()
+        let userId = try await getCurrentUserId()
+        var eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
+        
+        // Update timestamp
+        eventDTO = EventDTO(
+            id: eventDTO.id,
+            familyId: eventDTO.familyId,
+            babyId: eventDTO.babyId,
+            type: eventDTO.type,
+            subtype: eventDTO.subtype,
+            startTime: eventDTO.startTime,
+            endTime: eventDTO.endTime,
+            amount: eventDTO.amount,
+            unit: eventDTO.unit,
+            side: eventDTO.side,
+            note: eventDTO.note,
+            createdBy: eventDTO.createdBy,
+            createdAt: eventDTO.createdAt,
+            updatedAt: Date()
+        )
+        
+        let eventData = try jsonEncoder.encode(eventDTO)
+        let eventDict = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
+        //     .from("events")
+        //     .update(eventDict)
+        //     .eq("id", value: event.id.uuidString)
+        //     .execute()
+        
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     func deleteEvent(_ event: Event) async throws {
-        // TODO: Implement Supabase delete
-        // Example:
-        // try await supabaseClient.database
+        guard provider.isConfigured else {
+            throw DataStoreError.authenticationRequired
+        }
+        
+        // TODO: Uncomment when Supabase Swift SDK is added
+        // try await client.database
         //     .from("events")
         //     .delete()
-        //     .eq("id", event.id.uuidString)
+        //     .eq("id", value: event.id.uuidString)
         //     .execute()
         
-        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
+        throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK - see SUPABASE_SETUP.md")
     }
     
     // MARK: - Predictions

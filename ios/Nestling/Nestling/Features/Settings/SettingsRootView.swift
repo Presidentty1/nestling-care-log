@@ -6,10 +6,38 @@ struct SettingsRootView: View {
     @State private var showPrivacyData = false
     @State private var showManageBabies = false
     @State private var showManageCaregivers = false
+    @State private var showAuth = false
     
     var body: some View {
         NavigationStack {
             List {
+                // Guest/Account upgrade section
+                if !SupabaseClientProvider.shared.isConfigured {
+                    Section {
+                        Button(action: { showAuth = true }) {
+                            HStack(spacing: .spacingMD) {
+                                Image(systemName: "person.badge.plus")
+                                    .foregroundColor(.primary)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Create account to back up & share")
+                                        .font(.headline)
+                                        .foregroundColor(.foreground)
+                                    Text("Sync your data across devices and share with caregivers")
+                                        .font(.caption)
+                                        .foregroundColor(.mutedForeground)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.mutedForeground)
+                                    .font(.caption)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+
                 Section("Notifications & Reminders") {
                     NavigationLink("Notification Settings") {
                         NotificationSettingsView()
@@ -21,13 +49,17 @@ struct SettingsRootView: View {
                         HStack {
                             Text("AI Data Sharing")
                             Spacer()
+                            Text(environment.appSettings.aiDataSharingEnabled ? "On" : "Off")
+                                .font(.caption)
+                                .foregroundColor(.mutedForeground)
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.mutedForeground)
                                 .font(.caption)
                         }
                     }
                     
-                    Toggle("Prefer Medium Sheet", isOn: Binding(
+                    #if DEBUG
+                    Toggle("Use medium-sized popups", isOn: Binding(
                         get: { environment.appSettings.preferMediumSheet },
                         set: { newValue in
                             Task {
@@ -40,25 +72,32 @@ struct SettingsRootView: View {
                             }
                         }
                     ))
+                    #endif
                     
-                    Toggle("Index Events in Spotlight", isOn: Binding(
-                        get: { environment.appSettings.spotlightIndexingEnabled },
-                        set: { newValue in
-                            Task {
-                                var settings = environment.appSettings
-                                settings.spotlightIndexingEnabled = newValue
-                                try? await environment.dataStore.saveAppSettings(settings)
-                                await MainActor.run {
-                                    environment.appSettings = settings
-                                    
-                                    // If disabling, remove all indexed events
-                                    if !newValue {
-                                        SpotlightIndexer.shared.removeAllIndexedEvents()
+                    VStack(alignment: .leading, spacing: 4) {
+                        Toggle("Index Events in Spotlight", isOn: Binding(
+                            get: { environment.appSettings.spotlightIndexingEnabled },
+                            set: { newValue in
+                                Task {
+                                    var settings = environment.appSettings
+                                    settings.spotlightIndexingEnabled = newValue
+                                    try? await environment.dataStore.saveAppSettings(settings)
+                                    await MainActor.run {
+                                        environment.appSettings = settings
+                                        
+                                        // If disabling, remove all indexed events
+                                        if !newValue {
+                                            SpotlightIndexer.shared.removeAllIndexedEvents()
+                                        }
                                     }
                                 }
                             }
-                        }
-                    ))
+                        ))
+                        
+                        Text("Search your baby's logs from iOS Search")
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                    }
                 }
                 
                 Section("Privacy & Data") {
@@ -76,14 +115,16 @@ struct SettingsRootView: View {
                         PrivacySettingsView()
                     }
                     
-                    NavigationLink("Caregiver Mode") {
-                        CaregiverModeView()
-                    }
+                    // Caregiver Mode hidden for MVP
+                    // NavigationLink("Caregiver Mode") {
+                    //     CaregiverModeView()
+                    // }
                     
                     #if DEBUG
-                    NavigationLink("Data Migration") {
-                        DataMigrationView()
-                    }
+                    // Data Migration hidden for MVP - migration happens automatically if needed
+                    // NavigationLink("Data Migration") {
+                    //     DataMigrationView()
+                    // }
                     #endif
                 }
                 
@@ -147,10 +188,38 @@ struct SettingsRootView: View {
                 }
                 
                 Section("About") {
+                    Button(action: {
+                        // Open support email
+                        let email = "support@nestling.app"
+                        let subject = "Nestling Support Request"
+                        let body = """
+                        Please describe your issue or feedback:
+
+                        App Version: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
+                        iOS Version: \(UIDevice.current.systemVersion)
+                        Device: \(UIDevice.current.model)
+
+                        """
+                        let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                        let encodedBody = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                        let urlString = "mailto:\(email)?subject=\(encodedSubject)&body=\(encodedBody)"
+
+                        if let url = URL(string: urlString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }) {
+                        HStack {
+                            Text("Get Help or Send Feedback")
+                            Spacer()
+                            Image(systemName: "envelope")
+                                .foregroundColor(.mutedForeground)
+                        }
+                    }
+
                     NavigationLink("Achievements") {
                         AchievementsView()
                     }
-                    
+
                     NavigationLink("About") {
                         AboutView()
                     }
@@ -204,6 +273,16 @@ struct SettingsRootView: View {
             }
             .sheet(isPresented: $showManageCaregivers) {
                 ManageCaregiversView()
+            }
+            .sheet(isPresented: $showAuth) {
+                AuthView(viewModel: AuthViewModel()) {
+                    // On successful authentication, dismiss and refresh
+                    showAuth = false
+                    Task {
+                        await environment.refreshBabies()
+                        await environment.refreshSettings()
+                    }
+                }
             }
         }
     }

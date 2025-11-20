@@ -63,13 +63,15 @@ struct Baby: Identifiable, Codable, Equatable {
 enum Sex: String, Codable, CaseIterable {
     case male = "m"
     case female = "f"
-    case other
+    case intersex = "i"
+    case preferNotToSay = "pns"
     
     var displayName: String {
         switch self {
-        case .male: return "Male"
-        case .female: return "Female"
-        case .other: return "Other"
+        case .male: return "Boy"
+        case .female: return "Girl"
+        case .intersex: return "Intersex"
+        case .preferNotToSay: return "Prefer not to say"
         }
     }
 }

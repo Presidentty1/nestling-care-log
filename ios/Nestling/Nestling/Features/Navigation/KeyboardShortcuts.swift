@@ -51,8 +51,8 @@ struct KeyboardShortcutModifier: ViewModifier {
         content
             .onKeyPress(key, phases: .down) { _ in
                 if modifiers.contains(.command) {
-                    action()
-                    return .handled
+                action()
+                return .handled
                 }
                 return .ignored
             }

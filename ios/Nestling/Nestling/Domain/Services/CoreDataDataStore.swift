@@ -560,5 +560,45 @@ class CoreDataDataStore: DataStore {
             }
         }
     }
+    
+    // MARK: - Delete All Data
+    
+    /// Delete all data from Core Data (for privacy/data deletion feature)
+    func deleteAllData() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = self.stack.newBackgroundContext()
+            context.perform {
+                do {
+                    // Delete all events
+                    let eventRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "EventEntity")
+                    let deleteEvents = NSBatchDeleteRequest(fetchRequest: eventRequest)
+                    try context.execute(deleteEvents)
+                    
+                    // Delete all babies
+                    let babyRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "BabyEntity")
+                    let deleteBabies = NSBatchDeleteRequest(fetchRequest: babyRequest)
+                    try context.execute(deleteBabies)
+                    
+                    // Delete all predictions
+                    let predictionRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PredictionCacheEntity")
+                    let deletePredictions = NSBatchDeleteRequest(fetchRequest: predictionRequest)
+                    try context.execute(deletePredictions)
+                    
+                    // Delete all last used values
+                    let lastUsedRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "LastUsedValuesEntity")
+                    let deleteLastUsed = NSBatchDeleteRequest(fetchRequest: lastUsedRequest)
+                    try context.execute(deleteLastUsed)
+                    
+                    // Note: We keep AppSettingsEntity so the app doesn't crash on next launch
+                    // The onboarding flow will check if babies exist and reset if needed
+                    
+                    try self.stack.save(context: context)
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
 }
 

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Moon, Clock, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Moon, Clock, ThumbsUp, ThumbsDown, Minus, Info } from 'lucide-react';
 import { format, isBefore, isAfter } from 'date-fns';
 import { NapPrediction } from '@/types/events';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { dataService } from '@/services/dataService';
+import { napPredictorService } from '@/services/napPredictorService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,19 @@ interface NapPillProps {
 export function NapPill({ prediction, babyId, onFeedbackSubmitted, className }: NapPillProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [learningMetrics, setLearningMetrics] = useState<{ daysLogged: number; napCount: number; recentAdjustments: string[] } | null>(null);
+
+  useEffect(() => {
+    const loadLearningMetrics = async () => {
+      try {
+        const metrics = await napPredictorService.getLearningMetrics(babyId);
+        setLearningMetrics(metrics);
+      } catch (error) {
+        console.error('Error loading learning metrics:', error);
+      }
+    };
+    loadLearningMetrics();
+  }, [babyId]);
 
   const now = new Date();
   const windowStart = new Date(prediction.nextWindowStartISO);
@@ -94,6 +108,26 @@ export function NapPill({ prediction, babyId, onFeedbackSubmitted, className }: 
             <p className="text-caption text-muted-foreground mt-2">
               {Math.round(prediction.confidence * 100)}% confidence
             </p>
+            {learningMetrics && learningMetrics.daysLogged > 0 && (
+              <div className="mt-3 p-2 bg-muted/50 rounded text-xs">
+                <div className="flex items-center gap-1 mb-1">
+                  <Info className="h-3 w-3" />
+                  <span className="font-medium">Learning from your data</span>
+                </div>
+                <p className="text-muted-foreground">
+                  Tuned from {learningMetrics.daysLogged} day{learningMetrics.daysLogged !== 1 ? 's' : ''} of logs, based on {learningMetrics.napCount} nap{learningMetrics.napCount !== 1 ? 's' : ''}
+                </p>
+                {learningMetrics.recentAdjustments.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {learningMetrics.recentAdjustments.map((adjustment, index) => (
+                      <p key={index} className="text-muted-foreground italic">
+                        • {adjustment}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -28,7 +28,7 @@ export function TimelineList({ events, onEdit, onDelete, useVirtualization = tru
       <EmptyState
         icon={Calendar}
         title="Your day is off to a quiet start ✨"
-        description="Tap the + button below to log your first event. Every baby's day is unique!"
+        description="Some days you'll log everything, some days just one feed. Both are okay. Tap the + button when you're ready to add your first event."
       />
     );
   }

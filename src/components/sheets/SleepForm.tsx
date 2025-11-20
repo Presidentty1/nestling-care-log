@@ -132,6 +132,33 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
         </Alert>
       )}
 
+      {/* Quick Actions */}
+      {!editingEventId && (
+        <div className="space-y-3">
+          {!startTime ? (
+            <Button
+              type="button"
+              onClick={handleStart}
+              className="w-full h-16 text-lg font-semibold"
+              variant="default"
+            >
+              <Play className="mr-3 h-6 w-6" />
+              Start nap now
+            </Button>
+          ) : !endTime ? (
+            <Button
+              type="button"
+              onClick={handleStop}
+              className="w-full h-16 text-lg font-semibold"
+              variant="destructive"
+            >
+              <Square className="mr-3 h-6 w-6" />
+              End nap now
+            </Button>
+          ) : null}
+        </div>
+      )}
+
       {/* Type Selection */}
       <div className="space-y-2">
         <Label className="text-base font-medium">Sleep Type</Label>

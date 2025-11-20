@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# iOS Secrets (prevent committing sensitive keys)
+ios/Nestling/Nestling/Services/Secrets.swift
+Secrets.swift

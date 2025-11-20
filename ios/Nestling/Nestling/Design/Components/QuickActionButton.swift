@@ -55,8 +55,35 @@ struct QuickActionButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(isCaregiverMode ? .spacingLG : .spacingMD)
-            .background(Color.surface)
+            .background(
+                Group {
+                    if isActive {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                color.opacity(0.15),
+                                color.opacity(0.08)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.surface,
+                                Color.surface.opacity(0.95)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+                }
+            )
             .cornerRadius(.radiusMD)
+            .shadow(color: isActive ? color.opacity(0.2) : Color.black.opacity(0.05), radius: isActive ? 6 : 2, x: 0, y: isActive ? 3 : 1)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusMD)
+                    .stroke(isActive ? color.opacity(0.3) : Color.separator, lineWidth: isActive ? 1.5 : 0.5)
+            )
         }
         .buttonStyle(QuickActionButtonStyle(isActive: isActive))
         .motionAnimation(.easeInOut(duration: 0.2), value: isActive)
