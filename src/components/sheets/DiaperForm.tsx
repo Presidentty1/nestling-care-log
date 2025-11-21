@@ -120,20 +120,20 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
 
       {/* Optional Notes */}
       {!quickMode && (
-        <div className="space-y-3">
-          <Label htmlFor="note" className="text-base">Notes (optional)</Label>
-          <Textarea
-            id="note"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Any observations..."
-            className="min-h-[100px] text-base resize-none"
-            maxLength={500}
-          />
-          {note.length > 0 && (
-            <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
-          )}
-        </div>
+      <div className="space-y-3">
+        <Label htmlFor="note" className="text-base">Notes (optional)</Label>
+        <Textarea
+          id="note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Any observations..."
+          className="min-h-[100px] text-base resize-none"
+          maxLength={500}
+        />
+        {note.length > 0 && (
+          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+        )}
+      </div>
       )}
     </form>
   );

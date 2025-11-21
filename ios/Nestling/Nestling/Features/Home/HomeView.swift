@@ -144,7 +144,9 @@ struct HomeView: View {
                         FeedFormView(viewModel: feedViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadTodayEvents()
+                                Task {
+                                    await viewModel?.loadTodayEvents()
+                                }
                                 environment.navigationCoordinator.showFeedForm = false
                                 environment.navigationCoordinator.clearPrefillData()
                             }
@@ -165,7 +167,9 @@ struct HomeView: View {
                         SleepFormView(viewModel: sleepViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadTodayEvents()
+                                Task {
+                                    await viewModel?.loadTodayEvents()
+                                }
                                 viewModel?.checkActiveSleep()
                                 environment.navigationCoordinator.showSleepForm = false
                             }
@@ -186,7 +190,9 @@ struct HomeView: View {
                         DiaperFormView(viewModel: diaperViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadTodayEvents()
+                                Task {
+                                    await viewModel?.loadTodayEvents()
+                                }
                                 environment.navigationCoordinator.showDiaperForm = false
                                 environment.navigationCoordinator.clearPrefillData()
                             }
@@ -207,7 +213,9 @@ struct HomeView: View {
                         TummyTimeFormView(viewModel: tummyViewModel)
                             .onDisappear {
                                 editingEvent = nil
-                                viewModel?.loadTodayEvents()
+                                Task {
+                                    await viewModel?.loadTodayEvents()
+                                }
                                 environment.navigationCoordinator.showTummyForm = false
                                 environment.navigationCoordinator.clearPrefillData()
                             }
@@ -298,7 +306,14 @@ struct HomeView: View {
             return
         }
         print("updateViewModel: Creating new viewModel for baby \(baby.id)")
-        viewModel = HomeViewModel(dataStore: environment.dataStore, baby: baby)
+        viewModel = HomeViewModel(
+            dataStore: environment.dataStore,
+            baby: baby,
+            showToast: { title, message in
+                let combinedMessage = title.isEmpty ? message : "\(title): \(message)"
+                showToast = ToastMessage(message: combinedMessage, type: .info)
+            }
+        )
     }
     
     private func showFormForEvent(_ event: Event) {
