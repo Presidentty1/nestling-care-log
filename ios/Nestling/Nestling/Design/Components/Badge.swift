@@ -48,7 +48,7 @@ struct Badge: View {
 #Preview {
     HStack(spacing: 8) {
         Badge("New")
-        Badge("Beta", variant: .secondary)
+        Badge("Beta", variant: .default)
         Badge("Urgent", variant: .destructive)
         Badge("Draft", variant: .outline)
     }

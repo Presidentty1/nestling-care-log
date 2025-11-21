@@ -26,3 +26,6 @@ dist-ssr
 # iOS Secrets (prevent committing sensitive keys)
 ios/Nestling/Nestling/Services/Secrets.swift
 Secrets.swift
+
+# Swift Package Manager (managed by Xcode)
+ios/Nestling/.swiftpm/

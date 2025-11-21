@@ -126,7 +126,7 @@ export default function History() {
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-headline">History</h1>
+          <h1 className="font-display text-left">History</h1>
           <Button
             variant="outline"
             size="sm"

@@ -1,7 +1,10 @@
 import Foundation
+import Sentry
 
-/// Service for crash reporting and error tracking
-/// MVP implementation uses console logging, can be upgraded to Sentry/Firebase
+// Avoid naming conflict with Sentry.Event
+typealias SentryEvent = Sentry.Event
+
+/// Service for crash reporting and error tracking using Sentry
 @MainActor
 class CrashReportingService {
     static let shared = CrashReportingService()
@@ -9,57 +12,112 @@ class CrashReportingService {
     private var enabled = true
 
     private init() {
-        // Set up any initial configuration
-        print("✅ CrashReportingService initialized")
+        // Set up Sentry configuration
+        setupSentry()
+        print("✅ CrashReportingService initialized with Sentry")
+    }
+
+    private func setupSentry() {
+        SentrySDK.start { options in
+            // Configure Sentry DSN - will be set via environment variables
+            if let dsn = ProcessInfo.processInfo.environment["SENTRY_DSN"] {
+                options.dsn = dsn
+            } else {
+                // Fallback for development - replace with actual DSN
+                options.dsn = "https://your-sentry-dsn@sentry.io/project-id"
+                print("⚠️ Using placeholder Sentry DSN - configure SENTRY_DSN environment variable")
+            }
+
+            // Configure for iOS app
+            options.environment = ProcessInfo.processInfo.environment["ENVIRONMENT"] ?? "development"
+            options.releaseName = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+
+            // Enable performance monitoring
+            options.tracesSampleRate = 1.0
+            options.enableAutoSessionTracking = true
+            options.enableWatchdogTerminationTracking = true
+
+            // Configure breadcrumbs
+            options.maxBreadcrumbs = 100
+            options.enableNetworkTracking = true
+            // options.enableFileIOTracking = false // Not available in this version
+        }
     }
 
     /// Log a non-fatal error
     func logError(_ error: Error, context: [String: Any]? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         guard enabled else { return }
 
-        let errorInfo: [String: Any] = [
-            "error": error.localizedDescription,
+        // Create Sentry event
+        let event = SentryEvent(level: .error)
+        event.message = SentryMessage(formatted: error.localizedDescription)
+
+        // Add context information
+        var tags: [String: String] = [:]
+        var extra: [String: Any] = [
             "file": URL(fileURLWithPath: file).lastPathComponent,
             "function": function,
             "line": line,
-            "timestamp": Date().ISO8601Format(),
-            "context": context ?? [:]
+            "timestamp": Date().ISO8601Format()
         ]
 
-        print("🚨 Error logged: \(errorInfo)")
+        // Add custom context if provided
+        if let context = context {
+            extra.merge(context) { (_, new) in new }
+        }
 
-        // TODO: Send to crash reporting service (Sentry, Firebase, etc.)
-        // For MVP, just log to console
+        event.tags = tags
+        event.extra = extra
+
+        // Capture the event
+        SentrySDK.capture(event: event)
+
+        // Also log to console for development
+        print("🚨 Error logged: \(extra)")
     }
 
     /// Log a fatal crash (if we can catch it before termination)
     func logCrash(_ error: Error, context: [String: Any]? = nil) {
         guard enabled else { return }
 
-        let crashInfo: [String: Any] = [
+        let event = SentryEvent(level: .fatal)
+        event.message = SentryMessage(formatted: "Fatal crash: \(error.localizedDescription)")
+
+        var extra: [String: Any] = [
             "crash": true,
-            "error": error.localizedDescription,
-            "timestamp": Date().ISO8601Format(),
-            "context": context ?? [:]
+            "timestamp": Date().ISO8601Format()
         ]
 
-        print("💥 Crash logged: \(crashInfo)")
+        if let context = context {
+            extra.merge(context) { (_, new) in new }
+        }
 
-        // TODO: Send critical crash data to service
+        event.extra = extra
+        event.tags = ["crash": "true"]
+
+        SentrySDK.capture(event: event)
+
+        print("💥 Fatal crash logged: \(extra)")
     }
 
     /// Log a user action that might be relevant for debugging
     func logBreadcrumb(_ message: String, category: String, data: [String: Any]? = nil) {
         guard enabled else { return }
 
-        let breadcrumb: [String: Any] = [
-            "message": message,
-            "category": category,
-            "timestamp": Date().ISO8601Format(),
-            "data": data ?? [:]
-        ]
+        let breadcrumb = Breadcrumb()
+        breadcrumb.level = .info
+        breadcrumb.category = category
+        breadcrumb.message = message
+        breadcrumb.timestamp = Date()
 
-        print("📝 Breadcrumb: \(breadcrumb)")
+        if let data = data {
+            breadcrumb.data = data
+        }
+
+        SentrySDK.addBreadcrumb(breadcrumb)
+
+        // Also log to console for development
+        print("📝 Breadcrumb: \(category) - \(message)")
     }
 
     /// Enable/disable crash reporting

@@ -3,12 +3,13 @@ import StoreKit
 import Combine
 
 /// Pro subscription service using StoreKit 2.
-/// 
+///
 /// Manages in-app purchases for Pro features:
+/// - AI nap predictor
+/// - Cry analysis (beta)
+/// - AI assistant
+/// - Today's insight
 /// - Advanced analytics
-/// - Unlimited babies
-/// - Family sharing (caregiver invites)
-/// - Priority support
 ///
 /// Usage:
 /// ```swift
@@ -25,20 +26,33 @@ enum ProFeature: String, CaseIterable {
     case smartPredictions = "smart_predictions"
     case cryInsights = "cry_insights"
     case advancedAnalytics = "advanced_analytics"
-    
+    case aiAssistant = "ai_assistant"
+    case todaysInsight = "todays_insight"
+
     var displayName: String {
         switch self {
         case .smartPredictions: return "Smarter nap & feed predictions"
         case .cryInsights: return "Cry insights (Beta)"
         case .advancedAnalytics: return "Advanced analytics"
+        case .aiAssistant: return "AI assistant"
+        case .todaysInsight: return "Today's insight"
         }
     }
-    
+
     var description: String {
         switch self {
         case .smartPredictions: return "AI-powered predictions for next nap and feed times"
         case .cryInsights: return "Analyze your baby's cry patterns to identify possible causes"
         case .advancedAnalytics: return "Detailed charts and insights about your baby's patterns"
+        case .aiAssistant: return "AI-powered assistance for parenting questions"
+        case .todaysInsight: return "Personalized recommendations based on your baby's patterns"
+        }
+    }
+
+    var freeLimit: Int? {
+        switch self {
+        case .cryInsights: return 3 // 3 free cry analyses
+        default: return nil
         }
     }
 }
@@ -58,21 +72,77 @@ class ProSubscriptionService: ObservableObject {
     @Published var subscriptionStatus: SubscriptionStatus = .notSubscribed
     @Published var isProUser: Bool = false
     @Published var isLoading: Bool = false
-    
+    @Published var trialDaysRemaining: Int? = nil
+    @Published var freeTierLimits: [ProFeature: Int] = [:]
+
     // Product IDs (configure in App Store Connect)
     private let monthlyProductID = "com.nestling.pro.monthly"
     private let yearlyProductID = "com.nestling.pro.yearly"
-    
+
+    // Trial configuration - handled by StoreKit introductory offers
+    private let trialDurationDays = 7
+
     private var products: [Product] = []
     private var currentSubscription: Product?
     
     private var transactionListener: Task<Void, Never>?
     
     private init() {
+        initializeFreeTierLimits()
+
         Task {
             await loadProducts()
             await checkSubscriptionStatus()
             startTransactionListener()
+        }
+    }
+
+    private func initializeFreeTierLimits() {
+        // Initialize free tier usage counters
+        for feature in ProFeature.allCases {
+            if let limit = feature.freeLimit {
+                freeTierLimits[feature] = limit
+            }
+        }
+    }
+
+    private func checkTrialStatus() async {
+        do {
+            // Check for active introductory offers (trials)
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result {
+                    if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+                        // Check if this is an introductory offer (trial)
+                        if #available(iOS 17.2, *), let offerType = transaction.offer?.type, offerType == .introductory {
+                            // Calculate remaining trial days
+                            if let expirationDate = transaction.expirationDate {
+                                let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
+                                if daysRemaining > 0 {
+                                    trialDaysRemaining = daysRemaining
+                                    // During trial, user has Pro access
+                                    isProUser = true
+                                    subscriptionStatus = .subscribed
+
+                                    // Analytics: trial started (if this is the first time we detect it)
+                                    Task {
+                                        await Analytics.shared.logSubscriptionTrialStarted(
+                                            plan: transaction.productID.contains("yearly") ? "yearly" : "monthly",
+                                            source: "storekit_introductory_offer"
+                                        )
+                                    }
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // No active trial found
+            trialDaysRemaining = nil
+        } catch {
+            print("[Pro] Failed to check trial status: \(error)")
+            trialDaysRemaining = nil
         }
     }
     
@@ -100,16 +170,47 @@ class ProSubscriptionService: ObservableObject {
     /// Handle transaction update (renewal, cancellation, etc.)
     private func handleTransactionUpdate(_ transaction: Transaction) async {
         if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+            let plan = transaction.productID.contains("yearly") ? "yearly" : "monthly"
+
             if transaction.revocationDate == nil {
                 // Subscription is active
                 subscriptionStatus = .subscribed
                 isProUser = true
+
+                // Check if this is a new activation or renewal
+                let originalPurchaseDate = transaction.originalPurchaseDate
+                if let expirationDate = transaction.expirationDate {
+                    let timeSincePurchase = Date().timeIntervalSince(originalPurchaseDate)
+                    let isRenewal = timeSincePurchase > 86400 // More than 1 day since original purchase
+
+                    if isRenewal {
+                        // Analytics: subscription renewed
+                        Task {
+                            await Analytics.shared.logSubscriptionRenewed(plan: plan)
+                        }
+                    } else {
+                        // Analytics: subscription activated
+                        Task {
+                            if let product = products.first(where: { $0.id == transaction.productID }) {
+                                await Analytics.shared.logSubscriptionActivated(
+                                    plan: plan,
+                                    price: product.displayPrice
+                                )
+                            }
+                        }
+                    }
+                }
             } else {
                 // Subscription was revoked/cancelled
                 subscriptionStatus = .expired
                 isProUser = false
+
+                // Analytics: subscription cancelled
+                Task {
+                    await Analytics.shared.logSubscriptionCancelled(plan: plan, reason: nil)
+                }
             }
-            
+
             await checkSubscriptionStatus()
         }
     }
@@ -146,22 +247,27 @@ class ProSubscriptionService: ObservableObject {
                     if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
                         subscriptionStatus = .subscribed
                         isProUser = true
-                        
+
                         // Check expiration
                         if let expirationDate = transaction.expirationDate,
                            expirationDate < Date() {
                             subscriptionStatus = .expired
                             isProUser = false
                         }
-                        
+
                         return
                     }
                 }
             }
-            
-            // No active subscription
-            subscriptionStatus = .notSubscribed
-            isProUser = false
+
+            // No active subscription - check trial status
+            await checkTrialStatus()
+
+            // If no trial and no subscription, user is not Pro
+            if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
+                subscriptionStatus = .notSubscribed
+                isProUser = false
+            }
         } catch {
             print("[Pro] Failed to check subscription: \(error)")
             subscriptionStatus = .notSubscribed
@@ -189,9 +295,9 @@ class ProSubscriptionService: ObservableObject {
                     await transaction.finish()
                     await checkSubscriptionStatus()
 
-                    // Analytics: subscription started
+                    // Analytics: subscription purchased
                     Task {
-                        await Analytics.shared.logSubscriptionStarted(
+                        await Analytics.shared.logSubscriptionPurchased(
                             productId: productID,
                             price: product.displayPrice
                         )
@@ -233,8 +339,58 @@ class ProSubscriptionService: ObservableObject {
     /// - Parameter feature: Feature to check
     /// - Returns: True if user has access
     func hasAccess(to feature: ProFeature) -> Bool {
-        // All Pro features require subscription (no free tier for these)
-        return isProUser
+        // During trial, user has full access
+        if trialDaysRemaining != nil && trialDaysRemaining! > 0 {
+            return true
+        }
+
+        // If user has active subscription, full access
+        if isProUser {
+            return true
+        }
+
+        // Check free tier limits
+        if let limit = feature.freeLimit {
+            let currentUsage = getCurrentUsage(for: feature)
+            return currentUsage < limit
+        }
+
+        // No free tier for this feature, requires Pro
+        return false
+    }
+
+    /// Get current usage for a feature
+    func getCurrentUsage(for feature: ProFeature) -> Int {
+        switch feature {
+        case .cryInsights:
+            // Would integrate with CryInsightsQuotaManager
+            return 0 // Placeholder
+        default:
+            return 0
+        }
+    }
+
+    /// Get expiration date of current Pro subscription
+    var proExpirationDate: Date? {
+        get async {
+            do {
+                for await result in Transaction.currentEntitlements {
+                    if case .verified(let transaction) = result {
+                        if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+                            return transaction.expirationDate
+                        }
+                    }
+                }
+            } catch {
+                print("[Pro] Failed to get expiration date: \(error)")
+            }
+            return nil
+        }
+    }
+
+    /// Manually refresh entitlements from App Store
+    func refreshEntitlements() async {
+        await checkSubscriptionStatus()
     }
     
     /// Get available subscription products
@@ -272,6 +428,31 @@ extension ProSubscriptionService {
     /// - Returns: True if feature requires Pro
     func requiresPro(_ feature: ProFeature) -> Bool {
         return !hasAccess(to: feature)
+    }
+}
+
+// MARK: - Usage Statistics
+
+extension ProSubscriptionService {
+    /// Usage statistics for value demonstration
+    struct UsageStats {
+        let totalEvents: Int
+        let daysTracked: Int
+        let timeSaved: String
+
+        static let zero = UsageStats(totalEvents: 0, daysTracked: 0, timeSaved: "0m")
+    }
+
+    /// Get current usage statistics
+    func getUsageStats() -> UsageStats {
+        // This would integrate with the actual data store
+        // For now, return placeholder stats
+        // TODO: Integrate with CoreDataStore to get real stats
+        return UsageStats(
+            totalEvents: 47,
+            daysTracked: 12,
+            timeSaved: "1.5h" // 47 events * 2 minutes each = 94 minutes = 1.5 hours
+        )
     }
 }
 

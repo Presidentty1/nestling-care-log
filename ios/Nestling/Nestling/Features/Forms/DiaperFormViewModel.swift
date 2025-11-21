@@ -1,10 +1,12 @@
 import Foundation
 import Combine
+import UIKit
 
 @MainActor
 class DiaperFormViewModel: ObservableObject {
     @Published var subtype: DiaperSubtype = .wet
     @Published var note: String = ""
+    @Published var photos: [UIImage] = []
     @Published var startTime: Date = Date()
     @Published var isValid: Bool = true
     @Published var isSaving: Bool = false
@@ -30,6 +32,7 @@ class DiaperFormViewModel: ObservableObject {
             self.subtype = DiaperSubtype(rawValue: subtype) ?? .wet
         }
         note = event.note ?? ""
+        photos = PhotoStorageService.shared.loadPhotos(for: event.id)
         startTime = event.startTime
     }
     
@@ -50,13 +53,22 @@ class DiaperFormViewModel: ObservableObject {
         isSaving = true
         defer { isSaving = false }
         
+        let eventId = editingEvent?.id ?? IDGenerator.generate()
+
+        // Save photos if any
+        var photoUrls: [String]? = nil
+        if !photos.isEmpty {
+            photoUrls = try await PhotoStorageService.shared.savePhotos(photos, for: eventId)
+        }
+
         let eventData = Event(
-            id: editingEvent?.id ?? IDGenerator.generate(),
+            id: eventId,
             babyId: baby.id,
             type: .diaper,
             subtype: subtype.rawValue,
             startTime: startTime,
             note: note.isEmpty ? nil : note,
+            photoUrls: photoUrls,
             createdAt: editingEvent?.createdAt ?? Date(),
             updatedAt: Date()
         )

@@ -47,9 +47,34 @@ struct TimelineRow: View {
                     .foregroundColor(.mutedForeground)
                     .lineLimit(nil)
             }
-            
+
+            // Photo thumbnails (if any)
+            if let photoUrls = event.photoUrls, !photoUrls.isEmpty {
+                let photos = PhotoStorageService.shared.loadPhotos(for: event.id)
+                if !photos.isEmpty {
+                    HStack(spacing: 2) {
+                        ForEach(photos.prefix(2), id: \.self) { photo in
+                            Image(uiImage: photo)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 24, height: 24)
+                                .cornerRadius(4)
+                                .clipped()
+                        }
+                        if photos.count > 2 {
+                            Text("+\(photos.count - 2)")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
+                                .frame(width: 24, height: 24)
+                                .background(Color.surface)
+                                .cornerRadius(4)
+                        }
+                    }
+                }
+            }
+
             Spacer()
-            
+
             // Time
             Text(formatTime(event.startTime))
                 .font(.caption)

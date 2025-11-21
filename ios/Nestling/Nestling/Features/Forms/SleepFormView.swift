@@ -101,9 +101,11 @@ struct SleepFormView: View {
                 
                 if !isCaregiverMode || showAdvancedOptions {
                     Section("Notes") {
-                        TextField("Optional notes", text: $viewModel.note, axis: .vertical)
-                            .font(isCaregiverMode ? .caregiverBody : .body)
-                            .lineLimit(3...6)
+                        VoiceInputView(text: $viewModel.note, placeholder: "Optional notes...")
+                    }
+
+                    Section("Photos") {
+                        PhotoPickerView(selectedPhotos: $viewModel.photos)
                     }
                 }
                 

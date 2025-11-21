@@ -1,6 +1,7 @@
 import SwiftUI
 import os.signpost
 import CoreSpotlight
+import FirebaseCore
 
 @main
 struct NestlingApp: App {
@@ -13,6 +14,16 @@ struct NestlingApp: App {
     private let launchSignpostID: OSSignpostID
     
     init() {
+        // Initialize Firebase (only if GoogleService-Info.plist exists)
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           FileManager.default.fileExists(atPath: path) {
+            FirebaseApp.configure()
+            print("✅ Firebase configured successfully")
+        } else {
+            print("⚠️ GoogleService-Info.plist not found - Firebase features will be disabled")
+            print("   To enable Firebase: Add GoogleService-Info.plist to the project")
+        }
+
         // Initialize crash reporting
         _ = CrashReportingService.shared
 
@@ -30,30 +41,47 @@ struct NestlingApp: App {
             Group {
                 if isCheckingAuth {
                     // Show loading screen while checking auth status
-                    Color.background
-                        .ignoresSafeArea()
-                        .overlay {
+                    ZStack {
+                        Color.background
+                            .ignoresSafeArea()
+                        VStack(spacing: .spacingMD) {
                             ProgressView()
+                            Text("Loading...")
+                                .font(.caption)
+                                .foregroundColor(.mutedForeground)
                         }
-                        .task {
-                            // Check for existing session
-                            await authViewModel.restoreSession()
-                            await MainActor.run {
-                                isCheckingAuth = false
-                                // If no session, we'll show AuthView
-                                // If session exists, check onboarding
-                                if authViewModel.session != nil {
-                                    isCheckingOnboarding = true
-                                    checkOnboarding()
+                    }
+                    .task {
+                        // Add timeout to prevent infinite loading
+                        let timeoutTask = Task {
+                            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                            if isCheckingAuth {
+                                print("⚠️ WARNING: Auth check timed out, proceeding to auth screen")
+                                await MainActor.run {
+                                    isCheckingAuth = false
                                 }
                             }
                         }
-                } else if authViewModel.session == nil {
-                    // No session - show Auth
+                        
+                        // Check for existing session
+                        await authViewModel.restoreSession()
+                        timeoutTask.cancel()
+                        
+                        await MainActor.run {
+                            isCheckingAuth = false
+                            // If session exists or auth was skipped, check onboarding
+                            if authViewModel.session != nil || authViewModel.hasSkippedAuth {
+                                isCheckingOnboarding = true
+                                checkOnboarding()
+                            }
+                        }
+                    }
+                } else if authViewModel.session == nil && !authViewModel.hasSkippedAuth {
+                    // No session and hasn't skipped - show Auth
                     AuthView(viewModel: authViewModel) {
-                        // On authenticated, check onboarding
+                        // On authenticated or skipped, check onboarding
                         Task { @MainActor in
-                            // Small delay to ensure session state propagates
+                            // Small delay to ensure state updates propagate
                             try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
                             isCheckingOnboarding = true
                             checkOnboarding()
@@ -231,7 +259,7 @@ struct NestlingApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var environment: AppEnvironment
-    
+
     var body: some View {
         TabView(selection: Binding(
             get: { environment.navigationCoordinator.selectedTab },
@@ -242,25 +270,27 @@ struct ContentView: View {
                     Label("Home", systemImage: "house.fill")
                 }
                 .tag(0)
-            
+
             HistoryView()
                 .tabItem {
                     Label("History", systemImage: "calendar")
                 }
                 .tag(1)
-            
+
             LabsView()
                 .tabItem {
                     Label("Labs", systemImage: "flask.fill")
                 }
                 .tag(2)
-            
+
             SettingsRootView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
                 .tag(3)
         }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .motionTransition(.opacity)
     }
 }
 

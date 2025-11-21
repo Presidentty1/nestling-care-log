@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct Event: Identifiable, Codable, Equatable {
     let id: UUID
@@ -11,6 +12,7 @@ struct Event: Identifiable, Codable, Equatable {
     let unit: String?
     let side: String?
     let note: String?
+    let photoUrls: [String]? // URLs to stored photos
     let createdAt: Date
     var updatedAt: Date
     
@@ -25,6 +27,7 @@ struct Event: Identifiable, Codable, Equatable {
         unit: String? = nil,
         side: String? = nil,
         note: String? = nil,
+        photoUrls: [String]? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -38,6 +41,7 @@ struct Event: Identifiable, Codable, Equatable {
         self.unit = unit
         self.side = side
         self.note = note
+        self.photoUrls = photoUrls
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -118,6 +122,15 @@ enum EventType: String, Codable, CaseIterable {
         case .diaper: return "drop.circle.fill"
         case .sleep: return "moon.fill"
         case .tummyTime: return "figure.child"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .feed: return .blue
+        case .diaper: return .orange
+        case .sleep: return .purple
+        case .tummyTime: return .green
         }
     }
 }

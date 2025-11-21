@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showTummyForm = false
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
+    @State private var showProSubscription = false
     
     var body: some View {
         NavigationStack {
@@ -30,7 +31,47 @@ struct HomeView: View {
                                 SummaryCardsView(summary: summary)
                                     .padding(.horizontal, .spacingMD)
                             }
-                            
+
+                            // Today's Insight (Personalized Recommendations) - Pro Feature
+                            if let topRecommendation = viewModel.recommendations.first {
+                                FeatureGate.check(.todaysInsight, accessible: {
+                                    TodaysInsightCard(recommendation: topRecommendation)
+                                        .padding(.horizontal, .spacingMD)
+                                        .onTapGesture {
+                                            // Handle recommendation tap - could show detail or dismiss
+                                            Haptics.light()
+                                        }
+                                }, paywall: {
+                                    // Show upgrade prompt for non-Pro users
+                                    TodaysInsightCard(recommendation: topRecommendation)
+                                        .padding(.horizontal, .spacingMD)
+                                        .blur(radius: 2)
+                                        .overlay(
+                                            VStack {
+                                                Spacer()
+                                                HStack {
+                                                    Spacer()
+                                                    PrimaryButton("Upgrade to Pro", icon: "star.fill") {
+                                                        showProSubscription = true
+                                                    }
+                                                    .padding(.horizontal, .spacingMD)
+                                                    Spacer()
+                                                }
+                                                Spacer()
+                                            }
+                                        )
+                                        .onTapGesture {
+                                            showProSubscription = true
+                                        }
+                                })
+                            }
+
+                            // Streaks & Milestones
+                            if viewModel.currentStreak > 0 || viewModel.longestStreak > 0 {
+                                StreaksView(currentStreak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
+                                    .padding(.horizontal, .spacingMD)
+                            }
+
                             // Quick Actions - Always show, even during loading
                             QuickActionsSection(
                                 activeSleep: viewModel.activeSleep,
@@ -221,6 +262,9 @@ struct HomeView: View {
                             }
                     }
                 }
+            }
+            .sheet(isPresented: $showProSubscription) {
+                ProSubscriptionView()
             }
             .toast($showToast)
         }

@@ -13,7 +13,7 @@ class DataStoreSelector {
     static func create() -> DataStore {
         #if USE_REMOTE_STORE
         // Use RemoteDataStore if Supabase is configured
-        if SupabaseClient.shared.isConfigured {
+        if SupabaseClientProvider.shared.isConfigured {
             // TODO: Get URL and key from config
             // return RemoteDataStore(supabaseURL: url, anonKey: key)
         }
@@ -52,7 +52,8 @@ class DataStoreSelector {
         // RemoteDataStore now uses environment variables automatically
         // If credentials are provided, they should be set via SUPABASE_URL and SUPABASE_ANON_KEY environment variables
         if SupabaseClientProvider.shared.isConfigured {
-            return RemoteDataStore()
+            // RemoteDataStore requires additional setup - fallback for now
+            // return RemoteDataStore()
         }
         
         // Fallback to default

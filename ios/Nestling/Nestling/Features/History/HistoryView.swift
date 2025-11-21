@@ -9,6 +9,11 @@ struct HistoryView: View {
     @State private var showTummyForm = false
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
+    @State private var selectedTab: HistoryTab = .timeline
+
+    enum HistoryTab {
+        case timeline, activity
+    }
     
     @ViewBuilder
     private func timelineContent(for viewModel: HistoryViewModel) -> some View {
@@ -103,18 +108,43 @@ struct HistoryView: View {
             Group {
                 if let viewModel = viewModel {
                     ObservedViewModel(viewModel) { viewModel in
-                        VStack(spacing: .spacingMD) {
-                            // Date Picker
-                            DatePickerView(selectedDate: Binding(
-                                get: { viewModel.selectedDate },
-                                set: { viewModel.selectDate($0) }
-                            )) { date in
-                                viewModel.selectDate(date)
+                        VStack(spacing: 0) {
+                            // Tab Picker
+                            Picker("View", selection: $selectedTab) {
+                                Text("Timeline").tag(HistoryTab.timeline)
+                                Text("Activity").tag(HistoryTab.activity)
                             }
+                            .pickerStyle(.segmented)
                             .padding(.horizontal, .spacingMD)
-                            
-                            // Timeline
-                            timelineContent(for: viewModel)
+                            .padding(.vertical, .spacingSM)
+
+                            // Content based on selected tab
+                            switch selectedTab {
+                            case .timeline:
+                                VStack(spacing: .spacingMD) {
+                                    // Date Picker
+                                    DatePickerView(selectedDate: Binding(
+                                        get: { viewModel.selectedDate },
+                                        set: { viewModel.selectDate($0) }
+                                    )) { date in
+                                        viewModel.selectDate(date)
+                                    }
+                                    .padding(.horizontal, .spacingMD)
+
+                                    // Timeline
+                                    timelineContent(for: viewModel)
+                                }
+                            case .activity:
+                                if let baby = environment.currentBaby {
+                                    ActivityFeedView(events: viewModel.events, baby: baby)
+                                } else {
+                                    EmptyStateView(
+                                        icon: "person.crop.circle.badge.questionmark",
+                                        title: "No baby selected",
+                                        message: "Select a baby to view activity feed"
+                                    )
+                                }
+                            }
                         }
                     }
                 } else if environment.babies.isEmpty {

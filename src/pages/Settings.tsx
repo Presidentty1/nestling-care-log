@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { abTestingService } from '@/services/abTestingService';
+import { useAuth } from '@/hooks/useAuth';
+import { TasteOfPatterns, TasteOfDoctorReport, TasteOfAIInsights, TasteOfCaregiverSync } from '@/components/TasteOfPro';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +28,10 @@ import {
 export default function Settings() {
   const navigate = useNavigate();
   const { caregiverMode, setCaregiverMode, setActiveBabyId } = useAppStore();
+  const { user } = useAuth();
+
+  // Get A/B testing variant for paywall
+  const paywallVariant = abTestingService.getPaywallVariant(user?.id);
 
   const handleSignOut = async () => {
     try {
@@ -162,64 +169,48 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
+        <Card className={`bg-gradient-to-br ${paywallVariant.backgroundColor} border-primary/20`}>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              Nestling Pro
+              {paywallVariant.headline}
             </CardTitle>
-            <CardDescription>Unlock advanced features</CardDescription>
+            <CardDescription>{paywallVariant.subheadline}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div>
-                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  Know what to do next
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Personalized nap & feed predictions tuned to your baby's unique patterns
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  Understand the bigger picture
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  See sleep, feeding, and diaper patterns over the past week with insights
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  Keep caregivers in sync
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  One subscription covers all caregivers. Share patterns and doctor reports
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  Extra help on tough days
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Cry Insights (Beta) and AI guidance when you need support
-                </p>
-              </div>
+              {paywallVariant.features.map((feature, index) => (
+                <div key={index}>
+                  <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                    <span className="text-lg">{feature.icon}</span>
+                    {feature.title}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
             </div>
+
             <div className="pt-2">
               <p className="text-sm text-muted-foreground mb-3">
-                <strong className="text-primary">$39.99/yr</strong> (founder launch special)
+                <strong className="text-primary">{paywallVariant.pricing.yearly}</strong>
                 <br />
-                <span className="text-xs">Also available: $4.99/mo • $79.99 lifetime</span>
+                <span className="text-xs">Also available: {paywallVariant.pricing.monthly} • {paywallVariant.pricing.lifetime}</span>
               </p>
-              <Button disabled className="w-full" variant="default">
-                Coming Soon
+              <p className="text-xs text-muted-foreground mb-3 text-center">
+                {paywallVariant.socialProof}
+              </p>
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => {
+                  abTestingService.trackPaywallInteraction('click_cta', paywallVariant.id);
+                  // TODO: Implement actual subscription flow
+                  toast.info('Subscription flow coming soon!');
+                }}
+              >
+                {paywallVariant.ctaText}
               </Button>
             </div>
           </CardContent>
@@ -245,6 +236,14 @@ export default function Settings() {
             </button>
           </CardContent>
         </Card>
+
+        {/* Taste of Pro - Show blurred previews of Pro features */}
+        <div className="space-y-4">
+          <TasteOfPatterns onUpgrade={() => navigate('/patterns')} />
+          <TasteOfDoctorReport onUpgrade={() => navigate('/doctor-report')} />
+          <TasteOfAIInsights onUpgrade={() => navigate('/ai-assistant')} />
+          <TasteOfCaregiverSync onUpgrade={() => navigate('/settings/caregivers')} />
+        </div>
 
         <Card>
           <CardHeader>

@@ -27,6 +27,43 @@ struct DeveloperSettingsView: View {
                 }
             }
             
+            Section("Subscription Testing") {
+                Toggle("Force Pro Status", isOn: Binding(
+                    get: { ProSubscriptionService.shared.isProUser },
+                    set: { newValue in
+                        // For debugging only - force Pro status
+                        ProSubscriptionService.shared.isProUser = newValue
+                        if !newValue {
+                            ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                        } else {
+                            ProSubscriptionService.shared.subscriptionStatus = .subscribed
+                        }
+                    }
+                ))
+
+                Button("Simulate Trial Expiration") {
+                    // Set trial to expired state
+                    ProSubscriptionService.shared.trialDaysRemaining = nil
+                    ProSubscriptionService.shared.isProUser = false
+                    ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                }
+
+                Button("Clear Subscription Data") {
+                    // Clear UserDefaults related to subscriptions
+                    UserDefaults.standard.removeObject(forKey: "nestling_trial_start_date")
+                    ProSubscriptionService.shared.trialDaysRemaining = nil
+                    ProSubscriptionService.shared.isProUser = false
+                    ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                }
+
+                Button("Reset Trial Eligibility") {
+                    // Reset trial to be available again
+                    UserDefaults.standard.removeObject(forKey: "nestling_trial_start_date")
+                    ProSubscriptionService.shared.trialDaysRemaining = nil
+                        Task { await ProSubscriptionService.shared.checkSubscriptionStatus() }
+                }
+            }
+
             Section("Data Management") {
                 Button("Reset All Data", role: .destructive) {
                     showResetConfirmation = true
@@ -40,7 +77,28 @@ struct DeveloperSettingsView: View {
                     Text(dataStoreType)
                         .foregroundColor(.mutedForeground)
                 }
-                
+
+                HStack {
+                    Text("Subscription Status")
+                    Spacer()
+                    Text(subscriptionStatusText)
+                        .foregroundColor(.mutedForeground)
+                }
+
+                HStack {
+                    Text("Pro User")
+                    Spacer()
+                    Text(ProSubscriptionService.shared.isProUser ? "Yes" : "No")
+                        .foregroundColor(ProSubscriptionService.shared.isProUser ? .primary : .mutedForeground)
+                }
+
+                HStack {
+                    Text("Trial Days Remaining")
+                    Spacer()
+                    Text(ProSubscriptionService.shared.trialDaysRemaining.map { "\($0)" } ?? "N/A")
+                        .foregroundColor(.mutedForeground)
+                }
+
                 HStack {
                     Text("App Version")
                     Spacer()
@@ -70,6 +128,21 @@ struct DeveloperSettingsView: View {
             return "Core Data"
         } else {
             return "In Memory"
+        }
+    }
+
+    private var subscriptionStatusText: String {
+        switch ProSubscriptionService.shared.subscriptionStatus {
+        case .notSubscribed:
+            return "Not Subscribed"
+        case .subscribed:
+            return "Active"
+        case .expired:
+            return "Expired"
+        case .inGracePeriod:
+            return "Grace Period"
+        case .inBillingRetryPeriod:
+            return "Billing Retry"
         }
     }
 }

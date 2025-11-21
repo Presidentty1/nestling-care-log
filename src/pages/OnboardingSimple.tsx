@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,13 +8,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Toggle } from '@/components/ui/toggle';
-import { CalendarIcon, Baby } from 'lucide-react';
+import { CalendarIcon, Baby, Heart, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
 import { detectTimeZone, parseLocalDate } from '@/services/time';
 import { validateBaby } from '@/services/validation';
 import { toast } from 'sonner';
+import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
 
 export default function OnboardingSimple() {
   const navigate = useNavigate();

@@ -199,8 +199,9 @@ struct AuthView: View {
                         
                         Button(action: {
                             // Continue without account - use local-only data storage
+                            viewModel.skipAuthentication()
+                            // Trigger the callback to proceed to onboarding/content
                             Task { @MainActor in
-                                viewModel.skipAuthentication()
                                 // Small delay to ensure state updates propagate
                                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                                 onAuthenticated()

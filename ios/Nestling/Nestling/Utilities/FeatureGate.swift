@@ -45,6 +45,14 @@ struct FeatureGate {
             paywall()
         }
     }
+
+    /// Show upgrade prompt for feature
+    /// - Parameter feature: Feature to prompt for
+    /// - Returns: UpgradePromptView
+    @ViewBuilder
+    static func upgradePrompt(for feature: ProFeature) -> some View {
+        UpgradePromptView(feature: feature)
+    }
     
     /// Execute block if feature is accessible, otherwise execute paywall block
     /// - Parameters:
@@ -68,9 +76,27 @@ struct FeatureGate {
 struct FeatureGateModifier<Paywall: View>: ViewModifier {
     let feature: ProFeature
     let paywall: () -> Paywall
-    
+
     func body(content: Content) -> some View {
         FeatureGate.check(feature, accessible: { content }, paywall: paywall)
+    }
+}
+
+/// View modifier for showing upgrade prompt sheet
+struct UpgradePromptModifier: ViewModifier {
+    let feature: ProFeature
+    @State private var showPrompt = false
+
+    func body(content: Content) -> some View {
+        content
+            .onTapGesture {
+                if !FeatureGate.hasAccess(to: feature) {
+                    showPrompt = true
+                }
+            }
+            .sheet(isPresented: $showPrompt) {
+                FeatureGate.upgradePrompt(for: feature)
+            }
     }
 }
 
@@ -85,6 +111,13 @@ extension View {
         @ViewBuilder paywall: @escaping () -> Paywall
     ) -> some View {
         modifier(FeatureGateModifier(feature: feature, paywall: paywall))
+    }
+
+    /// Show upgrade prompt when tapped (if Pro feature is not accessible)
+    /// - Parameter feature: Feature to prompt for
+    /// - Returns: View with upgrade prompt behavior
+    func upgradePromptOnTap(_ feature: ProFeature) -> some View {
+        modifier(UpgradePromptModifier(feature: feature))
     }
 }
 

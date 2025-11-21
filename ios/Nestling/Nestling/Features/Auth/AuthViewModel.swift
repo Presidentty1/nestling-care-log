@@ -1,7 +1,6 @@
 import Foundation
 import Combine
-// TODO: Uncomment when Supabase Swift SDK is added
-// import Supabase
+import Supabase
 
 /// ViewModel for authentication flow (sign up, sign in, sign out)
 @MainActor
@@ -11,20 +10,27 @@ class AuthViewModel: ObservableObject {
     @Published var name = ""
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var session: AuthSession?
-    
-    private let provider = SupabaseClientProvider.shared
+    @Published var session: Supabase.Session?
+    @Published var hasSkippedAuth = false // Track if user skipped authentication
+
+    private var supabaseClient: SupabaseClient?
     private var authStateSubscription: AnyCancellable?
-    
+
     init() {
+        // Initialize Supabase client
+        do {
+            self.supabaseClient = try SupabaseClientProvider.shared.getClient()
+        } catch {
+            print("⚠️ Supabase client not configured: \(error.localizedDescription)")
+        }
+
         // Check for existing session on init
         Task {
             await restoreSession()
         }
-        
-        // Set up auth state listener when SDK is added
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // setupAuthStateListener()
+
+        // Set up auth state listener
+        setupAuthStateListener()
     }
     
     // MARK: - Authentication Methods
@@ -34,42 +40,38 @@ class AuthViewModel: ObservableObject {
         guard !email.isEmpty, !password.isEmpty else {
             throw AuthError.invalidInput("Email and password are required")
         }
-        
+
         guard password.count >= 8 else {
             throw AuthError.invalidInput("Password must be at least 8 characters")
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         defer { isLoading = false }
-        
-        guard provider.isConfigured else {
+
+        guard let client = supabaseClient else {
             throw AuthError.notConfigured
         }
         
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     let response = try await provider.client.auth.signUp(
-        //         email: email,
-        //         password: password,
-        //         data: ["name": name.isEmpty ? nil : name]
-        //     )
-        //     
-        //     if let session = response.session {
-        //         self.session = AuthSession(from: session)
-        //         // Save session to Keychain
-        //         try await saveSession(session)
-        //     } else {
-        //         // Email confirmation required
-        //         throw AuthError.emailConfirmationRequired
-        //     }
-        // } catch {
-        //     self.errorMessage = error.localizedDescription
-        //     throw error
-        // }
-        
-        throw AuthError.notImplemented("Auth requires Supabase SDK - see SUPABASE_SETUP.md")
+        do {
+            let response = try await client.auth.signUp(
+                email: email,
+                password: password
+            )
+
+            if let session = response.session {
+                self.session = session
+                // Session is automatically persisted by Supabase
+                print("✅ Signed up successfully")
+            } else {
+                // Email confirmation required
+                throw AuthError.emailConfirmationRequired
+            }
+        } catch {
+            self.errorMessage = error.localizedDescription
+            throw error
+        }
     }
     
     /// Sign in with email and password
@@ -83,109 +85,95 @@ class AuthViewModel: ObservableObject {
         
         defer { isLoading = false }
         
-        guard provider.isConfigured else {
+        guard let client = supabaseClient else {
             throw AuthError.notConfigured
         }
-        
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     let response = try await provider.client.auth.signIn(
-        //         email: email,
-        //         password: password
-        //     )
-        //     
-        //     guard let session = response.session else {
-        //         throw AuthError.authenticationFailed("No session returned")
-        //     }
-        //     
-        //     self.session = AuthSession(from: session)
-        //     // Save session to Keychain
-        //     try await saveSession(session)
-        // } catch {
-        //     self.errorMessage = error.localizedDescription
-        //     throw error
-        // }
-        
-        throw AuthError.notImplemented("Auth requires Supabase SDK - see SUPABASE_SETUP.md")
+
+        do {
+            let session = try await client.auth.signIn(
+                email: email,
+                password: password
+            )
+
+            self.session = session
+            print("✅ Signed in successfully")
+        } catch {
+            self.errorMessage = error.localizedDescription
+            throw error
+        }
     }
     
     /// Sign out current user
     func signOut() async throws {
-        guard provider.isConfigured else {
+        guard let client = supabaseClient else {
             throw AuthError.notConfigured
         }
-        
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // try await provider.client.auth.signOut()
-        // self.session = nil
-        // try await clearSession()
-        
-        throw AuthError.notImplemented("Auth requires Supabase SDK - see SUPABASE_SETUP.md")
+
+        try await client.auth.signOut()
+        self.session = nil
+        print("✅ Signed out successfully")
     }
     
-    /// Restore session from Keychain
+    /// Restore session from Supabase
     func restoreSession() async {
-        guard provider.isConfigured else { return }
-        
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     let session = try await loadSession()
-        //     if let session = session {
-        //         self.session = AuthSession(from: session)
-        //         // Refresh session if needed
-        //         try await provider.client.auth.refreshSession()
-        //     }
-        // } catch {
-        //     print("Failed to restore session: \(error)")
-        // }
+        guard let client = supabaseClient else {
+            print("Supabase client not configured")
+            return
+        }
+
+        do {
+            let session = try await client.auth.session
+            self.session = session
+            if session != nil {
+                print("✅ Session restored successfully")
+            }
+        } catch {
+            print("Failed to restore session: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Auth State Listener
     
     private func setupAuthStateListener() {
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // let authStateChanges = provider.client.auth.authStateChanges
-        // authStateSubscription = authStateChanges
-        //     .sink { [weak self] event in
-        //         Task { @MainActor in
-        //             switch event {
-        //             case .initialSession(let session):
-        //                 if let session = session {
-        //                     self?.session = AuthSession(from: session)
-        //                 }
-        //             case .signedIn(let session):
-        //                 self?.session = AuthSession(from: session)
-        //                 try? await self?.saveSession(session)
-        //             case .signedOut:
-        //                 self?.session = nil
-        //                 try? await self?.clearSession()
-        //             case .tokenRefreshed(let session):
-        //                 self?.session = AuthSession(from: session)
-        //                 try? await self?.saveSession(session)
-        //             default:
-        //                 break
-        //             }
-        //         }
-        //     }
+        guard let client = supabaseClient else { return }
+
+        // Set up auth state changes listener using AsyncStream
+        Task {
+            for await (event, session) in client.auth.authStateChanges {
+                await handleAuthStateChange(event: event, session: session)
+            }
+        }
+    }
+    
+    private func handleAuthStateChange(event: AuthChangeEvent, session: Supabase.Session?) {
+        switch event {
+        case .initialSession:
+            if let session = session {
+                self.session = session
+            }
+        case .signedIn:
+            self.session = session
+            print("✅ Auth state: signed in")
+        case .signedOut:
+            self.session = nil
+            print("✅ Auth state: signed out")
+        case .tokenRefreshed:
+            self.session = session
+            print("✅ Auth state: token refreshed")
+        default:
+            break
+        }
     }
     
     // MARK: - Dev Mode
     
-    #if DEBUG
-    /// Skip authentication for development (DEV ONLY - remove before production)
+    /// Skip authentication to use app in guest mode (local-only data)
     func skipAuthentication() {
-        print("⚠️ DEV MODE: Skipping authentication")
-        // Set a mock session so the app proceeds normally
-        // This is a placeholder - in production, this would be a real Supabase session
-        session = AuthSession(
-            userId: UUID(),
-            email: "dev@nestling.app",
-            accessToken: "dev-token-\(UUID().uuidString)",
-            refreshToken: "dev-refresh-\(UUID().uuidString)",
-            expiresAt: Date().addingTimeInterval(86400 * 365) // Expires in 1 year
-        )
+        print("✅ Skipping authentication - using guest mode")
+        // Mark that user has skipped auth so app can proceed
+        hasSkippedAuth = true
+        session = nil
     }
-    #endif
     
     // MARK: - Session Persistence (Keychain)
     

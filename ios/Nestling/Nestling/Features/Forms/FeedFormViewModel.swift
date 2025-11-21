@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 @MainActor
 class FeedFormViewModel: ObservableObject {
@@ -8,6 +9,7 @@ class FeedFormViewModel: ObservableObject {
     @Published var unit: UnitType = .ml
     @Published var side: Side = .left
     @Published var note: String = ""
+    @Published var photos: [UIImage] = []
     @Published var startTime: Date = Date()
     @Published var isValid: Bool = false
     @Published var errorMessage: String?
@@ -58,6 +60,9 @@ class FeedFormViewModel: ObservableObject {
         
         note = event.note ?? ""
         startTime = event.startTime
+
+        // Load photos
+        photos = PhotoStorageService.shared.loadPhotos(for: event.id)
     }
     
     private func loadLastUsedValues() {
@@ -120,26 +125,35 @@ class FeedFormViewModel: ObservableObject {
         isSaving = true
         defer { isSaving = false }
         
+        let eventId = editingEvent?.id ?? IDGenerator.generate()
+
+        // Save photos if any
+        var photoUrls: [String]? = nil
+        if !photos.isEmpty {
+            photoUrls = try await PhotoStorageService.shared.savePhotos(photos, for: eventId)
+        }
+
         var eventData: Event
-        
+
         if feedType == .breast {
             eventData = Event(
-                id: editingEvent?.id ?? IDGenerator.generate(),
+                id: eventId,
                 babyId: baby.id,
                 type: .feed,
                 subtype: "breast",
                 startTime: startTime,
                 side: side.rawValue,
                 note: note.isEmpty ? nil : note,
+                photoUrls: photoUrls,
                 createdAt: editingEvent?.createdAt ?? Date(),
                 updatedAt: Date()
             )
         } else {
             let amountValue = Double(amount) ?? 0
             let amountML = unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
-            
+
             eventData = Event(
-                id: editingEvent?.id ?? IDGenerator.generate(),
+                id: eventId,
                 babyId: baby.id,
                 type: .feed,
                 subtype: feedType.rawValue,
@@ -147,6 +161,7 @@ class FeedFormViewModel: ObservableObject {
                 amount: amountML,
                 unit: unit.rawValue,
                 note: note.isEmpty ? nil : note,
+                photoUrls: photoUrls,
                 createdAt: editingEvent?.createdAt ?? Date(),
                 updatedAt: Date()
             )

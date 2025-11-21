@@ -33,6 +33,7 @@ struct PrimaryButton: View {
             .cornerRadius(.radiusMD)
         }
         .disabled(isDisabled)
+        .gentlePress()
         .accessibilityLabel(title)
         .accessibilityHint("Double tap to activate")
     }

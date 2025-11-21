@@ -3,6 +3,7 @@ import { EventRecord } from '@/services/eventsService';
 import { SwipeableTimelineRow } from './SwipeableTimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';
+import { usePerformance } from '@/hooks/usePerformance';
 
 interface VirtualizedTimelineListProps {
   events: EventRecord[];
@@ -29,6 +30,10 @@ export function VirtualizedTimelineList({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
+  const scrollRafId = useRef<number>();
+
+  // Performance monitoring
+  usePerformance('VirtualizedTimelineList', events.length > 100);
 
   // Sort events by effective time (end_time if present, else start_time), most recent first
   const sortedEvents = useMemo(() => {
@@ -59,9 +64,26 @@ export function VirtualizedTimelineList({
     return { startIndex, endIndex, totalHeight };
   }, [scrollTop, containerHeight, itemHeight, overscan, sortedEvents.length]);
 
-  // Handle scroll
+  // Handle scroll with performance optimization
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
+    // Cancel previous RAF to throttle updates
+    if (scrollRafId.current) {
+      cancelAnimationFrame(scrollRafId.current);
+    }
+
+    // Use RAF for smooth updates
+    scrollRafId.current = requestAnimationFrame(() => {
+      setScrollTop(e.currentTarget.scrollTop);
+    });
+  }, []);
+
+  // Cleanup RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollRafId.current) {
+        cancelAnimationFrame(scrollRafId.current);
+      }
+    };
   }, []);
 
   // Measure container height

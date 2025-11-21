@@ -1,15 +1,26 @@
 import { EventType } from '@/types/events';
+import { track, identify } from '@/analytics/analytics';
+import * as Sentry from '@sentry/react';
 
 /**
- * Analytics service for tracking user actions
- * Console stub for MVP - will be replaced with real analytics later
+ * Analytics service for tracking user actions with Firebase Analytics and Sentry error reporting
  */
 class AnalyticsService {
   private enabled = true;
 
   private log(event: string, data?: any) {
     if (!this.enabled) return;
-    console.log(`[Analytics] ${event}`, data || '');
+
+    // Send breadcrumb to Sentry for user actions
+    Sentry.addBreadcrumb({
+      message: event,
+      category: 'user_action',
+      level: 'info',
+      data: data || {}
+    });
+
+    // Track with Firebase Analytics
+    track(event, data);
   }
 
   trackOnboardingComplete(babyId: string) {

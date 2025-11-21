@@ -19,16 +19,12 @@ class DataStoreSelector {
         #endif
         
         #if USE_CORE_DATA
-        return CoreDataDataStore()
+        return CoreDataStore()
         #elseif USE_JSON_STORE
         return JSONBackedDataStore()
         #else
         // Default: Use Core Data if available, fallback to JSON
-        if FileManager.default.fileExists(atPath: CoreDataStack.shared.persistentContainer.persistentStoreDescriptions.first?.url?.path ?? "") {
-            return CoreDataDataStore()
-        } else {
-            return JSONBackedDataStore()
-        }
+        return CoreDataStore()
         #endif
     }
     

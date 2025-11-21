@@ -5,7 +5,7 @@ import Foundation
 class WidgetActionService {
     static let shared = WidgetActionService()
     
-    private let appGroupID = "group.com.nestling.app" // Update with actual App Group ID
+    private let appGroupID = "group.com.nestling.Nestling"
     private let userDefaults: UserDefaults?
     
     private init() {

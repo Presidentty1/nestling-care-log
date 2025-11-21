@@ -46,21 +46,28 @@ export default function Accessibility() {
   }, [userSettings]);
 
   const applySettings = (settings: any) => {
-    // Apply theme
+    // Apply theme with smooth transition
     const root = document.documentElement;
-    if (settings.theme === 'dark') {
-      root.classList.add('dark');
-    } else if (settings.theme === 'light') {
-      root.classList.remove('dark');
-    } else {
-      // System theme
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
+
+    // Use requestAnimationFrame for smoother theme switching
+    requestAnimationFrame(() => {
+      if (settings.theme === 'dark') {
         root.classList.add('dark');
-      } else {
+        localStorage.setItem('theme', 'dark');
+      } else if (settings.theme === 'light') {
         root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        // System theme
+        localStorage.removeItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
       }
-    }
+    });
 
     // Apply font size
     root.style.fontSize = {

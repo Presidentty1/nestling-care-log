@@ -1,5 +1,7 @@
 import SwiftUI
 
+// Import voice input component
+
 struct FeedFormView: View {
     @ObservedObject var viewModel: FeedFormViewModel
     @Environment(\.dismiss) var dismiss
@@ -77,8 +79,11 @@ struct FeedFormView: View {
                 }
                 
                 Section("Notes") {
-                    TextField("Optional notes", text: $viewModel.note, axis: .vertical)
-                        .lineLimit(3...6)
+                    VoiceInputView(text: $viewModel.note, placeholder: "Optional notes...")
+                }
+
+                Section("Photos") {
+                    PhotoPickerView(selectedPhotos: $viewModel.photos)
                 }
             }
             .navigationTitle(viewModel.editingEvent != nil ? "Edit Feed" : "New Feed")

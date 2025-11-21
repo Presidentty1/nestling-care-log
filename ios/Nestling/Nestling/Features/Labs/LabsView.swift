@@ -4,6 +4,8 @@ struct LabsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var showPredictions = false
     @State private var showProSubscription = false
+    @State private var showCryInsightsOnboarding = false
+    @State private var showCryInsights = false
     
     var body: some View {
         NavigationStack {
@@ -34,20 +36,19 @@ struct LabsView: View {
                     .padding(.horizontal, .spacingMD)
                     
                     // Cry Insights Card
-                    NavigationLink(destination: {
-                        if let baby = environment.currentBaby ?? environment.babies.first {
-                            CryRecorderView(dataStore: environment.dataStore, baby: baby)
+                    LabsCard(
+                        title: "Cry Insights",
+                        description: "Analyze baby's cry patterns",
+                        icon: "waveform",
+                        color: .primary,
+                        badge: "Beta"
+                    ) {
+                        let onboardingShown = UserDefaults.standard.bool(forKey: "cryInsightsOnboardingShown")
+                        if !onboardingShown {
+                            showCryInsightsOnboarding = true
                         } else {
-                            Text("No baby selected")
+                            showCryInsights = true
                         }
-                    }) {
-                        LabsCard(
-                            title: "Cry Insights",
-                            description: "Analyze baby's cry patterns",
-                            icon: "waveform",
-                            color: .primary,
-                            badge: "Beta"
-                        ) { }
                     }
                     .padding(.horizontal, .spacingMD)
                 }
@@ -77,6 +78,20 @@ struct LabsView: View {
                     .onDisappear {
                         environment.navigationCoordinator.showPredictions = false
                     }
+            }
+            .sheet(isPresented: $showCryInsightsOnboarding) {
+                AIFeatureOnboardingView(feature: .cryInsights)
+                    .onDisappear {
+                        // Show Cry Insights after onboarding
+                        showCryInsights = true
+                    }
+            }
+            .sheet(isPresented: $showCryInsights) {
+                if let baby = environment.currentBaby ?? environment.babies.first {
+                    CryRecorderView(dataStore: environment.dataStore, baby: baby)
+                } else {
+                    Text("No baby selected")
+                }
             }
         }
     }

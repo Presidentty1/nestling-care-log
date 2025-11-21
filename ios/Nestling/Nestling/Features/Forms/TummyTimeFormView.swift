@@ -86,7 +86,11 @@ struct TummyTimeFormView: View {
                     }
                     
                     Section("Notes") {
-                        TextField("Optional notes", text: $viewModel.note, axis: .vertical)
+                        VoiceInputView(text: $viewModel.note, placeholder: "Optional notes...")
+
+                    Section("Photos") {
+                        PhotoPickerView(selectedPhotos: $viewModel.photos)
+                    }
                             .font(isCaregiverMode ? .caregiverBody : .body)
                             .lineLimit(3...6)
                     }

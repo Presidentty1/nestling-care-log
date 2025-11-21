@@ -256,7 +256,7 @@ struct Last7DaysTrendsView: View {
             let endDate = Date()
             let startDate = Calendar.current.date(byAdding: .day, value: -6, to: endDate) ?? endDate
 
-            let events = try await environment.dataStore.fetchEvents(forBaby: babyId, from: startDate, to: endDate)
+            let events = try await environment.dataStore.fetchEvents(for: environment.currentBaby ?? Baby.mock(), from: startDate, to: endDate)
 
             // Process data
             let calendar = Calendar.current
@@ -306,7 +306,7 @@ struct Last7DaysTrendsView: View {
             let averageDiapers = dailyDiapers.isEmpty ? 0 : Double(totalDiapers) / Double(dailyDiapers.count)
 
             let avgFirstNapTime = firstNapData.isEmpty ? Date() :
-                firstNapData.reduce(Date()) { $0.addingTimeInterval($1.time.timeIntervalSince1970) } / Double(firstNapData.count)
+                Date(timeIntervalSince1970: firstNapData.map { $0.time.timeIntervalSince1970 }.reduce(0, +) / Double(firstNapData.count))
 
             weeklyData = WeeklyTrendsData(
                 dailySleep: dailySleepData,
@@ -365,5 +365,5 @@ struct FirstNapData {
 
 #Preview {
     Last7DaysTrendsView(babyId: UUID())
-        .environmentObject(AppEnvironment())
+        .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
 }

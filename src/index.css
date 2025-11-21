@@ -2,37 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
-@layer base {
-  :root {
-    /* iOS-quality design tokens - Light mode */
-    /* Background layers */
-    --background: 210 17% 98%; /* #F8FAFB */
-    --foreground: 199 62% 8%; /* #0D1B1E */
-    --surface: 0 0% 100%; /* #FFFFFF cards/sheets */
-    --elevated: 0 0% 100%; /* #FFFFFF higher cards */
+/* Smooth theme transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
 
-    /* Brand - Calming teal */
-    --primary: 168 46% 34%; /* #2E7D6A action teal */
+/* Typography utilities */
+.font-display { font: var(--font-display); }
+.font-title { font: var(--font-title); }
+.font-body { font: var(--font-body); }
+.font-caption { font: var(--font-caption); }
+
+/* Rounded pill-style primary buttons */
+.btn-pill {
+  border-radius: 9999px; /* Fully rounded */
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+  min-height: 52px; /* 52-56pt as specified */
+  transition: all 0.2s ease;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* Enhanced focus indicators for dark mode */
+.dark *:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Better text selection in dark mode */
+.dark ::selection {
+  background-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Ensure proper contrast for links */
+.dark a {
+  color: hsl(var(--primary));
+}
+
+.dark a:hover {
+  color: hsl(var(--primary-600));
+}
+
+/* Critical: No white backgrounds in dark mode */
+.dark {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Ensure all text is readable */
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .text-foreground {
+  color: hsl(var(--foreground));
+}
+
+@layer base {
+  /* Dark mode only - Nestling design system */
+  :root {
+    color-scheme: dark;
+
+    /* Background layers */
+    --background: 210 31% 9%; /* #0F1417 - near-black app background */
+    --surface: 204 20% 12%; /* #141A1E - cards, quick actions, inputs */
+    --elevated: 202 17% 14%; /* #182127 - higher cards */
+
+    /* Primary brand color - FINALIZED: Green (onboarding/AI) */
+    --primary: 168 46% 34%; /* #2E7D6A - calming teal (primary CTAs, active nav) */
     --primary-foreground: 0 0% 100%;
-    --primary-600: 168 50% 29%; /* #256E5E darker teal */
-    --primary-100: 168 57% 90%; /* #D8EFE9 light teal */
-    
-    /* Accent - Links & highlights */
-    --secondary: 235 100% 70%; /* #6A7DFF indigo */
-    --secondary-foreground: 0 0% 100%;
+    --primary-600: 168 50% 29%; /* #256E5E - darker teal for hovers */
+    --primary-100: 168 57% 90%; /* #D8EFE9 - light teal accents */
+
+    /* Secondary accent - Blue (login screen) as secondary */
+    --secondary: 199 89% 48%; /* #0BA5EC - blue for secondary actions */
+    --secondary-foreground: 210 31% 9%;
 
     /* Semantic colors */
-    --success: 168 46% 34%; /* matches primary */
-    --success-foreground: 0 0% 100%;
-    --warning: 38 96% 55%; /* #F5A623 */
-    --warning-foreground: 199 62% 8%;
-    --destructive: 0 64% 55%; /* #D64545 */
+    --success: 142 71% 45%; /* #10B981 - green for healthy/on track */
+    --success-foreground: 210 31% 9%;
+    --warning: 38 96% 55%; /* #F5A623 - orange for warnings */
+    --warning-foreground: 210 31% 9%;
+    --destructive: 0 64% 55%; /* #D64545 - red for errors */
     --destructive-foreground: 0 0% 100%;
-    --info: 207 90% 54%; /* #2196F3 */
+    --info: 207 90% 54%; /* #2196F3 - blue for info */
     --info-foreground: 0 0% 100%;
 
     /* Event-specific colors for tracking */
@@ -40,12 +106,14 @@ All colors MUST be HSL.
     --event-sleep: 250 70% 60%; /* #8B5CF6 - Purple (rest, night) */
     --event-diaper: 25 95% 53%; /* #FB923C - Warm orange (attention) */
     --event-tummy: 142 71% 45%; /* #10B981 - Green (growth, activity) */
-    --event-medication: 0 84% 60%; /* #EF4444 - Red (medical attention) */
 
     /* Text hierarchy */
-    --muted: 199 19% 62%; /* #8FA1A8 */
-    --muted-foreground: 199 19% 62%;
-    --text-subtle: 199 17% 28%; /* #415058 */
+    --foreground: 190 25% 93%; /* #EAF0F2 - white text */
+    --muted-foreground: 197 12% 58%; /* #86969E - muted grey */
+    --text-subtle: 195 15% 75%; /* #B8C5CB - subtle text */
+
+    /* Borders */
+    --border: 204 22% 19%; /* #223039 - subtle 1px lines */
     
     /* UI elements */
     --accent: 235 100% 70%; /* matches secondary */
@@ -96,74 +164,25 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 199 62% 8%;
     --sidebar-border: 202 25% 91%;
     --sidebar-ring: 168 46% 34%;
-  }
 
-  .dark {
-    /* iOS-quality design tokens - Dark mode */
-    --background: 210 31% 9%; /* #0F1417 */
-    --foreground: 190 25% 93%; /* #EAF0F2 */
-    --surface: 204 20% 12%; /* #141A1E */
-    --elevated: 202 17% 14%; /* #182127 */
+    /* Typography scale - Nestling design system */
+    --font-display: 800 32px/1.2 'Inter', system-ui; /* 32-34pt - Home, History, Labs */
+    --font-title: 600 24px/1.3 'Inter', system-ui; /* 24pt - onboarding titles */
+    --font-body: 400 16px/1.5 'Inter', system-ui; /* 16-17pt - main copy */
+    --font-caption: 400 13px/1.4 'Inter', system-ui; /* 13pt - helper text, disclaimers */
 
-    --primary: 168 36% 64%; /* #82C6B6 */
-    --primary-foreground: 0 0% 100%;
-    --primary-600: 168 35% 58%; /* #73B5A5 */
-    --primary-100: 168 26% 21%; /* #24413A */
-    
-    --secondary: 235 100% 81%; /* #9AA6FF */
-    --secondary-foreground: 210 31% 9%;
-
-    --success: 168 36% 64%;
-    --success-foreground: 210 31% 9%;
-    --warning: 39 100% 70%; /* #FFC266 */
-    --warning-foreground: 210 31% 9%;
-    --destructive: 0 100% 75%; /* #FF7D7D */
-    --destructive-foreground: 210 31% 9%;
-    --info: 207 89% 70%; /* #64B5F6 */
-    --info-foreground: 210 31% 9%;
-
-    /* Event-specific colors - dark mode */
-    --event-feed: 199 89% 65%; /* #52B5F5 - Lighter blue */
-    --event-sleep: 250 70% 75%; /* #A78BFA - Lighter purple */
-    --event-diaper: 25 95% 65%; /* #FDBA74 - Lighter orange */
-    --event-tummy: 142 71% 60%; /* #34D399 - Lighter green */
-    --event-medication: 0 84% 75%; /* #FCA5A5 - Lighter red */
-
-    --muted: 197 12% 58%; /* #86969E */
-    --muted-foreground: 197 12% 58%;
-    --text-subtle: 195 15% 75%; /* #B8C5CB */
-    
-    --accent: 235 100% 81%;
+    --accent: 199 89% 48%; /* matches secondary blue */
     --accent-foreground: 210 31% 9%;
-    
+
     --card: 204 20% 12%;
     --card-foreground: 190 25% 93%;
-    
+
     --popover: 204 20% 12%;
     --popover-foreground: 190 25% 93%;
 
-    --border: 204 22% 19%; /* #223039 */
+    --border: 204 22% 19%; /* #223039 - subtle 1px lines */
     --input: 204 22% 19%;
-    --ring: 168 36% 64%;
-
-    /* Shadows - Dark mode */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
-
-    /* Caregiver Mode - UI Scaling */
-    --caregiver-scale: 1.0;
-
-    --sidebar-background: 210 31% 9%;
-    --sidebar-foreground: 190 25% 93%;
-    --sidebar-primary: 168 36% 64%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 204 20% 12%;
-    --sidebar-accent-foreground: 190 25% 93%;
-    --sidebar-border: 204 22% 19%;
-    --sidebar-ring: 168 36% 64%;
+    --ring: 168 46% 34%; /* matches primary */
   }
 }
 

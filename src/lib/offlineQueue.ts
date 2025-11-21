@@ -51,22 +51,38 @@ class OfflineQueue {
     let success = 0;
     let failed = 0;
 
+    // Process operations in batches to avoid blocking the main thread
+    const batchSize = 5;
     const operations = [...this.queue];
-    
-    for (const op of operations) {
-      try {
-        await this.processOperation(op);
-        this.removeFromQueue(op.id);
-        success++;
-      } catch (error) {
-        console.error('Failed to process operation:', error);
-        op.retryCount++;
-        
-        if (op.retryCount >= this.maxRetries) {
+
+    for (let i = 0; i < operations.length; i += batchSize) {
+      const batch = operations.slice(i, i + batchSize);
+
+      const results = await Promise.allSettled(
+        batch.map(op => this.processOperation(op))
+      );
+
+      results.forEach((result, index) => {
+        const op = batch[index];
+
+        if (result.status === 'fulfilled') {
           this.removeFromQueue(op.id);
-          failed++;
+          success++;
+        } else {
+          console.error('Failed to process operation:', result.reason);
+          op.retryCount++;
+
+          if (op.retryCount >= this.maxRetries) {
+            this.removeFromQueue(op.id);
+            failed++;
+          } else {
+            failed++;
+          }
         }
-      }
+      });
+
+      // Yield control to prevent blocking the main thread
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     this.saveQueue();

@@ -7,7 +7,21 @@ struct SettingsRootView: View {
     @State private var showManageBabies = false
     @State private var showManageCaregivers = false
     @State private var showAuth = false
-    
+    @State private var showProSubscription = false
+
+    private func proStatusText() -> String {
+        let proService = ProSubscriptionService.shared
+        if proService.isProUser {
+            if proService.trialDaysRemaining != nil && proService.trialDaysRemaining! > 0 {
+                return "Pro Trial Active"
+            } else {
+                return "Pro Active"
+            }
+        } else {
+            return "Free Plan"
+        }
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -44,6 +58,28 @@ struct SettingsRootView: View {
                     }
                 }
                 
+                Section("Subscription") {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Nestling Pro")
+                                .font(.headline)
+                                .foregroundColor(.foreground)
+
+                            Text(proStatusText())
+                                .font(.caption)
+                                .foregroundColor(.mutedForeground)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.mutedForeground)
+                            .font(.caption)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        showProSubscription = true
+                    }
+                }
+
                 Section("AI & Smart Features") {
                     Button(action: { showAIDataSharing = true }) {
                         HStack {
@@ -283,6 +319,9 @@ struct SettingsRootView: View {
                         await environment.refreshSettings()
                     }
                 }
+            }
+            .sheet(isPresented: $showProSubscription) {
+                ProSubscriptionView()
             }
         }
     }

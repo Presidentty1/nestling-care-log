@@ -19,22 +19,27 @@ struct Secrets {
         if let url = ProcessInfo.processInfo.environment["SUPABASE_URL"], !url.isEmpty {
             return url
         }
-        
+
         // Fallback to hardcoded value (update this with your actual URL)
-        // TODO: Replace with your Supabase project URL
+        // Replace with your Supabase project URL
         return "https://your-project.supabase.co"
     }
-    
+
     /// Supabase anonymous (public) key
     static var supabaseAnonKey: String {
         // Try environment variable first
         if let key = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"], !key.isEmpty {
             return key
         }
-        
+
         // Fallback to hardcoded value (update this with your actual key)
-        // TODO: Replace with your Supabase anon key
+        // Replace with your Supabase anon key
         return "your-anon-key-here"
+    }
+
+    /// Supabase JWT secret (for edge function calls)
+    static var supabaseJWT: String? {
+        ProcessInfo.processInfo.environment["SUPABASE_JWT"]
     }
     
     /// Check if secrets are properly configured

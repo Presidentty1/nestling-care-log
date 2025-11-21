@@ -71,7 +71,14 @@ export default function Home() {
   const privacyBanner = useDismissibleBanner('privacy_stance');
   const caregiverBanner = useDismissibleBanner('caregiver_invite');
   const { getLastUsed, saveLastUsed } = useLastUsedValues();
-  const [dismissedTips, setDismissedTips] = useState<string[]>([]);
+  const [dismissedTips, setDismissedTips] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('dismissedTips');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [floatingButtonEnabled, setFloatingButtonEnabled] = useState(() => {
     const stored = localStorage.getItem('floating_button_enabled');
     return stored !== null ? JSON.parse(stored) : true;
@@ -440,6 +447,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5">
+        {/* Page Title */}
+        <h1 className="font-display text-left mb-6">Home</h1>
+
         {selectedBaby && (
           <div className="flex items-center justify-between mb-2">
             <Button
@@ -452,7 +462,7 @@ export default function Home() {
               </Avatar>
               <div className="text-left">
                 <div className="font-semibold text-[17px] leading-[24px]">{selectedBaby.name}</div>
-                <div className="text-secondary text-muted-foreground">
+                <div className="text-muted-foreground">
                   {differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth))} months
                 </div>
               </div>
@@ -491,7 +501,14 @@ export default function Home() {
         {/* AI Contextual Tips */}
         {selectedBaby && (() => {
           const tips = getContextualTips(selectedBaby.date_of_birth, events);
-          const visibleTips = tips.filter(tip => !dismissedTips.includes(tip.id));
+          // Essential tips that should always show (non-dismissible)
+          const essentialTipIds = ['loose-logging', 'trust-yourself'];
+          const essentialTips = tips.filter(tip => essentialTipIds.includes(tip.id));
+          const otherTips = tips.filter(tip => !essentialTipIds.includes(tip.id));
+          const visibleOtherTips = otherTips.filter(tip => !dismissedTips.includes(tip.id));
+          
+          // Always show essential tips, plus other non-dismissed tips
+          const visibleTips = [...essentialTips, ...visibleOtherTips];
           
           return visibleTips.length > 0 ? (
             <div className="space-y-2">
@@ -500,6 +517,8 @@ export default function Home() {
                   key={tip.id}
                   tip={tip}
                   onDismiss={(tipId) => {
+                    // Don't allow dismissing essential tips
+                    if (essentialTipIds.includes(tipId)) return;
                     setDismissedTips(prev => {
                       const newDismissed = [...prev, tipId];
                       localStorage.setItem('dismissedTips', JSON.stringify(newDismissed));

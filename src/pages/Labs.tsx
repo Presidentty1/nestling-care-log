@@ -10,6 +10,7 @@ import { aiPreferencesService } from '@/services/aiPreferencesService';
 import { useAuth } from '@/hooks/useAuth';
 import { usePro } from '@/hooks/usePro';
 import { useNavigate } from 'react-router-dom';
+import { SmartPredictionsCard } from '@/components/labs/SmartPredictionsCard';
 
 export default function Labs() {
   const { user } = useAuth();
@@ -39,7 +40,7 @@ export default function Labs() {
     <div className="min-h-screen bg-surface pb-20">
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         <div>
-          <h1 className="text-2xl font-bold">Labs</h1>
+          <h1 className="font-display text-left">Labs</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Experimental features to help understand your baby
           </p>
@@ -110,6 +111,25 @@ export default function Labs() {
               <TrendingUp className="mr-2 h-4 w-4" />
               {isPro ? 'View Patterns' : 'Upgrade to View Patterns'}
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <CardTitle>Smart Predictions</CardTitle>
+                  <Badge variant="secondary">AI</Badge>
+                </div>
+                <CardDescription>
+                  AI learns your baby's patterns to predict nap and feed times
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <SmartPredictionsCard />
           </CardContent>
         </Card>
 

@@ -4,27 +4,66 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { queryClient } from "@/lib/queryClient";
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { reminderService } from '@/services/reminderService';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { page } from '@/analytics/analytics';
+import { ResilientErrorBoundary } from '@/components/ResilientErrorBoundary';
+import { reportWebVitals } from '@/hooks/usePerformance';
+import * as Sentry from '@sentry/react';
 
-// Core pages (eager loaded)
+// Initialize Sentry for web app
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN || 'https://your-sentry-dsn@sentry.io/project-id',
+  environment: import.meta.env.MODE || 'development',
+  release: import.meta.env.VITE_APP_VERSION || '1.0.0',
+
+  // Performance monitoring
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
+  ],
+
+  // Configure breadcrumbs
+  maxBreadcrumbs: 100,
+
+  // Release health
+  enableTracing: true,
+});
+
+// Initialize performance monitoring
+if (typeof window !== 'undefined') {
+  // Defer web vitals reporting to avoid blocking initial load
+  setTimeout(() => {
+    reportWebVitals();
+  }, 100);
+}
+
+// Core pages (eager loaded for fast initial load)
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import OnboardingSimple from "./pages/OnboardingSimple";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
-import ManageBabiesPage from "./pages/Settings/ManageBabies";
-import NotificationSettingsPage from "./pages/Settings/NotificationSettings";
-import ManageCaregiversPage from "./pages/Settings/ManageCaregivers";
-import PrivacyDataPage from "./pages/Settings/PrivacyData";
-import AIDataSharingPage from "./pages/Settings/AIDataSharing";
 import NotFound from "./pages/NotFound";
+
+// Settings pages (lazy loaded for better performance)
+const ManageBabiesPage = lazy(() => import("./pages/Settings/ManageBabies"));
+const NotificationSettingsPage = lazy(() => import("./pages/Settings/NotificationSettings"));
+const ManageCaregiversPage = lazy(() => import("./pages/Settings/ManageCaregivers"));
+const PrivacyDataPage = lazy(() => import("./pages/Settings/PrivacyData"));
+const AIDataSharingPage = lazy(() => import("./pages/Settings/AIDataSharing"));
 
 // Heavy pages (lazy loaded for better performance)
 const Labs = lazy(() => import("./pages/Labs"));
@@ -52,20 +91,18 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const ParentWellness = lazy(() => import("./pages/ParentWellness"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 
-// Suspense wrapper for lazy loaded routes
-function SuspenseWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-screen animate-fade-in">
-          <LoadingSpinner />
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
-  );
-}
+// Optimized Suspense wrapper for lazy loaded routes
+const SuspenseWrapper = memo(({ children }: { children: React.ReactNode }) => (
+  <Suspense
+    fallback={
+      <div className="flex items-center justify-center min-h-screen animate-fade-in">
+        <LoadingSpinner />
+      </div>
+    }
+  >
+    {children}
+  </Suspense>
+));
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -90,6 +127,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const { activeBabyId, caregiverMode } = useAppStore();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Track page views
   useEffect(() => {
@@ -109,10 +147,18 @@ function AppContent() {
     };
   }, [activeBabyId]);
 
+  const handleGoHome = () => {
+    navigate('/home');
+  };
+
   return (
-    <div className={caregiverMode ? 'caregiver-mode' : ''}>
-      <NotificationBanner />
-      <Routes>
+    <ResilientErrorBoundary
+      context="main-app"
+      onGoHome={handleGoHome}
+    >
+      <div className={caregiverMode ? 'caregiver-mode' : ''}>
+        <NotificationBanner />
+        <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
@@ -152,7 +198,8 @@ function AppContent() {
         <Route path="/parent-wellness" element={<SuspenseWrapper><AuthGuard><ParentWellness /></AuthGuard></SuspenseWrapper>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </div>
+      </div>
+    </ResilientErrorBoundary>
   );
 }
 

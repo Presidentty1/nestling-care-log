@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 @MainActor
 class SleepFormViewModel: ObservableObject {
@@ -7,6 +8,7 @@ class SleepFormViewModel: ObservableObject {
     @Published var startTime: Date = Date()
     @Published var endTime: Date?
     @Published var note: String = ""
+    @Published var photos: [UIImage] = []
     @Published var isTimerMode: Bool = true
     @Published var isTimerRunning: Bool = false
     @Published var timerStartTime: Date?
@@ -43,6 +45,7 @@ class SleepFormViewModel: ObservableObject {
         startTime = event.startTime
         endTime = event.endTime
         note = event.note ?? ""
+        photos = PhotoStorageService.shared.loadPhotos(for: event.id)
         isTimerMode = false
     }
     
@@ -225,14 +228,23 @@ class SleepFormViewModel: ObservableObject {
             }
         }
         
+        let eventId = editingEvent?.id ?? IDGenerator.generate()
+
+        // Save photos if any
+        var photoUrls: [String]? = nil
+        if !photos.isEmpty {
+            photoUrls = try await PhotoStorageService.shared.savePhotos(photos, for: eventId)
+        }
+
         let eventData = Event(
-            id: editingEvent?.id ?? IDGenerator.generate(),
+            id: eventId,
             babyId: baby.id,
             type: .sleep,
             subtype: subtype.rawValue,
             startTime: startTime,
             endTime: finalEndTime,
             note: note.isEmpty ? nil : note,
+            photoUrls: photoUrls,
             createdAt: editingEvent?.createdAt ?? Date(),
             updatedAt: Date()
         )

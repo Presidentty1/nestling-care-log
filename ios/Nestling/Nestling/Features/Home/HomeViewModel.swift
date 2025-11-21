@@ -7,6 +7,9 @@ import UserNotifications
 class HomeViewModel: ObservableObject {
     @Published var events: [Event] = []
     @Published var summary: DaySummary?
+    @Published var recommendations: [PersonalizedRecommendationsService.Recommendation] = []
+    @Published var currentStreak: Int = 0
+    @Published var longestStreak: Int = 0
     @Published var isLoading = false {
         didSet {
             print("🔵 HomeViewModel.isLoading changed: \(oldValue) -> \(isLoading) [Thread: \(Thread.isMainThread ? "Main" : "Background")]")
@@ -227,6 +230,24 @@ class HomeViewModel: ObservableObject {
                 // Update UI on MainActor (we're already on MainActor, but be explicit)
                 self.events = todayEvents
                 self.summary = calculateSummary(from: todayEvents)
+
+                // Generate personalized recommendations
+                self.recommendations = await PersonalizedRecommendationsService.shared.generateRecommendations(
+                    for: baby,
+                    recentEvents: todayEvents
+                )
+
+                // Calculate streaks
+                let streakService = StreakService(dataStore: dataStore)
+                do {
+                    self.currentStreak = try await streakService.calculateCurrentStreak(for: baby)
+                    self.longestStreak = try await streakService.calculateLongestStreak(for: baby)
+                } catch {
+                    print("Error calculating streaks: \(error)")
+                    self.currentStreak = 0
+                    self.longestStreak = 0
+                }
+
                 // Set isLoading to false BEFORE defer block to ensure immediate UI update
                 self.isLoading = false
                 print("[\(taskID)] UI updated with \(todayEvents.count) events, isLoading = false")

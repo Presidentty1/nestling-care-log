@@ -1,8 +1,8 @@
+import { logEvent, setUserId, setUserProperties } from 'firebase/analytics';
+import { analytics } from '@/lib/firebase';
+
 /**
- * Analytics abstraction layer for Nestling web app.
- * 
- * Default implementation logs to console. Can be swapped with
- * production analytics service (e.g., PostHog, Mixpanel, Amplitude).
+ * Analytics abstraction layer for Nestling web app using Firebase Analytics.
  */
 
 export interface AnalyticsEvent {
@@ -18,35 +18,78 @@ export interface AnalyticsService {
 }
 
 /**
- * Default console-based analytics implementation.
- * Logs events to console in development, no-op in production.
+ * Firebase Analytics implementation.
+ * Tracks events to Firebase Analytics for production insights.
  */
-class ConsoleAnalytics implements AnalyticsService {
-  private isDevelopment = import.meta.env.DEV;
+class FirebaseAnalytics implements AnalyticsService {
+  private isInitialized = !!analytics;
+
+  constructor() {
+    if (this.isInitialized) {
+      console.log('[Analytics] Firebase Analytics initialized');
+    } else {
+      console.warn('[Analytics] Firebase Analytics not available, using console logging');
+    }
+  }
 
   track(eventName: string, properties?: Record<string, any>): void {
-    if (this.isDevelopment) {
+    if (!this.isInitialized || !analytics) {
       console.log('[Analytics]', eventName, properties || {});
+      return;
     }
-    // In production, this would send to analytics service
-    // Example: analyticsService.track(eventName, properties);
+
+    try {
+      // Firebase event names must be alphanumeric with underscores, max 40 chars
+      const firebaseEventName = eventName.replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 40);
+
+      logEvent(analytics, firebaseEventName, properties);
+    } catch (error) {
+      console.error('[Analytics] Failed to track event:', error);
+    }
   }
 
   identify(userId: string, traits?: Record<string, any>): void {
-    if (this.isDevelopment) {
+    if (!this.isInitialized || !analytics) {
       console.log('[Analytics] Identify:', userId, traits || {});
+      return;
+    }
+
+    try {
+      setUserId(analytics, userId);
+
+      if (traits) {
+        // Convert trait names to Firebase-friendly format
+        const userProperties: Record<string, any> = {};
+        Object.entries(traits).forEach(([key, value]) => {
+          const firebaseKey = key.replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 24);
+          userProperties[firebaseKey] = value;
+        });
+        setUserProperties(analytics, userProperties);
+      }
+    } catch (error) {
+      console.error('[Analytics] Failed to identify user:', error);
     }
   }
 
   page(name: string, properties?: Record<string, any>): void {
-    if (this.isDevelopment) {
+    if (!this.isInitialized || !analytics) {
       console.log('[Analytics] Page:', name, properties || {});
+      return;
+    }
+
+    try {
+      logEvent(analytics, 'page_view', {
+        page_title: name,
+        ...properties
+      });
+    } catch (error) {
+      console.error('[Analytics] Failed to track page view:', error);
     }
   }
 }
 
 // Singleton instance
-let analyticsInstance: AnalyticsService = new ConsoleAnalytics();
+let analyticsInstance: AnalyticsService = new FirebaseAnalytics();
 
 /**
  * Initialize analytics with a custom service.

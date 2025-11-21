@@ -44,9 +44,13 @@ struct DiaperFormView: View {
                     }
                     
                     Section("Notes") {
-                        TextField("Optional notes", text: $viewModel.note, axis: .vertical)
+                        VoiceInputView(text: $viewModel.note, placeholder: "Optional notes...")
                             .font(isCaregiverMode ? .caregiverBody : .body)
                             .lineLimit(3...6)
+                    }
+
+                    Section("Photos") {
+                        PhotoPickerView(selectedPhotos: $viewModel.photos)
                     }
                 }
                 

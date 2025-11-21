@@ -75,7 +75,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "4.99",
+          "displayPrice" : "5.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "6738223825",
@@ -104,7 +104,10 @@
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6738223826",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "type" : "FreeTrial",
+            "duration" : "P7D"
+          },
           "localizations" : [
             {
               "description" : "Unlock advanced features for tracking your baby's care",
