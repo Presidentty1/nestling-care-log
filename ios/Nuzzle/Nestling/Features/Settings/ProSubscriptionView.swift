@@ -487,8 +487,10 @@ struct ProSubscriptionView: View {
     // MARK: - Helper Methods
     
     private func loadProductsIfNeeded() async {
-        isLoadingProducts = true
-        productLoadError = nil
+        await MainActor.run {
+            isLoadingProducts = true
+            productLoadError = nil
+        }
         
         do {
             await proService.loadProducts()
@@ -500,14 +502,20 @@ struct ProSubscriptionView: View {
                 }
             }
             
-            if proService.getProducts().isEmpty {
-                productLoadError = "No subscription products found. Please contact support."
+            await MainActor.run {
+                if proService.getProducts().isEmpty {
+                    productLoadError = "No subscription products found. Please contact support."
+                }
             }
         } catch {
-            productLoadError = error.localizedDescription
+            await MainActor.run {
+                productLoadError = error.localizedDescription
+            }
         }
         
-        isLoadingProducts = false
+        await MainActor.run {
+            isLoadingProducts = false
+        }
     }
 }
 struct TrialOptionCard: View {
@@ -657,4 +665,3 @@ private struct StatItem: View {
 #Preview {
     ProSubscriptionView()
 }
-

@@ -10,6 +10,7 @@ class HomeViewModel: ObservableObject {
     @Published var activeSleep: Event?
     @Published var searchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
+    @Published var nextNapPrediction: Prediction?
     
     private let dataStore: DataStore
     private let baby: Baby
@@ -90,6 +91,7 @@ class HomeViewModel: ObservableObject {
         self.baby = baby
         loadTodayEvents()
         checkActiveSleep()
+        loadNextNapPrediction()
     }
     
     func checkActiveSleep() {
@@ -377,6 +379,22 @@ class HomeViewModel: ObservableObject {
             } catch {
                 Haptics.error()
                 errorMessage = "Failed to duplicate event: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    /// Load next nap prediction for display on home screen
+    func loadNextNapPrediction() {
+        Task {
+            do {
+                if let prediction = try await dataStore.fetchPredictions(for: baby, type: .nextNap) {
+                    await MainActor.run {
+                        self.nextNapPrediction = prediction
+                    }
+                }
+            } catch {
+                // Silently fail - predictions are optional
+                print("Failed to load nap prediction: \(error)")
             }
         }
     }

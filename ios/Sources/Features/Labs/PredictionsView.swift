@@ -115,7 +115,8 @@ struct PredictionsView: View {
         viewModel = PredictionsViewModel(
             dataStore: environment.dataStore,
             baby: baby,
-            aiEnabled: environment.appSettings.aiDataSharingEnabled
+            aiEnabled: environment.appSettings.aiDataSharingEnabled,
+            appSettings: environment.appSettings
         )
     }
 }

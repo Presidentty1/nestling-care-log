@@ -15,6 +15,11 @@ class AppEnvironment: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     
+    /// Check if AI features are enabled (requires both AI data sharing consent and Pro subscription)
+    var isAIFeatureEnabled: Bool {
+        appSettings.aiDataSharingEnabled && ProSubscriptionService.shared.isProUser
+    }
+    
     init(dataStore: DataStore) {
         self.dataStore = dataStore
         self.navigationCoordinator = NavigationCoordinator()

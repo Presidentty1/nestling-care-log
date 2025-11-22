@@ -54,6 +54,17 @@ ios/
 └── README.md                           # This file
 ```
 
+## Project Structure
+
+**Active Code:**
+- `ios/Sources/...` - Current active iOS app code
+
+**Legacy/Reference:**
+- `ios/Nuzzle/...` - Legacy iOS project (reference only, not active)
+- `ios/Nestling/...` - Legacy iOS project (reference only, not active)
+
+**Note:** Only `ios/Sources/...` is actively maintained. Legacy directories are preserved for reference but are not used by the current Xcode project.
+
 ## Features Implemented (P0 MVP)
 
 ### ✅ Core Features

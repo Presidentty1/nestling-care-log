@@ -21,6 +21,7 @@ export function TimelineList({ events, onEdit, onDelete, useVirtualization = tru
         events={events}
         onEdit={onEdit}
         onDelete={onDelete}
+        onQuickAction={onQuickAction}
       />
     );
   }

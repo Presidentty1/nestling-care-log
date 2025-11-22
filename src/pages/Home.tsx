@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, differenceInMonths, subDays, startOfDay, endOfDay } from 'date-fns';
 import { EventType } from '@/types/events';
@@ -122,13 +122,6 @@ export default function Home() {
       checkTrialStatus();
     }
   }, [activeBabyId]);
-
-  // Real-time updates from Supabase (for multi-caregiver sync and immediate updates)
-  useRealtimeEvents(selectedBaby?.family_id, () => {
-    if (activeBabyId) {
-      loadTodayEvents();
-    }
-  });
 
   useEffect(() => {
     const unsubscribe = eventsService.subscribe((action, data) => {
@@ -308,7 +301,7 @@ export default function Home() {
     }
   };
 
-  const loadTodayEvents = async () => {
+  const loadTodayEvents = useCallback(async () => {
     if (!activeBabyId) return;
     
     try {
@@ -346,7 +339,17 @@ export default function Home() {
       logger.error('Failed to load events', error, 'Home');
       toast.error('Failed to load events');
     }
-  };
+  }, [activeBabyId, selectedBaby]);
+
+  // Real-time updates from Supabase (for multi-caregiver sync and immediate updates)
+  // Memoize callback to prevent re-subscriptions on every render
+  const handleRealtimeUpdate = useCallback(() => {
+    if (activeBabyId) {
+      loadTodayEvents();
+    }
+  }, [activeBabyId, loadTodayEvents]);
+  
+  useRealtimeEvents(selectedBaby?.family_id, handleRealtimeUpdate);
 
   const handleQuickAction = (type: EventType) => {
     setModalState({ open: true, type });

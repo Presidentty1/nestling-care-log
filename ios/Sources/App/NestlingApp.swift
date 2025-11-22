@@ -164,11 +164,17 @@ struct ContentView: View {
                 }
                 .tag(2)
             
+            AssistantEntryView()
+                .tabItem {
+                    Label("Ask", systemImage: "bubble.left.and.bubble.right.fill")
+                }
+                .tag(3)
+            
             SettingsRootView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
-                .tag(3)
+                .tag(4)
         }
         .commands {
             CommandMenu("Quick Actions") {

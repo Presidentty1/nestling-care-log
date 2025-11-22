@@ -73,9 +73,11 @@ export function EventSheet({
       if (editingEventId) {
         await eventsService.updateEvent(editingEventId, eventData);
         toast.success('Event updated');
+        hapticFeedback.medium(); // Gentle haptic on successful update
       } else {
         await eventsService.createEvent(eventData);
         toast.success('Event saved');
+        hapticFeedback.medium(); // Gentle haptic on successful save
       }
       
       onClose();

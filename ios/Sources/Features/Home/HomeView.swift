@@ -31,6 +31,12 @@ struct HomeView: View {
                                     .padding(.horizontal, .spacingMD)
                             }
                             
+                            // Next Nap Prediction Card
+                            if let napPrediction = viewModel.nextNapPrediction {
+                                NextNapCard(prediction: napPrediction)
+                                    .padding(.horizontal, .spacingMD)
+                            }
+                            
                             // Quick Actions
                             QuickActionsSection(
                                 activeSleep: viewModel.activeSleep,
@@ -442,6 +448,61 @@ struct TimelineSection: View {
                 )
             }
         }
+    }
+}
+
+/// Next Nap Prediction Card
+struct NextNapCard: View {
+    let prediction: Prediction
+    
+    var body: some View {
+        let minutesUntil = Calendar.current.dateComponents([.minute], from: Date(), to: prediction.predictedTime).minute ?? 0
+        let timeUntil = formatTimeUntil(minutes: minutesUntil)
+        
+        CardView(variant: .info) {
+            HStack(spacing: .spacingMD) {
+                Image(systemName: "moon.fill")
+                    .font(.title2)
+                    .foregroundColor(.eventSleep)
+                
+                VStack(alignment: .leading, spacing: .spacingXS) {
+                    Text("Next nap")
+                        .font(.headline)
+                        .foregroundColor(.foreground)
+                    
+                    if minutesUntil > 0 {
+                        Text("Around \(formatTime(prediction.predictedTime)) (in \(timeUntil))")
+                            .font(.body)
+                            .foregroundColor(.foreground)
+                    } else {
+                        Text("Around \(formatTime(prediction.predictedTime))")
+                            .font(.body)
+                            .foregroundColor(.foreground)
+                    }
+                    
+                    Text(prediction.explanation)
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                }
+                
+                Spacer()
+            }
+        }
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    private func formatTimeUntil(minutes: Int) -> String {
+        if minutes < 60 {
+            return "\(minutes) min"
+        }
+        let hours = minutes / 60
+        let mins = minutes % 60
+        return mins > 0 ? "\(hours)h \(mins)m" : "\(hours)h"
     }
 }
 

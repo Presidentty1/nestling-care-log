@@ -10,11 +10,13 @@ class PredictionsViewModel: ObservableObject {
     private let dataStore: DataStore
     private let baby: Baby
     let aiEnabled: Bool
+    private let appSettings: AppSettings
     
-    init(dataStore: DataStore, baby: Baby, aiEnabled: Bool) {
+    init(dataStore: DataStore, baby: Baby, aiEnabled: Bool, appSettings: AppSettings) {
         self.dataStore = dataStore
         self.baby = baby
         self.aiEnabled = aiEnabled
+        self.appSettings = appSettings
         
         if aiEnabled {
             loadPredictions()
@@ -63,6 +65,8 @@ class PredictionsViewModel: ObservableObject {
                     self.nextFeedPrediction = prediction
                 case .nextNap:
                     self.nextNapPrediction = prediction
+                    // Schedule nap window alert if enabled
+                    await self.scheduleNapWindowAlertIfNeeded(prediction: prediction)
                 }
                 
                 self.isLoading = false
@@ -91,6 +95,25 @@ class PredictionsViewModel: ObservableObject {
     
     private var babyAgeDays: Int {
         Calendar.current.dateComponents([.day], from: baby.dateOfBirth, to: Date()).day ?? 0
+    }
+    
+    /// Schedule nap window alert if enabled and permission granted
+    private func scheduleNapWindowAlertIfNeeded(prediction: Prediction) async {
+        guard appSettings.napWindowAlertEnabled else { return }
+        
+        // Check notification permission
+        let permissionStatus = await NotificationPermissionManager.shared.checkPermissionStatus()
+        guard permissionStatus == .authorized else { return }
+        
+        // Check quiet hours
+        let quietHoursStart = appSettings.quietHoursStart
+        let quietHoursEnd = appSettings.quietHoursEnd
+        
+        // Schedule the alert (15 minutes before predicted time)
+        NotificationScheduler.shared.scheduleNapWindowAlert(
+            predictedTime: prediction.predictedTime,
+            enabled: true
+        )
     }
 }
 

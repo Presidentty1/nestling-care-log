@@ -9,6 +9,7 @@ interface VirtualizedTimelineListProps {
   events: EventRecord[];
   onEdit: (event: EventRecord) => void;
   onDelete: (eventId: string) => void;
+  onQuickAction?: (type: 'feed' | 'sleep' | 'diaper' | 'tummy_time') => void; // Optional quick action handler
   itemHeight?: number; // Estimated height per item in pixels
   overscan?: number; // Number of items to render outside visible area
 }
@@ -24,6 +25,7 @@ export function VirtualizedTimelineList({
   events,
   onEdit,
   onDelete,
+  onQuickAction,
   itemHeight = DEFAULT_ITEM_HEIGHT,
   overscan = DEFAULT_OVERSCAN,
 }: VirtualizedTimelineListProps) {
@@ -117,7 +119,11 @@ export function VirtualizedTimelineList({
       <EmptyState
         icon={Calendar}
         title="Your day is off to a quiet start ✨"
-        description="Tap the + button below to log your first event. Every baby's day is unique!"
+        description="Some days you'll log everything, some days just one feed. Both are okay."
+        action={onQuickAction ? {
+          label: "Log a Feed",
+          onClick: () => onQuickAction('feed')
+        } : undefined}
       />
     );
   }

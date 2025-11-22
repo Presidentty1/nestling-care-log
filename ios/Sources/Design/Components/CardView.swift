@@ -6,6 +6,7 @@ enum CardVariant {
     case success
     case warning
     case info
+    case destructive
     case elevated
     case outline
 }
@@ -35,6 +36,7 @@ struct CardView<Content: View>: View {
         case .success: return Color.success.opacity(0.1)
         case .warning: return Color.warning.opacity(0.1)
         case .info: return Color.info.opacity(0.1)
+        case .destructive: return Color.red.opacity(0.1)
         case .elevated: return .surface
         }
     }

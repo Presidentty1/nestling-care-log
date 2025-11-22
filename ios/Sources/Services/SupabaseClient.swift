@@ -25,8 +25,8 @@ class SupabaseClient {
     static let shared = SupabaseClient()
     
     private var configured = false
-    private var url: String?
-    private var anonKey: String?
+    var url: String?
+    var anonKey: String?
     
     // TODO: Replace with actual SupabaseClient when SDK is added
     // var client: SupabaseClient { ... }
