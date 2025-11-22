@@ -176,3 +176,7 @@ These Terms constitute the entire agreement between you and Nuzzle regarding the
 
 **Note**: Review this template with legal counsel. Customize [DATE], [JURISDICTION], and dispute resolution mechanisms. Ensure compliance with applicable laws.
 
+
+
+
+

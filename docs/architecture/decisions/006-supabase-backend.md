@@ -55,3 +55,7 @@ We chose Supabase as the primary backend-as-a-service platform for data storage,
 ## Related Decisions
 - ADR 003: Offline-First Architecture
 - ADR 007: Capacitor for Cross-Platform Mobile
+
+
+
+

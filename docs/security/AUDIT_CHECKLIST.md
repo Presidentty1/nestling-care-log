@@ -245,3 +245,7 @@ add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
 ---
 
 *This checklist should be reviewed and updated regularly as the application evolves and new security threats emerge.*
+
+
+
+

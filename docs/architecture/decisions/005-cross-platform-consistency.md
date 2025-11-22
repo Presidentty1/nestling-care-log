@@ -53,3 +53,7 @@ We established consistent patterns and conventions across React and SwiftUI plat
 - ADR 001: MVVM Pattern for SwiftUI Architecture
 - ADR 002: React Query for State Management
 - ADR 007: Capacitor for Cross-Platform Mobile
+
+
+
+

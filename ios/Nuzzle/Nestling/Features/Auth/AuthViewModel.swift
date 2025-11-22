@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import Supabase
+import Security
 
 /// ViewModel for authentication flow (sign up, sign in, sign out)
 @MainActor
@@ -238,6 +239,34 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    /// Send password reset email
+    func sendPasswordReset() async {
+        guard let client = supabaseClient else {
+            errorMessage = AuthError.notConfigured.localizedDescription
+            return
+        }
+
+        guard !email.isEmpty else {
+            errorMessage = "Please enter your email address"
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+        passwordResetSent = false
+
+        do {
+            try await client.auth.resetPasswordForEmail(email)
+            passwordResetSent = true
+            errorMessage = nil
+        } catch {
+            errorMessage = "Failed to send password reset email. Please try again."
+            print("Password reset error: \(error)")
+        }
+
+        isLoading = false
+    }
+    
     deinit {
         authStateSubscription?.cancel()
     }
@@ -285,34 +314,6 @@ enum AuthError: LocalizedError {
         case .networkError(let error):
             return "Network error: \(error.localizedDescription)"
         }
-    }
-
-    /// Send password reset email
-    func sendPasswordReset() async {
-        guard let client = supabaseClient else {
-            errorMessage = AuthError.notConfigured.localizedDescription
-            return
-        }
-
-        guard !email.isEmpty else {
-            errorMessage = "Please enter your email address"
-            return
-        }
-
-        isLoading = true
-        errorMessage = nil
-        passwordResetSent = false
-
-        do {
-            try await client.auth.resetPasswordForEmail(email)
-            passwordResetSent = true
-            errorMessage = nil
-        } catch {
-            errorMessage = "Failed to send password reset email. Please try again."
-            print("Password reset error: \(error)")
-        }
-
-        isLoading = false
     }
 }
 

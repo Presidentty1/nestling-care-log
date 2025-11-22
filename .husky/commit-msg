@@ -17,3 +17,7 @@ else
 fi
 
 echo "Commit message validation passed! ✅"
+
+
+
+

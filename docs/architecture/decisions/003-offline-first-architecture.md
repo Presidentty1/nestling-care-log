@@ -47,3 +47,7 @@ We implemented an offline-first architecture with local storage as the source of
 - ADR 002: React Query for State Management
 - ADR 006: Supabase as Backend Service
 - ADR 007: Capacitor for Cross-Platform Mobile
+
+
+
+

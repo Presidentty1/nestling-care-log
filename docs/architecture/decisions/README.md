@@ -50,3 +50,7 @@ When proposing a new architectural decision:
 - ADRs should be reviewed when significant architectural changes are considered
 - If an ADR is superseded, update its status and reference the new decision
 - Keep ADRs current as the system evolves
+
+
+
+

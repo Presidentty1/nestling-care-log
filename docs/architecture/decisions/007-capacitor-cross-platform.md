@@ -57,3 +57,7 @@ We chose Capacitor as the cross-platform runtime to package the React web applic
 - ADR 002: React Query for State Management
 - ADR 005: Cross-Platform Consistency Patterns
 - ADR 006: Supabase as Backend Service
+
+
+
+

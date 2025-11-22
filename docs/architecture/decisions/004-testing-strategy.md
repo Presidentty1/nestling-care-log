@@ -56,3 +56,7 @@ Unit Tests (Fast, Low Value) - Individual Functions
 ## Related Decisions
 - ADR 001: MVVM Pattern for SwiftUI Architecture
 - ADR 002: React Query for State Management
+
+
+
+

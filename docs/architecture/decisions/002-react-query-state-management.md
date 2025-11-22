@@ -47,3 +47,7 @@ We chose React Query (TanStack Query) for managing server state and API interact
 - ADR 001: MVVM Pattern for SwiftUI Architecture
 - ADR 003: Offline-First Architecture
 - ADR 005: Cross-Platform Consistency Patterns
+
+
+
+

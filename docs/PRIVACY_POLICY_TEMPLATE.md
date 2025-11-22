@@ -155,3 +155,7 @@ We may update this Privacy Policy periodically. We will notify you of significan
 
 **Note**: Review this template with legal counsel. Customize [DATE], [REGION], and other placeholders. Ensure compliance with applicable laws (GDPR, CCPA, etc.).
 
+
+
+
+
