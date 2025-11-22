@@ -1,4 +1,4 @@
-# Nestling 🍼
+# Nuzzle 🍼
 
 A comprehensive baby care logging app with local-first architecture. Track feedings, sleep, diapers, tummy time with intelligent predictions and offline support.
 
@@ -101,12 +101,41 @@ See `DEPLOYMENT.md` for:
 
 ## 📚 Documentation
 
-- **`DESIGN_SYSTEM.md`** - Complete design system with tokens, components, and SwiftUI mappings
+### Architecture & Development
+- **`ARCHITECTURE_WEB.md`** - Complete web application architecture
+- **`DESIGN_SYSTEM.md`** - Design system with tokens, components, and SwiftUI mappings
 - `DEVELOPMENT.md` - Complete local development guide
 - `DEPLOYMENT.md` - Production deployment instructions
+- `ENVIRONMENT_VARIABLES.md` - Environment variables and secrets management
+
+### Testing & Quality
+- **`TEST_PLAN_WEB.md`** - Comprehensive testing strategy (unit, E2E, performance)
 - `TESTING_CHECKLIST.md` - Pre-deployment testing steps
+- `MVP_CHECKLIST.md` - MVP launch requirements checklist
+
+### Database & Security
+- **`DB_OPERATIONS.md`** - Database operations, migrations, seed data
+- **`DB_SECURITY.md`** - RLS policies and security documentation
+- `DATA_MODEL.md` - Complete database schema documentation
+
+### Analytics & Business
+- **`ANALYTICS_SPEC_WEB.md`** - Analytics implementation and event tracking
+- `DEMO_SCRIPT.md` - Demo walkthrough for stakeholders
+- `USER_REVIEW_AND_VALUE_PROPOSITION.md` - User perspective and value analysis
+
+### Legal & Compliance
+- `docs/PRIVACY_POLICY_TEMPLATE.md` - Privacy policy template
+- `docs/TERMS_OF_SERVICE_TEMPLATE.md` - Terms of service template
+- `PRE_LAUNCH_CHECKLIST.md` - App Store submission checklist
+
+### iOS Development
+- `ios/README.md` - iOS app documentation
+- `ios/IOS_ARCHITECTURE.md` - iOS architecture guide
+- `docs/IOS_MIGRATION_GUIDE.md` - Web to iOS migration guide
+
+### Other
 - `MIGRATION_CHECKLIST.md` - Lovable to Cursor migration guide
-- `SECRETS.md` - Environment variables and secrets
+- `SECRETS.md` - Legacy secrets documentation (see ENVIRONMENT_VARIABLES.md)
 - `supabase/functions/README.md` - Edge functions documentation
 
 ## Project Info

@@ -1,17 +1,32 @@
+// React imports
+import { useState, useEffect, lazy, Suspense, memo } from 'react';
+
+// External libraries
+import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+
+// UI components
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { queryClient } from "@/lib/queryClient";
-import { useState, useEffect, lazy, Suspense, memo } from 'react';
-import { useAppStore } from '@/store/appStore';
-import { reminderService } from '@/services/reminderService';
+
+// Internal components
 import { NotificationBanner } from '@/components/NotificationBanner';
+
+// Internal utilities
+import { queryClient } from "@/lib/queryClient";
+
+// Services
+import { reminderService } from '@/services/reminderService';
+
+// Store
+import { useAppStore } from '@/store/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { page } from '@/analytics/analytics';
 import { ResilientErrorBoundary } from '@/components/ResilientErrorBoundary';
+import { SettingsErrorBoundary, MainAppErrorBoundary, FeatureErrorBoundary, OnboardingErrorBoundary } from '@/components/errorBoundaries/RouteErrorBoundary';
+import { ConflictResolutionModal } from '@/components/ConflictResolutionModal';
 import { reportWebVitals } from '@/hooks/usePerformance';
 import * as Sentry from '@sentry/react';
 
@@ -128,6 +143,7 @@ function AppContent() {
   const { activeBabyId, caregiverMode } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const [showConflictModal, setShowConflictModal] = useState(false);
 
   // Track page views
   useEffect(() => {
@@ -159,45 +175,186 @@ function AppContent() {
       <div className={caregiverMode ? 'caregiver-mode' : ''}>
         <NotificationBanner />
         <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
-        <Route path="/home" element={<AuthGuard><Home /></AuthGuard>} />
-        <Route path="/history" element={<AuthGuard><History /></AuthGuard>} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/babies" element={<ManageBabiesPage />} />
-        <Route path="/settings/caregivers" element={<ManageCaregiversPage />} />
-        <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
-        <Route path="/settings/privacy-data" element={<PrivacyDataPage />} />
-        <Route path="/settings/ai-data-sharing" element={<AIDataSharingPage />} />
-        <Route path="/settings/shortcuts" element={<SuspenseWrapper><ShortcutsSettings /></SuspenseWrapper>} />
-        
-        {/* Lazy loaded routes for better performance */}
-        <Route path="/labs" element={<SuspenseWrapper><Labs /></SuspenseWrapper>} />
-        <Route path="/growth" element={<SuspenseWrapper><AuthGuard><GrowthTracker /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/health" element={<SuspenseWrapper><AuthGuard><HealthRecords /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/milestones" element={<SuspenseWrapper><AuthGuard><Milestones /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/photos" element={<SuspenseWrapper><AuthGuard><PhotoGallery /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/cry-insights" element={<SuspenseWrapper><AuthGuard><CryInsights /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/ai-assistant" element={<SuspenseWrapper><AuthGuard><AIAssistant /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/analytics" element={<SuspenseWrapper><AuthGuard><Analytics /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/analytics-dashboard" element={<SuspenseWrapper><AuthGuard><AnalyticsDashboard /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/patterns" element={<SuspenseWrapper><AuthGuard><Patterns /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/sleep-training" element={<SuspenseWrapper><AuthGuard><SleepTraining /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/sleep-training/new-session" element={<SuspenseWrapper><AuthGuard><NewSleepTrainingSession /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/activity-feed" element={<SuspenseWrapper><AuthGuard><ActivityFeed /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/smart-predictions" element={<Navigate to="/predictions" replace />} />
-        <Route path="/predictions" element={<SuspenseWrapper><AuthGuard><Predictions /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/journal" element={<SuspenseWrapper><AuthGuard><Journal /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/journal/new" element={<SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/journal/entry/:id" element={<SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>} />
-        <Route path="/referrals" element={<SuspenseWrapper><Referrals /></SuspenseWrapper>} />
-        <Route path="/accessibility" element={<SuspenseWrapper><Accessibility /></SuspenseWrapper>} />
-        <Route path="/feedback" element={<SuspenseWrapper><Feedback /></SuspenseWrapper>} />
-        <Route path="/privacy" element={<SuspenseWrapper><Privacy /></SuspenseWrapper>} />
-        <Route path="/parent-wellness" element={<SuspenseWrapper><AuthGuard><ParentWellness /></AuthGuard></SuspenseWrapper>} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Root and auth routes */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/auth" element={<Auth />} />
+
+          {/* Onboarding flow with specific error boundary */}
+          <Route path="/onboarding" element={
+            <OnboardingErrorBoundary onGoHome={handleGoHome}>
+              <AuthGuard><Onboarding /></AuthGuard>
+            </OnboardingErrorBoundary>
+          } />
+
+          {/* Main app routes with error boundary */}
+          <Route path="/home" element={
+            <MainAppErrorBoundary onGoHome={handleGoHome}>
+              <AuthGuard><Home /></AuthGuard>
+            </MainAppErrorBoundary>
+          } />
+          <Route path="/history" element={
+            <MainAppErrorBoundary onGoHome={handleGoHome}>
+              <AuthGuard><History /></AuthGuard>
+            </MainAppErrorBoundary>
+          } />
+
+          {/* Settings routes with specific error boundary */}
+          <Route path="/settings" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <Settings />
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/babies" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><ManageBabiesPage /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/caregivers" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><ManageCaregiversPage /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/notifications" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><NotificationSettingsPage /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/privacy-data" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><PrivacyDataPage /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/ai-data-sharing" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AIDataSharingPage /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/settings/shortcuts" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><ShortcutsSettings /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+
+          {/* Feature routes with specific error boundary */}
+          <Route path="/labs" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Labs /></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/growth" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><GrowthTracker /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/health" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><HealthRecords /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/milestones" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><Milestones /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/photos" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><PhotoGallery /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/cry-insights" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><CryInsights /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/ai-assistant" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><AIAssistant /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/analytics" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><Analytics /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/analytics-dashboard" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><AnalyticsDashboard /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/patterns" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><Patterns /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/sleep-training" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><SleepTraining /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/sleep-training/new-session" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><NewSleepTrainingSession /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/activity-feed" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><ActivityFeed /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/smart-predictions" element={<Navigate to="/predictions" replace />} />
+          <Route path="/predictions" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><Predictions /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/journal" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><Journal /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/journal/new" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/journal/entry/:id" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><JournalEntry /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/referrals" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Referrals /></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/accessibility" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Accessibility /></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/feedback" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Feedback /></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/privacy" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Privacy /></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="/parent-wellness" element={
+            <FeatureErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><AuthGuard><ParentWellness /></AuthGuard></SuspenseWrapper>
+            </FeatureErrorBoundary>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+
+        {/* Global modals */}
+        <ConflictResolutionModal
+          isOpen={showConflictModal}
+          onClose={() => setShowConflictModal(false)}
+        />
       </div>
     </ResilientErrorBoundary>
   );

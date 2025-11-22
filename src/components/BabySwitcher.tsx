@@ -1,4 +1,4 @@
-import { Baby } from '@/lib/types';
+import type { Baby } from '@/lib/types';
 import {
   Drawer,
   DrawerContent,

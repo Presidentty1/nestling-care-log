@@ -1,315 +1,241 @@
-# MVP Checklist
+# MVP Launch Checklist
 
-This checklist tracks the completion status of core features for both web and iOS platforms.
+## Overview
 
-## Web App
+This checklist ensures all requirements are met before the public MVP release of Nuzzle. Complete all items before submitting to App Store.
 
-### Core Features (P0)
+## Code & Technical Requirements
 
-- [x] **Authentication**
-  - [x] Sign up / Sign in
-  - [x] Session persistence
-  - [x] Protected routes
+### ✅ Supabase Hardening
+- [x] Comprehensive RLS policies for all tables
+- [x] Seed scripts for development/testing
+- [x] Environment variables secured (no secrets in code)
+- [x] Database migrations tested and documented
 
-- [x] **Baby Management**
-  - [x] Create baby profile
-  - [x] Edit baby profile
-  - [x] Delete baby
-  - [x] Switch active baby
+### ✅ iOS Project Setup
+- [ ] Xcode project builds without errors
+- [ ] Target memberships configured correctly
+- [ ] Bundle identifiers set (`com.nestling.Nestling` preserved)
+- [ ] Version numbers set (1.0 / 1)
+- [ ] Signing certificates configured
+- [ ] Privacy manifest added (`PrivacyInfo.xcprivacy`)
 
-- [x] **Event Logging**
-  - [x] Log feed (bottle/breast, amount, side)
-  - [x] Log diaper (wet/dirty/both)
-  - [x] Log sleep (start/end times)
-  - [x] Log tummy time (duration)
-  - [x] Edit event
-  - [x] Delete event
+### ✅ CI/CD
+- [x] GitHub Actions workflows for web (lint, test, build)
+- [x] GitHub Actions workflows for iOS (build, test)
+- [x] Supabase CI/CD (migrations, edge functions)
+- [ ] All workflows passing on main branch
 
-- [x] **Home Dashboard**
-  - [x] Summary cards (feeds, sleep, diapers)
-  - [x] Today's timeline
-  - [x] Quick actions
-  - [x] Nap prediction
+## Testing Requirements
 
-- [x] **History**
-  - [x] Date picker
-  - [x] View events by date
-  - [x] Navigate days
+### Unit Tests
+- [ ] All service functions tested (80%+ coverage)
+- [ ] Utility functions tested (90%+ coverage)
+- [ ] Custom hooks tested (70%+ coverage)
+- [ ] All tests passing
 
-- [x] **Settings**
-  - [x] Units preference (ml/oz)
-  - [x] AI data sharing toggle
-  - [x] Notification settings
-  - [x] Baby management
-  - [x] Data export (CSV/JSON)
+### E2E Tests
+- [ ] Critical path tests passing (sign up → log event → view history)
+- [ ] Event logging tests passing
+- [ ] Offline sync tests passing
+- [ ] Multi-device sync verified
 
-### Testing & Quality
+### Manual Testing
+- [ ] Authentication flow tested
+- [ ] Onboarding flow tested
+- [ ] All event types can be logged
+- [ ] History navigation works
+- [ ] Settings pages functional
+- [ ] AI features working (nap predictor, assistant)
+- [ ] Offline mode tested
+- [ ] Error handling verified
 
-- [x] **Unit Tests**
-  - [x] Utility functions
-  - [x] Service logic
-  - [x] Component tests (partial)
+### Performance
+- [ ] Lighthouse score >90 (Performance, Accessibility, Best Practices)
+- [ ] First Contentful Paint <1.5s
+- [ ] Time to Interactive <3.5s
+- [ ] No console errors in production build
 
-- [x] **E2E Tests**
-  - [x] Critical path
-  - [x] Event logging
-  - [x] History navigation
-  - [x] Onboarding
-
-- [x] **Analytics**
-  - [x] Analytics abstraction
-  - [x] Event tracking (partial)
-  - [x] Page tracking
-
-- [x] **Documentation**
-  - [x] Architecture docs
-  - [x] Test plan
-  - [x] Analytics spec
-
-### Backend
-
-- [x] **Database**
-  - [x] Schema migrations
-  - [x] RLS policies
-  - [x] Seed scripts
-
-- [x] **Edge Functions**
-  - [x] Bootstrap user
-  - [x] Generate predictions
-  - [x] AI assistant
-  - [x] Cry analysis
-
-## iOS App
-
-### Core Features (P0)
-
-- [x] **App Structure**
-  - [x] SwiftUI app entry
-  - [x] Tab navigation
-  - [x] App environment
-
-- [x] **Domain Models**
-  - [x] Baby model
-  - [x] Event model
-  - [x] AppSettings model
-  - [x] Prediction model
-
-- [x] **Data Persistence**
-  - [x] DataStore protocol
-  - [x] JSONBackedDataStore
-  - [x] InMemoryDataStore (for tests/previews)
-  - [x] Core Data option (available)
-
-- [x] **Home Screen**
-  - [x] Baby selector
-  - [x] Summary cards
-  - [x] Quick actions
-  - [x] Timeline
-
-- [x] **History Screen**
-  - [x] Date picker
-  - [x] Timeline by date
-  - [x] Edit/delete events
-
-- [x] **Event Forms**
-  - [x] Feed form
-  - [x] Diaper form
-  - [x] Sleep form
-  - [x] Tummy time form
-
-- [x] **Settings**
-  - [x] Units toggle
-  - [x] AI data sharing toggle
-  - [x] Notification settings
-  - [x] Baby management
-  - [x] Privacy/data export
-
-- [x] **Predictions**
-  - [x] Local predictions engine
-  - [x] Predictions view
-  - [x] Medical disclaimer
-
-### Modern iOS Features
-
-- [x] **UX Polish**
-  - [x] Bottom sheet detents
-  - [x] Pull-to-refresh
-  - [x] Swipe actions
-  - [x] Context menus
-  - [x] Searchable timelines
-  - [x] Haptics
-
-- [x] **Accessibility**
-  - [x] VoiceOver labels
-  - [x] Dynamic Type support
-  - [x] Large touch targets
-
-- [x] **Widgets & Shortcuts**
-  - [x] Home screen widgets
-  - [x] Lock screen widgets
-  - [x] App Intents (Siri shortcuts)
-  - [x] Live Activities (sleep timer)
-
-- [x] **Advanced Features**
-  - [x] Dynamic Island
-  - [x] Keyboard shortcuts
-  - [x] Spotlight indexing
-  - [x] Deep links
-
-### Testing & Quality
-
-- [x] **Unit Tests**
-  - [x] DataStore tests
-  - [x] Date utilities tests
-  - [x] Predictions engine tests
-
-- [x] **UI Tests**
-  - [x] Onboarding flow
-  - [x] Quick actions
-  - [x] Deep links
-  - [x] Predictions
-
-- [x] **Documentation**
-  - [x] Architecture docs
-  - [x] Xcode setup guide
-  - [x] Test plan
-
-### Setup Requirements
-
-- [ ] **Xcode Project**
-  - [ ] Create `.xcodeproj` file (manual)
-  - [ ] Add files to targets (manual)
-  - [ ] Configure code signing (manual)
-  - [ ] Link Core Data model (manual)
-
-## Backend (Supabase)
-
-### Database
-
-- [x] **Schema**
-  - [x] Core tables (babies, events, families)
-  - [x] Extended tables (growth, health, milestones, etc.)
-  - [x] Indexes for performance
-
-- [x] **Security**
-  - [x] RLS enabled on all tables
-  - [x] Family-scoped policies
-  - [x] Role-based access (admin/member/viewer)
-
-- [x] **Migrations**
-  - [x] 17 migration files
-  - [x] Versioned migrations
-  - [x] Seed script
-
-### Edge Functions
-
-- [x] **Core Functions**
-  - [x] bootstrap-user
-  - [x] generate-predictions
-  - [x] calculate-nap-window
-  - [x] ai-assistant
-  - [x] analyze-cry-pattern
-
-- [x] **Additional Functions**
-  - [x] generate-weekly-summary
-  - [x] invite-caregiver
-  - [x] process-voice-command
-
-## CI/CD
-
-- [x] **Web CI**
-  - [x] GitHub Actions workflow
-  - [x] Unit tests
-  - [x] E2E tests
-  - [x] Build verification
-
-- [x] **iOS CI**
-  - [x] GitHub Actions workflow
-  - [x] Build verification (when project exists)
-  - [x] Test execution (when project exists)
+### Accessibility
+- [ ] WCAG 2.1 AA compliance verified
+- [ ] Keyboard navigation works
+- [ ] Screen reader compatible
+- [ ] Color contrast meets standards
 
 ## Documentation
 
-- [x] **Architecture**
-  - [x] Web architecture (`ARCHITECTURE_WEB.md`)
-  - [x] iOS architecture (`ios/IOS_ARCHITECTURE.md`)
-  - [x] Data model (`DATA_MODEL.md`)
+### ✅ Technical Documentation
+- [x] `ARCHITECTURE_WEB.md` - Web architecture
+- [x] `TEST_PLAN_WEB.md` - Testing strategy
+- [x] `ANALYTICS_SPEC_WEB.md` - Analytics implementation
+- [x] `DB_OPERATIONS.md` - Database operations
+- [x] `DB_SECURITY.md` - Security documentation
+- [x] `DEMO_SCRIPT.md` - Demo walkthrough
+- [x] `MVP_CHECKLIST.md` - This file
+- [ ] `README.md` updated with all documentation links
 
-- [x] **Operations**
-  - [x] DB operations (`DB_OPERATIONS.md`)
-  - [x] DB security (`DB_SECURITY.md`)
-  - [x] Test plans (web + iOS)
+### User Documentation
+- [ ] Privacy policy published and accessible
+- [ ] Terms of service published and accessible
+- [ ] Support documentation available
+- [ ] FAQ page (if applicable)
 
-- [x] **Setup Guides**
-  - [x] Xcode setup (`ios/XCODE_SETUP.md`)
-  - [x] Quick start (`ios/QUICK_START.md`)
+## App Store Requirements
 
-- [x] **Specifications**
-  - [x] Analytics spec (`ANALYTICS_SPEC_WEB.md`)
-  - [x] Design system (`DESIGN_SYSTEM.md`)
+### App Store Connect
+- [ ] App record created
+- [ ] Bundle ID configured (`com.nestling.Nestling`)
+- [ ] App name: "Nuzzle"
+- [ ] Subtitle configured
+- [ ] Description written (all "Nestling" → "Nuzzle")
+- [ ] Keywords set
+- [ ] Support URL configured
+- [ ] Privacy policy URL configured
+- [ ] Marketing URL configured
+- [ ] Support email configured
 
-## P1 Items (Post-MVP)
+### App Store Assets
+- [ ] App icon (1024×1024 PNG)
+- [ ] Screenshots (minimum 6, 1290×2796 for iPhone)
+  - [ ] Home screen
+  - [ ] Event logging
+  - [ ] History view
+  - [ ] Nap predictor
+  - [ ] AI assistant
+  - [ ] Settings
+- [ ] App preview video (optional but recommended)
 
-### Web
+### Legal & Compliance
+- [ ] Privacy policy drafted and published
+- [ ] Terms of service drafted and published
+- [ ] Medical disclaimer included in app
+- [ ] GDPR compliance verified
+- [ ] Data export functionality working
+- [ ] Account deletion functionality working
 
-- [ ] Expand component test coverage
-- [ ] Add visual regression tests
-- [ ] Performance monitoring (Lighthouse CI)
-- [ ] Production analytics integration
+## Feature Completeness (P0 MVP)
 
-### iOS
+### Authentication & Onboarding
+- [ ] Email/password sign up works
+- [ ] Email/password sign in works
+- [ ] Onboarding flow complete
+- [ ] Baby profile creation works
+- [ ] Session persistence works
 
-- [ ] Test on physical device
-- [ ] Configure App Groups (for widgets)
-- [ ] Enable real notifications
-- [ ] Add Supabase sync layer
+### Home Dashboard
+- [ ] Timeline displays today's events
+- [ ] Summary chips show correct counts
+- [ ] Nap prediction card displays
+- [ ] Quick actions work (feed, diaper, sleep)
+- [ ] Baby selector works
 
-### Backend
+### Event Logging
+- [ ] Feed logging (breast, bottle, pumping)
+- [ ] Diaper logging (wet, dirty, both)
+- [ ] Sleep logging (timer and manual)
+- [ ] Tummy time logging
+- [ ] Event editing works
+- [ ] Event deletion works
 
-- [ ] Add database backup automation
-- [ ] Monitor RLS policy performance
-- [ ] Add rate limiting to edge functions
+### History
+- [ ] Day-by-day navigation works
+- [ ] Date picker functional
+- [ ] Event filtering works
+- [ ] Past events display correctly
 
-## P2 Items (Future)
+### AI Features
+- [ ] Nap predictor displays predictions
+- [ ] Nap feedback collection works
+- [ ] AI assistant responds to questions
+- [ ] Medical disclaimers visible
 
-### Web
+### Settings
+- [ ] Baby profile management works
+- [ ] Account settings accessible
+- [ ] Sign out works
+- [ ] App settings functional
 
-- [ ] Service worker for offline-first
-- [ ] Virtual scrolling for long timelines
-- [ ] Advanced analytics dashboard
+## Security & Privacy
 
-### iOS
+### Security
+- [ ] All API keys in environment variables
+- [ ] No secrets in source code
+- [ ] RLS policies tested and verified
+- [ ] Authentication required for all protected routes
+- [ ] Input validation on all forms
+- [ ] XSS prevention verified
+- [ ] CSRF protection enabled
 
-- [ ] Complete Cry Analysis ML integration
-- [ ] Test widgets on device
-- [ ] Add Pro subscription checks
-- [ ] Performance optimization for large datasets
+### Privacy
+- [ ] Privacy policy accessible
+- [ ] Data collection disclosed
+- [ ] User consent for AI features
+- [ ] Data export working
+- [ ] Account deletion working
+- [ ] No tracking without consent
+- [ ] Analytics opt-out available (if applicable)
 
-### Backend
+## Performance & Quality
 
-- [ ] Add database replication
-- [ ] Implement audit logging
-- [ ] Add data retention policies
+### Performance
+- [ ] Production build optimized
+- [ ] Code splitting implemented
+- [ ] Images optimized
+- [ ] Bundle size reasonable (<2MB initial)
+- [ ] Lazy loading for routes
+- [ ] React Query caching working
 
-## Summary
+### Quality
+- [ ] No TypeScript errors
+- [ ] No ESLint errors
+- [ ] No console errors in production
+- [ ] Error boundaries implemented
+- [ ] Loading states for all async operations
+- [ ] Empty states for all lists
+- [ ] Error messages user-friendly
 
-### ✅ Complete
+## Pre-Launch Verification
 
-- **Web**: Core features, tests, analytics, docs
-- **iOS**: Code complete, needs Xcode project setup
-- **Backend**: Schema, migrations, RLS, edge functions
-- **CI**: Workflows for web and iOS
+### Final Checks
+- [ ] All tests passing
+- [ ] Production build successful
+- [ ] No known critical bugs
+- [ ] Performance benchmarks met
+- [ ] Accessibility verified
+- [ ] Legal documents published
+- [ ] App Store metadata complete
+- [ ] Screenshots prepared
+- [ ] Support email configured
 
-### ⏳ Remaining
+### Smoke Testing
+- [ ] Sign up new user
+- [ ] Complete onboarding
+- [ ] Log 3+ events
+- [ ] View history
+- [ ] Test AI features
+- [ ] Verify offline mode
+- [ ] Test on multiple devices
+- [ ] Verify data sync
 
-- **iOS**: Xcode project creation (manual, ~10 minutes)
-- **P1**: Device testing, App Groups, notifications, Supabase sync
-- **P2**: ML features, performance optimizations
+## Launch Readiness
 
-### 🎯 Ready For
+### Before Submission
+- [ ] All checklist items complete
+- [ ] Team review completed
+- [ ] Stakeholder approval received
+- [ ] App Store submission prepared
+- [ ] Release notes drafted
 
-- **Web Beta**: ✅ Ready
-- **iOS TestFlight**: ⏳ After Xcode project setup
-- **App Store**: ⏳ After P1 items complete
+### Post-Launch
+- [ ] Monitor error tracking (Sentry)
+- [ ] Monitor analytics (Firebase)
+- [ ] Monitor user feedback
+- [ ] Prepare hotfix process
+- [ ] Plan first update
 
+## Related Documentation
 
+- `MVP_SCOPE.md` - Feature scope definition
+- `PRE_LAUNCH_CHECKLIST.md` - Detailed pre-launch steps
+- `TEST_PLAN_WEB.md` - Testing strategy
+- `ARCHITECTURE_WEB.md` - Technical architecture

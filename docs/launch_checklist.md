@@ -1,4 +1,4 @@
-# Nestling Launch Checklist
+# Nuzzle Launch Checklist
 
 ## Pre-Launch Preparation
 
@@ -18,7 +18,7 @@
 - [ ] App Store categories selected
 
 ### ✅ Subscriptions Setup
-- [ ] Subscription group "Nestling Pro" created
+- [ ] Subscription group "Nuzzle Pro" created
 - [ ] Monthly product ($5.99) configured and approved
 - [ ] Yearly product ($39.99) with 7-day trial configured
 - [ ] Introductory offer approved
@@ -86,7 +86,7 @@
 ## App Store Submission
 
 ### ✅ Metadata
-- [ ] App name: "Nestling"
+- [ ] App name: "Nuzzle"
 - [ ] Subtitle: "AI Baby Tracker for Parents"
 - [ ] Description: < 4000 characters, includes all features
 - [ ] Keywords: baby tracker, newborn care, sleep tracking

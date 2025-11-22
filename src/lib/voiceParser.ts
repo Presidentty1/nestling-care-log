@@ -1,4 +1,4 @@
-import { EventType } from './types';
+import type { EventType } from './types';
 
 export interface VoiceCommand {
   type: EventType | null;

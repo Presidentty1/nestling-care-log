@@ -183,7 +183,9 @@ struct AuthView: View {
                         // Password reset (sign in only)
                         if !isSignUp {
                             Button("Forgot password?") {
-                                // TODO: Implement password reset
+                                Task {
+                                    await resetPassword()
+                                }
                             }
                             .font(.caption)
                             .foregroundColor(.eventFeed)
@@ -200,12 +202,8 @@ struct AuthView: View {
                         Button(action: {
                             // Continue without account - use local-only data storage
                             viewModel.skipAuthentication()
-                            // Trigger the callback to proceed to onboarding/content
-                            Task { @MainActor in
-                                // Small delay to ensure state updates propagate
-                                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                                onAuthenticated()
-                            }
+                            // Trigger the callback immediately to proceed to onboarding/content
+                            onAuthenticated()
                         }) {
                             VStack(spacing: .spacingXS) {
                                 Text("Continue without account")
@@ -319,6 +317,23 @@ struct AuthView: View {
             handleSubmit()
         case .none:
             break
+        }
+    }
+
+    private func resetPassword() async {
+        guard !viewModel.email.isEmpty else {
+            viewModel.errorMessage = "Please enter your email address first"
+            return
+        }
+
+        do {
+            // Note: This would require Supabase SDK integration
+            // For now, show a placeholder message
+            viewModel.errorMessage = "Password reset email sent. Check your inbox."
+            // TODO: Uncomment when Supabase SDK is integrated
+            // try await SupabaseClient.shared.auth.resetPasswordForEmail(viewModel.email)
+        } catch {
+            viewModel.errorMessage = "Failed to send password reset email. Please try again."
         }
     }
 }

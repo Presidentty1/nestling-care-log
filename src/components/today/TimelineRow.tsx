@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { EventRecord } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby, ActivitySquare, MoreVertical } from 'lucide-react';
@@ -17,7 +17,7 @@ interface TimelineRowProps {
   onDelete: () => void;
 }
 
-export const TimelineRow = memo(function TimelineRow({ event, onEdit, onDelete }: TimelineRowProps) {
+export const TimelineRow = memo(({ event, onEdit, onDelete }: TimelineRowProps) => {
   const getIcon = () => {
     switch (event.type) {
       case 'feed':

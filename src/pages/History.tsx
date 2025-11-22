@@ -11,16 +11,18 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { TimelineList } from '@/components/today/TimelineList';
 import { useAppStore } from '@/store/appStore';
-import { eventsService, EventRecord } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
 import { babyService } from '@/services/babyService';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { startOfDay, endOfDay } from 'date-fns';
-import { DailySummary } from '@/types/summary';
+import type { DailySummary } from '@/types/summary';
 import { DoctorShareModal } from '@/components/DoctorShareModal';
 import { Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EventSheet } from '@/components/sheets/EventSheet';
-import { EventType } from '@/types/events';
+import type { EventType } from '@/types/events';
 
 export default function History() {
   const { activeBabyId } = useAppStore();
@@ -79,7 +81,7 @@ export default function History() {
       const totals = eventsService.calculateSummary(dayEvents);
       setSummary(totals);
     } catch (error) {
-      console.error('Failed to load day data:', error);
+      logger.error('Failed to load day data', error, 'History');
       toast.error("Couldn't load events. Try again?");
     } finally {
       setLoading(false);

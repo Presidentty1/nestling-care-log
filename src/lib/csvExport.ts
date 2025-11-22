@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { dataService } from '@/services/dataService';
-import { EventRecord } from '@/types/events';
+import type { EventRecord } from '@/types/events';
 
 export async function exportEventsCSV(
   babyId: string,

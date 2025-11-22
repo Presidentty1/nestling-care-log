@@ -1,5 +1,5 @@
 import XCTest
-@testable import Nestling
+@testable import Nuzzle
 
 final class EventValidatorTests: XCTestCase {
     var baby: Baby!

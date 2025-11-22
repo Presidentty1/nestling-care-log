@@ -6,15 +6,15 @@ Since the automated script has issues, follow these manual steps to add Sentry t
 
 ### 1. Open Xcode Project
 ```bash
-cd ios/Nestling
-open Nestling.xcodeproj
+cd ios/Nuzzle
+open Nuzzle.xcodeproj
 ```
 
 ### 2. Add Package Dependencies
 1. In Xcode, go to **File → Add Package Dependencies...**
 2. Enter the Sentry package URL: `https://github.com/getsentry/sentry-cocoa.git`
 3. Set dependency rule to **Up to Next Major Version** and version **8.0.0**
-4. Add both products to the Nestling target:
+4. Add both products to the Nuzzle target:
    - **Sentry** (required)
    - **SentrySwiftUI** (optional, for SwiftUI integration)
 
@@ -30,10 +30,10 @@ ENVIRONMENT=development  # or production
 ### 4. Build and Test
 ```bash
 # Build the project
-xcodebuild -project Nestling.xcodeproj -scheme Nestling -sdk iphonesimulator build
+xcodebuild -project Nuzzle.xcodeproj -scheme Nuzzle -sdk iphonesimulator build
 
 # Run on simulator
-xcodebuild -project Nestling.xcodeproj -scheme Nestling -sdk iphonesimulator build test
+xcodebuild -project Nuzzle.xcodeproj -scheme Nuzzle -sdk iphonesimulator build test
 ```
 
 ## Sentry Configuration

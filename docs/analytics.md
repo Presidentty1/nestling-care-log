@@ -1,8 +1,8 @@
-# Nestling Analytics
+# Nuzzle Analytics
 
 ## Overview
 
-Nestling uses Firebase Analytics for tracking user behavior, subscription events, and feature usage. All events are properly anonymized and respect user privacy.
+Nuzzle uses Firebase Analytics for tracking user behavior, subscription events, and feature usage. All events are properly anonymized and respect user privacy.
 
 ## Analytics Service
 

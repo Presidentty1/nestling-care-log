@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { Baby } from './types';
+import type { Baby } from './types';
 import { supabase } from '@/integrations/supabase/client';
 
 export async function exportWeeklyReport(baby: Baby) {

@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAnalytics, Analytics } from 'firebase/analytics';
+import type { Analytics } from 'firebase/analytics';
+import { getAnalytics } from 'firebase/analytics';
 
 // Firebase configuration
 const firebaseConfig = {

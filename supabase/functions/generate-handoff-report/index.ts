@@ -60,7 +60,7 @@ Events during shift:
 ${JSON.stringify(eventsSummary, null, 2)}
 
 Recent events detail:
-${events.slice(-5).map(e => `- ${e.type} at ${new Date(e.start_time).toLocaleTimeString()}${e.note ? ': ' + e.note : ''}`).join('\n')}
+${events.slice(-5).map(e => `- ${e.type} at ${new Date(e.start_time).toLocaleTimeString()}${e.note ? `: ${  e.note}` : ''}`).join('\n')}
 
 Generate:
 1. A brief summary paragraph (2-3 sentences)

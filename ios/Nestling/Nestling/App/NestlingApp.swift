@@ -79,10 +79,13 @@ struct NestlingApp: App {
                 } else if authViewModel.session == nil && !authViewModel.hasSkippedAuth {
                     // No session and hasn't skipped - show Auth
                     AuthView(viewModel: authViewModel) {
-                        // On authenticated or skipped, check onboarding
-                        Task { @MainActor in
-                            // Small delay to ensure state updates propagate
-                            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+                        // On authenticated or skipped, check onboarding immediately
+                        isCheckingOnboarding = true
+                        checkOnboarding()
+                    }
+                    .onChange(of: authViewModel.hasSkippedAuth) { oldValue, newValue in
+                        // React to hasSkippedAuth changes immediately
+                        if newValue && !oldValue {
                             isCheckingOnboarding = true
                             checkOnboarding()
                         }
@@ -160,27 +163,64 @@ struct NestlingApp: App {
     
     private func checkOnboarding() {
         Task { @MainActor in
-            // Add timeout to prevent infinite loading
+            print("🔍 Starting onboarding check...")
+            
+            // Add timeout to prevent infinite loading (declare early for guest mode)
             let timeoutTask = Task {
-                try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+                try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
                 if isCheckingOnboarding {
-                    print("⚠️ WARNING: checkOnboarding timed out after 3 seconds, proceeding anyway")
-                    isCheckingOnboarding = false
+                    print("⚠️ WARNING: checkOnboarding timed out after 1.5 seconds, proceeding anyway")
+                    await MainActor.run {
+                        isCheckingOnboarding = false
+                        // On timeout, just show onboarding
+                        showOnboarding = true
+                    }
                 }
             }
             
-            // Check if onboarding is needed
-            do {
-                let onboardingService = OnboardingService(dataStore: environment.dataStore)
-                let completed = await onboardingService.isOnboardingCompleted()
-                
-                // Also check if user has any babies - if not, force onboarding
-                let babies = try await environment.dataStore.fetchBabies()
-                let hasBabies = !babies.isEmpty
-                
+            // For guest mode (skipped auth), proceed immediately
+            if authViewModel.hasSkippedAuth {
+                print("✅ Guest mode: Proceeding immediately to onboarding check")
                 timeoutTask.cancel()
                 isCheckingOnboarding = false
                 
+                // Check babies in background, but don't wait - just show onboarding for now
+                // User can skip onboarding if they already have data
+                Task {
+                    do {
+                        let babies = try await environment.dataStore.fetchBabies()
+                        if !babies.isEmpty {
+                            await environment.refreshBabies()
+                            // If we have babies, hide onboarding
+                            showOnboarding = false
+                        }
+                    } catch {
+                        print("⚠️ Error checking babies: \(error)")
+                    }
+                }
+                
+                // Always show onboarding for guest mode (they can skip if they want)
+                showOnboarding = true
+                return
+            }
+            
+            // For authenticated users, check onboarding
+            let onboardingService = OnboardingService(dataStore: environment.dataStore)
+            let completedResult = await withTimeout(seconds: 0.5) {
+                await onboardingService.isOnboardingCompleted()
+            }
+            
+            // Also check if user has any babies - if not, force onboarding
+            let babiesResult = await withTimeout(seconds: 0.5) {
+                try await environment.dataStore.fetchBabies()
+            }
+            
+            timeoutTask.cancel()
+            isCheckingOnboarding = false
+            
+            switch (completedResult, babiesResult) {
+            case (.success(let completed), .success(let babies)):
+                let hasBabies = !babies.isEmpty
                 // Show onboarding if:
                 // 1. Onboarding was never completed, OR
                 // 2. Onboarding was completed but no babies exist (data might have been cleared)
@@ -190,15 +230,41 @@ struct NestlingApp: App {
                     // Refresh babies list in environment
                     await environment.refreshBabies()
                 }
-            } catch {
-                print("⚠️ ERROR: Failed to check onboarding status: \(error)")
-                timeoutTask.cancel()
-                isCheckingOnboarding = false
-                // On error, assume onboarding is needed to be safe
+            default:
+                // On timeout or error, show onboarding
+                print("⚠️ Timeout or error during onboarding check, showing onboarding")
                 showOnboarding = true
             }
         }
     }
+    
+    // Helper to add timeout to async operations
+    private func withTimeout<T>(seconds: Double, operation: @escaping () async throws -> T) async -> Result<T, Error> {
+        await withTaskGroup(of: Result<T, Error>.self) { group in
+            // Add the actual operation
+            group.addTask {
+                do {
+                    let result = try await operation()
+                    return .success(result)
+                } catch {
+                    return .failure(error)
+                }
+            }
+            
+            // Add timeout task
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                return .failure(TimeoutError())
+            }
+            
+            // Get first result (either success or timeout)
+            let result = await group.next()!
+            group.cancelAll()
+            return result
+        }
+    }
+    
+    private struct TimeoutError: Error {}
     
     /// Handle Spotlight search result tap
     private func handleSpotlightActivity(_ userActivity: NSUserActivity) {
@@ -289,7 +355,6 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
         .motionTransition(.opacity)
     }
 }

@@ -61,7 +61,7 @@ struct SettingsRootView: View {
                 Section("Subscription") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Nestling Pro")
+                            Text("Nuzzle Pro")
                                 .font(.headline)
                                 .foregroundColor(.foreground)
 
@@ -218,7 +218,7 @@ struct SettingsRootView: View {
                 }
                 
                 Section("Subscription") {
-                    NavigationLink("Nestling Pro") {
+                    NavigationLink("Nuzzle Pro") {
                         ProSubscriptionView()
                     }
                 }

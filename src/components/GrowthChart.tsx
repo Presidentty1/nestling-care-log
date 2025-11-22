@@ -1,4 +1,4 @@
-import { GrowthRecord, Baby } from '@/lib/types';
+import type { GrowthRecord, Baby } from '@/lib/types';
 import { calculateWeightPercentile, calculateLengthPercentile, getExpectedWeight } from '@/lib/whoPercentiles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { differenceInDays } from 'date-fns';

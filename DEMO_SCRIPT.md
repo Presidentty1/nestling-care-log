@@ -1,156 +1,287 @@
-# Demo Script
+# Demo Script for Nuzzle MVP
 
-A 5-10 minute walkthrough of Nestling for stakeholders, investors, or team members.
+## Overview
 
-## Setup (Before Demo)
+This script provides a structured walkthrough for demonstrating Nuzzle to stakeholders, investors, or potential users. Follow this flow to showcase key features effectively.
 
-1. **Web App**: Open http://localhost:5173 (or production URL)
-2. **iOS App**: Open in simulator (if Xcode project exists)
-3. **Test Account**: Sign in with demo credentials
-4. **Test Data**: Ensure seed data is loaded (or create a baby)
+## Pre-Demo Setup
 
-## Demo Flow
+### Environment Preparation
 
-### 1. Introduction (30 seconds)
+1. **Test Account:**
+   - Use seed data: `supabase db reset`
+   - Test user: `test@example.com` / `testpassword`
+   - Baby profile: "Test Baby" (60 days old)
 
-> "Nestling is a comprehensive baby care logging app that helps parents track feeds, sleep, diapers, and more. It's built with a local-first architecture, meaning it works offline and prioritizes privacy."
+2. **Data Preparation:**
+   - Ensure sample events exist (feeds, sleep, diapers)
+   - Have at least 3-5 events for today
+   - Include events from yesterday for history demo
 
-**Show**: Home screen with summary cards
+3. **Browser Setup:**
+   - Clear cache and cookies
+   - Use incognito/private window
+   - Have multiple tabs ready (for multi-device demo)
 
-### 2. Quick Logging (1 minute)
+## Demo Flow (15-20 minutes)
 
-> "The core value is quick, one-tap logging. Let me show you how easy it is to log a feed."
+### 1. Introduction (2 minutes)
 
-**Actions**:
-- Click "Feed" quick action
-- Show form with sensible defaults
-- Enter amount (120 ml)
-- Save
-- **Show**: Event appears in timeline immediately
+**Opening:**
+> "Nuzzle is a baby care tracking app designed for sleep-deprived parents. It helps you log feeds, sleep, diapers, and more with one-tap quick actions and AI-powered insights."
 
-> "Notice how the summary card updates instantly. The app works completely offline - all data is stored locally first."
+**Key Value Props:**
+- ⚡ **Fast**: One-tap logging
+- 🧠 **Smart**: AI nap predictions
+- 📱 **Offline**: Works without internet
+- 👨‍👩‍👧‍👦 **Multi-caregiver**: Family sharing
 
-### 3. Multiple Event Types (1 minute)
+### 2. Authentication & Onboarding (3 minutes)
 
-> "Let's log a few more events to show the variety."
+**Sign Up Flow:**
+1. Navigate to `/auth`
+2. Show sign up form
+3. Create account: `demo@nuzzle.app`
+4. **Highlight**: Auto-redirect to onboarding
 
-**Actions**:
-- Log a diaper (wet)
-- Log sleep (start timer, then stop)
-- Log tummy time
+**Onboarding:**
+1. Welcome screen
+2. Create baby profile:
+   - Name: "Demo Baby"
+   - Date of birth: 60 days ago
+   - Feeding style: Combo
+3. **Highlight**: Smooth onboarding, no friction
 
-**Show**: Timeline with all event types, color-coded
+### 3. Home Dashboard (4 minutes)
 
-> "Each event type has its own color and icon for quick visual scanning."
+**Overview:**
+> "This is the main dashboard. Everything you need is here."
 
-### 4. History & Navigation (1 minute)
+**Key Features to Show:**
 
-> "Parents often need to look back at past days, especially for doctor visits."
+1. **Baby Selector** (top)
+   - Show baby name
+   - Mention multi-baby support
 
-**Actions**:
-- Navigate to History tab
-- Select yesterday's date
-- Show events from that day
-- Navigate to different dates
+2. **Nap Prediction Card**
+   - "AI predicts next nap based on age and sleep patterns"
+   - Show prediction time
+   - **Highlight**: Age-based wake windows
 
-> "The timeline is searchable and filterable. You can also export data as CSV or PDF for doctor visits."
+3. **Quick Actions**
+   - "One-tap logging for common events"
+   - Demonstrate: Tap "Log Feed" → Form opens
+   - **Highlight**: Speed and convenience
 
-### 5. Smart Predictions (1 minute)
+4. **Timeline**
+   - "All events in chronological order"
+   - Show today's events
+   - **Highlight**: Visual timeline, easy to scan
 
-> "One of our key differentiators is AI-powered predictions."
+5. **Summary Chips**
+   - "Quick stats: feeds today, diapers, sleep"
+   - **Highlight**: At-a-glance information
 
-**Actions**:
-- Navigate to Labs/Predictions
-- Show nap prediction card
-- Explain age-based wake windows
-- Show "Next Feed" prediction
+### 4. Event Logging (3 minutes)
 
-> "These predictions get smarter over time as we learn the baby's patterns. All analysis happens on-device for privacy."
+**Quick Action:**
+1. Tap "Log Feed" quick action
+2. Form opens with smart defaults
+3. Fill amount: 120ml
+4. Submit
+5. **Highlight**: Event appears instantly in timeline
 
-### 6. Settings & Privacy (1 minute)
+**Manual Entry:**
+1. Tap FAB (floating action button)
+2. Show event type selector
+3. Select "Diaper"
+4. Fill form
+5. Submit
+6. **Highlight**: Flexible logging options
 
-> "Privacy is core to our product. Let me show you the settings."
+**Edit Event:**
+1. Tap event in timeline
+2. Show edit form
+3. Update amount
+4. Save
+5. **Highlight**: Easy editing
 
-**Actions**:
-- Navigate to Settings
-- Show AI data sharing toggle
-- Show units preference (ml/oz)
-- Show data export options
-- Show privacy policy link
+### 5. History View (2 minutes)
 
-> "Users have full control. They can export all their data, delete it, or disable AI features entirely. We never sell data."
+**Navigation:**
+1. Go to History tab
+2. Show date picker
+3. Select yesterday
+4. **Highlight**: Day-by-day navigation
 
-### 7. iOS Native Features (1 minute - if iOS available)
+**Features:**
+- Filter by event type
+- Export data (CSV/PDF)
+- **Highlight**: Doctor visit reports
 
-> "The iOS app takes advantage of native features."
+### 6. AI Features (3 minutes)
 
-**Actions**:
-- Show home screen widget
-- Show lock screen widget
-- Demonstrate Siri shortcut: "Hey Siri, log a feed"
-- Show Live Activity for sleep timer
+**Nap Predictor:**
+1. Navigate to Nap Predictor
+2. Show prediction details
+3. Explain age-based calculations
+4. **Highlight**: Personalized predictions
 
-> "Parents can log events without even opening the app. The Dynamic Island shows active sleep timers."
+**AI Assistant** (if time):
+1. Navigate to AI Assistant
+2. Ask: "When should my baby nap next?"
+3. Show contextual response
+4. **Highlight**: AI-powered insights
 
-### 8. Multi-Baby Support (30 seconds)
+### 7. Settings & Multi-Caregiver (2 minutes)
 
-> "Many families have multiple children."
+**Settings Overview:**
+1. Navigate to Settings
+2. Show key options:
+   - Baby management
+   - Caregiver invites
+   - Notification settings
+   - Privacy controls
 
-**Actions**:
-- Show baby switcher
-- Switch between babies
-- Show context changes (different timelines, predictions)
+**Family Sharing:**
+1. Show caregiver management
+2. Explain invite flow
+3. **Highlight**: Multi-device sync
 
-### 9. Closing (30 seconds)
+### 8. Offline Demo (1 minute)
 
-> "That's Nestling in a nutshell. It's designed to be:
-> - **Fast**: One-tap logging
-> - **Private**: Local-first, no tracking
-> - **Smart**: AI predictions without compromising privacy
-> - **Reliable**: Works offline, syncs when online"
-
-**Show**: Summary cards one more time
-
-> "Questions?"
+**Offline Capability:**
+1. Disable network (dev tools)
+2. Log an event
+3. Show it queues
+3. Re-enable network
+4. Show automatic sync
+5. **Highlight**: Works offline, syncs when online
 
 ## Key Talking Points
 
-### If Asked About Offline Support
+### Problem Statement
 
-> "Yes, the app works completely offline. All data is stored locally first, then synced to the cloud when online. This means parents can log events even in areas with poor connectivity, like hospitals."
+> "New parents are overwhelmed. They're sleep-deprived, trying to remember when baby last fed, which side to feed from, when naps happened. Nuzzle solves this with one-tap logging and AI insights."
 
-### If Asked About AI
+### Solution Highlights
 
-> "Our AI features are opt-in. Users can disable AI data sharing entirely. When enabled, we use Google Gemini via Supabase Edge Functions. All analysis happens server-side, but we never store audio recordings or sell data."
+1. **Speed**: "One tap to log a feed. No forms, no friction."
+2. **Intelligence**: "AI learns your baby's patterns and predicts naps."
+3. **Reliability**: "Works offline, syncs across devices."
+4. **Family**: "Multiple caregivers can log, everyone stays in sync."
 
-### If Asked About Pricing
+### Competitive Advantages
 
-> "We're currently in beta. Future plans include a free tier with basic features and a Pro tier with advanced analytics, unlimited babies, and family sharing."
-
-### If Asked About Data Export
-
-> "Users can export all their data as CSV or PDF at any time. We also support secure deletion - when a user deletes their account, all data is permanently removed from our servers."
-
-## Demo Tips
-
-1. **Keep it moving**: Don't get stuck on one feature
-2. **Show, don't tell**: Let the UI speak for itself
-3. **Handle errors gracefully**: If something breaks, acknowledge it and move on
-4. **Emphasize privacy**: This is a key differentiator
-5. **Show speed**: Quick actions should feel instant
+- **Faster than competitors**: One-tap vs. multi-step forms
+- **Smarter**: AI predictions vs. manual tracking
+- **More reliable**: Offline-first vs. online-only
+- **Better UX**: iOS-quality design vs. generic web apps
 
 ## Common Questions & Answers
 
-**Q: How is this different from other baby trackers?**
-A: Local-first architecture, AI predictions without compromising privacy, and modern iOS features like widgets and Siri shortcuts.
+**Q: How does AI work?**
+A: "We use age-based wake windows and sleep pattern analysis. The more you log, the more accurate predictions become."
 
-**Q: Can multiple caregivers use it?**
-A: Yes, we support family sharing. Multiple caregivers can log events for the same baby, and changes sync in real-time.
+**Q: Is my data secure?**
+A: "Yes. All data is encrypted in transit and at rest. We use Row Level Security so you can only see your family's data."
 
-**Q: What about data security?**
-A: All data is encrypted in transit and at rest. We use Supabase with Row Level Security, so users can only access their own family's data.
+**Q: Can I export my data?**
+A: "Yes. You can export to CSV or PDF at any time. We believe in data portability."
 
-**Q: Is there a mobile app?**
-A: Yes, we have a native iOS app with all the same features plus widgets, Siri shortcuts, and Live Activities. Android is planned for the future.
+**Q: What about privacy?**
+A: "We're privacy-first. No ads, no tracking. Your data stays yours. AI features are opt-in."
 
+**Q: How much does it cost?**
+A: "Free tier includes basic logging. Pro ($5.99/month) adds AI predictions, unlimited cry insights, and advanced analytics."
 
+## Demo Tips
+
+### Do's
+
+✅ **Do:**
+- Keep it conversational
+- Focus on user benefits, not features
+- Show real scenarios ("Imagine it's 3 AM...")
+- Highlight speed and ease
+- Address concerns proactively
+
+### Don'ts
+
+❌ **Don't:**
+- Get too technical
+- Show bugs or errors
+- Rush through features
+- Ignore questions
+- Overwhelm with features
+
+## Post-Demo
+
+### Follow-Up
+
+1. **Send Materials:**
+   - Privacy policy
+   - Feature comparison
+   - Pricing information
+
+2. **Schedule Next Steps:**
+   - Beta testing
+   - Feedback session
+   - Custom demo if needed
+
+3. **Collect Feedback:**
+   - What resonated?
+   - What's missing?
+   - Would they use it?
+
+## Demo Variations
+
+### Short Demo (5 minutes)
+- Authentication
+- Home dashboard
+- Quick action logging
+- Nap prediction
+
+### Technical Demo (30 minutes)
+- Full feature walkthrough
+- Architecture overview
+- Security deep-dive
+- Q&A session
+
+### Investor Pitch (10 minutes)
+- Problem/solution
+- Market opportunity
+- Key features
+- Business model
+- Traction/roadmap
+
+## Troubleshooting
+
+### If Something Breaks
+
+1. **Stay Calm**: "Let me show you another feature..."
+2. **Have Backup**: Pre-recorded video demo
+3. **Acknowledge**: "This is beta, we're improving daily"
+4. **Pivot**: Move to working features
+
+### If Questions Come Up
+
+1. **Answer Honestly**: Don't make up features
+2. **Take Notes**: "Great question, let me follow up"
+3. **Show Roadmap**: "That's planned for Q2"
+4. **Be Transparent**: About limitations
+
+## Success Metrics
+
+**Good Demo Signs:**
+- ✅ Questions about pricing
+- ✅ Requests for beta access
+- ✅ Interest in specific features
+- ✅ Comparisons to competitors
+- ✅ "When can I use this?"
+
+## Related Documentation
+
+- `MVP_CHECKLIST.md` - Feature completeness
+- `ARCHITECTURE_WEB.md` - Technical details
+- `USER_REVIEW_AND_VALUE_PROPOSITION.md` - User perspective

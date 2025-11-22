@@ -14,7 +14,7 @@ import { FeedingAnalysis } from '@/components/analytics/FeedingAnalysis';
 import { PatternVisualization } from '@/components/analytics/PatternVisualization';
 import { BabySwitcher } from '@/components/BabySwitcher';
 import { DoctorReport } from '@/components/DoctorReport';
-import { Baby } from '@/services/babyService';
+import type { Baby } from '@/services/babyService';
 
 export default function Patterns() {
   const navigate = useNavigate();

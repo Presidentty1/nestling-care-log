@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Baby } from './types';
+import type { Baby } from './types';
 import { differenceInMonths } from 'date-fns';
 
 export async function buildBabyContext(baby: Baby) {

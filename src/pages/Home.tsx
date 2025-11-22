@@ -18,6 +18,8 @@ import { babyService, Baby } from '@/services/babyService';
 import { napPredictorService } from '@/services/napPredictorService';
 import { reminderService } from '@/services/reminderService';
 import { useAppStore } from '@/store/appStore';
+import { logger } from '@/lib/logger';
+import { SafeComponentBoundary, DataComponentBoundary } from '@/components/errorBoundaries/ComponentErrorBoundary';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { TimelineList } from '@/components/today/TimelineList';
@@ -265,7 +267,7 @@ export default function Home() {
             }
           }
         } catch (e) {
-          console.error('Auto-provision error:', e);
+          logger.error('Auto-provision error', e, 'Home');
         }
         navigate('/onboarding');
         return;
@@ -277,7 +279,7 @@ export default function Home() {
       
       setLoading(false);
     } catch (error) {
-      console.error('Failed to load babies:', error);
+      logger.error('Failed to load babies', error, 'Home');
       toast.error("Couldn't load your babies. Check your connection?");
       setLoading(false);
     }
@@ -292,7 +294,7 @@ export default function Home() {
       
       await loadTodayEvents();
     } catch (error) {
-      console.error('Failed to load baby data:', error);
+      logger.error('Failed to load baby data', error, 'Home');
       toast.error('Failed to load data');
     }
   };
@@ -321,7 +323,7 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.error('Failed to load events:', error);
+      logger.error('Failed to load events', error, 'Home');
       toast.error('Failed to load events');
     }
   };
@@ -402,7 +404,7 @@ export default function Home() {
 
       loadTodayEvents();
     } catch (error) {
-      console.error('Quick log error:', error);
+      logger.error('Quick log error', error, 'Home');
       toast.error('Failed to log event', {
         description: 'Please try again.',
       });
@@ -424,7 +426,7 @@ export default function Home() {
       toast.success('Event deleted');
       loadTodayEvents(); // Reload events after deletion
     } catch (error) {
-      console.error('Failed to delete event:', error);
+      logger.error('Failed to delete event', error, 'Home');
       toast.error('Failed to delete event');
     }
   };
@@ -477,24 +479,30 @@ export default function Home() {
         {guestMode && showGuestBanner && <GuestModeBanner />}
 
         {(summary || napWindow) && (
-          <TodayPlanStrip events={events} napWindow={napWindow} summary={summary} />
+          <DataComponentBoundary componentName="TodayPlanStrip">
+            <TodayPlanStrip events={events} napWindow={napWindow} summary={summary} />
+          </DataComponentBoundary>
         )}
 
         {summary && (
-          <SummaryChips summary={summary} />
+          <DataComponentBoundary componentName="SummaryChips">
+            <SummaryChips summary={summary} />
+          </DataComponentBoundary>
         )}
 
         {napWindow && selectedBaby && (
           <div className="mb-4">
-            <NapPill 
-              prediction={{
-                nextWindowStartISO: napWindow.start.toISOString(),
-                nextWindowEndISO: napWindow.end.toISOString(),
-                reason: napWindow.reason,
-                confidence: 0.85,
-              }}
-              babyId={activeBabyId}
-            />
+            <DataComponentBoundary componentName="NapPill">
+              <NapPill
+                prediction={{
+                  nextWindowStartISO: napWindow.start.toISOString(),
+                  nextWindowEndISO: napWindow.end.toISOString(),
+                  reason: napWindow.reason,
+                  confidence: 0.85,
+                }}
+                babyId={activeBabyId}
+              />
+            </DataComponentBoundary>
           </div>
         )}
 
@@ -585,19 +593,23 @@ export default function Home() {
           </Card>
         )}
 
-        <QuickActions 
-          onActionSelect={handleQuickAction}
-          onQuickLog={handleQuickLog}
-          recentEvents={events}
-        />
+        <SafeComponentBoundary componentName="QuickActions">
+          <QuickActions
+            onActionSelect={handleQuickAction}
+            onQuickLog={handleQuickLog}
+            recentEvents={events}
+          />
+        </SafeComponentBoundary>
 
         <div className="space-y-3">
           <h2 className="text-headline">Today's Timeline</h2>
-          <TimelineList
-            events={events}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <DataComponentBoundary componentName="TimelineList">
+            <TimelineList
+              events={events}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </DataComponentBoundary>
         </div>
 
         <p className="text-xs text-center text-muted-foreground py-4 px-6">

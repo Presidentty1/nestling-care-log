@@ -1,198 +1,93 @@
-# Web Analytics Specification
+# Analytics Specification - Web Application
 
-This document describes all analytics events tracked in the Nestling web app.
+## Overview
 
-## Implementation
+Nuzzle uses Firebase Analytics for user behavior tracking and Sentry for error tracking. This document describes the analytics implementation, tracked events, and privacy considerations.
 
-Analytics are implemented via `src/analytics/analytics.ts` abstraction layer. Default implementation logs to console. Can be swapped with production analytics service (PostHog, Mixpanel, Amplitude, etc.).
+## Analytics Stack
 
-## Event Taxonomy
+- **Primary**: Firebase Analytics (Google Analytics 4)
+- **Error Tracking**: Sentry
+- **Implementation**: `src/analytics/analytics.ts`
+- **Service Layer**: `src/services/analyticsService.ts`
 
-### Event Logging
+## Event Tracking
 
-#### `event_logged`
-Tracked when a user logs a new event.
+### Core Events
 
-**Properties**:
-- `event_type`: `'feed' | 'diaper' | 'sleep' | 'tummy_time'`
-- `subtype`: string (e.g., `'bottle'`, `'wet'`, `'nap'`)
-- `amount`: number (optional, for feeds)
-- `unit`: `'ml' | 'oz'` (optional, for feeds)
-- `has_note`: boolean
-- `baby_id`: string
-- `source`: `'quick_action' | 'form' | 'voice'`
+**User Lifecycle:**
+- `user_signed_in` - User signs in
+- `user_signed_up` - New user registration
+- `onboarding_completed` - Onboarding flow completed
+- `page_view` - Page navigation
 
-**Example**:
-```ts
-track('event_logged', {
-  event_type: 'feed',
+**Event Logging:**
+- `event_saved` - Event created (type, subtype)
+- `event_edited` - Event updated (eventId, type)
+- `event_deleted` - Event removed (eventId, type)
+
+**Baby Management:**
+- `baby_created` - New baby profile (babyId)
+- `baby_updated` - Baby profile edited (babyId)
+- `baby_deleted` - Baby removed (babyId)
+- `baby_switched` - User switches active baby (babyId)
+
+**Features:**
+- `nap_recalculated` - Nap prediction updated (ageMonths)
+- `nap_feedback_submitted` - User feedback on prediction (rating)
+- `data_exported` - Data export (format: csv/pdf)
+- `delete_all_data` - User deletes all data
+
+**Settings:**
+- `notification_settings_saved` - Notification preferences updated
+- `notification_permission_requested` - Permission prompt shown
+- `caregiver_mode_toggled` - Caregiver mode enabled/disabled (enabled)
+
+**Errors:**
+- `error` - Application error (error message, context)
+
+## Implementation Details
+
+### Firebase Analytics Setup
+
+**Configuration:**
+```typescript
+// src/lib/firebase.ts
+import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  // ... other config
+};
+
+const app = initializeApp(firebaseConfig);
+export const analytics = getAnalytics(app);
+```
+
+**Event Naming:**
+- Firebase event names: alphanumeric + underscores, max 40 chars
+- Automatic sanitization in `analytics.ts`
+- Example: `event_saved` → `event_saved` (valid)
+
+### Tracking Functions
+
+**Track Event:**
+```typescript
+import { track } from '@/analytics/analytics';
+
+track('event_saved', {
+  type: 'feed',
   subtype: 'bottle',
   amount: 120,
-  unit: 'ml',
-  has_note: false,
-  baby_id: 'uuid-here',
-  source: 'quick_action'
+  unit: 'ml'
 });
 ```
 
-#### `event_edited`
-Tracked when a user edits an existing event.
-
-**Properties**:
-- `event_type`: string
-- `event_id`: string
-- `changes`: string[] (array of changed fields, e.g., `['amount', 'note']`)
-
-#### `event_deleted`
-Tracked when a user deletes an event.
-
-**Properties**:
-- `event_type`: string
-- `event_id`: string
-
-### Settings & Preferences
-
-#### `settings_changed`
-Tracked when user changes any setting.
-
-**Properties**:
-- `setting_category`: `'units' | 'notifications' | 'ai' | 'privacy' | 'accessibility'`
-- `setting_name`: string (specific setting name)
-- `old_value`: any (optional)
-- `new_value`: any
-
-**Example**:
-```ts
-track('settings_changed', {
-  setting_category: 'units',
-  setting_name: 'preferred_unit',
-  old_value: 'ml',
-  new_value: 'oz'
-});
-```
-
-#### `ai_consent_changed`
-Tracked when user toggles AI data sharing.
-
-**Properties**:
-- `enabled`: boolean
-- `source`: `'onboarding' | 'settings'`
-
-### Predictions & AI
-
-#### `predictions_viewed`
-Tracked when user views the Predictions page.
-
-**Properties**:
-- `baby_id`: string
-- `ai_enabled`: boolean
-
-#### `prediction_generated`
-Tracked when a prediction is generated.
-
-**Properties**:
-- `prediction_type`: `'next_feed' | 'next_nap'`
-- `baby_id`: string
-- `confidence`: number (0-1)
-- `ai_enabled`: boolean
-
-#### `ai_assistant_used`
-Tracked when user interacts with AI Assistant.
-
-**Properties**:
-- `action`: `'question_asked' | 'quick_question_selected'`
-- `question_length`: number (character count)
-- `baby_id`: string
-
-### Navigation & Engagement
-
-#### `page_viewed`
-Tracked on route changes (via React Router).
-
-**Properties**:
-- `page_name`: string (e.g., `'home'`, `'history'`, `'settings'`)
-- `baby_id`: string (if applicable)
-
-#### `baby_switched`
-Tracked when user switches active baby.
-
-**Properties**:
-- `from_baby_id`: string
-- `to_baby_id`: string
-
-#### `quick_action_used`
-Tracked when user uses quick action button.
-
-**Properties**:
-- `action_type`: `'feed' | 'diaper' | 'sleep' | 'tummy_time'`
-- `method`: `'quick_log' | 'open_form'`
-
-### Data Management
-
-#### `data_exported`
-Tracked when user exports data.
-
-**Properties**:
-- `export_format`: `'csv' | 'json' | 'pdf'`
-- `date_range`: string (e.g., `'today' | 'week' | 'month' | 'all'`)
-
-#### `data_deleted`
-Tracked when user deletes data.
-
-**Properties**:
-- `delete_type`: `'event' | 'baby' | 'all_data'`
-- `item_count`: number (for bulk deletions)
-
-### Onboarding & Authentication
-
-#### `user_signed_up`
-Tracked on user registration.
-
-**Properties**:
-- `method`: `'email'`
-- `has_baby`: boolean (whether baby was created during signup)
-
-#### `user_signed_in`
-Tracked on user login.
-
-**Properties**:
-- `method`: `'email'`
-
-#### `onboarding_completed`
-Tracked when user completes onboarding.
-
-**Properties**:
-- `steps_completed`: number
-- `ai_consent_given`: boolean
-- `notifications_enabled`: boolean
-
-### Errors & Performance
-
-#### `error_occurred`
-Tracked when errors occur (via error boundary or catch blocks).
-
-**Properties**:
-- `error_type`: string (e.g., `'network_error'`, `'validation_error'`)
-- `error_message`: string (sanitized, no PII)
-- `page`: string
-- `user_action`: string (what user was doing)
-
-#### `performance_metric`
-Tracked for performance monitoring.
-
-**Properties**:
-- `metric_name`: string (e.g., `'page_load_time'`, `'api_response_time'`)
-- `value`: number (milliseconds or appropriate unit)
-- `page`: string
-
-## User Identification
-
-Call `identify()` after user signs in:
-
-```ts
+**Identify User:**
+```typescript
 import { identify } from '@/analytics/analytics';
 
-// After successful auth
 identify(user.id, {
   email: user.email,
   name: user.name,
@@ -200,68 +95,213 @@ identify(user.id, {
 });
 ```
 
-## Page Tracking
-
-Track page views on route changes:
-
-```ts
+**Page View:**
+```typescript
 import { page } from '@/analytics/analytics';
 
-// In App.tsx or route component
-useEffect(() => {
-  page('home', {
-    baby_count: babies.length
-  });
-}, [location.pathname]);
+page('home', {
+  baby_count: 2
+});
+```
+
+### Service Layer
+
+**AnalyticsService** (`src/services/analyticsService.ts`):
+
+Provides high-level tracking methods:
+- `trackOnboardingComplete(babyId)`
+- `trackEventSaved(type, subtype)`
+- `trackBabySwitch(babyId)`
+- `trackNapRecalc(ageMonths)`
+- `trackExport(format)`
+- etc.
+
+**Usage:**
+```typescript
+import { analyticsService } from '@/services/analyticsService';
+
+analyticsService.trackEventSaved('feed', 'bottle');
+```
+
+### Sentry Integration
+
+**Error Tracking:**
+- Automatic error capture via Sentry
+- User action breadcrumbs
+- Contextual error information
+
+**Breadcrumbs:**
+```typescript
+Sentry.addBreadcrumb({
+  message: 'event_saved',
+  category: 'user_action',
+  level: 'info',
+  data: { type: 'feed' }
+});
 ```
 
 ## Privacy & Compliance
 
-- **No PII**: Never track personally identifiable information beyond user ID
-- **Opt-out**: Respect user preferences (can add opt-out mechanism)
-- **GDPR**: Events are designed to be GDPR-compliant
-- **Sanitization**: Error messages are sanitized before tracking
+### Data Collection
 
-## Integration Examples
+**Collected Data:**
+- User ID (hashed/anonymized)
+- Event types and timestamps
+- Feature usage patterns
+- Error logs
 
-### PostHog
-```ts
-import { initAnalytics } from '@/analytics/analytics';
-import posthog from 'posthog-js';
+**NOT Collected:**
+- Personal health information
+- Baby names or PII
+- Exact event details (amounts, notes)
+- Location data
 
-posthog.init('your-api-key');
-initAnalytics({
-  track: (name, props) => posthog.capture(name, props),
-  identify: (id, traits) => posthog.identify(id, traits),
-  page: (name, props) => posthog.capture('$pageview', { page: name, ...props })
-});
+### User Consent
+
+**AI Data Sharing:**
+- Separate consent for AI features
+- Stored in `profiles.ai_data_sharing_enabled`
+- Analytics tracking independent of AI consent
+
+**Opt-Out:**
+- Analytics can be disabled via environment variable
+- No user-facing toggle (complies with privacy policy)
+
+### GDPR Compliance
+
+**Data Retention:**
+- Firebase Analytics: 14 months default
+- Sentry: 90 days default
+- User can request data deletion
+
+**User Rights:**
+- Data export available
+- Account deletion removes analytics data
+- Privacy policy linked in app
+
+## Event Properties
+
+### Standard Properties
+
+**All Events:**
+- `timestamp` - Event timestamp (auto-added)
+- `user_id` - User identifier (hashed)
+
+**Event-Specific:**
+- `event_type` - Type of event (feed, sleep, etc.)
+- `event_subtype` - Subtype (bottle, nap, etc.)
+- `baby_id` - Baby identifier (hashed)
+- `format` - Export format (csv, pdf)
+
+### Property Limits
+
+**Firebase Constraints:**
+- Event name: 40 characters max
+- Property name: 24 characters max
+- Property value: 100 characters max (strings)
+- Max 25 custom parameters per event
+
+**Sanitization:**
+- Automatic in `analytics.ts`
+- Invalid characters replaced with underscores
+- Values truncated if necessary
+
+## Analytics Dashboard
+
+### Key Metrics
+
+**User Engagement:**
+- Daily Active Users (DAU)
+- Weekly Active Users (WAU)
+- Monthly Active Users (MAU)
+- Session duration
+- Events per session
+
+**Feature Usage:**
+- Event logging frequency
+- Feature adoption rates
+- Nap prediction usage
+- Export feature usage
+
+**Retention:**
+- Day 1, 7, 30 retention
+- Churn rate
+- Return user rate
+
+### Custom Reports
+
+**Firebase Console:**
+- Custom events dashboard
+- User property analysis
+- Funnel analysis
+- Cohort analysis
+
+**Sentry Dashboard:**
+- Error frequency
+- Error trends
+- User impact
+- Stack traces
+
+## Testing Analytics
+
+### Development Mode
+
+**Console Logging:**
+- Analytics events logged to console
+- No data sent to Firebase in dev
+- Useful for debugging
+
+**Test Events:**
+```typescript
+// In development
+track('test_event', { test: true });
+// Logs: [Analytics] test_event { test: true }
 ```
 
-### Mixpanel
-```ts
-import { initAnalytics } from '@/analytics/analytics';
-import mixpanel from 'mixpanel-browser';
+### Production Verification
 
-mixpanel.init('your-token');
-initAnalytics({
-  track: (name, props) => mixpanel.track(name, props),
-  identify: (id, traits) => mixpanel.identify(id) && mixpanel.people.set(traits),
-  page: (name, props) => mixpanel.track('Page View', { page: name, ...props })
-});
+**Firebase DebugView:**
+- Real-time event monitoring
+- Verify events are firing
+- Check event properties
+
+**Sentry Test Events:**
+```typescript
+Sentry.captureMessage('Test error', 'info');
 ```
 
-## Current Implementation Status
+## Best Practices
 
-✅ **Analytics abstraction created** (`src/analytics/analytics.ts`)  
-⏳ **Instrumentation**: Events need to be added throughout the app  
-⏳ **Production service**: Not yet integrated (using console logger)
+### Event Naming
 
-## Next Steps
+**Do:**
+- Use snake_case
+- Be descriptive (`event_saved` not `save`)
+- Keep under 40 characters
+- Use consistent naming
 
-1. Add `track()` calls to event logging flows
-2. Add `track()` calls to settings changes
-3. Add `page()` calls to route changes
-4. Add `identify()` call after authentication
-5. Integrate production analytics service when ready
+**Don't:**
+- Include PII in event names
+- Use special characters
+- Create too many unique events
+- Track sensitive data
 
+### Property Usage
 
+**Do:**
+- Use consistent property names
+- Keep values concise
+- Use enums for categorical data
+- Document all properties
+
+**Don't:**
+- Include PII in properties
+- Track exact amounts/values
+- Use free-form text
+- Exceed property limits
+
+## Related Documentation
+
+- `ARCHITECTURE_WEB.md` - Application architecture
+- `PRIVACY.md` - Privacy policy
+- `ENVIRONMENT_VARIABLES.md` - Configuration

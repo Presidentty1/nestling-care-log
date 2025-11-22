@@ -1,6 +1,6 @@
-# iOS Migration Guide for Nestling Care Log
+# iOS Migration Guide for Nuzzle Care Log
 
-This guide helps you convert the Nestling web app into a native iOS app using SwiftUI.
+This guide helps you convert the Nuzzle web app into a native iOS app using SwiftUI.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ This guide helps you convert the Nestling web app into a native iOS app using Sw
 
 ```bash
 # Create new iOS app project
-# App Name: Nestling
+# App Name: Nuzzle
 # Organization Identifier: app.lovable
 # Bundle ID: app.lovable.3be850d6430e4062887da465d2abf643
 # Interface: SwiftUI
@@ -44,7 +44,7 @@ Add to `Podfile`:
 ```ruby
 platform :ios, '17.0'
 
-target 'Nestling' do
+target 'Nuzzle' do
   use_frameworks!
   
   # Supabase
@@ -206,12 +206,12 @@ class BabyViewModel {
 
 ### 3.1 Main App Structure
 
-Create `NestlingApp.swift`:
+Create `NuzzleApp.swift`:
 ```swift
 import SwiftUI
 
 @main
-struct NestlingApp: App {
+struct NuzzleApp: App {
     @State private var authViewModel = AuthViewModel()
     @State private var babyViewModel = BabyViewModel()
     
@@ -477,10 +477,10 @@ class AIViewModel {
 
 ### 6.1 Unit Tests
 
-Create `NestlingTests/ViewModelTests.swift`:
+Create `NuzzleTests/ViewModelTests.swift`:
 ```swift
 import XCTest
-@testable import Nestling
+@testable import Nuzzle
 
 final class BabyViewModelTests: XCTestCase {
     func testFetchBabies() async {
@@ -493,7 +493,7 @@ final class BabyViewModelTests: XCTestCase {
 
 ### 6.2 UI Tests
 
-Create `NestlingUITests/HomeFlowTests.swift`:
+Create `NuzzleUITests/HomeFlowTests.swift`:
 ```swift
 import XCTest
 
@@ -535,14 +535,14 @@ Required:
 ```bash
 # Archive for distribution
 xcodebuild archive \
-  -workspace Nestling.xcworkspace \
-  -scheme Nestling \
+  -workspace Nuzzle.xcworkspace \
+  -scheme Nuzzle \
   -configuration Release \
-  -archivePath ./build/Nestling.xcarchive
+  -archivePath ./build/Nuzzle.xcarchive
 
 # Export IPA
 xcodebuild -exportArchive \
-  -archivePath ./build/Nestling.xcarchive \
+  -archivePath ./build/Nuzzle.xcarchive \
   -exportPath ./build \
   -exportOptionsPlist ExportOptions.plist
 ```

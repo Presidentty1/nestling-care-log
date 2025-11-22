@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Moon, Clock, ThumbsUp, ThumbsDown, Minus, Info } from 'lucide-react';
 import { format, isBefore, isAfter } from 'date-fns';
-import { NapPrediction } from '@/types/events';
+import type { NapPrediction } from '@/types/events';
 import { Button } from '@/components/ui/button';
 import {
   Popover,

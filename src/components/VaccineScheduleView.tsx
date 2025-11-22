@@ -1,4 +1,4 @@
-import { Baby } from '@/lib/types';
+import type { Baby } from '@/lib/types';
 import { CDCVaccineSchedule } from '@/lib/vaccineSchedule';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

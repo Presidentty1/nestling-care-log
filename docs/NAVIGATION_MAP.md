@@ -1,11 +1,11 @@
 # Navigation Map
 
-Visual representation of the entire Nestling app navigation structure.
+Visual representation of the entire Nuzzle app navigation structure.
 
 ## App Structure
 
 ```
-Nestling App
+Nuzzle App
 │
 ├── Unauthenticated Flow
 │   ├── /auth (Login/Signup)

@@ -14,8 +14,13 @@ class DataStoreSelector {
         #if USE_REMOTE_STORE
         // Use RemoteDataStore if Supabase is configured
         if SupabaseClientProvider.shared.isConfigured {
-            // TODO: Get URL and key from config
-            // return RemoteDataStore(supabaseURL: url, anonKey: key)
+            do {
+                let client = try SupabaseClientProvider.shared.getClient()
+                return RemoteDataStore(supabaseClient: client)
+            } catch {
+                print("⚠️ Failed to create RemoteDataStore: \(error.localizedDescription)")
+                // Fall through to local storage
+            }
         }
         #endif
         

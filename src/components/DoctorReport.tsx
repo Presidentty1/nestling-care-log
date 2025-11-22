@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { FileText, Share, Download, Mail, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { Baby } from '@/services/babyService';
+import type { Baby } from '@/services/babyService';
 import { exportWeeklyReport } from '@/lib/reportExport';
 import { differenceInMonths, format } from 'date-fns';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BabyEvent } from '@/lib/types';
+import type { BabyEvent } from '@/lib/types';
 
 export function useActiveTimer(activeEvent: BabyEvent | null) {
   const [elapsed, setElapsed] = useState(0);

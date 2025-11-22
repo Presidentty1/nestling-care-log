@@ -176,7 +176,7 @@ interaction.donate()
 ```
 
 User can then say:
-> "Hey Siri, log a feeding in Nestling"
+> "Hey Siri, log a feeding in Nuzzle"
 
 ## Troubleshooting
 
@@ -249,7 +249,7 @@ User can then say:
 
 ### Phase 2+ Ideas
 - **Multi-language support**: Spanish, French, German, etc.
-- **Continuous listening mode**: "Hey Nestling, log a feeding"
+- **Continuous listening mode**: "Hey Nuzzle, log a feeding"
 - **Voice profiles**: Distinguish between different caregivers
 - **Smart context**: "Same as last time" command
 - **Voice editing**: "Change that to 6 ounces"

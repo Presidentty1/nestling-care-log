@@ -13,6 +13,8 @@ import { format } from 'date-fns';
 import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
 import { detectTimeZone, parseLocalDate } from '@/services/time';
+import { logger } from '@/lib/logger';
+import { sanitizeBabyName } from '@/lib/sanitization';
 import { validateBaby } from '@/services/validation';
 import { toast } from 'sonner';
 import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
@@ -74,12 +76,13 @@ export default function OnboardingSimple() {
         return;
       }
       
-      const baby = await dataService.addBaby(babyData);
+      const sanitizedName = sanitizeBabyName(babyData.name);
+      const baby = await dataService.addBaby({ ...babyData, name: sanitizedName });
       setActiveBabyId(baby.id);
       toast.success(`Welcome, ${baby.name}! Log what you can, when you can. We'll work with whatever you provide.`);
       navigate('/home');
     } catch (error) {
-      console.error('Failed to create baby:', error);
+      logger.error('Failed to create baby', error, 'Onboarding');
       toast.error(
         'Could not save baby locally. Your data never leaves your device. Please try again.',
         { duration: 5000 }
@@ -101,7 +104,7 @@ export default function OnboardingSimple() {
       toast.success('Demo profile created!');
       navigate('/home');
     } catch (error) {
-      console.error('Failed to create demo:', error);
+      logger.error('Failed to create demo', error, 'Onboarding');
       toast.error('Failed to create demo profile');
     } finally {
       setIsCreating(false);
@@ -115,7 +118,7 @@ export default function OnboardingSimple() {
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <Baby className="h-6 w-6 text-primary" />
-              <CardTitle>Welcome to Nestling</CardTitle>
+              <CardTitle>Welcome to Nuzzle</CardTitle>
             </div>
             <CardDescription>Let's set up your baby's profile</CardDescription>
           </CardHeader>
@@ -125,7 +128,7 @@ export default function OnboardingSimple() {
               <Input
                 id="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(sanitizeBabyName(e.target.value))}
                 placeholder="Enter name"
                 maxLength={40}
                 aria-invalid={!!errors.name}

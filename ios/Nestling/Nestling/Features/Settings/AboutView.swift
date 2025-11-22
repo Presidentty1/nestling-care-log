@@ -12,7 +12,7 @@ struct AboutView: View {
                 
                 // App Name and Version
                 VStack(spacing: .spacingSM) {
-                    Text("Nestling")
+                    Text("Nuzzle")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.foreground)

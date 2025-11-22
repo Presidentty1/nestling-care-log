@@ -110,7 +110,7 @@ serve(async (req) => {
       .single();
 
     return new Response(
-      JSON.stringify({ summary: summary, data: summaryData }),
+      JSON.stringify({ summary, data: summaryData }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

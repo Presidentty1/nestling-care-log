@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SummaryChips } from '@/components/today/SummaryChips';
-import { DailySummary } from '@/types/summary';
+import type { DailySummary } from '@/types/summary';
 
 describe('SummaryChips', () => {
   const defaultSummary: DailySummary = {

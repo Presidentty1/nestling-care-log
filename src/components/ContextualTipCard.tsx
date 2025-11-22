@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { X, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ContextualTip } from '@/lib/contextualTips';
+import type { ContextualTip } from '@/lib/contextualTips';
 
 interface ContextualTipCardProps {
   tip: ContextualTip;

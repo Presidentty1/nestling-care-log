@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { forwardRef } from 'react';
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

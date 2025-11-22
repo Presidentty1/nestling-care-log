@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useEventLogger } from '@/hooks/useEventLogger';
 import { useActiveTimer } from '@/hooks/useActiveTimer';
-import { BabyEvent, EventType } from '@/lib/types';
+import type { BabyEvent, EventType } from '@/lib/types';
 import { Milk, Moon, Baby as BabyIcon } from 'lucide-react';
 import { toast } from 'sonner';
 

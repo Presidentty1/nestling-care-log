@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Baby } from '@/lib/types';
+import type { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

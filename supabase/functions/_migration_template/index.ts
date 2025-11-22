@@ -25,7 +25,7 @@ const lovableAIHandler = async (prompt: string) => {
     },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
-      prompt: prompt,
+      prompt,
       max_tokens: 500,
     }),
   });

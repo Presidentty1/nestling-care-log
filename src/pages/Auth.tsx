@@ -95,7 +95,7 @@ export default function Auth() {
       }
       
       if (error) {
-        toast.error('Skip login failed: ' + error.message);
+        toast.error(`Skip login failed: ${  error.message}`);
       } else {
         // Clear any stale baby selection so Home can route correctly
         setActiveBabyId(null);

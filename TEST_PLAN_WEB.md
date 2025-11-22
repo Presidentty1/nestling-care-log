@@ -1,233 +1,355 @@
-# Web Test Plan
+# Web Application Test Plan
 
 ## Overview
 
-This document describes the testing strategy for the Nestling web app, including unit tests, component tests, E2E tests, and manual QA procedures.
+This document outlines the comprehensive testing strategy for the Nuzzle web application, covering unit tests, integration tests, E2E tests, and performance benchmarks.
 
-## Test Types
+## Testing Stack
 
-### 1. Unit Tests (Vitest)
+- **Unit Tests**: Vitest 4.0+
+- **E2E Tests**: Playwright 1.56+
+- **Test Coverage**: Vitest coverage reports
+- **CI/CD**: GitHub Actions
 
-**Location**: `tests/*.test.ts`, `tests/components/*.test.tsx`
+## Test Categories
 
-**Coverage**:
-- ✅ Utility functions (`time.test.ts`, `unitConversion.test.ts`)
-- ✅ Service logic (`dataService.test.ts`, `napService.test.ts`)
-- ✅ Component rendering (`SummaryChips.test.tsx`, `BabySwitcher.test.tsx`)
+### 1. Unit Tests
 
-**Run**: `npm run test:unit`
+**Location**: `tests/` directory
 
-**Examples**:
-- `formatDuration()` formats minutes correctly
-- `SummaryChips` displays feed count
-- `BabySwitcher` calls onSelect when baby clicked
+**Coverage Targets:**
+- ✅ Service functions (80%+ coverage)
+- ✅ Utility functions (90%+ coverage)
+- ✅ Custom hooks (70%+ coverage)
+- ✅ Business logic (90%+ coverage)
 
-### 2. Component Tests (Vitest + React Testing Library)
+**Current Test Files:**
+- `tests/napService.test.ts` - Nap prediction logic
+- `tests/dataService.test.ts` - Data export/import
+- `tests/time.test.ts` - Time utilities
+- `tests/unitConversion.test.ts` - Unit conversion
+- `tests/haptics.test.ts` - Haptic feedback
+- `tests/components/BabySwitcher.test.tsx` - Component tests
+- `tests/components/SummaryChips.test.tsx` - Component tests
 
-**Location**: `tests/components/*.test.tsx`
+**Running Unit Tests:**
+```bash
+npm run test:unit          # Run once
+npm run test              # Watch mode
+npm run test:coverage      # With coverage report
+```
 
-**Coverage**:
-- ✅ Core components: `SummaryChips`, `BabySwitcher`
-- ⏳ Event forms: `FeedForm`, `DiaperForm`, `SleepForm`
-- ⏳ Timeline components: `TimelineList`, `EventTimeline`
+### 2. Integration Tests
 
-**Run**: `npm run test:unit`
+**Location**: `tests/integration/` (to be created)
 
-**Test Cases**:
-- Component renders correctly
-- User interactions trigger callbacks
-- Form validation works
-- Edge cases handled (empty states, errors)
+**Coverage:**
+- Service + Supabase integration
+- React Query mutations
+- Real-time subscriptions
+- Offline queue processing
 
-### 3. E2E Tests (Playwright)
+**Test Scenarios:**
+- Create event → Verify database insert
+- Update event → Verify optimistic update
+- Delete event → Verify cache invalidation
+- Real-time sync → Verify multi-device updates
 
-**Location**: `tests/e2e/*.spec.ts`
+### 3. E2E Tests
 
-**Coverage**:
-- ✅ Critical path: `mvp-critical-path.spec.ts`
-- ✅ Event logging: `events.spec.ts`
-- ✅ History navigation: `history.spec.ts`
-- ✅ Onboarding: `onboarding.spec.ts`
-- ✅ Offline sync: `offline-sync.spec.ts`
-- ✅ Voice logging: `voice-logging.spec.ts`
-- ✅ Caregiver mode: `caregiver-mode.spec.ts`
-- ✅ AI features: `ai-features.spec.ts`
+**Location**: `tests/e2e/`
 
-**Run**: `npm run test:e2e`
+**Current Test Files:**
+- `mvp-critical-path.spec.ts` - Core user flows
+- `onboarding.spec.ts` - User onboarding
+- `events.spec.ts` - Event logging
+- `history.spec.ts` - History navigation
+- `offline-sync.spec.ts` - Offline functionality
+- `caregiver-mode.spec.ts` - Caregiver features
+- `ai-features.spec.ts` - AI features
+- `voice-logging.spec.ts` - Voice logging
 
-**Test Scenarios**:
-1. **Log Feed**: Open form → Enter amount → Save → Verify in timeline
-2. **Edit Event**: Click event → Edit → Save → Verify changes
-3. **Delete Event**: Swipe/click delete → Confirm → Verify removed
-4. **Switch Baby**: Open switcher → Select baby → Verify context changes
-5. **Navigate History**: Select date → View events → Navigate days
+**Running E2E Tests:**
+```bash
+npm run test:e2e          # Run all E2E tests
+npm run test:e2e:ui       # Playwright UI mode
+npm run test:e2e:debug    # Debug mode
+```
 
-### 4. Integration Tests
+**E2E Test Scenarios:**
 
-**Coverage**:
-- Supabase integration (mocked in tests)
-- IndexedDB operations
-- React Query cache invalidation
+**Critical Path (MVP):**
+1. Sign up → Onboarding → Log feed → View history
+2. Log multiple events → Verify timeline
+3. Switch babies → Verify data isolation
+4. Offline logging → Online sync
+
+**Event Logging:**
+- Quick action → Form opens → Submit → Event appears
+- Manual entry → All fields → Validation → Submit
+- Edit event → Update → Verify change
+- Delete event → Confirm → Verify removal
+
+**History:**
+- Date picker → Select date → Events load
+- Filter by type → Verify filtered results
+- Export data → Verify CSV/PDF generation
+
+### 4. Performance Tests
+
+**Targets:**
+- **Lighthouse Score**: >90 (Performance, Accessibility, Best Practices, SEO)
+- **First Contentful Paint**: <1.5s
+- **Time to Interactive**: <3.5s
+- **Largest Contentful Paint**: <2.5s
+- **Cumulative Layout Shift**: <0.1
+
+**Running Performance Tests:**
+```bash
+# Build production bundle
+npm run build
+
+# Run Lighthouse CI
+npx lighthouse-ci --collect.url=http://localhost:4173
+```
+
+### 5. Accessibility Tests
+
+**Targets:**
+- **WCAG 2.1 AA Compliance**: 100%
+- **Keyboard Navigation**: All features accessible
+- **Screen Reader**: Compatible with NVDA/JAWS
+- **Color Contrast**: WCAG AA minimum
+
+**Testing Tools:**
+- Lighthouse accessibility audit
+- axe DevTools
+- WAVE browser extension
+- Manual keyboard navigation
+
+**Test Checklist:**
+- [ ] All interactive elements keyboard accessible
+- [ ] Focus indicators visible
+- [ ] ARIA labels on custom components
+- [ ] Color contrast ratios meet WCAG AA
+- [ ] Screen reader announcements correct
+
+## Test Execution Strategy
+
+### Pre-Commit
+
+**Local Checks:**
+```bash
+# Type check
+npx tsc --noEmit
+
+# Lint
+npm run lint
+
+# Unit tests (fast)
+npm run test:unit
+```
+
+### CI/CD Pipeline
+
+**GitHub Actions Workflow** (`.github/workflows/web-ci.yml`):
+
+1. **Lint Job**: ESLint + TypeScript check
+2. **Unit Tests Job**: Vitest with coverage
+3. **E2E Tests Job**: Playwright (smoke tests)
+4. **Build Job**: Production build verification
+5. **Lighthouse Job**: Performance audit (main branch only)
+
+### Pre-Release
+
+**Full Test Suite:**
+```bash
+# Complete test run
+npm run lint
+npm run test:unit
+npm run test:e2e
+npm run build
+
+# Performance audit
+npm run lighthouse
+
+# Accessibility audit
+npm run a11y
+```
+
+## Test Data Management
+
+### Test Users
+
+**Development:**
+- Use Supabase seed data (`supabase/seed.sql`)
+- Test user: `test@example.com` / `testpassword`
+
+**E2E Tests:**
+- Create test users programmatically
+- Clean up after test runs
+- Use unique email addresses per test run
+
+### Test Data Isolation
+
+- Each test creates its own data
+- Cleanup after each test
+- No shared state between tests
+
+## Mocking Strategy
+
+### Supabase Client
+
+**Unit Tests:**
+```typescript
+import { vi } from 'vitest';
+
+const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn(() => ({
+      eq: vi.fn(() => ({
+        data: mockData,
+        error: null,
+      })),
+    })),
+  })),
+};
+```
+
+### React Query
+
+**Component Tests:**
+```typescript
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+});
+```
 
 ## Test Coverage Goals
 
-- **Unit Tests**: > 80% coverage
-- **Component Tests**: All core components
-- **E2E Tests**: 100% of critical user flows
-- **Integration Tests**: Key service integrations
+### Current Coverage
 
-## Manual QA Checklist
+- **Overall**: ~60% (target: 80%+)
+- **Services**: ~75% (target: 90%+)
+- **Components**: ~40% (target: 70%+)
+- **Hooks**: ~50% (target: 80%+)
 
-### Pre-Release Testing
+### Coverage Reports
 
-#### Authentication
-- [ ] Sign up with new email
-- [ ] Sign in with existing account
-- [ ] Sign out works correctly
-- [ ] Session persists across page refresh
-- [ ] Protected routes redirect to `/auth` when not logged in
-
-#### Event Logging
-- [ ] Log feed (bottle) with amount
-- [ ] Log feed (breast) with side
-- [ ] Log diaper (wet, dirty, both)
-- [ ] Log sleep with start/end times
-- [ ] Log tummy time with duration
-- [ ] Quick log via quick actions
-- [ ] Edit existing event
-- [ ] Delete event with confirmation
-- [ ] Form validation works (required fields)
-
-#### Home Dashboard
-- [ ] Summary cards show correct counts
-- [ ] Timeline displays today's events
-- [ ] Quick actions work
-- [ ] Baby switcher works (if multiple babies)
-- [ ] Nap prediction displays correctly
-- [ ] Pull-to-refresh reloads data
-
-#### History
-- [ ] Navigate to previous days
-- [ ] Events display correctly for selected date
-- [ ] Date picker works
-- [ ] Filter by event type (if implemented)
-- [ ] Empty state shows when no events
-
-#### Settings
-- [ ] Toggle units (ml/oz)
-- [ ] Toggle AI data sharing
-- [ ] Notification settings save
-- [ ] Baby management (add/edit/delete)
-- [ ] Caregiver management (if implemented)
-- [ ] Data export (CSV/JSON)
-- [ ] Data deletion works
-
-#### Offline Support
-- [ ] App works offline (airplane mode)
-- [ ] Events saved locally when offline
-- [ ] Events sync when back online
-- [ ] Offline indicator displays
-- [ ] No data loss on refresh when offline
-
-#### Responsive Design
-- [ ] Mobile view (< 768px) works correctly
-- [ ] Tablet view (768px - 1024px) works correctly
-- [ ] Desktop view (> 1024px) works correctly
-- [ ] Touch interactions work on mobile
-- [ ] Keyboard navigation works
-
-#### Accessibility
-- [ ] Screen reader compatible (VoiceOver/TalkBack)
-- [ ] Keyboard navigation works
-- [ ] Focus indicators visible
-- [ ] Color contrast meets WCAG AA
-- [ ] Text scales with browser zoom
-
-#### Performance
-- [ ] Page load < 3 seconds on 3G
-- [ ] Smooth scrolling (60 FPS)
-- [ ] No console errors
-- [ ] No memory leaks (check DevTools)
-
-#### Browser Compatibility
-- [ ] Chrome (latest)
-- [ ] Safari (latest)
-- [ ] Firefox (latest)
-- [ ] Edge (latest)
-- [ ] Mobile Safari (iOS)
-- [ ] Chrome Mobile (Android)
-
-## Test Data Setup
-
-### Test User
-- Email: `test@nestling.app`
-- Password: `TestPassword123!`
-
-### Test Baby
-- Name: "Test Baby"
-- DOB: 60 days ago
-- Timezone: UTC
-
-### Test Events
-- 5 feeds (various amounts, types)
-- 3 sleep sessions (various durations)
-- 4 diapers (wet, dirty, both)
-- 2 tummy time sessions
-
-## Running Tests
-
-### Unit Tests
+**Generate Report:**
 ```bash
-# Run all unit tests
-npm run test:unit
-
-# Run in watch mode
-npm run test
-
-# Run with coverage
 npm run test:coverage
 ```
 
-### E2E Tests
-```bash
-# Run all E2E tests
-npm run test:e2e
+**View Report:**
+- HTML report: `coverage/index.html`
+- CI integration: Codecov
 
-# Run in UI mode
-npm run test:e2e:ui
+## Critical Test Scenarios
 
-# Run in debug mode
-npm run test:e2e:debug
+### 1. Authentication Flow
 
-# Run specific test file
-npx playwright test tests/e2e/events.spec.ts
-```
+**Test Cases:**
+- [ ] Sign up with valid email/password
+- [ ] Sign in with correct credentials
+- [ ] Sign in with incorrect credentials (error handling)
+- [ ] Session persistence across page reloads
+- [ ] Auto-redirect to onboarding for new users
+- [ ] Protected routes redirect to auth when unauthenticated
 
-## Continuous Integration
+### 2. Event Logging
 
-Tests run automatically on:
-- Pull requests
-- Commits to `main` branch
+**Test Cases:**
+- [ ] Quick action button opens correct form
+- [ ] Form validation (required fields)
+- [ ] Submit event → Appears in timeline
+- [ ] Optimistic update → Server confirmation
+- [ ] Error handling → Rollback on failure
+- [ ] Offline logging → Queue → Sync when online
 
-CI checks:
-- ✅ Unit tests pass
-- ✅ E2E tests pass
-- ✅ Linting passes
-- ✅ Type checking passes
+### 3. Data Synchronization
 
-## Known Test Gaps
+**Test Cases:**
+- [ ] Real-time updates across devices
+- [ ] Conflict resolution (last write wins)
+- [ ] Offline queue processing
+- [ ] Cache invalidation on updates
+- [ ] Background refetch on reconnect
 
-- [ ] Component tests for all event forms
-- [ ] Integration tests for Supabase edge functions
-- [ ] Performance tests (Lighthouse CI)
-- [ ] Visual regression tests
-- [ ] Accessibility automated tests (axe-core)
+### 4. Baby Management
 
-## Test Maintenance
+**Test Cases:**
+- [ ] Create baby profile
+- [ ] Switch between babies
+- [ ] Edit baby profile
+- [ ] Delete baby (with data cleanup)
+- [ ] Family member access control
 
-- Update tests when adding new features
-- Fix flaky tests immediately
-- Review test coverage quarterly
-- Update manual QA checklist with new features
+### 5. History & Analytics
 
+**Test Cases:**
+- [ ] Date picker navigation
+- [ ] Event filtering by type
+- [ ] Export CSV/PDF
+- [ ] Charts render correctly
+- [ ] Data aggregation accuracy
 
+## Regression Testing
+
+### Smoke Tests (Every PR)
+
+**Critical Paths:**
+1. Sign up → Onboarding → Log event → View history
+2. Sign in → View home → Log feed → Verify timeline
+
+### Full Regression (Pre-Release)
+
+**All Test Suites:**
+- Unit tests (100% pass rate)
+- E2E tests (all scenarios)
+- Performance benchmarks
+- Accessibility audit
+
+## Bug Triage
+
+### Test Failures
+
+**Priority Levels:**
+1. **P0 (Critical)**: Blocks release, core functionality broken
+2. **P1 (High)**: Major feature broken, workaround exists
+3. **P2 (Medium)**: Minor feature issue, non-blocking
+4. **P3 (Low)**: Cosmetic issue, edge case
+
+**Response Times:**
+- P0: Immediate fix or rollback
+- P1: Fix within 24 hours
+- P2: Fix in next release
+- P3: Backlog
+
+## Continuous Improvement
+
+### Test Metrics
+
+**Track:**
+- Test execution time
+- Coverage trends
+- Flaky test rate
+- Bug detection rate
+
+### Test Maintenance
+
+**Regular Tasks:**
+- Update tests for new features
+- Remove obsolete tests
+- Refactor flaky tests
+- Improve test performance
+
+## Related Documentation
+
+- `ARCHITECTURE_WEB.md` - Application architecture
+- `DEPLOYMENT.md` - Deployment procedures
+- `PRE_LAUNCH_CHECKLIST.md` - Pre-release checklist

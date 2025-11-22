@@ -3,10 +3,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Play, Square, Moon, AlertCircle } from 'lucide-react';
-import { CreateEventData, eventsService } from '@/services/eventsService';
+import type { CreateEventData} from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { sanitizeEventNote } from '@/lib/sanitization';
 
 interface SleepFormProps {
   babyId: string;
@@ -98,6 +100,7 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
     const durationMin = Math.floor(durationSec / 60);
 
     try {
+      const sanitizedNote = note ? sanitizeEventNote(note) : undefined;
       onSubmit({
         type: 'sleep',
         subtype,
@@ -105,7 +108,7 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
         end_time: end.toISOString(),
         duration_sec: durationSec,
         duration_min: durationMin,
-        note: note || undefined,
+        note: sanitizedNote,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Could not save sleep log';
@@ -233,7 +236,7 @@ export function SleepForm({ babyId, editingEventId, onValidChange, onSubmit, pre
         <Textarea
           id="note"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
           placeholder="Sleep quality, environment, etc."
           className="min-h-[80px] text-base resize-none"
           maxLength={500}

@@ -1,8 +1,8 @@
-# Core Data Setup for Nestling iOS App
+# Core Data Setup for Nuzzle iOS App
 
 ## Overview
 
-This guide explains how to set up Core Data for persistent storage in the Nestling iOS app. The implementation includes:
+This guide explains how to set up Core Data for persistent storage in the Nuzzle iOS app. The implementation includes:
 
 - `CoreDataStore` - Main data store implementation
 - Managed Object classes for all entities
@@ -14,11 +14,11 @@ This guide explains how to set up Core Data for persistent storage in the Nestli
 
 ### 1. Create Core Data Model
 
-1. Open `ios/Nestling/Nestling.xcodeproj` in Xcode
+1. Open `ios/Nuzzle/Nuzzle.xcodeproj` in Xcode
 2. **File → New → File...**
 3. Select **Data Model** under Core Data
-4. Name it: `NestlingDataModel.xcdatamodeld`
-5. Save in `ios/Nestling/Nestling/Domain/Models/`
+4. Name it: `NuzzleDataModel.xcdatamodeld`
+5. Save in `ios/Nuzzle/Nuzzle/Domain/Models/`
 
 ### 2. Create Entities
 
@@ -98,7 +98,7 @@ Create the following entities with these attributes:
 3. Select all entities
 4. Choose language: **Swift**
 5. Check **Use Core Data** generic classes
-6. Save in `ios/Nestling/Nestling/Domain/Models/CoreData/`
+6. Save in `ios/Nuzzle/Nuzzle/Domain/Models/CoreData/`
 
 This will generate the NSManagedObject subclasses that match the files we created.
 

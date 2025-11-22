@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { CreateEventData, eventsService } from '@/services/eventsService';
+import type { CreateEventData} from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
 import { Droplet, Circle, AlertCircle, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { sanitizeEventNote } from '@/lib/sanitization';
 
 interface DiaperFormProps {
   babyId: string;
@@ -51,11 +53,12 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
 
     setError(null);
     try {
+      const sanitizedNote = note ? sanitizeEventNote(note) : undefined;
       onSubmit({
         type: 'diaper',
         subtype,
         start_time: new Date().toISOString(),
-        note: note || undefined,
+        note: sanitizedNote,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Could not save diaper change';
@@ -125,7 +128,7 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
         <Textarea
           id="note"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
           placeholder="Any observations..."
           className="min-h-[100px] text-base resize-none"
           maxLength={500}

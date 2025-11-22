@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { proService, SubscriptionStatus } from '@/services/proService';
+import type { SubscriptionStatus } from '@/services/proService';
+import { proService } from '@/services/proService';
 
 export function usePro() {
   const [isPro, setIsPro] = useState(false);

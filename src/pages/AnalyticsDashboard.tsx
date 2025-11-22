@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, Calendar } from 'lucide-react';
-import { eventsService, EventRecord } from '@/services/eventsService';
-import { babyService, Baby } from '@/services/babyService';
+import type { EventRecord } from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
+import type { Baby } from '@/services/babyService';
+import { babyService } from '@/services/babyService';
 import { useAppStore } from '@/store/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfDay, endOfDay, differenceInDays } from 'date-fns';

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BabySwitcher } from '@/components/BabySwitcher';
-import { Baby } from '@/lib/types';
+import type { Baby } from '@/lib/types';
 
 // Mock analytics
 vi.mock('@/analytics/analytics', () => ({

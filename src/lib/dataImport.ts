@@ -1,5 +1,5 @@
 import { dataService } from '@/services/dataService';
-import { EventRecord } from '@/types/events';
+import type { EventRecord } from '@/types/events';
 
 interface ImportData {
   exported_at: string;

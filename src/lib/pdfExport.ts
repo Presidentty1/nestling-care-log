@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { dataService } from '@/services/dataService';
 import { getDayTotals } from '@/store/selectors';
-import { Baby } from '@/types/events';
+import type { Baby } from '@/types/events';
 
 export async function exportDaySummaryPDF(baby: Baby, date: Date) {
   const dayISO = format(date, 'yyyy-MM-dd');

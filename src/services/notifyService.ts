@@ -1,6 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { dataService } from './dataService';
-import { NotificationSettings } from '@/types/events';
+import type { NotificationSettings } from '@/types/events';
 
 class NotifyService {
   private checkInterval: NodeJS.Timeout | null = null;

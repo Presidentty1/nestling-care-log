@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDrag } from '@use-gesture/react';
 import { Trash2 } from 'lucide-react';
 import { TimelineRow } from './TimelineRow';
-import { EventRecord } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
 import { hapticFeedback } from '@/lib/haptics';
 
 interface SwipeableTimelineRowProps {

@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Milk, Moon, Baby } from 'lucide-react';
-import { DailySummary } from '@/types/summary';
+import type { DailySummary } from '@/types/summary';
 
 interface DaySummaryProps {
   date: Date;

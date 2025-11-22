@@ -10,7 +10,7 @@ import { ChevronLeft, Users } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { dataService } from '@/services/dataService';
 import { notifyService } from '@/services/notifyService';
-import { NotificationSettings } from '@/types/events';
+import type { NotificationSettings } from '@/types/events';
 import { toast } from 'sonner';
 
 export default function NotificationSettingsPage() {

@@ -1,5 +1,5 @@
 import { dataService } from './dataService';
-import { NapPrediction } from '@/types/events';
+import type { NapPrediction } from '@/types/events';
 import { addMinutes, differenceInMonths } from 'date-fns';
 
 interface WakeWindow {

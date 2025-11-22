@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Milk, Moon, Baby } from 'lucide-react';
-import { DailySummary } from '@/types/summary';
+import type { DailySummary } from '@/types/summary';
 
 interface SummaryChipsProps {
   summary: DailySummary;
 }
 
-export const SummaryChips = memo(function SummaryChips({ summary }: SummaryChipsProps) {
+export const SummaryChips = memo(({ summary }: SummaryChipsProps) => {
   // Defensive: ensure values are numbers
   const sleepMinutes = summary.sleepMinutes || 0;
   const sleepHours = Math.floor(sleepMinutes / 60);

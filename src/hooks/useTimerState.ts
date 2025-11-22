@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { TimerState } from '@/types/events';
+import type { TimerState } from '@/types/events';
 import { dataService } from '@/services/dataService';
 import { getElapsedSeconds } from '@/utils/time';
 import { toast } from 'sonner';

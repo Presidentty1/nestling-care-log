@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BabyEvent, EventType } from '@/lib/types';
+import type { EventType } from '@/lib/types';
+import { BabyEvent } from '@/lib/types';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { offlineQueue } from '@/lib/offlineQueue';

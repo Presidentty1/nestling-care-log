@@ -1,5 +1,6 @@
 import localforage from 'localforage';
-import { EventRecord, Baby } from '@/types/events';
+import type { Baby } from '@/types/events';
+import { EventRecord } from '@/types/events';
 
 const guestStore = localforage.createInstance({
   name: 'nestling-guest',

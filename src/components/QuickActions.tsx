@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby, Clock } from 'lucide-react';
-import { EventType } from '@/types/events';
+import type { EventType } from '@/types/events';
 import { formatDistanceToNow } from 'date-fns';
-import { EventRecord } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
 import { useState, useRef, useEffect } from 'react';
 import { track } from '@/analytics/analytics';
 

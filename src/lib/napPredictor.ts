@@ -1,4 +1,4 @@
-import { Baby, BabyEvent } from './types';
+import type { Baby, BabyEvent } from './types';
 import { differenceInWeeks, addMinutes } from 'date-fns';
 
 interface WakeWindow {

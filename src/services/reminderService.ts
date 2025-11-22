@@ -1,6 +1,6 @@
 import { differenceInHours, differenceInMinutes, addMinutes } from 'date-fns';
 import { toast } from 'sonner';
-import { EventRecord } from './eventsService';
+import type { EventRecord } from './eventsService';
 
 interface ReminderSettings {
   feedReminderEnabled: boolean;

@@ -10,16 +10,16 @@
 ### 2. Add iOS App to Firebase
 1. In Firebase Console, click "Add app" → iOS icon
 2. Bundle ID: `app.lovable.3be850d6430e4062887da465d2abf643`
-3. App nickname: `Nestling`
+3. App nickname: `Nuzzle`
 4. Download `GoogleService-Info.plist`
-5. Add the file to `ios/Nestling/Nestling/` directory
+5. Add the file to `ios/Nuzzle/Nuzzle/` directory
 
 ### 3. Add Firebase SDK via Swift Package Manager
-1. Open Xcode project: `ios/Nestling/Nestling.xcodeproj`
+1. Open Xcode project: `ios/Nuzzle/Nuzzle.xcodeproj`
 2. **File → Add Package Dependencies...**
 3. Enter: `https://github.com/firebase/firebase-ios-sdk.git`
 4. Set dependency rule: **Up to Next Major Version** `10.0.0`
-5. Add these products to Nestling target:
+5. Add these products to Nuzzle target:
    - FirebaseAnalytics
    - FirebaseCore
    - FirebaseCrashlytics (optional, for additional crash reporting)

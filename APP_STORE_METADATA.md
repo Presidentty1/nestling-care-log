@@ -1,10 +1,10 @@
-# App Store Metadata - Nestling Baby Tracker
+# App Store Metadata - Nuzzle Baby Tracker
 
 ## Basic Information
 
 **App Name** (30 characters max):
 ```
-Nestling Baby Tracker
+Nuzzle Baby Tracker
 ```
 
 **Subtitle** (30 characters max):
@@ -28,7 +28,7 @@ Track feeding, sleep & diapers in 2 taps. Get AI nap predictions. Sync with part
 *4000 characters max*
 
 ```
-NESTLING — THE SMART BABY TRACKER FOR MODERN PARENTS
+NUZZLE — THE SMART BABY TRACKER FOR MODERN PARENTS
 
 Track your baby's feeding, sleep, and diaper changes in 2 taps or less. Get AI-powered insights, nap predictions, and seamless multi-caregiver sync.
 
@@ -80,12 +80,12 @@ WHAT USERS SAY:
 "The AI nap predictor actually works—game changer."
 "Love that I can share with my partner instantly."
 
-Download Nestling today and spend less time logging, more time enjoying your baby. 💙
+Download Nuzzle today and spend less time logging, more time enjoying your baby. 💙
 
 ---
 
 MEDICAL DISCLAIMER:
-Nestling is not a medical device and does not provide medical advice. Always consult your pediatrician or healthcare provider for medical guidance.
+Nuzzle is not a medical device and does not provide medical advice. Always consult your pediatrician or healthcare provider for medical guidance.
 ```
 
 ## Keywords
@@ -175,19 +175,19 @@ https://lovableproject.com/privacy-policy
 
 **Support Email:**
 ```
-support@nestling.app
+support@nuzzle.app
 ```
 
 ## Copyright
 
 ```
-© 2025 Nestling. All rights reserved.
+© 2025 Nuzzle. All rights reserved.
 ```
 
 ## What's New (Version 1.0)
 
 ```
-Welcome to Nestling!
+Welcome to Nuzzle!
 
 🎉 Initial Release Features:
 • Ultra-fast logging (Feed, Sleep, Diaper, Tummy Time)
@@ -200,7 +200,7 @@ Welcome to Nestling!
 • Export data to CSV
 • Voice logging
 
-Thank you for choosing Nestling. We'd love your feedback!
+Thank you for choosing Nuzzle. We'd love your feedback!
 ```
 
 ## Pricing

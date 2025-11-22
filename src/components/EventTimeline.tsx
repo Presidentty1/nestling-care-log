@@ -1,4 +1,4 @@
-import { BabyEvent } from '@/lib/types';
+import type { BabyEvent } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby as BabyIcon, Trash2, Edit } from 'lucide-react';

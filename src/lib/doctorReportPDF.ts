@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
-import { Baby } from './types';
+import type { Baby } from './types';
 
 export async function generateDoctorReport(
   baby: Baby,

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Bell, Clock, Baby as BabyIcon } from 'lucide-react';
+import { X, Bell, Clock, Baby as BabyIcon, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 interface Notification {
   id: string;
@@ -46,6 +48,8 @@ export const notificationService = {
 
 export function NotificationBanner() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { pendingCount, conflictCount, isSyncing } = useOfflineQueue();
+  const isOnline = useNetworkStatus();
 
   useEffect(() => {
     return notificationService.subscribe(setNotifications);
@@ -67,6 +71,51 @@ export function NotificationBanner() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-4 pointer-events-none">
       <div className="max-w-2xl mx-auto space-y-2 pointer-events-auto">
+        {/* Offline/Sync Status */}
+        {!isOnline && (
+          <Card className="p-3 bg-warning/10 border-warning/20 text-warning-foreground">
+            <div className="flex items-center gap-2">
+              <WifiOff className="h-4 w-4" />
+              <span className="text-sm font-medium">You're offline</span>
+              {pendingCount > 0 && (
+                <span className="text-xs">({pendingCount} pending)</span>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {isOnline && isSyncing && (
+          <Card className="p-3 bg-info/10 border-info/20 text-info-foreground">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-3 w-3 border border-current border-t-transparent" />
+              <span className="text-sm font-medium">Syncing...</span>
+            </div>
+          </Card>
+        )}
+
+        {conflictCount > 0 && (
+          <Card className="p-3 bg-destructive/10 border-destructive/20 text-destructive-foreground">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {conflictCount} data conflict{conflictCount > 1 ? 's' : ''} need resolution
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto h-6 px-2 text-xs"
+                onClick={() => {
+                  // This would trigger showing the conflict modal
+                  // For now, just show an alert
+                  alert('Conflict resolution modal would open here');
+                }}
+              >
+                Resolve
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {notifications.map((notification) => (
           <Card
             key={notification.id}

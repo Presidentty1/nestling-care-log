@@ -1,4 +1,4 @@
-import { EventRecord, EventType } from '@/types/events';
+import type { EventRecord, EventType } from '@/types/events';
 
 export interface DaySummary {
   feedCount: number;

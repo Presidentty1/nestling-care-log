@@ -1,8 +1,8 @@
-# Nestling Subscription System
+# Nuzzle Subscription System
 
 ## Overview
 
-Nestling uses StoreKit 2 for in-app purchases with a simple Free vs Pro model. Pro features unlock advanced AI capabilities and analytics.
+Nuzzle uses StoreKit 2 for in-app purchases with a simple Free vs Pro model. Pro features unlock advanced AI capabilities and analytics.
 
 ## Pricing
 
@@ -36,7 +36,7 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 
 ### App Store Connect Setup
 
-1. Create subscription group "Nestling Pro"
+1. Create subscription group "Nuzzle Pro"
 2. Add monthly subscription ($5.99/month)
    - Product ID: `com.nestling.pro.monthly`
    - Recurring period: Monthly
@@ -48,7 +48,7 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 
 ### Local StoreKit Configuration
 
-Update `Nestling.storekit`:
+Update `Nuzzle.storekit`:
 - Monthly price: "5.99"
 - Yearly price: "39.99"
 - Add introductory offer to yearly: `{"type": "FreeTrial", "duration": "P7D"}`

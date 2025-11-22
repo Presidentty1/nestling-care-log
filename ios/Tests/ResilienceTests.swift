@@ -1,5 +1,5 @@
 import XCTest
-@testable import Nestling
+@testable import Nuzzle
 
 @MainActor
 final class ResilienceTests: XCTestCase {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import Nestling
+@testable import Nuzzle
 
 final class DateUtilsTests: XCTestCase {
     func testFormatRelativeTime() {

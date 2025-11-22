@@ -1,4 +1,5 @@
-import React, { Component, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component } from 'react';
 import { ErrorState } from './common/ErrorState';
 import { Button } from './ui/button';
 import { AlertTriangle, Wifi, WifiOff, RefreshCw, Home } from 'lucide-react';

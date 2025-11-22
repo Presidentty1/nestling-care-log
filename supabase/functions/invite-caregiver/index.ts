@@ -100,7 +100,7 @@ serve(async (req) => {
           data: {
             invite_token: invite.token,
             family_id: familyId,
-            role: role,
+            role,
           },
           redirectTo: inviteUrl,
         }

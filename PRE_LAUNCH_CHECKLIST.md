@@ -1,147 +1,259 @@
-# Pre-Launch Checklist - Nestling MVP
+# Pre-Launch Checklist for App Store Submission
 
-## 🚨 CRITICAL (MUST HAVE)
+## Critical Items Before Submission
 
-### Code Quality
-- [ ] All E2E tests passing (0 failures)
-- [ ] All unit tests passing (0 failures)
-- [ ] TypeScript: 0 errors (`npx tsc --noEmit`)
-- [ ] Linter: 0 errors (`npm run lint`)
-- [ ] Production build succeeds (`npm run build`)
-- [ ] No console errors in production build
-- [ ] No console warnings in production build
+### 1. ✅ Code Rebranding (Complete)
+- [x] Swift code renamed (NestlingApp → NuzzleApp)
+- [x] User-facing strings updated
+- [x] Directories renamed
+- [x] Module imports updated
+- [x] Info.plist privacy descriptions updated
+- [x] APP_STORE_METADATA.md updated
+- [x] APP_STORE_CHECKLIST.md updated
 
-### Security
-- [ ] RLS policies enabled on all database tables
-- [ ] Supabase linter shows 0 critical warnings
-- [ ] No API keys exposed in client code
-- [ ] Environment variables in .env (not committed)
-- [ ] SECRETS.md documents all secrets
-- [ ] Password breach protection enabled
+### 2. ✅ Privacy Usage Descriptions (Complete)
+- [x] **NSMicrophoneUsageDescription**: Updated to "Nuzzle"
+- [x] **NSPhotoLibraryUsageDescription**: Updated to "Nuzzle"  
+- [x] **NSCameraUsageDescription**: Updated to "Nuzzle"
+- [x] **NSFaceIDUsageDescription**: Updated to "Nuzzle"
+- [x] **NSUserNotificationsUsageDescription**: Updated to "Nuzzle"
 
-### App Store Assets
-- [ ] App icon created (1024×1024 PNG)
-- [ ] 6+ screenshots captured (1290×2796 px)
-- [ ] App Store metadata written (name, description, keywords)
-- [ ] Privacy policy created and publicly accessible
-- [ ] Support email set up
-- [ ] Copyright statement prepared
+### 3. ✅ Privacy Manifest (Complete)
+- [x] **PrivacyInfo.xcprivacy file created**
+  - Location: `ios/Nuzzle/Nestling/PrivacyInfo.xcprivacy`
+  - Declares UserDefaults API usage (CA92.1)
+  - Declares FileTimestamp API usage (C617.1)
+  - Declares collected data types (email, health, user ID, photos)
+  - No tracking declared
+- [ ] **Add to Xcode project** (manual step required)
 
-### Legal & Compliance
-- [ ] Privacy policy reviewed
-- [ ] Medical disclaimer visible in app (Settings page)
-- [ ] Terms of Service (if required)
-- [ ] Age rating confirmed (4+)
+### 4. 📱 App Store Connect Setup
 
-### Testing
-- [ ] Tested on iOS simulator (iPhone 15 Pro)
-- [ ] Tested on physical iPhone device (if available)
-- [ ] Tested in Chrome desktop
-- [ ] All 6 critical user paths verified
-- [ ] Offline mode works flawlessly
-- [ ] Multi-device sync works
+#### App Information
+- [ ] **Create app record** with bundle ID: `com.nestling.Nestling` (preserved per plan)
+- [ ] **App Name**: "Nuzzle" (30 chars max)
+- [ ] **Subtitle**: "AI-powered feed & sleep log" (30 chars max)
+- [ ] **Primary Language**: English (US)
 
-## ⚠️ IMPORTANT (SHOULD HAVE)
+#### Metadata (Update from APP_STORE_METADATA.md)
+- [ ] **Description**: Update all "Nestling" → "Nuzzle" references
+- [ ] **Keywords**: baby tracker,newborn log,feeding timer,sleep tracker,diaper log
+- [ ] **Support URL**: `https://nuzzle.app/support` (verify domain is live)
+- [ ] **Marketing URL**: `https://nuzzle.app` (verify domain is live)
+- [ ] **Privacy Policy URL**: `https://nuzzle.app/privacy` (verify domain is live)
+- [ ] **Support Email**: `support@nuzzle.app` (verify email is configured)
 
-### Performance
-- [ ] Lighthouse Performance score > 90
-- [ ] Lighthouse Accessibility score > 95
-- [ ] Lighthouse Best Practices score > 95
-- [ ] Lighthouse SEO score > 90
-- [ ] First Contentful Paint < 1.5s
-- [ ] Largest Contentful Paint < 2.5s
-- [ ] Cumulative Layout Shift < 0.1
+#### Screenshots (Required)
+- [ ] **iPhone 6.5" Display** (iPhone 14 Pro Max / 15 Pro Max)
+  - 5 screenshots minimum
+  - Show: Home screen, Event logging, History, Settings, Pro features
+- [ ] **iPhone 5.5" Display** (iPhone 8 Plus)
+  - 5 screenshots minimum
+- [ ] **iPad Pro 12.9"** (if iPad supported)
+  - 5 screenshots minimum
 
-### Accessibility
-- [ ] WCAG AA compliance verified
-- [ ] VoiceOver navigation tested (iOS)
-- [ ] Keyboard navigation tested (desktop)
-- [ ] Large Text support verified
-- [ ] Color contrast meets 4.5:1 ratio
-- [ ] Touch targets ≥ 44pt
-- [ ] Focus indicators visible
+#### App Preview Video (Optional but Recommended)
+- [ ] 30-second video showing key features
+- [ ] Auto-plays in App Store
 
-### UI/UX Polish
-- [ ] Loading states consistent across app
-- [ ] Empty states friendly and helpful
-- [ ] Error messages specific and actionable
-- [ ] Success feedback via toasts + haptics
-- [ ] Dark mode looks great
-- [ ] Typography scales properly
-- [ ] No text truncation at large sizes
-- [ ] Animations smooth (60fps)
+### 5. 🔐 Subscriptions Setup
 
-### Data Management
-- [ ] CSV export works correctly
-- [ ] Delete account/data works
-- [ ] No orphaned records after deletion
+#### App Store Connect
+- [ ] **Subscription Group**: "Nuzzle Pro" (already updated in storekit)
+- [ ] **Monthly Product**: `com.nestling.pro.monthly` ($5.99/month)
+  - Status: "Ready to Submit"
+  - Localized descriptions added
+- [ ] **Yearly Product**: `com.nestling.pro.yearly` ($39.99/year)
+  - Status: "Ready to Submit"
+  - 7-day free trial configured
+  - Localized descriptions added
 
-## 🎨 NICE TO HAVE (OPTIONAL)
+#### StoreKit Configuration
+- [x] Storekit file renamed to Nuzzle.storekit
+- [x] Product display names updated to "Nuzzle Pro"
+- [x] Product IDs preserved (for continuity)
 
-### Advanced Features
-- [ ] Analytics configured
-- [ ] Error monitoring set up (Sentry)
-- [ ] Performance monitoring
-- [ ] Feature flags system
+### 6. 📋 Legal & Compliance
 
-### Content
-- [ ] Onboarding tutorial/walkthrough
-- [ ] Help documentation or FAQ page
-- [ ] Video demo for App Store preview
-- [ ] Blog post announcing launch
-- [ ] Social media assets prepared
+#### Privacy Policy
+- [ ] **Privacy Policy** live at `https://nuzzle.app/privacy`
+  - Must include: Data collection, AI usage, third-party services
+  - Must comply with App Store guidelines
+  - Must be accessible without login
 
-### Community
-- [ ] Beta testing via TestFlight completed
-- [ ] User feedback incorporated
-- [ ] Support Discord or forum set up
-- [ ] Email list for updates
+#### Terms of Service
+- [ ] **Terms of Service** live at `https://nuzzle.app/terms`
+  - Must be accessible
+  - Links in App Store Connect and subscription view
 
-## 📱 iOS-Specific Checklist
+#### Medical Disclaimers
+- [x] AI features have disclaimers in app
+- [ ] **App Review Notes** include disclaimer:
+  - "Nuzzle is not a medical device and does not provide medical advice. All AI features are informational only."
 
-### Xcode Project
-- [ ] Bundle ID configured
-- [ ] Version number set (1.0.0)
-- [ ] Build number set (1)
-- [ ] Team/signing configured
-- [ ] Capabilities enabled (Push Notifications, etc.)
-- [ ] Info.plist permissions configured
+#### Export Compliance
+- [ ] **ITSAppUsesNonExemptEncryption** set to `NO` in Info.plist
+  - (Unless using custom encryption, then submit documentation)
 
-### App Store Connect
-- [ ] App listing created
-- [ ] Screenshots uploaded (6.7" iPhone)
-- [ ] App preview video uploaded (optional)
-- [ ] Metadata entered (name, description, keywords)
-- [ ] Privacy labels completed
-- [ ] Build uploaded via Xcode
-- [ ] Build submitted for review
+### 7. 🏗️ Build Configuration
 
-## 🚀 Deployment Checklist
+#### Version & Build Numbers
+- [ ] **Version**: Set to `1.0.0` (CFBundleShortVersionString)
+- [ ] **Build**: Set to `1` (CFBundleVersion)
+  - Increment for each App Store upload
 
-### Web Deployment
-- [ ] Environment variables configured
-- [ ] Custom domain connected (if applicable)
-- [ ] SSL certificate active (HTTPS)
-- [ ] Production build deployed
-- [ ] Smoke test: test core features on production
+#### Signing & Capabilities
+- [ ] **Distribution Certificate**: Valid and not expired
+- [ ] **Provisioning Profile**: Up to date for App Store distribution
+- [ ] **App Groups**: `group.com.nestling.Nestling` configured (preserved per plan)
+- [ ] **Push Notifications**: Configured (if used)
+- [ ] **Background Modes**: Configured (if used)
 
-### Post-Deployment
-- [ ] Monitor error logs (first 24 hours)
-- [ ] Monitor performance
-- [ ] Check Supabase usage
-- [ ] Verify emails/notifications sending
-- [ ] Test on multiple devices
-- [ ] Announce launch
+#### App Icon
+- [ ] **1024x1024 PNG** app icon
+  - No alpha channel
+  - No transparency
+  - Sharp at all sizes
+  - Matches "Nuzzle" branding
 
-## ✅ Final Sign-Off
+### 8. 🧪 Testing
 
-**Tested by:** ___________________  
-**Date:** ___________________  
-**Ready for App Store submission:** [ ] YES / [ ] NO
+#### Pre-Submission Testing
+- [ ] **TestFlight Beta** uploaded and tested
+- [ ] **Subscription flow** tested in sandbox
+  - Monthly purchase works
+  - Yearly purchase with trial works
+  - Restore purchases works
+  - Paywall displays correctly
+- [ ] **Core features** tested:
+  - App launches successfully
+  - Onboarding completes
+  - Event logging works
+  - Timeline displays correctly
+  - Settings accessible
+- [ ] **Offline mode** tested
+- [ ] **Multi-device sync** tested (if applicable)
 
-**Notes:**
-_______________________________________________________
-_______________________________________________________
+#### Device Testing
+- [ ] Tested on iPhone (latest iOS)
+- [ ] Tested on iPad (if supported)
+- [ ] Tested with VoiceOver (accessibility)
+- [ ] Tested with Dynamic Type (accessibility)
 
-**Approved by:** ___________________  
-**Date:** ___________________
+### 9. 📝 App Review Information
+
+#### Review Notes Template
+```
+App Overview:
+Nuzzle helps parents track baby care activities (feeding, sleep, diapers) with AI-powered insights.
+
+Key Points:
+- Not a medical device; all features are informational only
+- AI features are clearly marked as non-medical advice
+- Subscription is optional; core features are free
+- Privacy policy: https://nuzzle.app/privacy
+- Support: support@nuzzle.app
+
+Test Account (if required):
+- Email: [test account email]
+- Password: [provided separately]
+
+Notes:
+- AI predictions require 7+ days of data for accuracy
+- Sync requires internet connection
+- TestFlight build available for testing
+```
+
+### 10. 🔍 Final Verification
+
+#### Code Review
+- [ ] No "Nestling" references in user-facing code
+- [ ] All "Nestling Pro" → "Nuzzle Pro" updated
+- [ ] All URLs updated to nuzzle.app (or TODOs added)
+- [ ] All email addresses updated to @nuzzle.app (or TODOs added)
+
+#### Documentation
+- [ ] APP_STORE_METADATA.md updated with "Nuzzle"
+- [ ] APP_STORE_CHECKLIST.md updated with "Nuzzle"
+- [ ] All docs/ files reviewed for "Nestling" references
+
+#### Xcode Project
+- [ ] Scheme name: "Nuzzle" (not "Nestling")
+- [ ] Target names: "Nuzzle", "NuzzleTests", "NuzzleUITests"
+- [ ] Display name shows "Nuzzle" in app
+- [ ] Build succeeds without errors
+
+### 11. 📤 Submission Steps
+
+1. **Archive Build**
+   - Product → Archive in Xcode
+   - Wait for processing
+
+2. **Upload to App Store Connect**
+   - Window → Organizer
+   - Select archive
+   - Distribute App → App Store Connect
+   - Upload (takes 10-30 minutes)
+
+3. **Select Build in App Store Connect**
+   - Wait for processing to complete
+   - Select build for submission
+
+4. **Complete App Store Listing**
+   - All metadata filled
+   - Screenshots uploaded
+   - Privacy policy URL verified
+   - Support URL verified
+
+5. **Submit for Review**
+   - Review all information
+   - Add review notes
+   - Submit
+
+### 12. ⏱️ Post-Submission
+
+#### First 24 Hours
+- [ ] Monitor App Store Connect for review status
+- [ ] Respond to review team questions within 24 hours
+- [ ] Fix any critical issues immediately
+
+#### Common Rejection Reasons to Avoid
+- **Privacy Policy Missing/Inaccessible** - Ensure URL is live
+- **Medical Claims** - Clarify AI is informational only
+- **Subscription Issues** - Test thoroughly in sandbox
+- **Missing Privacy Manifest** - Add PrivacyInfo.xcprivacy
+- **Incorrect Privacy Usage Descriptions** - Update all "Nestling" → "Nuzzle"
+
+## Priority Actions
+
+### 🔴 Critical (Must Do Before Submission)
+1. Update Info.plist privacy descriptions ("Nestling" → "Nuzzle")
+2. Create PrivacyInfo.xcprivacy file
+3. Update APP_STORE_METADATA.md with "Nuzzle" branding
+4. Verify all URLs (privacy policy, support, terms) are live
+5. Set version and build numbers
+6. Upload screenshots to App Store Connect
+
+### 🟡 Important (Should Do)
+1. Update APP_STORE_CHECKLIST.md
+2. Test subscription flow in sandbox
+3. TestFlight beta testing
+4. Verify app icon is correct
+5. Complete App Store Connect metadata
+
+### 🟢 Nice to Have
+1. App preview video
+2. Additional screenshot sets
+3. Localized descriptions
+4. Marketing materials
+
+## Estimated Timeline
+
+- **Code Updates**: 1-2 hours (privacy descriptions, metadata files)
+- **Privacy Manifest**: 1 hour (create and configure)
+- **Screenshots**: 2-4 hours (capture and prepare)
+- **App Store Connect Setup**: 2-3 hours (metadata, subscriptions)
+- **Testing**: 4-8 hours (comprehensive testing)
+- **Submission**: 30 minutes (upload and submit)
+
+**Total: ~12-20 hours of work before ready to submit**

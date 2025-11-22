@@ -1,221 +1,149 @@
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, User } from 'lucide-react';
-import { track } from '@/analytics/analytics';
-
-export interface DataConflict {
-  id: string;
-  localData: any;
-  remoteData: any;
-  field: string;
-  localTimestamp: Date;
-  remoteTimestamp: Date;
-  remoteUser?: string;
-  type: 'event' | 'baby' | 'settings';
-}
+import { AlertTriangle, RefreshCw, SkipForward, Merge } from 'lucide-react';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
 interface ConflictResolutionModalProps {
-  conflict: DataConflict;
   isOpen: boolean;
-  onResolve: (resolution: 'local' | 'remote' | 'merge') => void;
-  onDismiss: () => void;
+  onClose: () => void;
 }
 
-export function ConflictResolutionModal({
-  conflict,
-  isOpen,
-  onResolve,
-  onDismiss
-}: ConflictResolutionModalProps) {
-  const [selectedResolution, setSelectedResolution] = useState<'local' | 'remote' | 'merge' | null>(null);
+export function ConflictResolutionModal({ isOpen, onClose }: ConflictResolutionModalProps) {
+  const { getConflicts, resolveConflict } = useOfflineQueue();
+  const conflicts = getConflicts();
 
-  const handleResolve = (resolution: 'local' | 'remote' | 'merge') => {
-    setSelectedResolution(resolution);
-    onResolve(resolution);
+  const handleResolution = async (conflictIndex: number, strategy: 'overwrite' | 'merge' | 'skip') => {
+    const conflict = conflicts[conflictIndex];
+    if (!conflict) return;
 
-    track('conflict_resolved', {
-      conflict_id: conflict.id,
-      resolution,
-      conflict_type: conflict.type,
-      field: conflict.field
+    const success = resolveConflict({
+      operationId: conflict.operation.id,
+      strategy,
     });
+
+    if (success) {
+      // Remove this conflict from local state or refresh
+      if (getConflicts().length === 0) {
+        onClose();
+      }
+    }
   };
 
-  const formatValue = (value: any): string => {
-    if (value instanceof Date) {
-      return value.toLocaleString();
-    }
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-    return String(value);
-  };
+  const formatConflictData = (data: any) => {
+    if (!data) return 'No data';
 
-  const getConflictDescription = () => {
-    switch (conflict.type) {
-      case 'event':
-        return `The ${conflict.field} of an event was changed by both you and ${conflict.remoteUser || 'another caregiver'}.`;
-      case 'baby':
-        return `Baby information was updated by both you and ${conflict.remoteUser || 'another caregiver'}.`;
-      case 'settings':
-        return `Settings were changed by both you and ${conflict.remoteUser || 'another caregiver'}.`;
-      default:
-        return 'Data was modified by multiple people.';
+    if (typeof data === 'object') {
+      const relevantFields = ['note', 'amount', 'start_time', 'end_time'];
+      const relevantData = Object.fromEntries(
+        Object.entries(data).filter(([key]) => relevantFields.includes(key))
+      );
+
+      if (Object.keys(relevantData).length === 0) return 'No relevant changes';
+
+      return Object.entries(relevantData)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ');
     }
+
+    return String(data);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onDismiss}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
-            Data Conflict Detected
+            <AlertTriangle className="h-5 w-5 text-warning" />
+            Data Conflicts Detected
           </DialogTitle>
-          <DialogDescription>
-            {getConflictDescription()}
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Local version */}
-          <div className="border rounded-lg p-3 bg-blue-50">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-blue-600" />
-                <span className="font-medium text-blue-900">Your Version</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                <Clock className="h-3 w-3 mr-1" />
-                {conflict.localTimestamp.toLocaleTimeString()}
-              </Badge>
-            </div>
-            <div className="text-sm text-blue-800">
-              <strong>{conflict.field}:</strong> {formatValue(conflict.localData)}
-            </div>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Some data was modified on another device while you were offline.
+            Please choose how to resolve each conflict.
+          </p>
 
-          {/* Remote version */}
-          <div className="border rounded-lg p-3 bg-green-50">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-green-600" />
-                <span className="font-medium text-green-900">
-                  {conflict.remoteUser || 'Other Caregiver'}
-                </span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                <Clock className="h-3 w-3 mr-1" />
-                {conflict.remoteTimestamp.toLocaleTimeString()}
-              </Badge>
-            </div>
-            <div className="text-sm text-green-800">
-              <strong>{conflict.field}:</strong> {formatValue(conflict.remoteData)}
-            </div>
-          </div>
-
-          {/* Resolution options */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Choose how to resolve this conflict:</h4>
-
-            <div className="space-y-2">
-              <Button
-                variant={selectedResolution === 'local' ? 'default' : 'outline'}
-                className="w-full justify-start"
-                onClick={() => handleResolve('local')}
-              >
-                <div className="text-left">
-                  <div className="font-medium">Keep Your Changes</div>
-                  <div className="text-xs opacity-70">Discard the other version</div>
-                </div>
-              </Button>
-
-              <Button
-                variant={selectedResolution === 'remote' ? 'default' : 'outline'}
-                className="w-full justify-start"
-                onClick={() => handleResolve('remote')}
-              >
-                <div className="text-left">
-                  <div className="font-medium">Use Their Changes</div>
-                  <div className="text-xs opacity-70">Discard your version</div>
-                </div>
-              </Button>
-
-              {conflict.type === 'event' && (
-                <Button
-                  variant={selectedResolution === 'merge' ? 'default' : 'outline'}
-                  className="w-full justify-start"
-                  onClick={() => handleResolve('merge')}
-                >
-                  <div className="text-left">
-                    <div className="font-medium">Merge Both</div>
-                    <div className="text-xs opacity-70">Combine the changes</div>
+          {conflicts.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No conflicts remaining. All resolved!
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {conflicts.map((conflict, index) => (
+                <div key={conflict.operation.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Badge variant="outline" className="mb-2">
+                        {conflict.operation.type.toUpperCase()} - {conflict.operation.table}
+                      </Badge>
+                      <p className="text-sm font-medium">
+                        Conflict Reason: {conflict.conflictReason.replace('_', ' ')}
+                      </p>
+                    </div>
                   </div>
-                </Button>
-              )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-destructive">Your Changes:</h4>
+                      <div className="bg-destructive/5 p-2 rounded text-xs">
+                        {formatConflictData(conflict.operation.data)}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-primary">Server Data:</h4>
+                      <div className="bg-primary/5 p-2 rounded text-xs">
+                        {formatConflictData(conflict.serverData)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-2 border-t">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleResolution(index, 'overwrite')}
+                      className="flex items-center gap-1"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Use My Changes
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResolution(index, 'merge')}
+                      className="flex items-center gap-1"
+                    >
+                      <Merge className="h-3 w-3" />
+                      Merge Changes
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResolution(index, 'skip')}
+                      className="flex items-center gap-1"
+                    >
+                      <SkipForward className="h-3 w-3" />
+                      Skip This
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+
+          <div className="flex justify-end pt-4 border-t">
+            <Button onClick={onClose}>
+              {conflicts.length === 0 ? 'Close' : 'Resolve Later'}
+            </Button>
           </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onDismiss}>
-            Cancel
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-// Hook for managing conflicts
-export function useConflictResolution() {
-  const [conflicts, setConflicts] = useState<DataConflict[]>([]);
-  const [currentConflict, setCurrentConflict] = useState<DataConflict | null>(null);
-
-  const addConflict = (conflict: DataConflict) => {
-    setConflicts(prev => [...prev, conflict]);
-    if (!currentConflict) {
-      setCurrentConflict(conflict);
-    }
-
-    track('conflict_detected', {
-      conflict_id: conflict.id,
-      conflict_type: conflict.type,
-      field: conflict.field
-    });
-  };
-
-  const resolveConflict = (conflictId: string, resolution: 'local' | 'remote' | 'merge') => {
-    // Remove the resolved conflict
-    setConflicts(prev => prev.filter(c => c.id !== conflictId));
-
-    // Show next conflict if any
-    const nextConflict = conflicts.find(c => c.id !== conflictId);
-    setCurrentConflict(nextConflict || null);
-  };
-
-  const dismissConflict = (conflictId: string) => {
-    setConflicts(prev => prev.filter(c => c.id !== conflictId));
-    const nextConflict = conflicts.find(c => c.id !== conflictId);
-    setCurrentConflict(nextConflict || null);
-  };
-
-  return {
-    conflicts,
-    currentConflict,
-    addConflict,
-    resolveConflict,
-    dismissConflict,
-    hasConflicts: conflicts.length > 0
-  };
-}
-

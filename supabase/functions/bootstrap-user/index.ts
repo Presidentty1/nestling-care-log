@@ -63,7 +63,7 @@ serve(async (req) => {
       if (babies && babies.length > 0) {
         return new Response(
           JSON.stringify({ 
-            familyId: familyId, 
+            familyId, 
             babyId: babies[0].id,
             existed: true 
           }),
@@ -79,21 +79,21 @@ serve(async (req) => {
           family_id: familyId,
           name: babyName,
           date_of_birth: dateOfBirth,
-          timezone: timezone
+          timezone
         })
         .select()
         .single();
 
       if (babyError) {
         console.error('Baby creation error:', babyError);
-        throw new Error('Failed to create baby: ' + babyError.message);
+        throw new Error(`Failed to create baby: ${  babyError.message}`);
       }
 
       console.log('Created baby:', baby.id);
 
       return new Response(
         JSON.stringify({ 
-          familyId: familyId, 
+          familyId, 
           babyId: baby.id,
           existed: false
         }),
@@ -112,7 +112,7 @@ serve(async (req) => {
 
     if (familyError) {
       console.error('Family creation error:', familyError);
-      throw new Error('Failed to create family: ' + familyError.message);
+      throw new Error(`Failed to create family: ${  familyError.message}`);
     }
 
     console.log('Created family:', family.id);
@@ -128,7 +128,7 @@ serve(async (req) => {
 
     if (memberError) {
       console.error('Family member creation error:', memberError);
-      throw new Error('Failed to create family member: ' + memberError.message);
+      throw new Error(`Failed to create family member: ${  memberError.message}`);
     }
 
     console.log('Created family member');
@@ -144,7 +144,7 @@ serve(async (req) => {
 
     if (roleError) {
       console.error('User role upsert error:', roleError);
-      throw new Error('Failed to upsert user role: ' + roleError.message);
+      throw new Error(`Failed to upsert user role: ${  roleError.message}`);
     }
 
     console.log('Created user role');
@@ -156,14 +156,14 @@ serve(async (req) => {
         family_id: family.id,
         name: babyName,
         date_of_birth: dateOfBirth,
-        timezone: timezone
+        timezone
       })
       .select()
       .single();
 
     if (babyError) {
       console.error('Baby creation error:', babyError);
-      throw new Error('Failed to create baby: ' + babyError.message);
+      throw new Error(`Failed to create baby: ${  babyError.message}`);
     }
 
     console.log('Created baby:', baby.id);

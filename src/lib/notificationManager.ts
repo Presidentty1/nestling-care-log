@@ -1,6 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { supabase } from '@/integrations/supabase/client';
-import { NotificationSettings, Medication } from './types';
+import type { NotificationSettings, Medication } from './types';
 
 class NotificationManager {
   private notificationIds = {

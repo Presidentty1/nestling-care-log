@@ -1,5 +1,5 @@
 import { differenceInMonths, addMinutes } from 'date-fns';
-import { EventRecord } from './eventsService';
+import type { EventRecord } from './eventsService';
 
 interface NapWindow {
   start: Date;

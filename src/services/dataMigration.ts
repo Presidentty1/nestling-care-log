@@ -3,7 +3,7 @@
  */
 
 import localforage from 'localforage';
-import { Baby, EventRecord } from '@/types/events';
+import type { Baby, EventRecord } from '@/types/events';
 
 const CURRENT_VERSION = 1;
 const VERSION_KEY = 'app_data_version';

@@ -2,222 +2,414 @@
 
 ## Overview
 
-Nestling uses Supabase PostgreSQL with **Row Level Security (RLS)** to ensure data isolation between families and prevent cross-tenant data leakage.
+This document describes the security architecture, Row Level Security (RLS) policies, and security best practices for the Nuzzle database.
 
-## Security Model
+## Security Architecture
 
-### Multi-Tenancy via Families
+### Authentication
 
-- Each user belongs to one or more **families**
-- All data (babies, events) is scoped to a `family_id`
-- Users can only access data for families they belong to
-- Family members can have roles: `admin`, `member`, or `viewer`
+**Supabase Auth:**
+- Email/password authentication
+- JWT tokens for API access
+- Session management via HTTP-only cookies
+- Password hashing (bcrypt)
 
-### Role-Based Access Control
+**User Identification:**
+- `auth.uid()` - Current authenticated user ID
+- Available in RLS policies and functions
+- Null for unauthenticated requests
 
-**Admin**:
-- Can manage family members (invite, remove, change roles)
-- Can update family settings
-- Can delete babies
-- Can create/update/delete events
+### Authorization
 
-**Member**:
-- Can view all family data
-- Can create/update babies
-- Can create/update/delete events
-- Cannot manage family members
+**Row Level Security (RLS):**
+- Database-level access control
+- Policies evaluated on every query
+- No application-level bypass possible
 
-**Viewer**:
-- Can view all family data (read-only)
-- Cannot create/update/delete anything
+**Role-Based Access:**
+- `admin` - Full family management
+- `member` - Can create/edit events
+- `viewer` - Read-only access
 
-## Row Level Security Policies
+## RLS Policy Architecture
 
-### Core Tables
+### Policy Structure
 
-#### `profiles`
+**Standard Policy Pattern:**
+```sql
+CREATE POLICY "policy_name" ON table_name
+  FOR operation  -- SELECT, INSERT, UPDATE, DELETE, ALL
+  USING (condition)  -- For SELECT, UPDATE, DELETE
+  WITH CHECK (condition)  -- For INSERT, UPDATE
+```
 
-**Policies**:
-- Users can view their own profile
-- Users can update their own profile
-- Users can insert their own profile
+**Helper Functions:**
+```sql
+-- Check family membership
+CREATE FUNCTION is_family_member(_user_id UUID, _family_id UUID)
+RETURNS BOOLEAN;
 
-**Security**: ✅ Users cannot access other users' profiles
+-- Check baby access
+CREATE FUNCTION can_access_baby(_user_id UUID, _baby_id UUID)
+RETURNS BOOLEAN;
+```
 
-#### `families`
+### Core Tables Policies
 
-**Policies**:
-- Users can view families they belong to
-- Users can create families
-- Admins can update their families
+#### Profiles
 
-**Security**: ✅ Users cannot see families they don't belong to
+**Policy: Users can only access their own profile**
+```sql
+CREATE POLICY "Users can view their own profile" ON public.profiles
+  FOR SELECT USING (auth.uid() = id);
 
-#### `family_members`
+CREATE POLICY "Users can update their own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
 
-**Policies**:
-- Users can view family members of their families
-- Users can insert themselves as family members
-- Admins can manage family members (update/delete)
+CREATE POLICY "Users can insert their own profile" ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+```
 
-**Security**: ✅ Users cannot see members of other families
+#### Families
 
-#### `babies`
+**Policy: Users can see families they belong to**
+```sql
+CREATE POLICY "Users can view families they belong to" ON public.families
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = families.id
+      AND family_members.user_id = auth.uid()
+    )
+  );
+```
 
-**Policies**:
-- Users can view babies in their families
-- Members/admins can create babies in their families
-- Members/admins can update babies in their families
-- Admins can delete babies
+**Policy: Admins can update families**
+```sql
+CREATE POLICY "Admins can update their families" ON public.families
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = families.id
+      AND family_members.user_id = auth.uid()
+      AND family_members.role = 'admin'
+    )
+  );
+```
 
-**Security**: ✅ Users cannot access babies from other families
+#### Babies
 
-#### `events`
+**Policy: Users can access babies in their families**
+```sql
+CREATE POLICY "Users can view babies in their families" ON public.babies
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = babies.family_id
+      AND family_members.user_id = auth.uid()
+    )
+  );
+```
 
-**Policies**:
-- Users can view events for babies in their families
-- Members/admins can create events in their families
-- Members/admins can update events in their families
-- Members/admins can delete events in their families
+**Policy: Members can create/update babies**
+```sql
+CREATE POLICY "Members can create babies in their families" ON public.babies
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = babies.family_id
+      AND family_members.user_id = auth.uid()
+      AND family_members.role IN ('admin', 'member')
+    )
+  );
+```
 
-**Security**: ✅ Users cannot access events from other families
+#### Events
+
+**Policy: Users can view events for babies in their families**
+```sql
+CREATE POLICY "Users can view events for babies in their families" ON public.events
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = events.family_id
+      AND family_members.user_id = auth.uid()
+    )
+  );
+```
+
+**Policy: Members can create/update/delete events**
+```sql
+CREATE POLICY "Members can create events in their families" ON public.events
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.family_members
+      WHERE family_members.family_id = events.family_id
+      AND family_members.user_id = auth.uid()
+      AND family_members.role IN ('admin', 'member')
+    )
+  );
+```
 
 ### Additional Tables
 
-All other tables follow the same pattern:
-- **View**: Users can view data for babies in their families
-- **Create/Update/Delete**: Members/admins can manage data in their families
+**All tables follow similar patterns:**
+- SELECT: Family membership check
+- INSERT: Family membership + role check
+- UPDATE: Family membership + role check
+- DELETE: Family membership + role check (admin only for sensitive data)
 
-## Security Guarantees
+## Security Functions
 
-### ✅ Data Isolation
+### Helper Functions
 
-- Users **cannot** access data from families they don't belong to
-- All queries are automatically filtered by `family_id` via RLS
-- No cross-tenant data leakage possible
-
-### ✅ Role Enforcement
-
-- Role checks enforced at database level (not just application level)
-- Viewers cannot modify data even if they bypass application checks
-- Admins have elevated permissions only for their families
-
-### ✅ Authentication Required
-
-- All RLS policies check `auth.uid()` (authenticated user ID)
-- Unauthenticated users cannot access any data
-- Edge functions verify authentication before database access
-
-## Testing RLS Policies
-
-### Manual Testing
-
-1. **Create two test users**:
-   - User A: `test-a@example.com`
-   - User B: `test-b@example.com`
-
-2. **Create separate families**:
-   - Family 1: User A creates
-   - Family 2: User B creates
-
-3. **Verify isolation**:
-   - User A should NOT see Family 2's babies/events
-   - User B should NOT see Family 1's babies/events
-
-### Automated Testing
-
+**is_family_member:**
 ```sql
--- Test: User cannot access other family's data
-SET ROLE authenticated;
-SET request.jwt.claim.sub = 'user-a-uuid';
-
--- Should return empty (User A cannot see Family 2)
-SELECT * FROM babies WHERE family_id = 'family-2-uuid';
-
--- Should return data (User A can see Family 1)
-SELECT * FROM babies WHERE family_id = 'family-1-uuid';
+CREATE OR REPLACE FUNCTION public.is_family_member(
+  _user_id UUID, 
+  _family_id UUID
+)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.family_members
+    WHERE family_id = _family_id
+      AND user_id = _user_id
+  )
+$$;
 ```
 
-## Edge Cases Handled
+**can_access_baby:**
+```sql
+CREATE OR REPLACE FUNCTION public.can_access_baby(
+  _user_id UUID, 
+  _baby_id UUID
+)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.babies b
+    JOIN public.family_members fm ON b.family_id = fm.family_id
+    WHERE b.id = _baby_id
+      AND fm.user_id = _user_id
+  )
+$$;
+```
 
-### ✅ Family Member Removal
+### Security Definer Functions
 
-- When a user is removed from a family, they immediately lose access
-- RLS policies prevent access even if session is still active
-- No orphaned data access possible
+**Purpose:**
+- Bypass RLS for internal checks
+- Prevent RLS recursion
+- Maintain security while allowing policy evaluation
 
-### ✅ Baby Deletion
+**Best Practices:**
+- Always use `SET search_path = public`
+- Mark as `STABLE` for query optimization
+- Document function purpose
 
-- When a baby is deleted, all related events are cascade-deleted
-- RLS ensures only admins can delete babies
-- No data leakage from deleted babies
+## Data Isolation
 
-### ✅ Event Ownership
+### Family-Level Isolation
 
-- Events are scoped to `family_id`, not individual users
-- Any family member (with appropriate role) can view/edit events
-- `created_by` field tracks creator but doesn't restrict access
+**Principle:**
+- Users can only access data for families they belong to
+- No cross-family data access
+- Enforced at database level
+
+**Implementation:**
+- All tables include `family_id`
+- RLS policies check family membership
+- Helper functions verify access
+
+### User-Level Isolation
+
+**User-Specific Data:**
+- `profiles` - Own profile only
+- `app_settings` - Own settings only
+- `user_feedback` - Own feedback only
+- `subscriptions` - Own subscription only
+
+## Service Role Access
+
+### Service Role Usage
+
+**When to Use:**
+- Edge functions (server-side)
+- Background jobs
+- Admin operations
+- System operations
+
+**Security:**
+- Service role bypasses RLS
+- Use with extreme caution
+- Always validate input
+- Log all service role operations
+
+**Example:**
+```typescript
+// Edge function
+const supabaseAdmin = createClient(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY  // Service role key
+);
+
+// Can access all data (bypasses RLS)
+const { data } = await supabaseAdmin
+  .from('events')
+  .select('*');
+```
 
 ## Security Best Practices
 
-### ✅ Always Use RLS
+### Policy Design
 
-- Never disable RLS for any table
-- All tables have RLS enabled
-- Policies are tested and verified
+**1. Principle of Least Privilege:**
+- Grant minimum necessary access
+- Separate SELECT, INSERT, UPDATE, DELETE policies
+- Role-based restrictions
 
-### ✅ Use Parameterized Queries
+**2. Explicit Checks:**
+- Always check family membership
+- Verify user roles explicitly
+- Don't rely on implicit relationships
 
-- All Supabase queries use parameterized queries (built-in)
-- No SQL injection possible
-- Edge functions use Supabase client (safe)
+**3. Performance:**
+- Use indexes on foreign keys
+- Keep policy conditions simple
+- Use helper functions for complex checks
 
-### ✅ Validate Input
+### Application Security
 
-- Application-level validation (Zod schemas)
-- Database-level constraints (CHECK constraints)
-- Type safety via TypeScript
+**1. Never Trust Client:**
+- Always validate on server
+- RLS is final authority
+- Don't skip RLS checks
 
-### ✅ Audit Logging
+**2. Input Validation:**
+- Validate all user input
+- Use parameterized queries
+- Sanitize data before display
 
-- `created_by` field tracks who created records
-- `created_at` / `updated_at` track timestamps
-- Can audit changes via `updated_at` triggers
+**3. Error Handling:**
+- Don't expose sensitive errors
+- Log security violations
+- Monitor for suspicious activity
 
-## Known Limitations
+## Security Audit
 
-### ⚠️ Service Role Bypass
+### Policy Verification
 
-- Service role (used by edge functions) bypasses RLS
-- Edge functions must manually verify permissions
-- All edge functions check `auth.uid()` before database access
+**Check All Tables Have RLS:**
+```sql
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
+AND rowsecurity = false;
+```
 
-### ⚠️ Materialized Views
+**List All Policies:**
+```sql
+SELECT 
+  schemaname,
+  tablename,
+  policyname,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies
+WHERE schemaname = 'public'
+ORDER BY tablename, policyname;
+```
 
-- Materialized views may not respect RLS automatically
-- Views are refreshed periodically, not real-time
-- Consider using regular views or functions instead
+### Testing Security
 
-## Recommendations
+**Test as Different Users:**
+```sql
+-- Test as user
+SET ROLE authenticated;
+SET request.jwt.claim.sub = 'user-id-here';
+SELECT * FROM events;  -- Should only see own family's data
 
-1. **Regular Audits**: Review RLS policies quarterly
-2. **Test Coverage**: Add automated RLS tests
-3. **Documentation**: Keep this doc updated with policy changes
-4. **Monitoring**: Monitor for unauthorized access attempts
+-- Reset
+RESET ROLE;
+```
 
-## Migration Safety
+**Test Service Role:**
+```sql
+SET ROLE service_role;
+SELECT * FROM events;  -- Should see all data
+RESET ROLE;
+```
 
-When adding new tables:
-1. ✅ Enable RLS: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`
-2. ✅ Add SELECT policy (family members can view)
-3. ✅ Add INSERT policy (members/admins can create)
-4. ✅ Add UPDATE policy (members/admins can update)
-5. ✅ Add DELETE policy (admins can delete, if applicable)
-6. ✅ Test policies with multiple users/families
+## Common Security Issues
 
-## References
+### Issue: RLS Recursion
 
-- [Supabase RLS Documentation](https://supabase.com/docs/guides/auth/row-level-security)
-- [PostgreSQL RLS Guide](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
+**Problem:**
+- Policy checks family_members table
+- family_members has RLS
+- Infinite recursion
 
+**Solution:**
+- Use SECURITY DEFINER functions
+- Functions bypass RLS for internal checks
 
+### Issue: Missing Policies
+
+**Problem:**
+- Table has RLS enabled
+- No policies defined
+- All queries blocked
+
+**Solution:**
+- Always create policies when enabling RLS
+- Test policies thoroughly
+- Document policy purpose
+
+### Issue: Performance
+
+**Problem:**
+- RLS policies slow queries
+- Complex policy conditions
+
+**Solution:**
+- Use indexes on foreign keys
+- Simplify policy conditions
+- Use helper functions
+
+## Compliance
+
+### GDPR Compliance
+
+**Data Access:**
+- Users can export their data
+- Users can delete their data
+- RLS ensures data isolation
+
+**Data Retention:**
+- Automatic cleanup policies
+- User-initiated deletion
+- Audit logs for compliance
+
+### HIPAA Considerations
+
+**Note:** Nuzzle is not HIPAA compliant by default. For HIPAA compliance:
+- Use Supabase HIPAA-compliant plan
+- Enable additional encryption
+- Implement audit logging
+- Sign Business Associate Agreement (BAA)
+
+## Related Documentation
+
+- `DATA_MODEL.md` - Database schema
+- `DB_OPERATIONS.md` - Database operations
+- `supabase/migrations/20250120000000_comprehensive_rls_security.sql` - Complete RLS policies

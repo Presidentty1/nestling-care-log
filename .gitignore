@@ -27,5 +27,14 @@ dist-ssr
 ios/Nestling/Nestling/Services/Secrets.swift
 Secrets.swift
 
+# Environment Variables (prevent committing sensitive configuration)
+ios/Environment.xcconfig
+ios/.env
+.env.local
+.env.*.local
+
 # Swift Package Manager (managed by Xcode)
-ios/Nestling/.swiftpm/
+ios/**/.swiftpm/
+ios/**/.swiftpm/checkouts/
+ios/**/.swiftpm/repositories/
+ios/**/.swiftpm/artifacts/

@@ -72,7 +72,7 @@ All colors MUST be HSL.
 }
 
 @layer base {
-  /* Dark mode only - Nestling design system */
+  /* Dark mode only - Nuzzle design system */
   :root {
     color-scheme: dark;
 
@@ -165,7 +165,7 @@ All colors MUST be HSL.
     --sidebar-border: 202 25% 91%;
     --sidebar-ring: 168 46% 34%;
 
-    /* Typography scale - Nestling design system */
+    /* Typography scale - Nuzzle design system */
     --font-display: 800 32px/1.2 'Inter', system-ui; /* 32-34pt - Home, History, Labs */
     --font-title: 600 24px/1.3 'Inter', system-ui; /* 24pt - onboarding titles */
     --font-body: 400 16px/1.5 'Inter', system-ui; /* 16-17pt - main copy */

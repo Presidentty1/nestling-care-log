@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Pencil, Trash2, Plus, ChevronLeft } from 'lucide-react';
 import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
-import { Baby } from '@/types/events';
+import type { Baby } from '@/types/events';
 import { getAgeDisplay } from '@/services/time';
 import { toast } from 'sonner';
 

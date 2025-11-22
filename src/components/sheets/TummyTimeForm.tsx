@@ -1,11 +1,24 @@
+// React imports
 import { useState, useEffect } from 'react';
+
+// External libraries
+import { Play, Square } from 'lucide-react';
+
+// UI components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Square } from 'lucide-react';
-import { CreateEventData, eventsService } from '@/services/eventsService';
+
+// Types
+import type { CreateEventData } from '@/services/eventsService';
+
+// Services
+import { eventsService } from '@/services/eventsService';
+
+// Utilities
+import { sanitizeEventNote, sanitizeDuration } from '@/lib/sanitization';
 
 interface TummyTimeFormProps {
   babyId: string;
@@ -118,13 +131,16 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit,
       end = new Date(start.getTime() + durationSec * 1000);
     }
 
+    const sanitizedNote = note ? sanitizeEventNote(note) : undefined;
+    const sanitizedDuration = sanitizeDuration(durationSec);
+
     onSubmit({
       type: 'tummy_time',
       start_time: start.toISOString(),
       end_time: end.toISOString(),
-      duration_sec: durationSec,
+      duration_sec: sanitizedDuration || durationSec,
       duration_min: durationMin,
-      note: note || undefined,
+      note: sanitizedNote,
     });
   };
 
@@ -185,7 +201,7 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit,
         <Textarea
           id="note"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
           placeholder="Any observations..."
         />
       </div>

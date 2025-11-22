@@ -13,7 +13,7 @@
 
 **Option 1: Restart Xcode (Recommended)**
 1. Quit Xcode completely (⌘Q)
-2. Reopen the project: `ios/Nestling/Nestling.xcodeproj`
+2. Reopen the project: `ios/Nuzzle/Nuzzle.xcodeproj`
 3. Build (⌘B)
 
 **Option 2: Clean and rebuild**
@@ -24,8 +24,8 @@
 
 **Option 3: Command line**
 ```bash
-cd ios/Nestling
-xcodebuild -project Nestling.xcodeproj -scheme Nestling -sdk iphonesimulator clean build
+cd ios/Nuzzle
+xcodebuild -project Nuzzle.xcodeproj -scheme Nuzzle -sdk iphonesimulator clean build
 ```
 
 ## Packages successfully resolved:

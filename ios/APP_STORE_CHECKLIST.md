@@ -1,6 +1,6 @@
 # App Store Submission Checklist
 
-Complete checklist for submitting Nestling to the App Store.
+Complete checklist for submitting Nuzzle to the App Store.
 
 ## Pre-Submission Checks
 
@@ -28,22 +28,22 @@ Complete checklist for submitting Nestling to the App Store.
 Verify all required privacy usage descriptions:
 
 - [ ] **NSMicrophoneUsageDescription** ✅ (already exists)
-  - Description: "Nestling needs microphone access to analyze your baby's cry patterns and provide insights."
+  - Description: "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights."
 
 - [ ] **NSPhotoLibraryUsageDescription**
-  - Description: "Nestling needs photo library access to save and attach photos to baby profiles and events."
+  - Description: "Nuzzle needs photo library access to save and attach photos to baby profiles and events."
 
 - [ ] **NSCameraUsageDescription**
-  - Description: "Nestling needs camera access to take photos for baby profiles and events."
+  - Description: "Nuzzle needs camera access to take photos for baby profiles and events."
 
 - [ ] **NSHealthShareUsageDescription** (if HealthKit integration)
-  - Description: "Nestling needs health data access to sync baby care information with the Health app."
+  - Description: "Nuzzle needs health data access to sync baby care information with the Health app."
 
 - [ ] **NSHealthUpdateUsageDescription** (if HealthKit integration)
   - Description: "Nestling needs health data write access to sync baby care information with the Health app."
 
 - [ ] **NSLocationWhenInUseUsageDescription** (if location features)
-  - Description: "Nestling needs location access to add location context to logged events."
+  - Description: "Nuzzle needs location access to add location context to logged events."
 
 ### Encryption
 
@@ -54,13 +54,13 @@ Verify all required privacy usage descriptions:
 ### Privacy Policy & Terms
 
 - [ ] **Privacy Policy URL**
-  - URL: `https://nestling.app/privacy` (or your URL)
+  - URL: `https://nuzzle.app/privacy` (or your URL)
   - Policy is live and accessible
   - Includes data collection, AI usage, third-party services
   - Links in App Store Connect and app settings
 
 - [ ] **Terms of Service URL**
-  - URL: `https://nestling.app/terms` (or your URL)
+  - URL: `https://nuzzle.app/terms` (or your URL)
   - Terms are live and accessible
   - Links in App Store Connect and subscription view
 
@@ -70,7 +70,7 @@ Verify all required privacy usage descriptions:
   - Disclaimer shown on Predictions screen
   - Disclaimer shown on Cry Insights screen
   - Disclaimer shown on AI Assistant screen
-  - Text: "Nestling is not a medical device and does not provide medical advice. Always consult your pediatrician for medical guidance."
+  - Text: "Nuzzle is not a medical device and does not provide medical advice. Always consult your pediatrician for medical guidance."
 
 - [ ] **App Review Notes**
   - Include disclaimer in review notes
@@ -116,7 +116,7 @@ Required sizes (at least one set):
 ### Metadata
 
 - [ ] **App Name** (30 characters max)
-  - "Nestling Baby Tracker"
+  - "Nuzzle Baby Tracker"
 
 - [ ] **Subtitle** (30 characters max)
   - "AI-powered feed & sleep log"
@@ -133,10 +133,10 @@ Required sizes (at least one set):
   - "Track feeding, sleep & diapers in 2 taps. Get AI nap predictions. Sync with partner. Perfect for sleep-deprived parents. 🍼✨"
 
 - [ ] **Support URL**
-  - `https://nestling.app/support` (or your URL)
+  - `https://nuzzle.app/support` (or your URL)
 
 - [ ] **Marketing URL**
-  - `https://nestling.app` (or your URL)
+  - `https://nuzzle.app` (or your URL)
 
 - [ ] **Privacy Policy URL**
   - `https://nestling.app/privacy` (or your URL)
@@ -167,7 +167,7 @@ Required sizes (at least one set):
 ### Subscriptions
 
 - [ ] **Subscription Group Created**
-  - Group name: "Nestling Pro"
+  - Group name: "Nuzzle Pro"
 
 - [ ] **Products Created**
   - `com.nestling.pro.monthly` ($4.99/month)
@@ -197,17 +197,17 @@ Include in review notes:
 
 ```
 App Overview:
-Nestling helps parents track baby care activities (feeding, sleep, diapers) with AI-powered insights.
+Nuzzle helps parents track baby care activities (feeding, sleep, diapers) with AI-powered insights.
 
 Key Points:
 - Not a medical device; all features are informational only
 - AI features are clearly marked as non-medical advice
 - Subscription is optional; core features are free
 - Privacy policy: [URL]
-- Support: support@nestling.app
+- Support: support@nuzzle.app
 
 Test Account:
-- Email: test@nestling.app
+- Email: test@nuzzle.app
 - Password: [provided separately]
 
 Notes:

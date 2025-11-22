@@ -25,9 +25,9 @@ The iOS project needs the following Swift Package dependencies. Since the automa
 
 ## Steps to Add in Xcode
 
-1. Open `ios/Nestling/Nestling.xcodeproj` in Xcode
-2. Select the **Nestling** project in the navigator (top item)
-3. Select the **Nestling** target
+1. Open `ios/Nuzzle/Nuzzle.xcodeproj` in Xcode
+2. Select the **Nuzzle** project in the navigator (top item)
+3. Select the **Nuzzle** target
 4. Go to the **Package Dependencies** tab
 5. Click the **+** button to add a package
 6. For each package:

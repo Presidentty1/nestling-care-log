@@ -1,5 +1,5 @@
 import XCTest
-@testable import Nestling
+@testable import Nuzzle
 
 /// Performance tests for critical paths.
 /// These tests verify that performance budgets are met.

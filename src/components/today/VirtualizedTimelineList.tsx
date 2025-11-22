@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { EventRecord } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
 import { SwipeableTimelineRow } from './SwipeableTimelineRow';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Calendar } from 'lucide-react';

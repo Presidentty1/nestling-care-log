@@ -74,7 +74,7 @@ export function useOnboarding() {
           body: {
             babyName: 'Demo Baby',
             dateOfBirth: demoBirthdate,
-            timezone: timezone
+            timezone
           },
           headers: {
             Authorization: `Bearer ${session.access_token}`
@@ -113,7 +113,7 @@ export function useOnboarding() {
             body: {
               babyName: 'Demo Baby',
               dateOfBirth: demoBirthdate,
-              timezone: timezone
+              timezone
             },
             headers: {
               Authorization: `Bearer ${session.access_token}`

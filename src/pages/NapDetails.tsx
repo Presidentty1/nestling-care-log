@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Baby, BabyEvent } from '@/lib/types';
+import type { Baby, BabyEvent } from '@/lib/types';
 import { predictNextNap } from '@/lib/napPredictor';
 import { format, formatDistanceToNow, isBefore, isAfter } from 'date-fns';
 import { ArrowLeft, Moon } from 'lucide-react';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Baby, Milestone } from '@/lib/types';
+import type { Baby, Milestone } from '@/lib/types';
 import { milestoneCategories } from '@/lib/milestoneCategories';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

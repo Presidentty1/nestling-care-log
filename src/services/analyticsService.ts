@@ -1,4 +1,4 @@
-import { EventType } from '@/types/events';
+import type { EventType } from '@/types/events';
 import { track, identify } from '@/analytics/analytics';
 import * as Sentry from '@sentry/react';
 

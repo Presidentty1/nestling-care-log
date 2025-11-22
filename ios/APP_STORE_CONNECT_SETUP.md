@@ -1,6 +1,6 @@
 # App Store Connect Setup Guide
 
-This guide walks you through setting up subscriptions in App Store Connect for Nestling Pro.
+This guide walks you through setting up subscriptions in App Store Connect for Nuzzle Pro.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This guide walks you through setting up subscriptions in App Store Connect for N
 2. Click **My Apps** → **+** → **New App**
 3. Fill in:
    - **Platform**: iOS
-   - **Name**: Nestling Baby Tracker
+   - **Name**: Nuzzle Baby Tracker
    - **Primary Language**: English (U.S.)
    - **Bundle ID**: `com.nestling.Nestling` (or your bundle ID)
    - **SKU**: `nestling-ios-001`
@@ -25,7 +25,7 @@ This guide walks you through setting up subscriptions in App Store Connect for N
 
 1. In your app, go to **Features** → **In-App Purchases**
 2. Click **+** next to **Subscription Groups**
-3. Name: **Nestling Pro**
+3. Name: **Nuzzle Pro**
 4. Click **Create**
 
 ## Step 3: Create Subscription Products
@@ -36,7 +36,7 @@ This guide walks you through setting up subscriptions in App Store Connect for N
 2. Select **Auto-Renewable Subscription**
 3. Fill in:
    - **Product ID**: `com.nestling.pro.monthly`
-   - **Reference Name**: Nestling Pro Monthly
+   - **Reference Name**: Nuzzle Pro Monthly
    - **Subscription Duration**: 1 Month
 4. Click **Create**
 5. Add localized information:

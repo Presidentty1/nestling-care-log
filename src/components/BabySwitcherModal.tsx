@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Check, Plus } from 'lucide-react';
-import { Baby } from '@/services/babyService';
+import type { Baby } from '@/services/babyService';
 import { getAgeDisplay } from '@/services/time';
 
 interface BabySwitcherModalProps {

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nestling supports Siri Shortcuts for hands-free baby tracking. Users can say voice commands like:
+Nuzzle supports Siri Shortcuts for hands-free baby tracking. Users can say voice commands like:
 
 - "Hey Siri, log a feed"
 - "Hey Siri, start nap timer"
@@ -29,17 +29,17 @@ Nestling supports Siri Shortcuts for hands-free baby tracking. Users can say voi
 2. Ensure **Allow Siri When Locked** is enabled (optional)
 3. Enable **Siri Suggestions** for better shortcut discovery
 
-### 2. Add Nestling Shortcuts
+### 2. Add Nuzzle Shortcuts
 1. Open **Shortcuts app**
 2. Tap **+** to create new shortcut
-3. Search for **Nestling** in the action library
+3. Search for **Nuzzle** in the action library
 4. Add desired shortcuts to your collection
 
 ### 3. Siri Voice Commands
 Users can activate shortcuts by saying:
-- "Hey Siri, log a feed in Nestling"
-- "Hey Siri, start sleep timer in Nestling"
-- "Hey Siri, when was last feed in Nestling"
+- "Hey Siri, log a feed in Nuzzle"
+- "Hey Siri, start sleep timer in Nuzzle"
+- "Hey Siri, when was last feed in Nuzzle"
 
 ### 4. Customize Quick Actions
 In the Shortcuts app, users can:
@@ -50,7 +50,7 @@ In the Shortcuts app, users can:
 ## Technical Implementation
 
 ### App Intents
-- Located in `ios/NestlingIntents/` directory
+- Located in `ios/NuzzleIntents/` directory
 - Each intent handles specific functionality
 - Integration with shared data via App Groups
 
@@ -61,7 +61,7 @@ In the Shortcuts app, users can:
 
 ### Data Flow
 1. User speaks Siri command
-2. Siri matches to Nestling shortcut
+2. Siri matches to Nuzzle shortcut
 3. Intent executes using shared App Group data
 4. Result returned to user
 5. Widgets update automatically

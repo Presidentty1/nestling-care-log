@@ -4,11 +4,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Milk, AlertCircle } from 'lucide-react';
-import { CreateEventData, eventsService } from '@/services/eventsService';
+import type { CreateEventData} from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
 import { unitConversion } from '@/services/unitConversion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { RotateCcw } from 'lucide-react';
+import { sanitizeEventNote, sanitizeAmount } from '@/lib/sanitization';
 
 interface FeedFormProps {
   babyId: string;
@@ -89,18 +91,31 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
     if (!validate()) return;
 
     setError(null);
+
+    // Sanitize inputs
+    const sanitizedNote = note ? sanitizeEventNote(note) : undefined;
+    let sanitizedAmount: number | undefined;
+
+    if (feedType === 'bottle') {
+      const amountNum = parseFloat(amount);
+      sanitizedAmount = sanitizeAmount(amountNum);
+      if (sanitizedAmount === null) {
+        setError('Invalid amount');
+        return;
+      }
+    }
+
     const data: Partial<CreateEventData> = {
       type: 'feed',
       subtype: feedType,
-      note: note || undefined,
+      note: sanitizedNote,
       start_time: new Date().toISOString(),
     };
 
     if (feedType === 'breast') {
       data.side = side;
-    } else if (feedType === 'bottle') {
-      const amountNum = parseFloat(amount);
-      const storageAmount = unitConversion.toStorageVolume(amountNum, unit);
+    } else if (feedType === 'bottle' && sanitizedAmount !== undefined) {
+      const storageAmount = unitConversion.toStorageVolume(sanitizedAmount, unit);
       data.amount = storageAmount;
       data.unit = unit;
     }
@@ -258,7 +273,7 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
         <Textarea
           id="note"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
           placeholder="Any observations..."
           className="min-h-[100px] text-base resize-none"
           maxLength={500}
