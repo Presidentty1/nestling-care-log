@@ -91,11 +91,22 @@ class ProSubscriptionService: ObservableObject {
     
     private init() {
         initializeFreeTierLimits()
+        
+        // Restore dev mode if it was previously enabled
+        if UserDefaults.standard.bool(forKey: "dev_pro_mode_enabled") {
+            isProUser = true
+            subscriptionStatus = .subscribed
+            trialDaysRemaining = 999
+            print("[Pro] Dev mode restored from UserDefaults")
+        }
 
         Task {
-            await loadProducts()
-            await checkSubscriptionStatus()
-            startTransactionListener()
+            // Only check real subscription status if dev mode is not enabled
+            if !UserDefaults.standard.bool(forKey: "dev_pro_mode_enabled") {
+                await loadProducts()
+                await checkSubscriptionStatus()
+                startTransactionListener()
+            }
         }
     }
 
@@ -281,10 +292,19 @@ class ProSubscriptionService: ObservableObject {
     /// - Parameter productID: Product ID to purchase
     /// - Returns: Success status
     func purchase(productID: String) async -> Bool {
+        // Ensure products are loaded
+        if products.isEmpty {
+            print("[Pro] Products not loaded, loading now...")
+            await loadProducts()
+        }
+        
         guard let product = products.first(where: { $0.id == productID }) else {
             print("[Pro] Product not found: \(productID)")
+            print("[Pro] Available products: \(products.map { $0.id })")
             return false
         }
+        
+        print("[Pro] Starting purchase for product: \(product.displayName) (\(productID))")
         
         do {
             let result = try await product.purchase()
@@ -293,6 +313,7 @@ class ProSubscriptionService: ObservableObject {
             case .success(let verification):
                 switch verification {
                 case .verified(let transaction):
+                    print("[Pro] Purchase verified successfully")
                     // Purchase successful
                     await transaction.finish()
                     await checkSubscriptionStatus()
@@ -307,20 +328,24 @@ class ProSubscriptionService: ObservableObject {
 
                     return true
                 case .unverified(_, let error):
-                    print("[Pro] Unverified transaction: \(error)")
+                    print("[Pro] Unverified transaction: \(error.localizedDescription)")
                     return false
                 }
             case .userCancelled:
                 print("[Pro] User cancelled purchase")
                 return false
             case .pending:
-                print("[Pro] Purchase pending")
-                return false
+                print("[Pro] Purchase pending (requires approval)")
+                // For pending purchases, we should still return true as the purchase is in progress
+                // The transaction listener will handle the completion
+                return true
             @unknown default:
+                print("[Pro] Unknown purchase result")
                 return false
             }
         } catch {
-            print("[Pro] Purchase failed: \(error)")
+            print("[Pro] Purchase failed with error: \(error.localizedDescription)")
+            print("[Pro] Error details: \(error)")
             return false
         }
     }

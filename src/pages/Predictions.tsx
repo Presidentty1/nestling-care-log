@@ -145,9 +145,9 @@ export default function Predictions() {
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 Smart Predictions
-                <Badge variant="secondary">Beta</Badge>
+                <Badge variant="secondary">Suggestion</Badge>
               </h1>
-              <p className="text-sm text-muted-foreground">AI-powered insights</p>
+              <p className="text-sm text-muted-foreground">AI-powered suggestions based on your baby's patterns</p>
             </div>
           </div>
           {babies && babies.length > 0 && (

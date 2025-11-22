@@ -313,9 +313,9 @@ export default function AnalyticsDashboard() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="feeds" stroke="#3b82f6" name="Feeds" />
-                  <Line type="monotone" dataKey="sleep" stroke="#8b5cf6" name="Sleep (h)" />
-                  <Line type="monotone" dataKey="diapers" stroke="#10b981" name="Diapers" />
+                  <Line type="monotone" dataKey="feeds" stroke="hsl(var(--event-feed))" name="Feeds" />
+                  <Line type="monotone" dataKey="sleep" stroke="hsl(var(--event-sleep))" name="Sleep (h)" />
+                  <Line type="monotone" dataKey="diapers" stroke="hsl(var(--event-diaper))" name="Diapers" />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -335,7 +335,7 @@ export default function AnalyticsDashboard() {
                   <XAxis dataKey="hour" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#3b82f6" name="Feed Count" />
+                  <Bar dataKey="count" fill="hsl(var(--event-feed))" name="Feed Count" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -355,7 +355,7 @@ export default function AnalyticsDashboard() {
                   <XAxis dataKey="hour" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="duration" fill="#8b5cf6" name="Sleep Duration (h)" />
+                  <Bar dataKey="duration" fill="hsl(var(--event-sleep))" name="Sleep Duration (h)" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

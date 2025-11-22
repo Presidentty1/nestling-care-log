@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DeveloperSettingsView: View {
     @EnvironmentObject var environment: AppEnvironment
+    @StateObject private var proService = ProSubscriptionService.shared
     @State private var showWidgetTest = false
     @State private var showResetConfirmation = false
     
@@ -28,39 +29,77 @@ struct DeveloperSettingsView: View {
             }
             
             Section("Subscription Testing") {
-                Toggle("Force Pro Status", isOn: Binding(
-                    get: { ProSubscriptionService.shared.isProUser },
+                Toggle("🔓 Enable Pro Mode (Dev Only)", isOn: Binding(
+                    get: { proService.isProUser },
                     set: { newValue in
-                        // For debugging only - force Pro status
-                        ProSubscriptionService.shared.isProUser = newValue
-                        if !newValue {
-                            ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                        // Force Pro status for development testing
+                        proService.isProUser = newValue
+                        if newValue {
+                            proService.subscriptionStatus = .subscribed
+                            // Set trial days to simulate active subscription
+                            proService.trialDaysRemaining = 999
+                            // Persist dev mode setting
+                            UserDefaults.standard.set(true, forKey: "dev_pro_mode_enabled")
                         } else {
-                            ProSubscriptionService.shared.subscriptionStatus = .subscribed
+                            proService.subscriptionStatus = .notSubscribed
+                            proService.trialDaysRemaining = nil
+                            // Clear dev mode setting
+                            UserDefaults.standard.removeObject(forKey: "dev_pro_mode_enabled")
                         }
                     }
                 ))
+                .font(.headline)
+                .foregroundColor(.primary)
+
+                Text("Toggle this to enable/disable all Pro features for testing. This only works in development builds.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+
+                Button("Activate Pro Mode") {
+                    proService.isProUser = true
+                    proService.subscriptionStatus = .subscribed
+                    proService.trialDaysRemaining = 999
+                    UserDefaults.standard.set(true, forKey: "dev_pro_mode_enabled")
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button("Deactivate Pro Mode") {
+                    proService.isProUser = false
+                    proService.subscriptionStatus = .notSubscribed
+                    proService.trialDaysRemaining = nil
+                    UserDefaults.standard.removeObject(forKey: "dev_pro_mode_enabled")
+                }
+                .buttonStyle(.bordered)
 
                 Button("Simulate Trial Expiration") {
                     // Set trial to expired state
-                    ProSubscriptionService.shared.trialDaysRemaining = nil
-                    ProSubscriptionService.shared.isProUser = false
-                    ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                    proService.trialDaysRemaining = nil
+                    proService.isProUser = false
+                    proService.subscriptionStatus = .notSubscribed
                 }
 
                 Button("Clear Subscription Data") {
                     // Clear UserDefaults related to subscriptions
                     UserDefaults.standard.removeObject(forKey: "nestling_trial_start_date")
-                    ProSubscriptionService.shared.trialDaysRemaining = nil
-                    ProSubscriptionService.shared.isProUser = false
-                    ProSubscriptionService.shared.subscriptionStatus = .notSubscribed
+                    UserDefaults.standard.removeObject(forKey: "dev_pro_mode_enabled")
+                    proService.trialDaysRemaining = nil
+                    proService.isProUser = false
+                    proService.subscriptionStatus = .notSubscribed
                 }
 
                 Button("Reset Trial Eligibility") {
-                    // Reset trial to be available again
-                    UserDefaults.standard.removeObject(forKey: "nestling_trial_start_date")
-                    ProSubscriptionService.shared.trialDaysRemaining = nil
-                        Task { await ProSubscriptionService.shared.checkSubscriptionStatus() }
+                    Task {
+                        // Reset trial to be available again
+                        UserDefaults.standard.removeObject(forKey: "nestling_trial_start_date")
+                        proService.trialDaysRemaining = nil
+                        await proService.checkSubscriptionStatus()
+                    }
+                }
+
+                Button("Refresh Subscription Status") {
+                    Task {
+                        await proService.checkSubscriptionStatus()
+                    }
                 }
             }
 
@@ -88,15 +127,22 @@ struct DeveloperSettingsView: View {
                 HStack {
                     Text("Pro User")
                     Spacer()
-                    Text(ProSubscriptionService.shared.isProUser ? "Yes" : "No")
-                        .foregroundColor(ProSubscriptionService.shared.isProUser ? .primary : .mutedForeground)
+                    Text(proService.isProUser ? "Yes" : "No")
+                        .foregroundColor(proService.isProUser ? .primary : .mutedForeground)
                 }
 
                 HStack {
                     Text("Trial Days Remaining")
                     Spacer()
-                    Text(ProSubscriptionService.shared.trialDaysRemaining.map { "\($0)" } ?? "N/A")
+                    Text(proService.trialDaysRemaining.map { "\($0)" } ?? "N/A")
                         .foregroundColor(.mutedForeground)
+                }
+
+                HStack {
+                    Text("Dev Pro Mode")
+                    Spacer()
+                    Text(UserDefaults.standard.bool(forKey: "dev_pro_mode_enabled") ? "Enabled" : "Disabled")
+                        .foregroundColor(UserDefaults.standard.bool(forKey: "dev_pro_mode_enabled") ? .primary : .mutedForeground)
                 }
 
                 HStack {
@@ -132,7 +178,7 @@ struct DeveloperSettingsView: View {
     }
 
     private var subscriptionStatusText: String {
-        switch ProSubscriptionService.shared.subscriptionStatus {
+        switch proService.subscriptionStatus {
         case .notSubscribed:
             return "Not Subscribed"
         case .subscribed:

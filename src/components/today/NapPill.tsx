@@ -102,11 +102,16 @@ export function NapPill({ prediction, babyId, onFeedbackSubmitted, className }: 
                 {format(windowStart, 'h:mm a')} - {format(windowEnd, 'h:mm a')}
               </span>
             </div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                Suggestion
+              </span>
+            </div>
             <p className="text-caption text-muted-foreground">
               {prediction.reason}
             </p>
             <p className="text-caption text-muted-foreground mt-2">
-              {Math.round(prediction.confidence * 100)}% confidence
+              {Math.round(prediction.confidence * 100)}% confidence • Based on age and patterns
             </p>
             {learningMetrics && learningMetrics.daysLogged > 0 && (
               <div className="mt-3 p-2 bg-muted/50 rounded text-xs">

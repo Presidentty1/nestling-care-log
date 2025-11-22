@@ -96,8 +96,13 @@ export default function CryInsights() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Cry Insights</h1>
-              <p className="text-sm text-muted-foreground">AI-powered cry pattern analysis</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">Cry Insights</h1>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                  Beta
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">AI-powered suggestions for cry patterns</p>
             </div>
           </div>
           <Button

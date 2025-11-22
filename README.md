@@ -102,41 +102,71 @@ See `DEPLOYMENT.md` for:
 ## 📚 Documentation
 
 ### Architecture & Development
-- **`ARCHITECTURE_WEB.md`** - Complete web application architecture
-- **`DESIGN_SYSTEM.md`** - Design system with tokens, components, and SwiftUI mappings
-- `DEVELOPMENT.md` - Complete local development guide
-- `DEPLOYMENT.md` - Production deployment instructions
-- `ENVIRONMENT_VARIABLES.md` - Environment variables and secrets management
+- **[`ARCHITECTURE_WEB.md`](./ARCHITECTURE_WEB.md)** - Complete web application architecture
+- **[`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md)** - Design system with tokens, components, and SwiftUI mappings
+- **[`DEVELOPMENT.md`](./DEVELOPMENT.md)** - Complete local development guide
+- **[`DEPLOYMENT.md`](./DEPLOYMENT.md)** - Production deployment instructions
+- **[`docs/ENVIRONMENT_VARIABLES.md`](./docs/ENVIRONMENT_VARIABLES.md)** - Environment variables and secrets management
+- **[`docs/DEVELOPMENT_GUIDELINES.md`](./docs/DEVELOPMENT_GUIDELINES.md)** - Coding standards and best practices
+- **[`docs/CODE_QUALITY.md`](./docs/CODE_QUALITY.md)** - Code quality standards and linting rules
+
+### Architecture Decisions
+- **[`docs/architecture/decisions/`](./docs/architecture/decisions/)** - Architecture Decision Records (ADRs)
+  - `001-mvvm-pattern-swiftui.md` - MVVM pattern for SwiftUI
+  - `002-react-query-state-management.md` - React Query for state management
+  - `003-offline-first-architecture.md` - Offline-first design
+  - `004-testing-strategy.md` - Testing approach
+  - `005-cross-platform-consistency.md` - Cross-platform consistency
+  - `006-supabase-backend.md` - Supabase backend choice
+  - `007-capacitor-cross-platform.md` - Capacitor for cross-platform
 
 ### Testing & Quality
-- **`TEST_PLAN_WEB.md`** - Comprehensive testing strategy (unit, E2E, performance)
-- `TESTING_CHECKLIST.md` - Pre-deployment testing steps
-- `MVP_CHECKLIST.md` - MVP launch requirements checklist
+- **[`TEST_PLAN_WEB.md`](./TEST_PLAN_WEB.md)** - Comprehensive testing strategy (unit, E2E, performance)
+- **[`TESTING_CHECKLIST.md`](./TESTING_CHECKLIST.md)** - Pre-deployment testing steps
+- **[`MVP_CHECKLIST.md`](./MVP_CHECKLIST.md)** - MVP launch requirements checklist
+- **[`PRE_LAUNCH_CHECKLIST.md`](./PRE_LAUNCH_CHECKLIST.md)** - App Store submission checklist
 
 ### Database & Security
-- **`DB_OPERATIONS.md`** - Database operations, migrations, seed data
-- **`DB_SECURITY.md`** - RLS policies and security documentation
-- `DATA_MODEL.md` - Complete database schema documentation
+- **[`DB_OPERATIONS.md`](./DB_OPERATIONS.md)** - Database operations, migrations, seed data
+- **[`DB_SECURITY.md`](./DB_SECURITY.md)** - RLS policies and security documentation
+- **[`docs/security/AUDIT_CHECKLIST.md`](./docs/security/AUDIT_CHECKLIST.md)** - Security audit checklist
+- **[`docs/security/SECURITY_HEADERS.md`](./docs/security/SECURITY_HEADERS.md)** - Security headers configuration
+- **[`DATA_MODEL.md`](./DATA_MODEL.md)** - Complete database schema documentation
 
 ### Analytics & Business
-- **`ANALYTICS_SPEC_WEB.md`** - Analytics implementation and event tracking
-- `DEMO_SCRIPT.md` - Demo walkthrough for stakeholders
-- `USER_REVIEW_AND_VALUE_PROPOSITION.md` - User perspective and value analysis
+- **[`ANALYTICS_SPEC_WEB.md`](./ANALYTICS_SPEC_WEB.md)** - Analytics implementation and event tracking
+- **[`docs/analytics.md`](./docs/analytics.md)** - Analytics setup and configuration
+- **[`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md)** - Demo walkthrough for stakeholders
+- **[`USER_REVIEW_AND_VALUE_PROPOSITION.md`](./USER_REVIEW_AND_VALUE_PROPOSITION.md)** - User perspective and value analysis
 
 ### Legal & Compliance
-- `docs/PRIVACY_POLICY_TEMPLATE.md` - Privacy policy template
-- `docs/TERMS_OF_SERVICE_TEMPLATE.md` - Terms of service template
-- `PRE_LAUNCH_CHECKLIST.md` - App Store submission checklist
+- **[`docs/PRIVACY_POLICY_TEMPLATE.md`](./docs/PRIVACY_POLICY_TEMPLATE.md)** - Privacy policy template
+- **[`docs/TERMS_OF_SERVICE_TEMPLATE.md`](./docs/TERMS_OF_SERVICE_TEMPLATE.md)** - Terms of service template
+- **[`PRE_LAUNCH_CHECKLIST.md`](./PRE_LAUNCH_CHECKLIST.md)** - App Store submission checklist
 
 ### iOS Development
-- `ios/README.md` - iOS app documentation
-- `ios/IOS_ARCHITECTURE.md` - iOS architecture guide
-- `docs/IOS_MIGRATION_GUIDE.md` - Web to iOS migration guide
+- **[`ios/README.md`](./ios/README.md)** - iOS app documentation
+- **[`ios/IOS_ARCHITECTURE.md`](./ios/IOS_ARCHITECTURE.md)** - iOS architecture guide
+- **[`docs/IOS_MIGRATION_GUIDE.md`](./docs/IOS_MIGRATION_GUIDE.md)** - Web to iOS migration guide
+- **[`docs/DESIGN_TOKENS_IOS.md`](./docs/DESIGN_TOKENS_IOS.md)** - iOS design tokens mapping
+
+### Features & Components
+- **[`docs/AI_FEATURES.md`](./docs/AI_FEATURES.md)** - AI features documentation (nap predictor, cry insights, assistant)
+- **[`docs/VOICE_LOGGING.md`](./docs/VOICE_LOGGING.md)** - Voice logging feature guide
+- **[`docs/COMPONENT_INVENTORY.md`](./docs/COMPONENT_INVENTORY.md)** - Component library inventory
+- **[`docs/NAVIGATION_MAP.md`](./docs/NAVIGATION_MAP.md)** - Navigation structure and routes
+- **[`docs/subscriptions.md`](./docs/subscriptions.md)** - Subscription system documentation
+- **[`docs/API_ENDPOINTS.md`](./docs/API_ENDPOINTS.md)** - API endpoints documentation
+
+### Deployment & Launch
+- **[`DEPLOYMENT.md`](./DEPLOYMENT.md)** - Production deployment instructions
+- **[`docs/APP_STORE_ASSETS_GUIDE.md`](./docs/APP_STORE_ASSETS_GUIDE.md)** - App Store assets guide
+- **[`docs/launch_checklist.md`](./docs/launch_checklist.md)** - Launch readiness checklist
+- **[`MIGRATION_CHECKLIST.md`](./MIGRATION_CHECKLIST.md)** - Lovable to Cursor migration guide
 
 ### Other
-- `MIGRATION_CHECKLIST.md` - Lovable to Cursor migration guide
-- `SECRETS.md` - Legacy secrets documentation (see ENVIRONMENT_VARIABLES.md)
-- `supabase/functions/README.md` - Edge functions documentation
+- **[`SECRETS.md`](./SECRETS.md)** - Legacy secrets documentation (see ENVIRONMENT_VARIABLES.md)
+- **[`supabase/functions/README.md`](./supabase/functions/README.md)** - Edge functions documentation
 
 ## Project Info
 

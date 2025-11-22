@@ -116,6 +116,8 @@ struct ProSubscriptionView: View {
     @State private var purchaseError: String?
     @State private var showPurchaseError = false
     @State private var showTrialStarted = false
+    @State private var isLoadingProducts = false
+    @State private var productLoadError: String?
 
     private var proFeatures: [ProFeature] {
         ProFeature.allCases.filter { proService.requiresPro($0) }
@@ -154,6 +156,7 @@ struct ProSubscriptionView: View {
             .onAppear {
                 Task {
                     await Analytics.shared.logPaywallViewed(source: "settings")
+                    await loadProductsIfNeeded()
                 }
             }
         }
@@ -312,22 +315,58 @@ struct ProSubscriptionView: View {
         Group {
             if !proService.isProUser {
                 VStack(spacing: .spacingMD) {
-                    // Auto-select first product if none selected
-                    if selectedProductID == nil, !proService.getProducts().isEmpty {
-                        let _ = { selectedProductID = proService.getProducts().first?.id }()
-                    }
-
-                    ForEach(proService.getProducts(), id: \.id) { product in
-                        SubscriptionOptionCard(
-                            product: product,
-                            isSelected: selectedProductID == product.id,
-                            onSelect: {
-                                selectedProductID = product.id
+                    if isLoadingProducts {
+                        ProgressView("Loading subscription options...")
+                            .padding(.spacingXL)
+                    } else if let error = productLoadError {
+                        VStack(spacing: .spacingSM) {
+                            Text("Unable to load subscription options")
+                                .font(.headline)
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.mutedForeground)
+                            Button("Retry") {
+                                Task {
+                                    await loadProductsIfNeeded()
+                                }
                             }
-                        )
+                            .buttonStyle(.bordered)
+                        }
+                        .padding(.spacingXL)
+                    } else if proService.getProducts().isEmpty {
+                        VStack(spacing: .spacingSM) {
+                            Text("No subscription options available")
+                                .font(.headline)
+                            Text("Please check your internet connection and try again")
+                                .font(.caption)
+                                .foregroundColor(.mutedForeground)
+                            Button("Retry") {
+                                Task {
+                                    await loadProductsIfNeeded()
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding(.spacingXL)
+                    } else {
+                        ForEach(proService.getProducts(), id: \.id) { product in
+                            SubscriptionOptionCard(
+                                product: product,
+                                isSelected: selectedProductID == product.id,
+                                onSelect: {
+                                    selectedProductID = product.id
+                                }
+                            )
+                        }
                     }
                 }
                 .padding(.horizontal, .spacingMD)
+                .onAppear {
+                    // Auto-select first product if none selected and products are available
+                    if selectedProductID == nil, !proService.getProducts().isEmpty {
+                        selectedProductID = proService.getProducts().first?.id
+                    }
+                }
             } else {
                 proStatusView
             }
@@ -340,22 +379,33 @@ struct ProSubscriptionView: View {
                 "Subscribe",
                 icon: "star.fill"
             ) {
-                if let productID = selectedProductID {
-                    Task {
-                        isPurchasing = true
-                        purchaseError = nil
-                        let success = await proService.purchase(productID: productID)
-                        isPurchasing = false
-                        if success {
-                            dismiss()
-                        } else {
-                            purchaseError = "Purchase failed. Please check your payment method and try again."
-                            showPurchaseError = true
-                        }
+                guard let productID = selectedProductID else {
+                    purchaseError = "Please select a subscription plan"
+                    showPurchaseError = true
+                    return
+                }
+                
+                Task {
+                    isPurchasing = true
+                    purchaseError = nil
+                    
+                    // Ensure products are loaded
+                    if proService.getProducts().isEmpty {
+                        await loadProductsIfNeeded()
+                    }
+                    
+                    let success = await proService.purchase(productID: productID)
+                    isPurchasing = false
+                    
+                    if success {
+                        dismiss()
+                    } else {
+                        purchaseError = "Purchase failed. Please check your payment method and try again."
+                        showPurchaseError = true
                     }
                 }
             }
-            .disabled(selectedProductID == nil || isPurchasing)
+            .disabled(selectedProductID == nil || isPurchasing || isLoadingProducts || proService.getProducts().isEmpty)
             .overlay {
                 if isPurchasing {
                     ProgressView()
@@ -427,6 +477,37 @@ struct ProSubscriptionView: View {
             }
         }
         .padding(.horizontal, .spacingMD)
+        .alert("Purchase Error", isPresented: $showPurchaseError) {
+            Button("OK") { }
+        } message: {
+            Text(purchaseError ?? "An unknown error occurred")
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func loadProductsIfNeeded() async {
+        isLoadingProducts = true
+        productLoadError = nil
+        
+        do {
+            await proService.loadProducts()
+            
+            // Auto-select first product if none selected
+            if selectedProductID == nil, !proService.getProducts().isEmpty {
+                await MainActor.run {
+                    selectedProductID = proService.getProducts().first?.id
+                }
+            }
+            
+            if proService.getProducts().isEmpty {
+                productLoadError = "No subscription products found. Please contact support."
+            }
+        } catch {
+            productLoadError = error.localizedDescription
+        }
+        
+        isLoadingProducts = false
     }
 }
 struct TrialOptionCard: View {

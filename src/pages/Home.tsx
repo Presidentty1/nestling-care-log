@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format, differenceInMonths, subDays } from 'date-fns';
+import { format, differenceInMonths, subDays, startOfDay, endOfDay } from 'date-fns';
 import { EventType } from '@/types/events';
 import { DailySummary } from '@/types/summary';
 import { BabySwitcherModal } from '@/components/BabySwitcherModal';
@@ -8,6 +8,7 @@ import { QuickActions } from '@/components/QuickActions';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import { SummaryChips } from '@/components/today/SummaryChips';
 import { TodayPlanStrip } from '@/components/today/TodayPlanStrip';
+import { UnifiedDashboardCard } from '@/components/today/UnifiedDashboardCard';
 import { FloatingActionButtonRadial } from '@/components/FloatingActionButtonRadial';
 import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -43,6 +44,7 @@ import { streakService } from '@/services/streakService';
 import { achievementService } from '@/services/achievementService';
 import { trialService } from '@/services/trialService';
 import { dataService } from '@/services/dataService';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -121,14 +123,21 @@ export default function Home() {
     }
   }, [activeBabyId]);
 
+  // Real-time updates from Supabase (for multi-caregiver sync and immediate updates)
+  useRealtimeEvents(selectedBaby?.family_id, () => {
+    if (activeBabyId) {
+      loadTodayEvents();
+    }
+  });
+
   useEffect(() => {
     const unsubscribe = eventsService.subscribe((action, data) => {
       if (action === 'add') {
-        // Show confetti on first event
-        if (events.length === 0 && !hasShownConfetti) {
-          triggerConfetti();
-          setHasShownConfetti(true);
-        }
+      // Gentle animation on first event (subtle instead of confetti)
+      if (events.length === 0 && !hasShownConfetti) {
+        // Subtle success animation - no confetti for sleep-deprived parents
+        setHasShownConfetti(true);
+      }
 
         // Show first-log celebration after 2-3 logs with feeds and naps
         if (!hasShownFirstLogCelebration && activeBabyId) {
@@ -303,7 +312,18 @@ export default function Home() {
     if (!activeBabyId) return;
     
     try {
-      const todayEvents = await eventsService.getTodayEvents(activeBabyId);
+      // Use same date calculation as History for consistency
+      const today = new Date();
+      const start = startOfDay(today);
+      const end = endOfDay(today);
+      
+      // Use getEventsByRange to match History exactly
+      const todayEvents = await eventsService.getEventsByRange(
+        activeBabyId,
+        start.toISOString(),
+        end.toISOString()
+      );
+      
       setEvents(todayEvents);
       
       // Calculate summary
@@ -396,9 +416,8 @@ export default function Home() {
         description: `${formattedTime}${details}`,
       });
 
-      // Check if this is the first event
+      // Gentle success feedback (no flashy animations)
       if (events.length === 0 && !hasShownConfetti) {
-        triggerConfetti();
         setHasShownConfetti(true);
       }
 
@@ -478,32 +497,33 @@ export default function Home() {
 
         {guestMode && showGuestBanner && <GuestModeBanner />}
 
-        {(summary || napWindow) && (
-          <DataComponentBoundary componentName="TodayPlanStrip">
-            <TodayPlanStrip events={events} napWindow={napWindow} summary={summary} />
+        {/* Unified Dashboard Card - Single panel with all key info */}
+        {(summary || napWindow || events.length > 0) && (
+          <DataComponentBoundary componentName="UnifiedDashboardCard">
+            <UnifiedDashboardCard
+              events={events}
+              napWindow={napWindow}
+              summary={summary}
+              activeSleepTimer={(() => {
+                // Find active sleep event (no end_time)
+                const activeSleep = events.find(e => e.type === 'sleep' && !e.end_time);
+                if (activeSleep) {
+                  return {
+                    startTime: new Date(activeSleep.start_time),
+                    isRunning: true
+                  };
+                }
+                return null;
+              })()}
+            />
           </DataComponentBoundary>
         )}
 
+        {/* Summary Chips - Secondary info, lower in hierarchy */}
         {summary && (
           <DataComponentBoundary componentName="SummaryChips">
             <SummaryChips summary={summary} />
           </DataComponentBoundary>
-        )}
-
-        {napWindow && selectedBaby && (
-          <div className="mb-4">
-            <DataComponentBoundary componentName="NapPill">
-              <NapPill
-                prediction={{
-                  nextWindowStartISO: napWindow.start.toISOString(),
-                  nextWindowEndISO: napWindow.end.toISOString(),
-                  reason: napWindow.reason,
-                  confidence: 0.85,
-                }}
-                babyId={activeBabyId}
-              />
-            </DataComponentBoundary>
-          </div>
         )}
 
         {/* AI Contextual Tips */}
@@ -593,21 +613,27 @@ export default function Home() {
           </Card>
         )}
 
-        <SafeComponentBoundary componentName="QuickActions">
-          <QuickActions
-            onActionSelect={handleQuickAction}
-            onQuickLog={handleQuickLog}
-            recentEvents={events}
-          />
-        </SafeComponentBoundary>
-
+        {/* Primary Actions - Most prominent for quick logging */}
         <div className="space-y-3">
-          <h2 className="text-headline">Today's Timeline</h2>
+          <h2 className="text-headline">Quick Log</h2>
+          <SafeComponentBoundary componentName="QuickActions">
+            <QuickActions
+              onActionSelect={handleQuickAction}
+              onQuickLog={handleQuickLog}
+              recentEvents={events}
+            />
+          </SafeComponentBoundary>
+        </div>
+
+        {/* Secondary Content - Timeline (lower in visual hierarchy) */}
+        <div className="space-y-3">
+          <h2 className="text-headline text-muted-foreground/70">Today's Timeline</h2>
           <DataComponentBoundary componentName="TimelineList">
             <TimelineList
               events={events}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onQuickAction={handleQuickAction}
             />
           </DataComponentBoundary>
         </div>

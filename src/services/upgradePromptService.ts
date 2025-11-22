@@ -179,9 +179,10 @@ class UpgradePromptService {
       case 'feature_used':
         return context.recentlyUsedFeatures.includes(condition.value as string);
 
-      case 'time_since_signup':
+      case 'time_since_signup': {
         const daysSinceSignup = (Date.now() - context.signupDate.getTime()) / (1000 * 60 * 60 * 24);
         return this.compareValues(daysSinceSignup, condition.value, condition.operator);
+      }
 
       case 'page_view':
         return context.currentPage === condition.value;

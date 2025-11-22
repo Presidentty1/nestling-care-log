@@ -114,7 +114,7 @@ export default function Labs() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate('/predictions')}>
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="space-y-1">
@@ -130,6 +130,16 @@ export default function Labs() {
           </CardHeader>
           <CardContent className="space-y-4">
             <SmartPredictionsCard />
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/predictions');
+              }}
+            >
+              View Details
+            </Button>
           </CardContent>
         </Card>
 
