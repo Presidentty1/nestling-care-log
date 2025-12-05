@@ -21,11 +21,11 @@ struct MedicalDisclaimer: View {
     private var disclaimerText: String {
         switch variant {
         case .ai:
-            return "Nestling gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional."
+            return "Nestling is not a medical device. AI features provide general information only and should not replace professional medical judgment."
         case .sleep:
-            return "Nestling gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional."
+            return "Sleep predictions are estimates based on patterns. Always consult your pediatrician for medical advice."
         case .predictions:
-            return "Nestling gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional."
+            return "Predictions are estimates based on recent patterns. Always trust your instincts and consult a doctor if concerned."
         }
     }
 }
@@ -38,4 +38,5 @@ struct MedicalDisclaimer: View {
     }
     .padding()
 }
+
 

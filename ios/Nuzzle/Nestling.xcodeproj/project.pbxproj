@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		003444594D1537BCAA9BC9CA /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A8731F9B78D285D55E3818 /* AppSettings.swift */; };
 		0085609C9D34EB71E019FB8B /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A27A1E18CB885016D9281 /* PerformanceLogger.swift */; };
+		6CCD8AA001DFA2BBEDBEE861 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ABBBC565087080EFBEF5D /* Logger.swift */; };
 		0250688AB002DCA93B2010B7 /* TummyTimeFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F3ADF61709253BB486E61C /* TummyTimeFormViewModel.swift */; };
 		035045680E05170AE890D716 /* ManageBabiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD3ADB337A7C75C7CCC0564 /* ManageBabiesView.swift */; };
 		0353C3ACB316C5359BEC0F31 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F0880EF19BB96B6B56A146 /* CoreDataStack.swift */; };
@@ -37,6 +38,10 @@
 		1661E1282BC31E1F2CB2C430 /* CaregiverModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3540214FC5B5345D4F8422 /* CaregiverModeView.swift */; };
 		16B46F0CF75239082388A61B /* BabyAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F383152D8BA1C3B1145430B /* BabyAvatar.swift */; };
 		16BF5691B4BBFA267BBFB206 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14BBC37E5D81D304EB8A5988 /* PreferencesView.swift */; };
+		60F31D96DCEE98CAFB1E32B6 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339AA76DCCFE57A6F55FDEAF /* NetworkMonitor.swift */; };
+		AC11CA2AF1D2B89C50AA9E1C /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1043C3424FBCAEF81B0FAC7 /* ThemeManager.swift */; };
+		B1FE9E3D92E98DD7657DEE6D /* ReviewPromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACCF0A9D0E26FFFF68BE21A /* ReviewPromptManager.swift */; };
+		B2CDE8430FDA3ABF816BB54F /* SmartDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC2CD70ADABBEE2C03EF6AF0 /* SmartDefaultsService.swift */; };
 		536EBAB56E5BF62ADEB457FC /* OnboardingProgressDots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E98E2ECB8D2D3E769BCCA7D /* OnboardingProgressDots.swift */; };
 		0073168BD70904DFBDB536BB /* OnboardingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A86B29B0DE2DDCA91BCBEAEA /* OnboardingContainer.swift */; };
 		196EBDBF9A41FE7BB342535C /* PredictionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED120A4D333FBF8B928354AF /* PredictionsView.swift */; };
@@ -287,6 +292,7 @@
 		198E883DE3726CD30302FB40 /* CoreDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
 		1A189749D85741D27CF0C367 /* WidgetTestHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetTestHelper.swift; sourceTree = "<group>"; };
 		1A1A27A1E18CB885016D9281 /* PerformanceLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerformanceLogger.swift; sourceTree = "<group>"; };
+		1C4ABBBC565087080EFBEF5D /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		1A64CC17FA57E39EC4592D06 /* BabyAvatar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyAvatar.swift; sourceTree = "<group>"; };
 		1A73EE56C17B69745EE35784 /* DateUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateUtils.swift; sourceTree = "<group>"; };
 		1BA5FE321D6C0AB8C523E932 /* WidgetActionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetActionService.swift; sourceTree = "<group>"; };
@@ -419,6 +425,10 @@
 		54E1D9675E32E7354BCFD4ED /* HistoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		56801D98C637240DC8CD0714 /* ReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
 		56BED5D55BD2E6FBCA31ECA6 /* Badge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		339AA76DCCFE57A6F55FDEAF /* NetworkMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		C1043C3424FBCAEF81B0FAC7 /* ThemeManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		2ACCF0A9D0E26FFFF68BE21A /* ReviewPromptManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewPromptManager.swift; sourceTree = "<group>"; };
+		FC2CD70ADABBEE2C03EF6AF0 /* SmartDefaultsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmartDefaultsService.swift; sourceTree = "<group>"; };
 		6E98E2ECB8D2D3E769BCCA7D /* OnboardingProgressDots.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingProgressDots.swift; sourceTree = "<group>"; };
 		A86B29B0DE2DDCA91BCBEAEA /* OnboardingContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingContainer.swift; sourceTree = "<group>"; };
 		56CDB7D03D6DA573E5494ABD /* BabySetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySetupView.swift; sourceTree = "<group>"; };
@@ -1210,6 +1220,7 @@
 				AE5B093EE21F3CFA8283FCA1 /* FeatureGate.swift */,
 				8922B65831EF2E834E4299E5 /* IDGenerator.swift */,
 				59F3200205D8649DA8133B7A /* PerformanceLogger.swift */,
+				1C4ABBBC565087080EFBEF5D /* Logger.swift */,
 				20DE9F6B90541055974BD4CA /* SignpostLogger.swift */,
 				C87CD2AC1B1756A445617838 /* ViewHelpers.swift */,
 				10CE3BE7D7FBF3BD1340E2EA /* WidgetTestHelper.swift */,
@@ -1265,6 +1276,10 @@
 				9EC75E87F42600DE277B8EAD /* AIAssistantService.swift */,
 				714674DDA66397B315FA54A0 /* AchievementService.swift */,
 				F89E598E0634FC3E2D1DA16B /* AnalyticsService.swift */,
+				339AA76DCCFE57A6F55FDEAF /* NetworkMonitor.swift */,
+				C1043C3424FBCAEF81B0FAC7 /* ThemeManager.swift */,
+				2ACCF0A9D0E26FFFF68BE21A /* ReviewPromptManager.swift */,
+				FC2CD70ADABBEE2C03EF6AF0 /* SmartDefaultsService.swift */,
 				16090728F3B7241A7C0A5C03 /* AudioRecorderService.swift */,
 				46C3FBE4C76496D60805DAB6 /* AuthenticationManager.swift */,
 				3E25CBBA0A09A82A6451B4D4 /* BackupService.swift */,
@@ -1814,6 +1829,10 @@
 				5DEB0A54BF1C96AA2878017B /* ActivityFeedView.swift in Sources */,
 				16B46F0CF75239082388A61B /* BabyAvatar.swift in Sources */,
 				090776DE9CE5358B28ECC3F7 /* Badge.swift in Sources */,
+				60F31D96DCEE98CAFB1E32B6 /* NetworkMonitor.swift in Sources */,
+				AC11CA2AF1D2B89C50AA9E1C /* ThemeManager.swift in Sources */,
+				B1FE9E3D92E98DD7657DEE6D /* ReviewPromptManager.swift in Sources */,
+				B2CDE8430FDA3ABF816BB54F /* SmartDefaultsService.swift in Sources */,
 				536EBAB56E5BF62ADEB457FC /* OnboardingProgressDots.swift in Sources */,
 				0073168BD70904DFBDB536BB /* OnboardingContainer.swift in Sources */,
 				61412ED7878556649951A169 /* CardView.swift in Sources */,
@@ -1977,6 +1996,7 @@
 				3FF373CAA57754D1CB1856D7 /* FeatureGate.swift in Sources */,
 				90217F2123BA53DB83052041 /* IDGenerator.swift in Sources */,
 				0085609C9D34EB71E019FB8B /* PerformanceLogger.swift in Sources */,
+				6CCD8AA001DFA2BBEDBEE861 /* Logger.swift in Sources */,
 				B2161C0550EF44CB3DED1B02 /* SignpostLogger.swift in Sources */,
 				AE1ED53D88A2FC7F67563F73 /* ViewHelpers.swift in Sources */,
 				F6E2C16D49B94CBB526DE980 /* WidgetTestHelper.swift in Sources */,
