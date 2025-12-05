@@ -174,6 +174,9 @@ class FeedFormViewModel: ObservableObject {
             try await dataStore.updateEvent(eventData)
         } else {
             try await dataStore.addEvent(eventData)
+            
+            // Check if this is the first event ever logged (Epic 1 bug fix)
+            await checkAndCelebrateFirstEvent()
         }
         
         // Save last used values
@@ -184,6 +187,26 @@ class FeedFormViewModel: ObservableObject {
             subtype: eventData.subtype
         )
         try await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
+    }
+    
+    private func checkAndCelebrateFirstEvent() async {
+        do {
+            // Check if this baby has any events
+            // Note: editingEvent is guaranteed to be nil when this function is called (only called for new events)
+            let allEvents = try await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            
+            // If total count is 1, this is the first event we just added
+            // (The newly added event is already included in allEvents) - Bug fix from Epic 1
+            if allEvents.count == 1 {
+                await MainActor.run {
+                    Haptics.success()
+                    // Note: Toast notification would be shown here in a complete implementation
+                    print("🎉 Great start! First event logged!")
+                }
+            }
+        } catch {
+            print("Failed to check first event: \(error.localizedDescription)")
+        }
     }
 }
 

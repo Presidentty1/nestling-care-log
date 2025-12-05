@@ -44,12 +44,35 @@ struct BabySetupView: View {
                             } else {
                                 dobError = nil
                             }
+                            
+                            // Check if baby is >6 months old (Epic 1 AC4)
+                            let ageInMonths = Calendar.current.dateComponents([.month], from: newDate, to: Date()).month ?? 0
+                            if ageInMonths > 6 {
+                                coordinator.showAgeWarning = true
+                            } else {
+                                coordinator.showAgeWarning = false
+                            }
                         }
                         
                         if let dobError = dobError {
                             Text(dobError)
                                 .font(.caption)
                                 .foregroundColor(.destructive)
+                        }
+                        
+                        // Age >6mo warning (Epic 1 AC4)
+                        if coordinator.showAgeWarning {
+                            HStack(spacing: .spacingSM) {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundColor(.eventDiaper)
+                                    .font(.caption)
+                                Text("Nuzzle is optimized for 0-6 months. You can still use it, but guidance is best for early months.")
+                                    .font(.caption)
+                                    .foregroundColor(.mutedForeground)
+                            }
+                            .padding(.spacingSM)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusSM)
                         }
                     }
                     

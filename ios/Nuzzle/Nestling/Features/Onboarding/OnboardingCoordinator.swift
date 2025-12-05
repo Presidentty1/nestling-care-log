@@ -4,6 +4,7 @@ import Combine
 enum OnboardingStep {
     case welcome
     case babySetup
+    case initialState
     case preferences
     case aiConsent
     case notificationsIntro
@@ -20,6 +21,8 @@ class OnboardingCoordinator: ObservableObject {
     @Published var timeFormat24Hour: Bool = false
     @Published var aiDataSharingEnabled: Bool = true
     @Published var isCompleted: Bool = false
+    @Published var initialBabyState: String? = nil // "asleep" or "awake"
+    @Published var showAgeWarning: Bool = false // Epic 1 AC4: Show warning for >6mo babies
     
     private let dataStore: DataStore
     private let onboardingService: OnboardingService
@@ -34,6 +37,8 @@ class OnboardingCoordinator: ObservableObject {
         case .welcome:
             currentStep = .babySetup
         case .babySetup:
+            currentStep = .initialState
+        case .initialState:
             currentStep = .preferences
         case .preferences:
             currentStep = .aiConsent

@@ -7,14 +7,15 @@ struct OnboardingProgressIndicator: View {
         switch currentStep {
         case .welcome: return 0
         case .babySetup: return 1
-        case .preferences: return 2
-        case .aiConsent: return 3
-        case .notificationsIntro: return 4
-        case .proTrial: return 5
+        case .initialState: return 2
+        case .preferences: return 3
+        case .aiConsent: return 4
+        case .notificationsIntro: return 5
+        case .proTrial: return 6
         }
     }
     
-    private var totalSteps: Int { 6 }
+    private var totalSteps: Int { 7 }
     
     var body: some View {
         VStack(spacing: .spacingSM) {

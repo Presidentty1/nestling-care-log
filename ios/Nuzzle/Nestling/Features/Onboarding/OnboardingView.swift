@@ -25,6 +25,8 @@ struct OnboardingView: View {
                         WelcomeView(coordinator: coordinator)
                     case .babySetup:
                         BabySetupView(coordinator: coordinator)
+                    case .initialState:
+                        InitialStateView(coordinator: coordinator)
                     case .preferences:
                         PreferencesView(coordinator: coordinator)
                     case .aiConsent:

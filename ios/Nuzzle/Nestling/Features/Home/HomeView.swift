@@ -488,6 +488,12 @@ struct HomeContentView: View {
                     .padding(.horizontal, .spacingMD)
                 }
                 
+                // Guidance Strip (Epic 4)
+                if let baby = environment.currentBaby {
+                    GuidanceStripView(dataStore: environment.dataStore, baby: baby)
+                        .padding(.horizontal, .spacingMD)
+                }
+                
                 // Summary Cards
                 if let summary = viewModel.summary {
                     SummaryCardsView(summary: summary)
@@ -599,6 +605,12 @@ struct HomeContentView: View {
                 )
                 .frame(height: 200)
             } else {
+                // Example data banner (Epic 1 AC7)
+                if viewModel.filteredEvents.count > 0 && viewModel.baby.createdAt > Date().addingTimeInterval(-86400) {
+                    ExampleDataBanner()
+                        .padding(.horizontal, .spacingMD)
+                }
+                
                 // Filter chips
                 FilterChipsView(
                     selectedFilter: Binding(

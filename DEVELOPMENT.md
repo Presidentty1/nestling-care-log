@@ -68,6 +68,24 @@ npx cap open ios
 npm run cap:run:ios
 ```
 
+### Viewing iOS/Xcode Logs
+```bash
+# Stream logs from running simulator (auto-detects)
+npm run ios:logs
+
+# Stream logs and save to file
+npm run ios:logs:save
+
+# Stream logs with custom options
+./scripts/xcode-logs.sh --bundle-id com.nuzzle.Nuzzle --filter "Error"
+./scripts/xcode-logs.sh --level error --output error-logs.txt
+
+# View help
+./scripts/xcode-logs.sh --help
+```
+
+The log streaming script automatically detects running simulators or connected devices and streams their logs in real-time. Useful for debugging iOS app behavior without needing to keep Xcode console open.
+
 **Hot-reload setup in `capacitor.config.ts`:**
 ```typescript
 server: {
