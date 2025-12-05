@@ -5,6 +5,7 @@ struct SecondaryButton: View {
     let icon: String?
     let action: () -> Void
     var isDisabled: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
     
     init(_ title: String, icon: String? = nil, isDisabled: Bool = false, action: @escaping () -> Void) {
         self.title = title
@@ -25,13 +26,13 @@ struct SecondaryButton: View {
                 Text(title)
             }
             .font(.body)
-            .foregroundColor(.primary)
+            .foregroundColor(Color.adaptivePrimary(colorScheme))
             .frame(maxWidth: .infinity)
             .padding(.spacingMD)
-            .background(Color.surface)
+            .background(Color.adaptiveSurface(colorScheme))
             .overlay(
                 RoundedRectangle(cornerRadius: .radiusMD)
-                    .stroke(Color.primary, lineWidth: 1)
+                    .stroke(Color.adaptivePrimary(colorScheme), lineWidth: 1)
             )
             .cornerRadius(.radiusMD)
         }

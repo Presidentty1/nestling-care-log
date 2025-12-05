@@ -1,36 +1,18 @@
 import Foundation
+import Supabase
 
 /// Supabase client wrapper for iOS.
-/// 
-/// This is a placeholder that shows how to integrate Supabase Swift SDK.
-/// 
-/// To use:
-/// 1. Add Supabase Swift SDK via Swift Package Manager:
-///    - File → Add Package Dependencies
-///    - URL: https://github.com/supabase/supabase-swift
-///    - Version: Latest
 ///
-/// 2. Configure in AppEnvironment or AppDelegate:
-/// ```swift
-/// let supabaseURL = "https://your-project.supabase.co"
-/// let supabaseKey = "your-anon-key"
-/// SupabaseClient.shared.configure(url: supabaseURL, key: supabaseKey)
-/// ```
-///
-/// 3. Use in RemoteDataStore:
-/// ```swift
-/// let remoteStore = RemoteDataStore(supabaseClient: SupabaseClient.shared.client)
-/// ```
+/// Provides authentication and session management for the Nestling app.
+/// Requires Supabase Swift SDK to be added via Swift Package Manager.
 class SupabaseClient {
     static let shared = SupabaseClient()
-    
+
     private var configured = false
+    private(set) var client: SupabaseClient?
     var url: String?
     var anonKey: String?
-    
-    // TODO: Replace with actual SupabaseClient when SDK is added
-    // var client: SupabaseClient { ... }
-    
+
     private init() {}
     
     /// Configure Supabase client with project URL and anonymous key
@@ -41,13 +23,17 @@ class SupabaseClient {
         self.url = url
         self.anonKey = anonKey
         self.configured = true
-        
-        // TODO: Initialize Supabase client
-        // Example (when SDK is added):
-        // self.client = SupabaseClient(
-        //     supabaseURL: URL(string: url)!,
-        //     supabaseKey: anonKey
-        // )
+
+        // Initialize Supabase client
+        guard let supabaseURL = URL(string: url) else {
+            Logger.dataError("Invalid Supabase URL: \(url)")
+            return
+        }
+
+        self.client = SupabaseClient(
+            supabaseURL: supabaseURL,
+            supabaseKey: anonKey
+        )
     }
     
     /// Check if Supabase is configured
@@ -56,54 +42,65 @@ class SupabaseClient {
     }
     
     /// Get current user session
-    /// Returns nil if not authenticated
-    func getCurrentSession() async throws -> Any? {
-        guard isConfigured else {
+    /// Returns the session if authenticated, nil otherwise
+    func getCurrentSession() async throws -> Session? {
+        guard isConfigured, let client = client else {
             throw SupabaseError.notConfigured
         }
-        
-        // TODO: Implement with Supabase SDK
-        // Example:
-        // return try await client.auth.session
-        
-        return nil
+
+        do {
+            return try await client.auth.session
+        } catch {
+            // Not authenticated or session expired
+            return nil
+        }
     }
     
     /// Sign in with email and password
     func signIn(email: String, password: String) async throws {
-        guard isConfigured else {
+        guard isConfigured, let client = client else {
             throw SupabaseError.notConfigured
         }
-        
-        // TODO: Implement with Supabase SDK
-        // Example:
-        // try await client.auth.signIn(email: email, password: password)
+
+        do {
+            try await client.auth.signIn(email: email, password: password)
+        } catch {
+            Logger.authError("Sign in failed: \(error.localizedDescription)")
+            throw SupabaseError.authenticationFailed
+        }
     }
-    
+
     /// Sign up with email and password
     func signUp(email: String, password: String, name: String?) async throws {
-        guard isConfigured else {
+        guard isConfigured, let client = client else {
             throw SupabaseError.notConfigured
         }
-        
-        // TODO: Implement with Supabase SDK
-        // Example:
-        // let response = try await client.auth.signUp(
-        //     email: email,
-        //     password: password,
-        //     data: ["name": name ?? ""]
-        // )
+
+        do {
+            let authMetaData: [String: AnyJSON] = name != nil ? ["name": .string(name!)] : [:]
+            try await client.auth.signUp(
+                email: email,
+                password: password,
+                data: authMetaData
+            )
+        } catch {
+            Logger.authError("Sign up failed: \(error.localizedDescription)")
+            throw SupabaseError.authenticationFailed
+        }
     }
-    
+
     /// Sign out current user
     func signOut() async throws {
-        guard isConfigured else {
+        guard isConfigured, let client = client else {
             throw SupabaseError.notConfigured
         }
-        
-        // TODO: Implement with Supabase SDK
-        // Example:
-        // try await client.auth.signOut()
+
+        do {
+            try await client.auth.signOut()
+        } catch {
+            Logger.authError("Sign out failed: \(error.localizedDescription)")
+            throw SupabaseError.authenticationFailed
+        }
     }
 }
 

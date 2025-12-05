@@ -6,6 +6,7 @@ struct SleepFormView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var showToast: ToastMessage?
     @State private var showAdvancedOptions = false
+    @State private var saveTask: Task<Void, Never>?
     
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
@@ -100,17 +101,22 @@ struct SleepFormView: View {
             }
             .navigationTitle(viewModel.editingEvent != nil ? "Edit Sleep" : "Log Sleep")
             .navigationBarTitleDisplayMode(.inline)
+            .onDisappear {
+                saveTask?.cancel()
+                viewModel.cleanup()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        viewModel.timer?.invalidate()
+                        viewModel.cleanup()
                         dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        Task {
+                        saveTask?.cancel()
+                        saveTask = Task {
                             do {
                                 try await viewModel.save()
                                 Haptics.success()

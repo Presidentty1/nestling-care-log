@@ -21,32 +21,35 @@ import StoreKit
 /// ```
 
 enum ProFeature: String, CaseIterable {
-    case advancedAnalytics = "advanced_analytics"
-    case unlimitedBabies = "unlimited_babies"
-    case caregiverInvites = "caregiver_invites"
-    case prioritySupport = "priority_support"
+    case smartSuggestions = "smart_suggestions"
+    case intelligentReminders = "intelligent_reminders"
+    case cryAnalysis = "cry_analysis"
+    case advancedExport = "advanced_export"
     case csvExport = "csv_export"
-    case pdfReports = "pdf_reports"
-    
+    case familySharing = "family_sharing"
+    case prioritySupport = "priority_support"
+
     var displayName: String {
         switch self {
-        case .advancedAnalytics: return "Advanced Analytics"
-        case .unlimitedBabies: return "Unlimited Babies"
-        case .caregiverInvites: return "Family Sharing"
-        case .prioritySupport: return "Priority Support"
-        case .csvExport: return "CSV Export"
-        case .pdfReports: return "PDF Reports"
+        case .smartSuggestions: return "Smarter nap & feed suggestions"
+        case .intelligentReminders: return "Gentle reminders for feeds and naps"
+        case .cryAnalysis: return "Experimental cry insights (Beta)"
+        case .advancedExport: return "Advanced export options"
+        case .csvExport: return "Basic export"
+        case .familySharing: return "Family sharing"
+        case .prioritySupport: return "Priority support"
         }
     }
-    
+
     var description: String {
         switch self {
-        case .advancedAnalytics: return "Detailed charts and insights"
-        case .unlimitedBabies: return "Track multiple babies"
-        case .caregiverInvites: return "Share with family members"
-        case .prioritySupport: return "Faster response times"
-        case .csvExport: return "Export data as CSV"
-        case .pdfReports: return "Generate PDF reports"
+        case .smartSuggestions: return "AI-powered predictions and insights"
+        case .intelligentReminders: return "Smart notifications based on your baby's patterns"
+        case .cryAnalysis: return "Advanced cry pattern analysis"
+        case .advancedExport: return "Doctor-ready summaries and reports"
+        case .csvExport: return "Export your data as CSV"
+        case .familySharing: return "Share access with caregivers"
+        case .prioritySupport: return "Faster response times and premium support"
         }
     }
 }
@@ -62,119 +65,59 @@ enum SubscriptionStatus {
 @MainActor
 class ProSubscriptionService: ObservableObject {
     static let shared = ProSubscriptionService()
-    
+
     @Published var subscriptionStatus: SubscriptionStatus = .notSubscribed
     @Published var isProUser: Bool = false
     @Published var isLoading: Bool = false
-    
-    // Product IDs (configure in App Store Connect)
-    private let monthlyProductID = "com.nestling.pro.monthly"
-    private let yearlyProductID = "com.nestling.pro.yearly"
-    
-    private var products: [Product] = []
-    private var currentSubscription: Product?
-    
+
+    // Delegate to RevenueCat service
+    private let revenueCatService = RevenueCatService.shared
+
     private init() {
+        // Subscribe to RevenueCat changes
         Task {
+            await setupRevenueCatBindings()
             await loadProducts()
             await checkSubscriptionStatus()
         }
     }
+
+    private func setupRevenueCatBindings() async {
+        // Bind RevenueCat properties to our published properties
+        Task { @MainActor in
+            // This would be set up with Combine publishers in a real implementation
+            await revenueCatService.checkSubscriptionStatus()
+            self.subscriptionStatus = revenueCatService.subscriptionStatus
+            self.isProUser = revenueCatService.isProUser
+        }
+    }
     
-    /// Load available products from App Store
+    /// Load available products from RevenueCat
     func loadProducts() async {
         isLoading = true
         defer { isLoading = false }
-        
-        do {
-            products = try await Product.products(for: [monthlyProductID, yearlyProductID])
-            print("[Pro] Loaded \(products.count) products")
-        } catch {
-            print("[Pro] Failed to load products: \(error)")
-        }
+
+        await revenueCatService.loadOfferings()
+        Logger.info("[Pro] Loaded \(revenueCatService.offerings.count) offerings")
     }
-    
+
     /// Check current subscription status
     func checkSubscriptionStatus() async {
-        do {
-            // Check for active subscriptions
-            for await result in Transaction.currentEntitlements {
-                if case .verified(let transaction) = result {
-                    if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
-                        subscriptionStatus = .subscribed
-                        isProUser = true
-                        
-                        // Check expiration
-                        if let expirationDate = transaction.expirationDate,
-                           expirationDate < Date() {
-                            subscriptionStatus = .expired
-                            isProUser = false
-                        }
-                        
-                        return
-                    }
-                }
-            }
-            
-            // No active subscription
-            subscriptionStatus = .notSubscribed
-            isProUser = false
-        } catch {
-            print("[Pro] Failed to check subscription: \(error)")
-            subscriptionStatus = .notSubscribed
-            isProUser = false
-        }
+        await revenueCatService.checkSubscriptionStatus()
+        subscriptionStatus = revenueCatService.subscriptionStatus
+        isProUser = revenueCatService.isProUser
     }
     
     /// Purchase subscription
-    /// - Parameter productID: Product ID to purchase
+    /// - Parameter packageId: Package ID to purchase
     /// - Returns: Success status
-    func purchase(productID: String) async -> Bool {
-        guard let product = products.first(where: { $0.id == productID }) else {
-            print("[Pro] Product not found: \(productID)")
-            return false
-        }
-        
-        do {
-            let result = try await product.purchase()
-            
-            switch result {
-            case .success(let verification):
-                switch verification {
-                case .verified(let transaction):
-                    // Purchase successful
-                    await transaction.finish()
-                    await checkSubscriptionStatus()
-                    return true
-                case .unverified(_, let error):
-                    print("[Pro] Unverified transaction: \(error)")
-                    return false
-                }
-            case .userCancelled:
-                print("[Pro] User cancelled purchase")
-                return false
-            case .pending:
-                print("[Pro] Purchase pending")
-                return false
-            @unknown default:
-                return false
-            }
-        } catch {
-            print("[Pro] Purchase failed: \(error)")
-            return false
-        }
+    func purchase(packageId: String) async -> Bool {
+        return await revenueCatService.purchase(packageId: packageId)
     }
     
     /// Restore purchases
     func restorePurchases() async -> Bool {
-        do {
-            try await AppStore.sync()
-            await checkSubscriptionStatus()
-            return isProUser
-        } catch {
-            print("[Pro] Restore failed: \(error)")
-            return false
-        }
+        return await revenueCatService.restorePurchases()
     }
     
     /// Check if user has access to a specific feature
@@ -182,18 +125,36 @@ class ProSubscriptionService: ObservableObject {
     /// - Returns: True if user has access
     func hasAccess(to feature: ProFeature) -> Bool {
         // Free tier includes basic features
-        let freeFeatures: [ProFeature] = [.csvExport]
-        
+        let freeFeatures: [ProFeature] = [
+            // Basic logging is always free
+            // Age-based wake windows are free (basic predictions)
+        ]
+
         if freeFeatures.contains(feature) {
             return true
         }
-        
-        return isProUser
+
+        // Pro-gated features
+        let proFeatures: [ProFeature] = [
+            .smartSuggestions,    // AI-powered predictions
+            .intelligentReminders, // Smart notifications
+            .cryAnalysis,         // AI cry analysis
+            .advancedExport,      // Advanced export options
+            .familySharing,       // Multi-caregiver
+            .prioritySupport      // Premium support
+        ]
+
+        if proFeatures.contains(feature) {
+            return isProUser
+        }
+
+        // Default to free for unknown features
+        return true
     }
     
-    /// Get available subscription products
-    func getProducts() -> [Product] {
-        return products
+    /// Get available subscription offerings
+    func getOfferings() -> [RevenueCatOffering] {
+        return revenueCatService.offerings
     }
     
     /// Get formatted price for product

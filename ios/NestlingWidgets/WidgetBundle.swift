@@ -1,17 +1,11 @@
 import WidgetKit
 import SwiftUI
 
+/// Main widget bundle for Nestling app
 @main
-struct NuzzleWidgets: WidgetBundle {
-    @WidgetBundleBuilder
+struct NestlingWidgetBundle: WidgetBundle {
     var body: some Widget {
-        NextNapWidget()
-        NextFeedWidget()
-        TodaySummaryWidget()
-        
-        if #available(iOS 16.1, *) {
-            SleepActivityWidget()
-        }
+        QuickLogWidget()
+        // Add more widgets here as needed
     }
 }
-

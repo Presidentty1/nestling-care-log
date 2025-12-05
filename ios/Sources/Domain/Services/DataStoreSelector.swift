@@ -4,6 +4,7 @@ enum DataStoreType {
     case inMemory
     case json
     case coreData
+    case swiftData
 }
 
 /// Factory for selecting DataStore implementation.
@@ -13,18 +14,25 @@ class DataStoreSelector {
         #if USE_REMOTE_STORE
         // Use RemoteDataStore if Supabase is configured
         if SupabaseClient.shared.isConfigured {
-            // TODO: Get URL and key from config
+            // FUTURE: Get URL and key from config when Supabase is integrated
             // return RemoteDataStore(supabaseURL: url, anonKey: key)
         }
         #endif
-        
-        #if USE_CORE_DATA
+
+        #if USE_SWIFT_DATA
+        do {
+            return try SwiftDataStore()
+        } catch {
+            Logger.dataError("Failed to create SwiftDataStore, falling back: \(error.localizedDescription)")
+        }
+        #elseif USE_CORE_DATA
         return CoreDataStore()
         #elseif USE_JSON_STORE
         return JSONBackedDataStore()
         #else
-        // Default: Use Core Data if available, fallback to JSON
-        return CoreDataStore()
+        // Default: JSON-backed store for offline-first behavior on fresh install
+        // Can be migrated to SwiftData/CoreData later if needed
+        return JSONBackedDataStore()
         #endif
     }
     

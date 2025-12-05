@@ -1,17 +1,19 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { MobileNav } from '@/components/MobileNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store/appStore';
-import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart, MessageSquare, LogOut } from 'lucide-react';
+import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart, MessageSquare, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { abTestingService } from '@/services/abTestingService';
 import { useAuth } from '@/hooks/useAuth';
+import { subscriptionService } from '@/services/subscriptionService';
 import { TasteOfPatterns, TasteOfDoctorReport, TasteOfAIInsights, TasteOfCaregiverSync } from '@/components/TasteOfPro';
 import {
   AlertDialog,
@@ -29,9 +31,21 @@ export default function Settings() {
   const navigate = useNavigate();
   const { caregiverMode, setCaregiverMode, setActiveBabyId } = useAppStore();
   const { user } = useAuth();
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium'>('free');
 
   // Get A/B testing variant for paywall
   const paywallVariant = abTestingService.getPaywallVariant(user?.id);
+
+  // Load subscription status
+  useEffect(() => {
+    if (user?.id) {
+      subscriptionService.getSubscriptionStatus(user.id).then(status => {
+        setSubscriptionTier(status?.tier || 'free');
+      }).catch(() => {
+        setSubscriptionTier('free');
+      });
+    }
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     try {
@@ -163,6 +177,34 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Privacy Policy</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </CardContent>
+        </Card>
+
+        {/* Subscription Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              Subscription
+            </CardTitle>
+            <CardDescription>Manage your Nuzzle Premium subscription</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <button
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left"
+              onClick={() => navigate('/subscription/manage')}
+            >
+              <div className="flex items-center gap-3">
+                <Crown className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Manage Subscription</span>
+                  <Badge variant={subscriptionTier === 'premium' ? 'default' : 'outline'} className="text-xs">
+                    {subscriptionTier === 'premium' ? 'Premium' : 'Free'}
+                  </Badge>
+                </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>

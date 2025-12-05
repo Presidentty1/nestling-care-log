@@ -49,19 +49,24 @@ struct ProSubscriptionView: View {
                         }
                     }
                     .padding(.spacingMD)
-                    .background(Color.surface)
+                    .background(NuzzleTheme.surface)
                     .cornerRadius(.radiusLG)
                     .padding(.horizontal, .spacingMD)
                     
                     // Subscription Options
                     if !proService.isProUser {
                         VStack(spacing: .spacingMD) {
-                            ForEach(proService.getProducts(), id: \.id) { product in
-                                SubscriptionOptionCard(
-                                    product: product,
-                                    isSelected: selectedProductID == product.id,
+                            ForEach(proService.getOfferings().sorted { (offering1, offering2) -> Bool in
+                                // Sort to put yearly first (emphasize annual)
+                                if offering1.id.contains("yearly") { return true }
+                                if offering2.id.contains("yearly") { return false }
+                                return offering1.id < offering2.id
+                            }, id: \.id) { offering in
+                                RevenueCatOfferingCard(
+                                    offering: offering,
+                                    isSelected: selectedProductID == offering.id || (selectedProductID == nil && offering.id.contains("yearly")),
                                     onSelect: {
-                                        selectedProductID = product.id
+                                        selectedProductID = offering.id
                                     }
                                 )
                             }
@@ -74,12 +79,12 @@ struct ProSubscriptionView: View {
                             icon: "star.fill",
                             isLoading: isPurchasing
                         ) {
-                            if let productID = selectedProductID {
+                            if let packageId = selectedProductID {
                                 Task {
                                     isPurchasing = true
-                                    let success = await proService.purchase(productID: productID)
+                                    let success = await proService.purchase(packageId: packageId)
                                     isPurchasing = false
-                                    
+
                                     if success {
                                         dismiss()
                                     }
@@ -130,9 +135,19 @@ struct ProSubscriptionView: View {
                             .multilineTextAlignment(.center)
                         
                         HStack(spacing: .spacingMD) {
-                            Link("Terms of Service", destination: URL(string: "https://nestling.app/terms")!)
+                            Button(action: {
+                                AppConfig.validateAndOpenURL(AppConfig.termsOfServiceURL)
+                            }) {
+                                Text("Terms of Service")
+                                    .foregroundColor(NuzzleTheme.primary)
+                            }
                             Text("•")
-                            Link("Privacy Policy", destination: URL(string: "https://nestling.app/privacy")!)
+                            Button(action: {
+                                AppConfig.validateAndOpenURL(AppConfig.privacyPolicyURL)
+                            }) {
+                                Text("Privacy Policy")
+                                    .foregroundColor(NuzzleTheme.primary)
+                            }
                         }
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
@@ -181,11 +196,22 @@ struct SubscriptionOptionCard: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(product.displayPrice)
                         .font(.headline)
-                    
-                    if product.id.contains("yearly") {
-                        Text("Save 17%")
+
+                    // Trial information
+                    if let introOffer = product.subscription?.introductoryOffer {
+                        Text("Free \(introOffer.period.value) \(introOffer.period.unit.localizedDescription()) trial")
                             .font(.caption)
                             .foregroundColor(.success)
+                    } else if product.id.contains("yearly") {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("Best value")
+                                .font(.caption)
+                                .foregroundColor(.success)
+                                .fontWeight(.semibold)
+                            Text("Save ~44%")
+                                .font(.caption)
+                                .foregroundColor(.success)
+                        }
                     }
                 }
                 
@@ -193,11 +219,69 @@ struct SubscriptionOptionCard: View {
                     .foregroundColor(isSelected ? .primary : .mutedForeground)
             }
             .padding(.spacingMD)
-            .background(isSelected ? Color.primary.opacity(0.1) : Color.surface)
+            .background(isSelected ? NuzzleTheme.primary.opacity(0.1) : NuzzleTheme.surface)
             .cornerRadius(.radiusMD)
             .overlay(
                 RoundedRectangle(cornerRadius: .radiusMD)
-                    .stroke(isSelected ? Color.primary : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? NuzzleTheme.primary : Color.clear, lineWidth: 2)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct RevenueCatOfferingCard: View {
+    let offering: RevenueCatOffering
+    let isSelected: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(offering.title)
+                            .font(.headline)
+
+                        if offering.isPopular {
+                            Text("BEST VALUE")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.green)
+                                .cornerRadius(4)
+                        }
+                    }
+
+                    Text(offering.price)
+                        .font(.subheadline)
+
+                    if let savings = offering.savings {
+                        Text(savings)
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+
+                    if let trialDays = offering.trialDays {
+                        Text("Free \(trialDays)-day trial")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? .primary : .mutedForeground)
+            }
+            .padding(.spacingMD)
+            .background(isSelected ? NuzzleTheme.primary.opacity(0.1) : NuzzleTheme.surface)
+            .cornerRadius(.radiusMD)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusMD)
+                    .stroke(isSelected ? NuzzleTheme.primary : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(PlainButtonStyle())

@@ -31,9 +31,23 @@ struct AboutView: View {
                 
                 // Links
                 VStack(spacing: .spacingMD) {
-                    Link("Privacy Policy", destination: URL(string: "https://nestling.app/privacy")!)
-                    Link("Terms of Service", destination: URL(string: "https://nestling.app/terms")!)
-                    Link("Support", destination: URL(string: "https://nestling.app/support")!)
+                    Button(action: {
+                        AppConfig.validateAndOpenURL(AppConfig.privacyPolicyURL)
+                    }) {
+                        Text("Privacy Policy")
+                    }
+
+                    Button(action: {
+                        AppConfig.validateAndOpenURL(AppConfig.termsOfServiceURL)
+                    }) {
+                        Text("Terms of Service")
+                    }
+
+                    Button(action: {
+                        AppConfig.validateAndOpenURL(AppConfig.supportURL)
+                    }) {
+                        Text("Support")
+                    }
                 }
                 .padding(.spacingMD)
                 
@@ -54,7 +68,7 @@ struct AboutView: View {
             }
         }
         .navigationTitle("About")
-        .background(Color.background)
+        .background(NuzzleTheme.background)
     }
     
     private var appVersion: String {

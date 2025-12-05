@@ -15,6 +15,8 @@ struct AppSettings: Codable, Equatable {
     var timeFormat24Hour: Bool
     var preferMediumSheet: Bool // Prefer medium detent by default
     var spotlightIndexingEnabled: Bool // Index events in Spotlight
+    var primaryGoal: String? // User's primary goal: "better_naps", "track_feeds", etc.
+    var trialOffersDismissed: Bool // Whether user has dismissed trial offers
     
     init(
         aiDataSharingEnabled: Bool = true,
@@ -30,7 +32,9 @@ struct AppSettings: Codable, Equatable {
         preferredUnit: String = "ml",
         timeFormat24Hour: Bool = false,
         preferMediumSheet: Bool = true,
-        spotlightIndexingEnabled: Bool = true
+        spotlightIndexingEnabled: Bool = true,
+        primaryGoal: String? = nil,
+        trialOffersDismissed: Bool = false
     ) {
         self.aiDataSharingEnabled = aiDataSharingEnabled
         self.feedReminderEnabled = feedReminderEnabled
@@ -46,6 +50,8 @@ struct AppSettings: Codable, Equatable {
         self.timeFormat24Hour = timeFormat24Hour
         self.preferMediumSheet = preferMediumSheet
         self.spotlightIndexingEnabled = spotlightIndexingEnabled
+        self.primaryGoal = primaryGoal
+        self.trialOffersDismissed = trialOffersDismissed
     }
     
     // MARK: - Default Settings

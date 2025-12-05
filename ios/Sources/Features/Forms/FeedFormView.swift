@@ -5,6 +5,7 @@ struct FeedFormView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var environment: AppEnvironment
     @State private var showToast: ToastMessage?
+    @State private var saveTask: Task<Void, Never>?
     
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
@@ -83,6 +84,9 @@ struct FeedFormView: View {
             }
             .navigationTitle(viewModel.editingEvent != nil ? "Edit Feed" : "Log Feed")
             .navigationBarTitleDisplayMode(.inline)
+            .onDisappear {
+                saveTask?.cancel()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -92,7 +96,8 @@ struct FeedFormView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        Task {
+                        saveTask?.cancel()
+                        saveTask = Task {
                             do {
                                 try await viewModel.save()
                                 Haptics.success()

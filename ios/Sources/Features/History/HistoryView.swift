@@ -37,6 +37,12 @@ struct HistoryView: View {
                         } else {
                             ScrollView {
                                 VStack(spacing: .spacingSM) {
+                                    // Daily Summary
+                                    if let summary = viewModel?.dailySummary, !summary.isEmpty {
+                                        DailySummaryView(summary: summary, date: viewModel?.selectedDate ?? Date())
+                                            .padding(.horizontal, .spacingMD)
+                                    }
+
                                     // Filter chips
                                     FilterChipsView(
                                         selectedFilter: Binding(
@@ -69,8 +75,9 @@ struct HistoryView: View {
                                                     }
                                                 )
                                                 // Auto-dismiss after 7 seconds
+                                                let toastId = showToast?.id
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-                                                    if showToast?.id == showToast?.id {
+                                                    if showToast?.id == toastId {
                                                         showToast = nil
                                                     }
                                                 }
@@ -97,7 +104,28 @@ struct HistoryView: View {
                 }
             }
             .navigationTitle("History")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: {
+                            exportSummaryForDoctor(range: .last24Hours)
+                        }) {
+                            Label("Export Last 24 Hours", systemImage: "doc.text")
+                        }
+
+                        Button(action: {
+                            exportSummaryForDoctor(range: .last7Days)
+                        }) {
+                            Label("Export Last 7 Days", systemImage: "doc.text.fill")
+                        }
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Export options")
+                    .accessibilityHint("Export summary for doctor or caregiver")
+                }
+            }
             .searchable(text: Binding(
                 get: { viewModel?.searchText ?? "" },
                 set: { viewModel?.searchText = $0 }
@@ -240,11 +268,8 @@ struct DatePickerView: View {
     }
     
     private var last7Days: [Date] {
-        let calendar = Calendar.current
-        let today = Date()
-        return (0..<7).compactMap { daysAgo in
-            calendar.date(byAdding: .day, value: -daysAgo, to: today)
-        }
+        // Use DateUtils helper for consistent date handling
+        return DateUtils.lastNDays(7)
     }
 }
 
@@ -262,13 +287,15 @@ struct DateButton: View {
                 
                 Text(dayNumber)
                     .font(.title3)
-                    .fontWeight(.semibold)
+                    .fontWeight(isSelected ? .bold : .semibold)
                     .foregroundColor(isSelected ? .white : .foreground)
             }
             .frame(width: 60, height: 70)
-            .background(isSelected ? Color.primary : Color.surface)
+            .background(isSelected ? NuzzleTheme.primary : NuzzleTheme.surface)
             .cornerRadius(.radiusMD)
         }
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint(isSelected ? "Selected date" : "Select this date")
     }
     
     private var dayName: String {
@@ -281,6 +308,111 @@ struct DateButton: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "d"
         return formatter.string(from: date)
+    }
+    
+    private var accessibilityLabel: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        let dateString = formatter.string(from: date)
+        return isSelected ? "\(dateString), selected" : dateString
+    }
+}
+
+// MARK: - Daily Summary View
+
+struct DailySummaryView: View {
+    let summary: DailySummary
+    let date: Date
+
+    var body: some View {
+        CardView(variant: .elevated) {
+            HStack(spacing: .spacingMD) {
+                Image(systemName: "calendar")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+
+                VStack(alignment: .leading, spacing: .spacingXS) {
+                    Text(dateLabel)
+                        .font(.headline)
+                        .foregroundColor(.foreground)
+
+                    Text(summary.summaryText)
+                        .font(.body)
+                        .foregroundColor(.mutedForeground)
+                }
+
+                Spacer()
+            }
+        }
+        .accessibilityLabel("\(dateLabel): \(summary.summaryText)")
+        .accessibilityHint("Summary of events logged on this day")
+    }
+
+    private var dateLabel: String {
+        if Calendar.current.isDateInToday(date) {
+            return "Today"
+        } else if Calendar.current.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: date)
+        }
+    }
+
+    private func exportSummaryForDoctor(range: DateRange) {
+        guard let baby = environment.currentBaby else { return }
+
+        Task {
+            do {
+                let dateRange = range.dateRange
+                let events = try await environment.dataStore.fetchEvents(for: baby, from: dateRange.start, to: dateRange.end)
+
+                // Generate summary and CSV
+                let summary = DoctorExportService.shared.generateSummary(for: baby, events: events, dateRange: dateRange)
+                let csv = DoctorExportService.shared.generateCSV(for: baby, events: events, dateRange: dateRange)
+
+                // Create temporary files
+                guard let summaryURL = DoctorExportService.shared.createSummaryFile(summary: summary, baby: baby),
+                      let csvURL = DoctorExportService.shared.createCSVFile(csv: csv, baby: baby) else {
+                    return
+                }
+
+                // Present share sheet
+                await MainActor.run {
+                    let activityVC = UIActivityViewController(
+                        activityItems: [summaryURL, csvURL],
+                        applicationActivities: nil
+                    )
+
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let rootVC = windowScene.windows.first?.rootViewController {
+                        rootVC.present(activityVC, animated: true)
+                    }
+                }
+            } catch {
+                Logger.dataError("Failed to export data: \(error.localizedDescription)")
+            }
+        }
+    }
+}
+
+enum DateRange {
+    case last24Hours
+    case last7Days
+
+    var dateRange: (start: Date, end: Date) {
+        let now = Date()
+        let calendar = Calendar.current
+
+        switch self {
+        case .last24Hours:
+            let start = calendar.date(byAdding: .day, value: -1, to: now) ?? now.addingTimeInterval(-86400)
+            return (start: start, end: now)
+        case .last7Days:
+            let start = calendar.date(byAdding: .day, value: -7, to: now) ?? now.addingTimeInterval(-604800)
+            return (start: start, end: now)
+        }
     }
 }
 

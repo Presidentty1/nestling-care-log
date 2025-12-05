@@ -28,6 +28,27 @@ When AI features are enabled, the following data is sent to Google Gemini:
 - CCPA compliant: Users can export or delete all data
 - App Store compliant: Clear consent mechanism with detailed explanations
 
+## Platform-Specific Implementation
+
+### iOS Implementation
+
+**AI Assistant:**
+- Uses Supabase Swift SDK for authentication
+- Session tokens extracted from Supabase sessions
+- Edge function calls authenticated with user tokens
+- Falls back to local-only mode if authentication fails
+
+**Cry Analysis:**
+- On-device analysis using `MLCryClassifier` (rule-based)
+- No edge function calls required
+- Audio processed locally and immediately deleted
+- Works offline
+
+**Authentication Flow:**
+- Supabase client initialized on app launch
+- Session management with automatic token refresh
+- AI features require authenticated users with consent enabled
+
 ## Features
 
 ### 1. Smart Predictions

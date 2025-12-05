@@ -75,17 +75,18 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
 
       // Progress timer (20 seconds max)
       const startTime = Date.now();
-      const maxDuration = 20000;
+      const MAX_RECORDING_DURATION_MS = 20000;
+      const PROGRESS_UPDATE_INTERVAL_MS = 250; // Reduced from 100ms for better performance
       
       timerRef.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const newProgress = Math.min((elapsed / maxDuration) * 100, 100);
+        const newProgress = Math.min((elapsed / MAX_RECORDING_DURATION_MS) * 100, 100);
         setProgress(newProgress);
 
-        if (elapsed >= maxDuration) {
+        if (elapsed >= MAX_RECORDING_DURATION_MS) {
           stopRecording();
         }
-      }, 100);
+      }, PROGRESS_UPDATE_INTERVAL_MS);
     } catch (error) {
       console.error('Microphone access error:', error);
       toast.error('Could not access microphone. Please check permissions.');
@@ -106,20 +107,47 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
 
   const analyzeCry = async (blob: Blob) => {
     setIsAnalyzing(true);
-    
+
     try {
+      // Fetch recent events for context (same pattern as CryTimer)
+      const { data: recentEvents } = await supabase
+        .from('events')
+        .select('*')
+        .eq('baby_id', babyId)
+        .gte('start_time', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order('start_time', { ascending: false });
+
+      const now = new Date();
+      const timeOfDay = now.getHours();
+
+      // Calculate time since last feed
+      const lastFeed = recentEvents?.find((e: any) => e.type === 'feed');
+      const timeSinceLastFeed = lastFeed
+        ? Math.floor((Date.now() - new Date(lastFeed.start_time).getTime()) / (1000 * 60))
+        : 999;
+
+      // Calculate last sleep duration
+      const lastSleep = recentEvents?.find((e: any) => e.type === 'sleep' && e.end_time);
+      const lastSleepDuration = lastSleep && lastSleep.end_time
+        ? Math.floor((new Date(lastSleep.end_time).getTime() - new Date(lastSleep.start_time).getTime()) / (1000 * 60))
+        : 0;
+
       // Convert blob to base64
       const reader = new FileReader();
       reader.readAsDataURL(blob);
-      
+
       reader.onloadend = async () => {
         const base64Audio = reader.result as string;
-        
+
         try {
           const { data, error } = await supabase.functions.invoke('analyze-cry-pattern', {
             body: {
               babyId,
-              audioData: base64Audio,
+              recentEvents: recentEvents?.slice(0, 5) || [],
+              timeOfDay,
+              timeSinceLastFeed,
+              lastSleepDuration,
+              audioData: base64Audio, // Keep for future audio processing
             },
           });
 

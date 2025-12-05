@@ -6,48 +6,32 @@ struct OnboardingView: View {
     let onComplete: () -> Void
     
     init(dataStore: DataStore, onComplete: @escaping () -> Void) {
-        _coordinator = StateObject(wrappedValue: OnboardingCoordinator(dataStore: dataStore))
+        _coordinator = StateObject(wrappedValue: OnboardingCoordinator(dataStore: dataStore, onComplete: onComplete))
         self.onComplete = onComplete
     }
     
     var body: some View {
         ZStack {
-            Color.background.ignoresSafeArea()
+            NuzzleTheme.background.ignoresSafeArea()
             
             Group {
                 switch coordinator.currentStep {
-                case .welcome:
-                    WelcomeView(coordinator: coordinator)
-                case .babySetup:
+                case .babyInfo:
                     BabySetupView(coordinator: coordinator)
-                case .preferences:
-                    PreferencesView(coordinator: coordinator)
-                case .aiConsent:
-                    AIConsentView(coordinator: coordinator)
-                case .notificationsIntro:
-                    NotificationsIntroView(coordinator: coordinator)
+                case .goalSelection:
+                    GoalSelectionView(coordinator: coordinator)
+                case .initialState:
+                    InitialStateView(coordinator: coordinator)
                 }
             }
             .transition(.slide)
-        }
-        .onChange(of: coordinator.currentStep) { _, newStep in
-            if newStep == .notificationsIntro {
-                // Check if onboarding is complete
-                Task {
-                    if try await OnboardingService(dataStore: environment.dataStore).isOnboardingCompleted() {
-                        await MainActor.run {
-                            onComplete()
-                        }
-                    }
-                }
-            }
         }
     }
 }
 
 #Preview {
     OnboardingView(dataStore: InMemoryDataStore()) {
-        print("Onboarding complete")
+        Logger.analytics("Onboarding complete")
     }
     .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
 }

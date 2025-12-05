@@ -23,7 +23,7 @@ struct AIDataSharingSettingsView: View {
                     
                     Toggle("Enable AI Data Sharing", isOn: $aiEnabled)
                         .padding(.spacingMD)
-                        .background(Color.surface)
+                        .background(NuzzleTheme.surface)
                         .cornerRadius(.radiusMD)
                     
                     if !aiEnabled {
@@ -35,7 +35,7 @@ struct AIDataSharingSettingsView: View {
                 .padding(.spacingMD)
             }
             .navigationTitle("AI Data Sharing")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -61,7 +61,7 @@ struct AIDataSharingSettingsView: View {
                     environment.appSettings = settings
                 }
             } catch {
-                print("Failed to save settings: \(error)")
+            Logger.dataError("Failed to save settings: \(error.localizedDescription)")
             }
         }
     }

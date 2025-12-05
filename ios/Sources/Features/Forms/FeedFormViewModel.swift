@@ -95,7 +95,15 @@ class FeedFormViewModel: ObservableObject {
         if feedType == .breast {
             isValid = true
         } else {
-            let amountValue = Double(amount) ?? 0
+            // Validate amount string: must be numeric, positive, and reasonable (max 500ml/17oz)
+            let trimmed = amount.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty,
+                  let amountValue = Double(trimmed),
+                  amountValue > 0,
+                  amountValue <= (unit == .ml ? 500 : 17) else {
+                isValid = false
+                return
+            }
             let amountML = unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
             isValid = amountML >= AppConstants.minimumFeedAmountML
         }
@@ -156,8 +164,11 @@ class FeedFormViewModel: ObservableObject {
             try await dataStore.updateEvent(eventData)
         } else {
             try await dataStore.addEvent(eventData)
+
+            // Check if this is the first event ever logged
+            await checkAndCelebrateFirstEvent()
         }
-        
+
         // Save last used values
         let lastUsed = LastUsedValues(
             amount: eventData.amount,
@@ -166,6 +177,36 @@ class FeedFormViewModel: ObservableObject {
             subtype: eventData.subtype
         )
         try await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
+    }
+
+    private func checkAndCelebrateFirstEvent() async {
+        do {
+            // Check if this baby has any other events
+            // Note: editingEvent is guaranteed to be nil when this function is called (only called for new events)
+            let allEvents = try await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            
+            // If total count is 1, this is the first event we just added
+            // (The newly added event is already included in allEvents)
+            if allEvents.count == 1 {
+                await MainActor.run {
+                    Haptics.success()
+                    showToast = ToastMessage(
+                        message: "Great start! 🎉",
+                        type: .success
+                    )
+                }
+
+                // Analytics for first event
+                Task {
+                    await Analytics.shared.log("first_event_logged", parameters: [
+                        "event_type": "feed",
+                        "time_since_onboarding": Date().timeIntervalSince(Date.distantPast) // We'll need to store onboarding time
+                    ])
+                }
+            }
+        } catch {
+            Logger.dataError("Failed to check first event: \(error.localizedDescription)")
+        }
     }
 }
 

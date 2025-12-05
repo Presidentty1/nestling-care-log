@@ -82,11 +82,21 @@ class PDFExportService {
                     eventAttr.draw(in: textRect)
                     yPosition += 60
                 }
+                
+                // Epic 8 AC4: Footer with branding
+                let footerAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 10),
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+                let footerText = "Generated with Nuzzle – AI newborn sleep & feed co‑pilot."
+                let footer = NSAttributedString(string: footerText, attributes: footerAttributes)
+                let footerRect = CGRect(x: 72, y: pageHeight - 40, width: pageWidth - 144, height: 20)
+                footer.draw(in: footerRect)
             }
             
             return fileURL
         } catch {
-            print("Failed to generate PDF: \(error)")
+            Logger.dataError("Failed to generate PDF: \(error.localizedDescription)")
             return nil
         }
     }

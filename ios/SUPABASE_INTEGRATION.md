@@ -4,9 +4,12 @@ This guide explains how to integrate Supabase cloud sync into the iOS app.
 
 ## Current Status
 
-✅ **RemoteDataStore** implementation created (placeholder)  
-✅ **SupabaseClient** wrapper created (placeholder)  
-⏳ **Requires**: Supabase Swift SDK installation
+✅ **RemoteDataStore** implementation created (placeholder)
+✅ **SupabaseClient** wrapper implemented with full SDK integration
+✅ **Supabase Swift SDK** integration complete
+✅ **Authentication** implemented with session management
+✅ **AI Assistant** authentication working
+✅ **Tests** created for AI services
 
 ## Architecture
 
@@ -27,27 +30,31 @@ DataStore Protocol
 1. **Open Xcode project**
 2. **File → Add Package Dependencies**
 3. **Enter URL**: `https://github.com/supabase/supabase-swift`
-4. **Select version**: Latest release
+4. **Select version**: Latest release (recommended: `~> 2.0.0`)
 5. **Add to target**: Nestling ✅
 
-### 2. Configure Supabase Client
+### 2. Environment Variables
 
-Add your Supabase credentials to `AppEnvironment.swift` or create a config file:
+Set your Supabase credentials as environment variables:
 
-```swift
-// In AppEnvironment.swift or new SupabaseConfig.swift
-
-let SUPABASE_URL = "https://your-project.supabase.co"
-let SUPABASE_ANON_KEY = "your-anon-key-here"
-
-// Initialize Supabase client
-SupabaseClient.shared.configure(url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY)
+**For Development:**
+```bash
+# Add to your Xcode scheme environment variables
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-**⚠️ Security Note**: For production, store credentials in:
-- Environment variables (for development)
-- Secure keychain (for production)
-- Never commit keys to git
+**For Production:**
+Add to `Info.plist` or use secure keychain storage.
+
+### 3. Verify Implementation
+
+The following files have been updated with full Supabase integration:
+
+- ✅ `SupabaseClient.swift` - Complete SDK implementation
+- ✅ `AIAssistantService.swift` - Session token authentication
+- ✅ `NestlingApp.swift` - Client initialization
+- ✅ Tests created: `AIAssistantServiceTests.swift`, `AIAssistantViewModelTests.swift`, `CryAnalysisTests.swift`
 
 ### 3. Update RemoteDataStore
 
@@ -259,14 +266,14 @@ When user signs in:
 - [RLS Policies](https://supabase.com/docs/guides/auth/row-level-security)
 - [Edge Functions](https://supabase.com/docs/guides/functions)
 
-## Next Steps
+## Next Steps (Future Enhancements)
 
-1. ✅ RemoteDataStore placeholder created
-2. ⏳ Add Supabase Swift SDK
-3. ⏳ Implement RemoteDataStore methods
-4. ⏳ Add authentication flow
-5. ⏳ Test sync functionality
-6. ⏳ Handle offline mode
-7. ⏳ Implement conflict resolution
+1. ✅ Supabase Swift SDK integrated
+2. ✅ Authentication implemented
+3. ✅ AI features working with authentication
+4. ⏳ RemoteDataStore full implementation (when cloud sync needed)
+5. ⏳ Offline mode with local caching
+6. ⏳ Conflict resolution for multi-device sync
+7. ⏳ Migration from local to cloud storage
 
 

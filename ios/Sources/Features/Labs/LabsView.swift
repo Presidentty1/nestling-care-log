@@ -3,6 +3,7 @@ import SwiftUI
 struct LabsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var showPredictions = false
+    @State private var showPaywall = false
     
     var body: some View {
         NavigationStack {
@@ -17,35 +18,53 @@ struct LabsView: View {
                     // Smart Predictions Card
                     LabsCard(
                         title: "Smart Predictions",
-                        description: "AI-powered predictions for next feed and nap times",
+                        description: "AI-powered predictions for next feed and nap times. These features are for general guidance only and are not medical advice. If you're worried about your baby's health, contact a pediatric professional.",
+                        disclaimer: nil,
                         icon: "brain.head.profile",
-                        color: .primary
+                        color: NuzzleTheme.primary
                     ) {
                         showPredictions = true
                     }
                     .padding(.horizontal, .spacingMD)
                     
                     // Cry Insights Card
-                    NavigationLink(destination: {
-                        if let baby = environment.currentBaby ?? environment.babies.first {
-                            CryRecorderView(dataStore: environment.dataStore, baby: baby)
-                        } else {
-                            Text("No baby selected")
+                    if FeatureAccess.canUseCryAnalysis {
+                        NavigationLink(destination: {
+                            if let baby = environment.currentBaby ?? environment.babies.first {
+                                CryRecorderView(dataStore: environment.dataStore, baby: baby)
+                            } else {
+                                Text("No baby selected")
+                            }
+                        }) {
+                            LabsCard(
+                                title: "Cry Insights (Beta)",
+                                description: "Record a cry and we'll try to label it as hungry, tired, discomfort, or pain. Experimental feature — suggestions are not medical advice. These features are for general guidance only and are not medical advice. If you're worried about your baby's health, contact a pediatric professional.",
+                                disclaimer: nil,
+                                icon: "waveform",
+                                color: NuzzleTheme.primary
+                            ) { }
                         }
-                    }) {
-                        LabsCard(
-                            title: "Cry Insights",
-                            description: "Analyze baby's cry patterns (Beta)",
-                            icon: "waveform",
-                            color: .primary
-                        ) { }
+                        .padding(.horizontal, .spacingMD)
+                    } else {
+                        Button(action: {
+                            // Show paywall
+                            showPaywall = true
+                        }) {
+                            LabsCard(
+                                title: "Cry Insights (Beta)",
+                                description: "Record a cry and we'll try to label it as hungry, tired, discomfort, or pain. \(FeatureAccess.proMessage(for: .cryAnalysis))",
+                                disclaimer: nil,
+                                icon: "waveform",
+                                color: .gray
+                            ) { }
+                        }
+                        .padding(.horizontal, .spacingMD)
                     }
-                    .padding(.horizontal, .spacingMD)
                 }
                 .padding(.vertical, .spacingMD)
             }
             .navigationTitle("Labs")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .onChange(of: environment.navigationCoordinator.showPredictions) { _, newValue in
                 if newValue {
                     showPredictions = true
@@ -57,6 +76,9 @@ struct LabsView: View {
                         environment.navigationCoordinator.showPredictions = false
                     }
             }
+            .sheet(isPresented: $showPaywall) {
+                ProSubscriptionView()
+            }
         }
     }
 }
@@ -64,10 +86,20 @@ struct LabsView: View {
 struct LabsCard: View {
     let title: String
     let description: String
+    let disclaimer: String?
     let icon: String
     let color: Color
     let action: () -> Void
-    
+
+    init(title: String, description: String, disclaimer: String? = nil, icon: String, color: Color, action: @escaping () -> Void) {
+        self.title = title
+        self.description = description
+        self.disclaimer = disclaimer
+        self.icon = icon
+        self.color = color
+        self.action = action
+    }
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: .spacingMD) {
@@ -80,10 +112,17 @@ struct LabsCard: View {
                     Text(title)
                         .font(.title)
                         .foregroundColor(.foreground)
-                    
+
                     Text(description)
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
+
+                    if let disclaimer = disclaimer {
+                        Text(disclaimer)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 2)
+                    }
                 }
                 
                 Spacer()
@@ -92,7 +131,7 @@ struct LabsCard: View {
                     .foregroundColor(.mutedForeground)
             }
             .padding(.spacingMD)
-            .background(Color.surface)
+            .background(NuzzleTheme.surface)
             .cornerRadius(.radiusMD)
         }
         .buttonStyle(PlainButtonStyle())
@@ -126,7 +165,7 @@ struct ComingSoonSheet: View {
                     
                     Toggle("Notify me when available", isOn: $notifyMe)
                         .padding(.spacingMD)
-                        .background(Color.surface)
+                        .background(NuzzleTheme.surface)
                         .cornerRadius(.radiusMD)
                         .onChange(of: notifyMe) { _, newValue in
                             Task {
@@ -149,7 +188,7 @@ struct ComingSoonSheet: View {
                 }
                 .padding(.spacing2XL)
             }
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

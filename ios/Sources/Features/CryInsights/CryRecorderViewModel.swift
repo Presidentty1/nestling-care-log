@@ -54,7 +54,7 @@ class CryRecorderViewModel: ObservableObject {
             do {
                 try audioService.startRecording()
             } catch {
-                print("Failed to start recording: \(error)")
+                Logger.dataError("Failed to start recording: \(error.localizedDescription)")
             }
         }
     }
@@ -68,7 +68,7 @@ class CryRecorderViewModel: ObservableObject {
         // Use ML classifier if available, fallback to rule-based
         let mlClassifier = MLCryClassifier()
         let result = mlClassifier.classify(
-            audioFeatures: nil, // TODO: Extract features from audio buffer
+            audioFeatures: nil, // NOTE: Audio feature extraction not implemented in MVP
             duration: recordingDuration,
             averagePower: averagePower,
             peakPower: averagePower // Using average as proxy for peak
@@ -77,11 +77,27 @@ class CryRecorderViewModel: ObservableObject {
         classification = result.classification
         confidence = result.confidence
         explanation = result.explanation
+
+        // Analytics for cry analysis result viewed
+        Task {
+            await Analytics.shared.log("cry_analysis_result_viewed", parameters: [
+                "label": result.classification?.rawValue ?? "unknown",
+                "confidence_bucket": confidenceBucket(for: result.confidence)
+            ])
+        }
     }
     
     func saveInsight() async throws {
         guard let classification = classification else { return }
-        
+
+        // Analytics for cry analysis recording submitted
+        Task {
+            await Analytics.shared.log("cry_analysis_recording_submitted", parameters: [
+                "label": classification.rawValue,
+                "confidence_bucket": confidenceBucket(for: confidence)
+            ])
+        }
+
         // Create an event note with the classification
         let event = Event(
             babyId: baby.id,
@@ -90,9 +106,9 @@ class CryRecorderViewModel: ObservableObject {
             startTime: Date(),
             note: "Cry analysis: \(classification.displayName) (confidence: \(Int(confidence * 100))%). \(explanation)"
         )
-        
+
         try await dataStore.addEvent(event)
-        
+
         // Delete recording file
         audioService.deleteRecording()
     }
@@ -102,6 +118,15 @@ class CryRecorderViewModel: ObservableObject {
         classification = nil
         confidence = 0.0
         explanation = ""
+    }
+
+    private func confidenceBucket(for confidence: Double) -> String {
+        switch confidence {
+        case 0.0..<0.3: return "low"
+        case 0.3..<0.7: return "medium"
+        case 0.7...1.0: return "high"
+        default: return "unknown"
+        }
     }
 }
 

@@ -157,7 +157,7 @@ struct AddEditBabyView: View {
                     Button("Save") {
                         saveBaby()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || dateOfBirth > Date())
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || dateOfBirth > Calendar.current.startOfDay(for: Date()))
                 }
             }
             .alert("Validation Error", isPresented: .constant(errorMessage != nil)) {

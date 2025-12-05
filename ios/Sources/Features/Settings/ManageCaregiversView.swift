@@ -35,7 +35,7 @@ struct ManageCaregiversView: View {
                 .padding(.spacing2XL)
             }
             .navigationTitle("Manage Caregivers")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {

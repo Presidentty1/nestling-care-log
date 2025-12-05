@@ -11,12 +11,39 @@ class HomeViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
     @Published var nextNapPrediction: Prediction?
+    @Published var shouldShowFirstLogCard: Bool = false
+    @Published var shouldShowTrialOffer: Bool = false
+    @Published var currentTip: ParentalTip?
+    @Published var newAchievements: [Achievement] = []
+    @Published var hasExampleData: Bool = false // Epic 1 AC6-AC7: Track if timeline contains example data
     
     private let dataStore: DataStore
     private let baby: Baby
     
-    /// Filtered events based on search text and selected filter
+    // Cache for filtered events to avoid recalculation
+    private var _filteredEvents: [Event] = []
+    private var lastSearchText: String = ""
+    private var lastSelectedFilter: EventTypeFilter = .all
+    private var lastEventsCount: Int = 0
+    private var lastEventsIDs: Set<UUID> = []
+    
+    /// Filtered events based on search text and selected filter (cached)
     var filteredEvents: [Event] {
+        // Check if cache is still valid
+        let currentIDs = Set(events.map { $0.id })
+        let searchChanged = searchText != lastSearchText
+        let filterChanged = selectedFilter != lastSelectedFilter
+        let eventsChanged = events.count != lastEventsCount || currentIDs != lastEventsIDs
+        
+        if searchChanged || filterChanged || eventsChanged || _filteredEvents.isEmpty {
+            // Recalculate
+            return calculateFilteredEvents()
+        }
+        
+        return _filteredEvents
+    }
+    
+    private func calculateFilteredEvents() -> [Event] {
         var filtered = events
         
         // Apply type filter
@@ -54,9 +81,7 @@ class HomeViewModel: ObservableObject {
                 if query.contains("tummy") && event.type == .tummyTime { return true }
                 
                 // Search for time tokens (e.g., "8:30", "pm")
-                let timeFormatter = DateFormatter()
-                timeFormatter.timeStyle = .short
-                let timeString = timeFormatter.string(from: event.startTime).lowercased()
+                let timeString = DateUtils.formatTime(event.startTime).lowercased()
                 if timeString.contains(query) {
                     return true
                 }
@@ -64,6 +89,13 @@ class HomeViewModel: ObservableObject {
                 return false
             }
         }
+        
+        // Update cache
+        _filteredEvents = filtered
+        lastSearchText = searchText
+        lastSelectedFilter = selectedFilter
+        lastEventsCount = events.count
+        lastEventsIDs = Set(events.map { $0.id })
         
         return filtered
     }
@@ -92,6 +124,10 @@ class HomeViewModel: ObservableObject {
         loadTodayEvents()
         checkActiveSleep()
         loadNextNapPrediction()
+        checkShouldShowFirstLogCard()
+        checkShouldShowTrialOffer()
+        loadCurrentTip()
+        checkForAchievements()
     }
     
     func checkActiveSleep() {
@@ -102,6 +138,97 @@ class HomeViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    func checkShouldShowFirstLogCard() {
+        Task {
+            do {
+                let settings = try await dataStore.fetchAppSettings()
+                // Show card if onboarding was just completed and no events exist
+                let justCompletedOnboarding = settings.onboardingCompleted
+                let hasNoEvents = events.isEmpty
+                await MainActor.run {
+                    self.shouldShowFirstLogCard = justCompletedOnboarding && hasNoEvents
+                }
+            } catch {
+                Logger.dataError("Failed to check first log card: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func checkShouldShowTrialOffer() {
+        Task {
+            do {
+                // Don't show if user is already Pro
+                if ProSubscriptionService.shared.isProUser {
+                    await MainActor.run { self.shouldShowTrialOffer = false }
+                    return
+                }
+
+                let settings = try await dataStore.fetchAppSettings()
+                // Don't show if user has dismissed trial offers before
+                if settings.trialOffersDismissed {
+                    await MainActor.run { self.shouldShowTrialOffer = false }
+                    return
+                }
+
+                // Show if user has logged 3+ events or used nap predictions
+                let hasEnoughEvents = events.count >= 3
+                let hasUsedPredictions = nextNapPrediction != nil // Simple check - has predictions been generated
+
+                await MainActor.run {
+                    self.shouldShowTrialOffer = hasEnoughEvents || hasUsedPredictions
+                }
+            } catch {
+                Logger.dataError("Failed to check trial offer: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func dismissTrialOffer() {
+        shouldShowTrialOffer = false
+        // Save that user dismissed trial offers
+        Task {
+            do {
+                var settings = try await dataStore.fetchAppSettings()
+                settings.trialOffersDismissed = true
+                try await dataStore.saveAppSettings(settings)
+            } catch {
+                Logger.dataError("Failed to save trial offer dismissal: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func loadCurrentTip() {
+        Task {
+            let settings = try? await dataStore.fetchAppSettings()
+            let tip = await TipService.shared.getNextTip(for: baby, goal: settings?.primaryGoal, dataStore: dataStore)
+            await MainActor.run {
+                self.currentTip = tip
+            }
+        }
+    }
+
+    func dismissCurrentTip() {
+        currentTip = nil
+    }
+
+    func checkForAchievements() {
+        Task {
+            let newAchievements = await AchievementService.shared.checkForNewAchievements(baby: baby, dataStore: dataStore)
+            await MainActor.run {
+                self.newAchievements = newAchievements
+            }
+        }
+    }
+
+    func dismissNewAchievements() {
+        newAchievements = []
+    }
+
+    /// Hide the first log card (called after first event is logged)
+    func hideFirstLogCard() {
+        shouldShowFirstLogCard = false
     }
     
     func loadTodayEvents() {
@@ -114,6 +241,14 @@ class HomeViewModel: ObservableObject {
             do {
                 let todayEvents = try await dataStore.fetchEvents(for: baby, on: Date())
                 self.events = todayEvents
+                
+                // Check if any events are example data (Epic 1 AC6-AC7)
+                let hasExamples = todayEvents.contains { event in
+                    event.note?.contains("[EXAMPLE]") == true
+                }
+                await MainActor.run {
+                    self.hasExampleData = hasExamples
+                }
                 
                 // Index events in Spotlight
                 if let settings = try? await dataStore.fetchAppSettings() {
@@ -146,8 +281,8 @@ class HomeViewModel: ObservableObject {
                 }
             }
         } catch {
-            // Log error but don't block UI
-            print("Failed to restore active sleep: \(error.localizedDescription)")
+                // Log error but don't block UI
+                Logger.dataError("Failed to restore active sleep: \(error.localizedDescription)")
         }
     }
     
@@ -180,7 +315,10 @@ class HomeViewModel: ObservableObject {
                     note: nil
                 )
                 try await dataStore.addEvent(event)
-                
+
+                // Hide first log card after first event
+                hideFirstLogCard()
+
                 // Save last used
                 let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
                 try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
@@ -193,8 +331,24 @@ class HomeViewModel: ObservableObject {
                         "has_amount": true,
                         "has_note": false
                     ])
+                    await Analytics.shared.log("quick_action_tapped", parameters: [
+                        "type": "feed"
+                    ])
                 }
-                
+
+                // Track for review prompt
+                ReviewPromptManager.shared.trackLogCreated()
+
+                // Reschedule feed reminder based on new feed time
+                if let settings = try? await dataStore.fetchAppSettings(),
+                   settings.feedReminderEnabled {
+                    NotificationScheduler.shared.scheduleFeedReminderFromLastFeed(
+                        lastFeedTime: Date(),
+                        hours: settings.feedReminderHours,
+                        enabled: settings.feedReminderEnabled
+                    )
+                }
+
                 Haptics.success()
                 loadTodayEvents()
             } catch {
@@ -212,13 +366,22 @@ class HomeViewModel: ObservableObject {
                     let completedEvent = try await dataStore.stopActiveSleep(for: baby)
                     await MainActor.run {
                         self.activeSleep = nil
+                        // Hide first log card after first event
+                        self.hideFirstLogCard()
                     }
                     
                     // Stop Live Activity
                     if #available(iOS 16.1, *) {
                         LiveActivityManager.shared.stopSleepActivity()
                     }
-                    
+
+                    // Analytics
+                    Task {
+                        await Analytics.shared.log("quick_action_tapped", parameters: [
+                            "type": "sleep"
+                        ])
+                    }
+
                     Haptics.success()
                     loadTodayEvents()
                 } else {
@@ -232,7 +395,14 @@ class HomeViewModel: ObservableObject {
                     if #available(iOS 16.1, *) {
                         LiveActivityManager.shared.startSleepActivity(for: baby, startTime: newSleep.startTime)
                     }
-                    
+
+                    // Analytics
+                    Task {
+                        await Analytics.shared.log("quick_action_tapped", parameters: [
+                            "type": "sleep"
+                        ])
+                    }
+
                     Haptics.light()
                 }
             } catch {
@@ -260,11 +430,24 @@ class HomeViewModel: ObservableObject {
                     note: nil
                 )
                 try await dataStore.addEvent(event)
-                
+
+                // Hide first log card after first event
+                hideFirstLogCard()
+
                 // Save last used
                 let lastUsed = LastUsedValues(subtype: subtype)
                 try? await dataStore.saveLastUsedValues(for: .diaper, values: lastUsed)
-                
+
+                // Analytics
+                Task {
+                    await Analytics.shared.log("quick_action_tapped", parameters: [
+                        "type": "diaper"
+                    ])
+                }
+
+                // Track for review prompt
+                ReviewPromptManager.shared.trackLogCreated()
+
                 Haptics.success()
                 loadTodayEvents()
             } catch {
@@ -293,11 +476,24 @@ class HomeViewModel: ObservableObject {
                     note: nil
                 )
                 try await dataStore.addEvent(event)
-                
+
+                // Hide first log card after first event
+                hideFirstLogCard()
+
                 // Save last used
                 let lastUsed = LastUsedValues(durationMinutes: duration)
                 try? await dataStore.saveLastUsedValues(for: .tummyTime, values: lastUsed)
-                
+
+                // Analytics
+                Task {
+                    await Analytics.shared.log("quick_action_tapped", parameters: [
+                        "type": "tummy"
+                    ])
+                }
+
+                // Track for review prompt
+                ReviewPromptManager.shared.trackLogCreated()
+
                 Haptics.success()
                 loadTodayEvents()
             } catch {
@@ -394,7 +590,7 @@ class HomeViewModel: ObservableObject {
                 }
             } catch {
                 // Silently fail - predictions are optional
-                print("Failed to load nap prediction: \(error)")
+                Logger.dataError("Failed to load nap prediction: \(error.localizedDescription)")
             }
         }
     }

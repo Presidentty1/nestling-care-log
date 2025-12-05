@@ -37,7 +37,7 @@ class DiagnosticsService {
             try encoder.encode(settings).write(to: settingsURL)
         } catch {
             // Log error but continue
-            print("Failed to export settings: \(error)")
+            Logger.dataError("Failed to export settings: \(error.localizedDescription)")
         }
         
         // 4. Data Summary (no PII)

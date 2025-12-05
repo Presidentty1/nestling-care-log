@@ -29,10 +29,10 @@ struct PredictionsView: View {
                                 )
                                 .padding(.horizontal, .spacingMD)
                             } else {
-                                // Info about local predictions
+                                // Info about nap predictor
                                 InfoBanner(
-                                    title: "Local Predictions",
-                                    message: "Predictions use on-device heuristics based on your baby's age and recent patterns. No data is sent to external servers.",
+                                    title: "Nap Predictor",
+                                    message: "Based on your baby's age and last wake time, we suggest nap windows that may work for many babies.",
                                     variant: .info
                                 )
                                 .padding(.horizontal, .spacingMD)
@@ -95,7 +95,10 @@ struct PredictionsView: View {
                 }
             }
             .navigationTitle("Smart Predictions")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
+            .sheet(isPresented: $viewModel.showPaywall) {
+                ProSubscriptionView()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -151,7 +154,7 @@ struct PredictionCard: View {
         }
         .padding(.spacingMD)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.surface)
+        .background(NuzzleTheme.surface)
         .cornerRadius(.radiusMD)
     }
     

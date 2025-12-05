@@ -65,6 +65,11 @@ class HistoryViewModel: ObservableObject {
         return filtered
     }
     
+    /// Get daily summary for selected date
+    var dailySummary: DailySummary? {
+        calculateDailySummary(from: events)
+    }
+
     /// Get search suggestions based on recent notes
     var searchSuggestions: [String] {
         var suggestions: [String] = []
@@ -175,6 +180,88 @@ class HistoryViewModel: ObservableObject {
                 errorMessage = "Failed to duplicate event: \(error.localizedDescription)"
             }
         }
+    }
+
+    private func calculateDailySummary(from events: [Event]) -> DailySummary {
+        var feedCount = 0
+        var diaperCount = 0
+        var sleepCount = 0
+        var totalSleepMinutes = 0
+        var tummyTimeCount = 0
+
+        for event in events {
+            switch event.type {
+            case .feed:
+                feedCount += 1
+            case .diaper:
+                diaperCount += 1
+            case .sleep:
+                sleepCount += 1
+                if let duration = event.durationMinutes {
+                    totalSleepMinutes += duration
+                }
+            case .tummyTime:
+                tummyTimeCount += 1
+            }
+        }
+
+        return DailySummary(
+            feedCount: feedCount,
+            diaperCount: diaperCount,
+            sleepCount: sleepCount,
+            totalSleepMinutes: totalSleepMinutes,
+            tummyTimeCount: tummyTimeCount
+        )
+    }
+}
+
+struct DailySummary {
+    let feedCount: Int
+    let diaperCount: Int
+    let sleepCount: Int
+    let totalSleepMinutes: Int
+    let tummyTimeCount: Int
+
+    var sleepHours: Int {
+        totalSleepMinutes / 60
+    }
+
+    var sleepMinutes: Int {
+        totalSleepMinutes % 60
+    }
+
+    var summaryText: String {
+        var components: [String] = []
+
+        if feedCount > 0 {
+            components.append("\(feedCount) feed\(feedCount == 1 ? "" : "s")")
+        }
+
+        if diaperCount > 0 {
+            components.append("\(diaperCount) diaper\(diaperCount == 1 ? "" : "s")")
+        }
+
+        if totalSleepMinutes > 0 {
+            if sleepHours > 0 {
+                if sleepMinutes > 0 {
+                    components.append("\(sleepHours)h \(sleepMinutes)m sleep")
+                } else {
+                    components.append("\(sleepHours)h sleep")
+                }
+            } else {
+                components.append("\(sleepMinutes)m sleep")
+            }
+        }
+
+        if tummyTimeCount > 0 {
+            components.append("\(tummyTimeCount) tummy time\(tummyTimeCount == 1 ? "" : "s")")
+        }
+
+        return components.joined(separator: " • ")
+    }
+
+    var isEmpty: Bool {
+        feedCount == 0 && diaperCount == 0 && totalSleepMinutes == 0 && tummyTimeCount == 0
     }
 }
 

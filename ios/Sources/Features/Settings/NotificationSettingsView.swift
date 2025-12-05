@@ -13,19 +13,43 @@ struct NotificationSettingsView: View {
     @State private var quietHoursEnabled: Bool = false
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
     @State private var showPermissionAlert = false
+    @State private var intelligentFeedRemindersEnabled: Bool = true
+    @State private var winBackNotificationsEnabled: Bool = true
     
     var body: some View {
         Form {
             Section("Feed Reminders") {
                 Toggle("Enable Feed Reminders", isOn: $feedReminderEnabled)
-                
+                    .disabled(!FeatureAccess.canUseReminders)
+
                 if feedReminderEnabled {
                     Stepper("Remind every \(feedReminderHours) hours", value: $feedReminderHours, in: 1...6)
+                }
+
+                if feedReminderEnabled || FeatureAccess.canUseReminders {
+                    Text("Remind me if it's been a while since the last feed.")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                } else {
+                    Text(FeatureAccess.proMessage(for: .reminders))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             
             Section("Sleep Reminders") {
                 Toggle("Nap Window Alerts", isOn: $napWindowAlertEnabled)
+                    .disabled(!FeatureAccess.canUseReminders)
+
+                if napWindowAlertEnabled || FeatureAccess.canUseReminders {
+                    Text("Remind me when we're approaching the next nap window.")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                } else {
+                    Text(FeatureAccess.proMessage(for: .reminders))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             
             Section("Diaper Reminders") {
@@ -44,7 +68,30 @@ struct NotificationSettingsView: View {
                     DatePicker("End", selection: $quietHoursEnd, displayedComponents: .hourAndMinute)
                 }
             }
-            
+
+            Section("Intelligent Reminders") {
+                Toggle("Smart Feed Reminders", isOn: $intelligentFeedRemindersEnabled)
+                    .disabled(!FeatureAccess.canUseReminders)
+
+                if intelligentFeedRemindersEnabled || FeatureAccess.canUseReminders {
+                    Text("Learn your baby's feeding patterns and get reminders at optimal times.")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                } else {
+                    Text(FeatureAccess.proMessage(for: .reminders))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Section("Re-engagement") {
+                Toggle("Win-back Notifications", isOn: $winBackNotificationsEnabled)
+
+                Text("Gentle reminders if you haven't logged in a few days.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+            }
+
             Section("Permissions") {
                 HStack {
                     Text("Notification Permission")
@@ -157,6 +204,8 @@ struct NotificationSettingsView: View {
             settings.diaperReminderHours = diaperReminderHours
             settings.quietHoursStart = quietHoursEnabled ? quietHoursStart : nil
             settings.quietHoursEnd = quietHoursEnabled ? quietHoursEnd : nil
+            // Note: intelligentFeedRemindersEnabled and winBackNotificationsEnabled
+            // are handled by the notification scheduler when needed
             
             try? await environment.dataStore.saveAppSettings(settings)
             await MainActor.run {

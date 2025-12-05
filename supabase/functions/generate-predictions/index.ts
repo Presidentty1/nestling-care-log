@@ -33,8 +33,33 @@ serve(async (req) => {
           .single();
         
         if (!profile?.ai_data_sharing_enabled) {
-          return new Response(JSON.stringify({ 
-            error: 'AI features are disabled. Enable in Settings → AI & Data Sharing.' 
+          return new Response(JSON.stringify({
+            error: 'AI features are disabled. Enable in Settings → AI & Data Sharing.'
+          }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Check subscription status - nap predictions are premium-only
+        const { data: tierData, error: tierError } = await supabaseClient
+          .rpc('check_subscription_status', { user_uuid: user.id });
+
+        if (tierError) {
+          console.error('Subscription check error:', tierError);
+          return new Response(JSON.stringify({
+            error: 'Unable to verify subscription status'
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const isPremium = tierData === 'premium';
+        if (!isPremium) {
+          return new Response(JSON.stringify({
+            error: 'Nap predictions are a Premium feature. Upgrade to unlock AI-powered predictions.',
+            upgradeRequired: true
           }), {
             status: 403,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },

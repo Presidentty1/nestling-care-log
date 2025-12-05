@@ -12,8 +12,17 @@ serve(async (req) => {
   }
 
   try {
-    const { babyId, recentEvents, timeOfDay, timeSinceLastFeed, lastSleepDuration } = await req.json();
-    
+    const body = await req.json();
+    const { babyId, recentEvents, timeOfDay, timeSinceLastFeed, lastSleepDuration, audioData } = body;
+
+    // Validate required fields
+    if (!babyId) {
+      return new Response(JSON.stringify({ error: 'babyId is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -33,12 +42,49 @@ serve(async (req) => {
           .single();
         
         if (!profile?.ai_data_sharing_enabled) {
-          return new Response(JSON.stringify({ 
-            error: 'Cry analysis is disabled. Enable AI features in Settings → AI & Data Sharing.' 
+          return new Response(JSON.stringify({
+            error: 'Cry analysis is disabled. Enable AI features in Settings → AI & Data Sharing.'
           }), {
             status: 403,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
+        }
+
+        // Check subscription status
+        const { data: tierData, error: tierError } = await supabaseClient
+          .rpc('check_subscription_status', { user_uuid: user.id });
+
+        if (tierError) {
+          console.error('Subscription check error:', tierError);
+          return new Response(JSON.stringify({
+            error: 'Unable to verify subscription status'
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const isPremium = tierData === 'premium';
+        if (!isPremium) {
+          // Check usage limit for free users (2 per week)
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+
+          const { count: usageCount } = await supabaseClient
+            .from('cry_insight_sessions')
+            .select('*', { count: 'exact', head: true })
+            .eq('created_by', user.id)
+            .gte('created_at', weekAgo.toISOString());
+
+          if (usageCount >= 2) {
+            return new Response(JSON.stringify({
+              error: 'Free tier limit reached. Upgrade to Premium for unlimited cry analysis.',
+              upgradeRequired: true
+            }), {
+              status: 429,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
         }
       }
     }
@@ -48,13 +94,20 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Build context with defaults if missing (backwards compatibility)
+    const contextTimeOfDay = timeOfDay ?? new Date().getHours();
+    const contextTimeSinceLastFeed = timeSinceLastFeed ?? 999;
+    const contextLastSleepDuration = lastSleepDuration ?? 0;
+    const contextRecentEvents = recentEvents || [];
+
     // Build context for AI
     const context = `
 Baby is crying. Help analyze possible causes based on:
-- Time of day: ${timeOfDay}
-- Time since last feed: ${timeSinceLastFeed} minutes
-- Last sleep duration: ${lastSleepDuration} minutes
-- Recent events: ${JSON.stringify(recentEvents)}
+- Time of day: ${contextTimeOfDay}
+- Time since last feed: ${contextTimeSinceLastFeed} minutes
+- Last sleep duration: ${contextLastSleepDuration} minutes
+- Recent events: ${JSON.stringify(contextRecentEvents)}
+${audioData ? '- Audio recording available (metadata only)' : ''}
 
 Provide analysis in JSON format with:
 - possibleCauses: array of likely causes (hungry, tired, uncomfortable, overstimulated, needs diaper change)

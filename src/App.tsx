@@ -38,6 +38,38 @@ Sentry.init({
 
   // Performance monitoring
   tracesSampleRate: 1.0,
+
+  // Capture console logs as breadcrumbs
+  integrations: [
+    new Sentry.BrowserTracing({
+      tracePropagationTargets: ['localhost', /^https:\/\/your-domain\.com/],
+    }),
+    new Sentry.Replay({
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
+  ],
+
+  // Capture more context
+  beforeSend: (event) => {
+    // Add user context if available
+    const user = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
+    if (user?.user?.id) {
+      event.user = {
+        id: user.user.id,
+        email: user.user.email,
+      };
+    }
+
+    // Add app context
+    event.tags = {
+      ...event.tags,
+      app_version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+      user_agent: navigator.userAgent,
+    };
+
+    return event;
+  },
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 
@@ -92,6 +124,8 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const AnalyticsDashboard = lazy(() => import("./pages/AnalyticsDashboard"));
 const Patterns = lazy(() => import("./pages/Patterns"));
 const ShortcutsSettings = lazy(() => import("./pages/ShortcutsSettings"));
+const Subscription = lazy(() => import("./pages/Subscription"));
+const SubscriptionManagement = lazy(() => import("./pages/SubscriptionManagement"));
 const SleepTraining = lazy(() => import("./pages/SleepTraining"));
 const ActivityFeed = lazy(() => import("./pages/ActivityFeed"));
 const Predictions = lazy(() => import("./pages/Predictions"));
@@ -232,6 +266,18 @@ function AppContent() {
           <Route path="/settings/shortcuts" element={
             <SettingsErrorBoundary onGoHome={handleGoHome}>
               <SuspenseWrapper><ShortcutsSettings /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+
+          {/* Subscription routes */}
+          <Route path="/subscription" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><Subscription /></SuspenseWrapper>
+            </SettingsErrorBoundary>
+          } />
+          <Route path="/subscription/manage" element={
+            <SettingsErrorBoundary onGoHome={handleGoHome}>
+              <SuspenseWrapper><SubscriptionManagement /></SuspenseWrapper>
             </SettingsErrorBoundary>
           } />
 

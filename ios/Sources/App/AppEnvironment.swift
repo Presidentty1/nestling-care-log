@@ -28,12 +28,12 @@ class AppEnvironment: ObservableObject {
     }
     
     private func loadCaregiverMode() {
-        isCaregiverMode = UserDefaults.standard.bool(forKey: "isCaregiverMode")
+        isCaregiverMode = UserDefaults.standard.bool(forKey: AppConfig.userDefaultsCaregiverModeKey)
     }
     
     func setCaregiverMode(_ enabled: Bool) {
         isCaregiverMode = enabled
-        UserDefaults.standard.set(enabled, forKey: "isCaregiverMode")
+        UserDefaults.standard.set(enabled, forKey: AppConfig.userDefaultsCaregiverModeKey)
     }
     
     private func loadInitialData() {
@@ -54,7 +54,7 @@ class AppEnvironment: ObservableObject {
                     self.appSettings = settings
                 }
             } catch {
-                print("Error loading initial data: \(error)")
+                Logger.dataError("Error loading initial data: \(error.localizedDescription)")
             }
         }
     }
@@ -74,7 +74,7 @@ class AppEnvironment: ObservableObject {
                     }
                 }
             } catch {
-                print("Error refreshing babies: \(error)")
+                Logger.dataError("Error refreshing babies: \(error.localizedDescription)")
             }
         }
     }
@@ -87,7 +87,7 @@ class AppEnvironment: ObservableObject {
                     self.appSettings = settings
                 }
             } catch {
-                print("Error refreshing settings: \(error)")
+                Logger.dataError("Error refreshing settings: \(error.localizedDescription)")
             }
         }
     }

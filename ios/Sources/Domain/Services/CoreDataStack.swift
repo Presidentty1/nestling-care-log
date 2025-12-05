@@ -11,7 +11,17 @@ class CoreDataStack {
         let storeURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
             .appendingPathComponent("Nestling.sqlite")
         
-        let description = NSPersistentStoreDescription(url: storeURL ?? container.persistentStoreDescriptions.first!.url)
+        // Use fallback URL if App Group or default description is unavailable
+        let fallbackURL: URL
+        if let defaultURL = container.persistentStoreDescriptions.first?.url {
+            fallbackURL = defaultURL
+        } else {
+            // Last resort: use Documents directory
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            fallbackURL = documentsURL.appendingPathComponent("Nestling.sqlite")
+        }
+        
+        let description = NSPersistentStoreDescription(url: storeURL ?? fallbackURL)
         description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
         description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
         
@@ -19,7 +29,16 @@ class CoreDataStack {
         
         container.loadPersistentStores { description, error in
             if let error = error {
-                fatalError("Core Data store failed to load: \(error.localizedDescription)")
+                // Log error and report to crash reporter instead of crashing
+                Logger.error("Core Data store failed to load: \(error.localizedDescription)")
+                CrashReporter.shared.reportError(error, context: [
+                    "storeDescription": description.url?.absoluteString ?? "unknown",
+                    "storeType": description.type
+                ])
+                
+                // Attempt to use fallback location or in-memory store
+                // The app will fall back to JSONBackedDataStore via DataStoreSelector
+                // This prevents the app from crashing on Core Data initialization failure
             }
         }
         

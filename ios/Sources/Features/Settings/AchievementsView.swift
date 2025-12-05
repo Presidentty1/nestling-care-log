@@ -40,7 +40,7 @@ struct AchievementsView: View {
             .padding(.vertical, .spacingMD)
         }
         .navigationTitle("Achievements")
-        .background(Color.background)
+        .background(NuzzleTheme.background)
         .task {
             await loadAchievements()
         }
@@ -74,7 +74,7 @@ struct AchievementsView: View {
                 }
             }
         } catch {
-            print("Failed to load achievements: \(error)")
+            Logger.dataError("Failed to load achievements: \(error.localizedDescription)")
         }
     }
 }
@@ -107,11 +107,11 @@ struct AchievementCard: View {
         }
         .padding(.spacingMD)
         .frame(maxWidth: .infinity)
-        .background(Color.surface)
+        .background(NuzzleTheme.surface)
         .cornerRadius(.radiusMD)
         .overlay(
             RoundedRectangle(cornerRadius: .radiusMD)
-                .stroke(achievement.isUnlocked ? Color.primary : Color.clear, lineWidth: 2)
+                .stroke(achievement.isUnlocked ? NuzzleTheme.primary : Color.clear, lineWidth: 2)
         )
     }
     

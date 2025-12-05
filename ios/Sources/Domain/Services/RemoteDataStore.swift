@@ -32,7 +32,7 @@ class RemoteDataStore: DataStore {
         self.anonKey = anonKey
         self.supabaseClient = nil // Initialize Supabase client here when SDK is added
         
-        // TODO: Initialize Supabase client
+        // FUTURE: Initialize Supabase client when SDK is integrated
         // Example (when SDK is added):
         // self.supabaseClient = SupabaseClient(supabaseURL: URL(string: supabaseURL)!, supabaseKey: anonKey)
     }
@@ -40,7 +40,7 @@ class RemoteDataStore: DataStore {
     // MARK: - Babies
     
     func fetchBabies() async throws -> [Baby] {
-        // TODO: Implement Supabase query
+        // FUTURE: Implement Supabase query when SDK is integrated
         // Example:
         // let response = try await supabaseClient.database
         //     .from("babies")
@@ -52,17 +52,17 @@ class RemoteDataStore: DataStore {
     }
     
     func addBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase insert
+        // FUTURE: Implement Supabase insert when SDK is integrated
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
     func updateBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase update
+        // FUTURE: Implement Supabase update when SDK is integrated
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
     func deleteBaby(_ baby: Baby) async throws {
-        // TODO: Implement Supabase delete
+        // FUTURE: Implement Supabase delete when SDK is integrated
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
@@ -70,13 +70,18 @@ class RemoteDataStore: DataStore {
     
     func fetchEvents(for baby: Baby, on date: Date) async throws -> [Event] {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
         
         return try await fetchEvents(for: baby, from: startOfDay, to: endOfDay)
     }
     
+    func forceSyncIfNeeded() async throws {
+        // Force sync any pending operations
+        // NOTE: Not implemented in MVP - local-only functionality
+    }
+
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event] {
-        // TODO: Implement Supabase query with date range
+        // FUTURE: Implement Supabase query when SDK is integrated with date range
         // Example:
         // let response = try await supabaseClient.database
         //     .from("events")
@@ -95,7 +100,7 @@ class RemoteDataStore: DataStore {
         // Validate event before saving
         try EventValidator.validate(event)
         
-        // TODO: Implement Supabase insert
+        // FUTURE: Implement Supabase insert when SDK is integrated
         // Example:
         // let encoder = JSONEncoder()
         // encoder.dateEncodingStrategy = .iso8601
@@ -114,12 +119,12 @@ class RemoteDataStore: DataStore {
         // Validate event before saving
         try EventValidator.validate(event)
         
-        // TODO: Implement Supabase update
+        // FUTURE: Implement Supabase update when SDK is integrated
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
     func deleteEvent(_ event: Event) async throws {
-        // TODO: Implement Supabase delete
+        // FUTURE: Implement Supabase delete when SDK is integrated
         // Example:
         // try await supabaseClient.database
         //     .from("events")
@@ -133,7 +138,7 @@ class RemoteDataStore: DataStore {
     // MARK: - Predictions
     
     func fetchPredictions(for baby: Baby, type: PredictionType) async throws -> Prediction? {
-        // TODO: Query predictions table
+        // NOTE: Predictions are calculated locally in MVP - no remote storage
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
@@ -153,7 +158,7 @@ class RemoteDataStore: DataStore {
     // MARK: - Settings
     
     func fetchAppSettings() async throws -> AppSettings {
-        // TODO: Query app_settings table or profiles table
+        // NOTE: App settings stored locally in MVP
         // Example:
         // let response = try await supabaseClient.database
         //     .from("app_settings")
@@ -167,7 +172,7 @@ class RemoteDataStore: DataStore {
     }
     
     func saveAppSettings(_ settings: AppSettings) async throws {
-        // TODO: Upsert app_settings table
+        // NOTE: App settings sync not implemented in MVP
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
@@ -237,12 +242,12 @@ class RemoteDataStore: DataStore {
     // MARK: - Last Used Values
     
     func getLastUsedValues(for eventType: EventType) async throws -> LastUsedValues? {
-        // TODO: Query last_used_values table
+        // NOTE: Last-used values stored locally only
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
     
     func saveLastUsedValues(for eventType: EventType, values: LastUsedValues) async throws {
-        // TODO: Upsert last_used_values table
+        // NOTE: Last-used values sync not implemented
         throw DataStoreError.notImplemented("RemoteDataStore requires Supabase SDK")
     }
 }

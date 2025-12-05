@@ -8,13 +8,23 @@ struct QuickActionButton: View {
     let color: Color
     let action: () -> Void
     var isActive: Bool = false
+    var isEmphasized: Bool = false // Epic 3 AC2: Visual emphasis for context-aware actions
     var longPressAction: (() -> Void)?
     
-    init(title: String, icon: String, color: Color, isActive: Bool = false, action: @escaping () -> Void, longPressAction: (() -> Void)? = nil) {
+    init(
+        title: String,
+        icon: String,
+        color: Color,
+        isActive: Bool = false,
+        isEmphasized: Bool = false,
+        action: @escaping () -> Void,
+        longPressAction: (() -> Void)? = nil
+    ) {
         self.title = title
         self.icon = icon
         self.color = color
         self.isActive = isActive
+        self.isEmphasized = isEmphasized
         self.action = action
         self.longPressAction = longPressAction
     }
@@ -55,8 +65,12 @@ struct QuickActionButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(isCaregiverMode ? .spacingLG : .spacingMD)
-            .background(Color.surface)
+            .background(isEmphasized ? NuzzleTheme.primary.opacity(0.1) : NuzzleTheme.surface)
             .cornerRadius(.radiusMD)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusMD)
+                    .stroke(isEmphasized ? NuzzleTheme.primary : Color.clear, lineWidth: isEmphasized ? 2 : 0)
+            )
         }
         .buttonStyle(PlainButtonStyle())
         .gentlePress()
@@ -67,8 +81,18 @@ struct QuickActionButton: View {
                 longPressAction()
             }
         }
-        .accessibilityLabel("\(title) quick action")
+        .accessibilityLabel(accessibilityLabel)
         .accessibilityHint(isActive ? "Active. Double tap to stop, long press for detailed form" : "Double tap to log \(title.lowercased()), long press for detailed form")
+    }
+    
+    private var accessibilityLabel: String {
+        switch title.lowercased() {
+        case "feed": return "Log a feed"
+        case "sleep": return "Log sleep"
+        case "diaper": return "Log a diaper"
+        case "tummy": return "Log tummy time"
+        default: return "\(title) quick action"
+        }
     }
 }
 

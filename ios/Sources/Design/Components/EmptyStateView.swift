@@ -6,6 +6,7 @@ struct EmptyStateView: View {
     let message: String
     let actionTitle: String?
     let action: (() -> Void)?
+    @Environment(\.colorScheme) private var colorScheme
     
     init(
         icon: String,
@@ -25,15 +26,15 @@ struct EmptyStateView: View {
         VStack(spacing: .spacingMD) {
             Image(systemName: icon)
                 .font(.system(size: 48))
-                .foregroundColor(.mutedForeground)
-            
+                .foregroundColor(Color.adaptiveMutedForeground(colorScheme))
+
             Text(title)
                 .font(.headline)
-                .foregroundColor(.foreground)
-            
+                .foregroundColor(Color.adaptiveForeground(colorScheme))
+
             Text(message)
                 .font(.body)
-                .foregroundColor(.mutedForeground)
+                .foregroundColor(Color.adaptiveMutedForeground(colorScheme))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, .spacingMD)
             
@@ -43,7 +44,7 @@ struct EmptyStateView: View {
                     .padding(.top, .spacingSM)
             }
         }
-        .padding(.spacing2XL)
+        .padding(.spacingLG)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(message)")

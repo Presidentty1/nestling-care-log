@@ -14,7 +14,8 @@ enum CardVariant {
 struct CardView<Content: View>: View {
     let variant: CardVariant
     let content: Content
-    
+    @Environment(\.colorScheme) private var colorScheme
+
     init(variant: CardVariant = .default, @ViewBuilder content: () -> Content) {
         self.variant = variant
         self.content = content()
@@ -26,18 +27,18 @@ struct CardView<Content: View>: View {
             .background(backgroundColor)
             .overlay(overlay)
             .cornerRadius(.radiusMD)
-            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+            .adaptiveShadow(shadowLevel, scheme: colorScheme)
     }
     
     private var backgroundColor: Color {
         switch variant {
-        case .default, .outline: return .surface
-        case .emphasis: return Color.primary.opacity(0.05)
+        case .default, .outline: return Color.adaptiveSurface(colorScheme)
+        case .emphasis: return Color.adaptivePrimary(colorScheme).opacity(0.05)
         case .success: return Color.success.opacity(0.1)
         case .warning: return Color.warning.opacity(0.1)
         case .info: return Color.info.opacity(0.1)
         case .destructive: return Color.red.opacity(0.1)
-        case .elevated: return .surface
+        case .elevated: return Color.adaptiveElevated(colorScheme)
         }
     }
     
@@ -45,32 +46,22 @@ struct CardView<Content: View>: View {
     private var overlay: some View {
         if variant == .outline {
             RoundedRectangle(cornerRadius: .radiusMD)
-                .stroke(Color.border, lineWidth: 1)
+                .stroke(Color.adaptiveBorder(colorScheme), lineWidth: 1)
         } else if variant == .emphasis {
             RoundedRectangle(cornerRadius: .radiusMD)
-                .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                .stroke(Color.adaptivePrimary(colorScheme).opacity(0.2), lineWidth: 1)
         } else {
             EmptyView()
         }
     }
     
-    private var shadowColor: Color {
-        variant == .elevated ? Color.black.opacity(0.1) : Color.clear
-    }
-    
-    private var shadowRadius: CGFloat {
-        variant == .elevated ? 8 : 0
-    }
-    
-    private var shadowY: CGFloat {
-        variant == .elevated ? 4 : 0
+    private var shadowLevel: ShadowLevel {
+        variant == .elevated ? .lg : .sm
     }
 }
 
-extension Color {
-    static let border = Color(red: 0.9, green: 0.9, blue: 0.9)
-    static let info = Color(red: 0.13, green: 0.59, blue: 0.95) // #2196F3
-}
+// Legacy color definitions moved to DesignSystem.swift
+// Use Color.adaptiveBorder(_:) and Color.adaptiveInfo(_:) instead
 
 #Preview {
     VStack(spacing: 16) {

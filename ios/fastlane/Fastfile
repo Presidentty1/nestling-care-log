@@ -1,0 +1,137 @@
+# Fastlane configuration for Nestling iOS app
+# See https://docs.fastlane.tools
+
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    # Set up environment
+    ENV["FASTLANE_SKIP_UPDATE_CHECK"] = "true"
+    ENV["FASTLANE_HIDE_CHANGELOG"] = "true"
+  end
+
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      scheme: "Nestling",
+      device: "iPhone 15",
+      clean: true
+    )
+  end
+
+  desc "Build beta release"
+  lane :beta do
+    # Ensure we're on main branch
+    ensure_git_branch(branch: "main")
+
+    # Run tests first
+    run_tests(
+      scheme: "Nestling",
+      device: "iPhone 15"
+    )
+
+    # Increment build number
+    increment_build_number
+
+    # Build and archive
+    build_app(
+      scheme: "Nestling",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      notify_external_testers: false
+    )
+
+    # Commit version bump
+    commit_version_bump(
+      message: "Version bump for beta release",
+      force: true
+    )
+
+    # Push to git
+    push_to_git_remote
+  end
+
+  desc "Build release for App Store"
+  lane :release do
+    # Ensure we're on main branch
+    ensure_git_branch(branch: "main")
+
+    # Run tests
+    run_tests(
+      scheme: "Nestling",
+      device: "iPhone 15"
+    )
+
+    # Increment version number for release
+    increment_version_number
+
+    # Reset build number for new version
+    increment_build_number(build_number: "1")
+
+    # Build for App Store
+    build_app(
+      scheme: "Nestling",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store"
+    )
+
+    # Upload to App Store
+    deliver(
+      submit_for_review: false,
+      automatic_release: false,
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true
+    )
+
+    # Create git tag
+    add_git_tag(
+      tag: "v#{get_version_number}"
+    )
+
+    # Push tag
+    push_git_tags
+  end
+
+  desc "Generate screenshots"
+  lane :screenshots do
+    capture_screenshots(
+      scheme: "Nestling",
+      testplan: "ScreenshotTests"
+    )
+
+    frame_screenshots(
+      path: "./fastlane/screenshots"
+    )
+  end
+
+  desc "Update provisioning profiles"
+  lane :certificates do
+    match(
+      type: "development",
+      readonly: true
+    )
+
+    match(
+      type: "appstore",
+      readonly: true
+    )
+  end
+
+  desc "Set up CI environment"
+  lane :setup_ci do
+    setup_ci
+
+    # Install dependencies
+    cocoapods(
+      clean_install: true
+    )
+  end
+end

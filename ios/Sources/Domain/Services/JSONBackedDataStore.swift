@@ -12,6 +12,8 @@ class JSONBackedDataStore: DataStore {
     
     private let queue = DispatchQueue(label: "com.nestling.jsonstore", attributes: .concurrent)
     private let fileManager = FileManager.default
+    private var saveWorkItem: DispatchWorkItem?
+    private let saveDebounceInterval: TimeInterval = 0.5 // 500ms debounce
     
     private var documentsURL: URL {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -68,44 +70,93 @@ class JSONBackedDataStore: DataStore {
     }
     
     private func saveToDisk() {
-        queue.async(flags: .barrier) {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
+        // Cancel previous save work item for debouncing
+        saveWorkItem?.cancel()
+        
+        // Create new work item
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
             
-            var json: [String: Any] = [
-                "version": AppConstants.dataStoreVersion
-            ]
-            
-            if let babiesData = try? self.babies.map({ try encoder.encode($0) }).map({ try JSONSerialization.jsonObject(with: $0) as? [String: Any] }).compactMap({ $0 }) {
-                json["babies"] = babiesData
-            }
-            
-            if let eventsData = try? self.events.map({ try encoder.encode($0) }).map({ try JSONSerialization.jsonObject(with: $0) as? [String: Any] }).compactMap({ $0 }) {
-                json["events"] = eventsData
-            }
-            
-            if let predictionsData = try? self.predictions.map({ try encoder.encode($0) }).map({ try JSONSerialization.jsonObject(with: $0) as? [String: Any] }).compactMap({ $0 }) {
-                json["predictions"] = predictionsData
-            }
-            
-            if let settingsData = try? encoder.encode(self.appSettings),
-               let settingsDict = try? JSONSerialization.jsonObject(with: settingsData) as? [String: Any] {
-                json["settings"] = settingsDict
-            }
-            
-            var lastUsedDict: [String: [String: Any]] = [:]
-            for (eventType, values) in self.lastUsedValues {
-                if let valuesData = try? encoder.encode(values),
-                   let valuesDict = try? JSONSerialization.jsonObject(with: valuesData) as? [String: Any] {
-                    lastUsedDict[eventType.rawValue] = valuesDict
+            self.queue.async(flags: .barrier) {
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                
+                var json: [String: Any] = [
+                    "version": AppConstants.dataStoreVersion
+                ]
+                
+                // Encode babies
+                do {
+                    let babiesData = try self.babies.map { baby -> [String: Any]? in
+                        let data = try encoder.encode(baby)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["babies"] = babiesData
+                } catch {
+                    Logger.dataError("Failed to encode babies: \(error.localizedDescription)")
+                }
+                
+                // Encode events
+                do {
+                    let eventsData = try self.events.map { event -> [String: Any]? in
+                        let data = try encoder.encode(event)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["events"] = eventsData
+                } catch {
+                    Logger.dataError("Failed to encode events: \(error.localizedDescription)")
+                }
+                
+                // Encode predictions
+                do {
+                    let predictionsData = try self.predictions.map { prediction -> [String: Any]? in
+                        let data = try encoder.encode(prediction)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["predictions"] = predictionsData
+                } catch {
+                    Logger.dataError("Failed to encode predictions: \(error.localizedDescription)")
+                }
+                
+                // Encode settings
+                do {
+                    let settingsData = try encoder.encode(self.appSettings)
+                    if let settingsDict = try JSONSerialization.jsonObject(with: settingsData) as? [String: Any] {
+                        json["settings"] = settingsDict
+                    }
+                } catch {
+                    Logger.dataError("Failed to encode settings: \(error.localizedDescription)")
+                }
+                
+                // Encode last used values
+                var lastUsedDict: [String: [String: Any]] = [:]
+                for (eventType, values) in self.lastUsedValues {
+                    do {
+                        let valuesData = try encoder.encode(values)
+                        if let valuesDict = try JSONSerialization.jsonObject(with: valuesData) as? [String: Any] {
+                            lastUsedDict[eventType.rawValue] = valuesDict
+                        }
+                    } catch {
+                        Logger.dataError("Failed to encode last used values for \(eventType.rawValue): \(error.localizedDescription)")
+                    }
+                }
+                json["lastUsedValues"] = lastUsedDict
+                
+                // Write to disk
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: json)
+                    try jsonData.write(to: self.dataFileURL)
+                    Logger.data("Successfully saved data to disk")
+                } catch {
+                    Logger.dataError("Failed to write data to disk: \(error.localizedDescription)")
                 }
             }
-            json["lastUsedValues"] = lastUsedDict
-            
-            if let jsonData = try? JSONSerialization.data(withJSONObject: json) {
-                try? jsonData.write(to: self.dataFileURL)
-            }
         }
+        
+        saveWorkItem = workItem
+        
+        // Debounce: schedule save after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + saveDebounceInterval, execute: workItem)
     }
     
     private func seedMockData() {
@@ -181,6 +232,92 @@ class JSONBackedDataStore: DataStore {
         }
     }
     
+    func forceSyncIfNeeded() async throws {
+        // Cancel any pending debounced saves and perform immediate save
+        // This is critical for app backgrounding scenarios
+        saveWorkItem?.cancel()
+        
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            queue.async(flags: .barrier) {
+                // Perform the save synchronously within the barrier block
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                
+                var json: [String: Any] = [
+                    "version": AppConstants.dataStoreVersion
+                ]
+                
+                // Encode babies with error logging
+                do {
+                    let babiesData = try self.babies.map { baby -> [String: Any]? in
+                        let data = try encoder.encode(baby)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["babies"] = babiesData
+                } catch {
+                    Logger.dataError("Failed to encode babies in forceSync: \(error.localizedDescription)")
+                }
+                
+                // Encode events with error logging
+                do {
+                    let eventsData = try self.events.map { event -> [String: Any]? in
+                        let data = try encoder.encode(event)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["events"] = eventsData
+                } catch {
+                    Logger.dataError("Failed to encode events in forceSync: \(error.localizedDescription)")
+                }
+                
+                // Encode predictions with error logging
+                do {
+                    let predictionsData = try self.predictions.map { prediction -> [String: Any]? in
+                        let data = try encoder.encode(prediction)
+                        return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    }.compactMap { $0 }
+                    json["predictions"] = predictionsData
+                } catch {
+                    Logger.dataError("Failed to encode predictions in forceSync: \(error.localizedDescription)")
+                }
+                
+                // Encode settings with error logging
+                do {
+                    let settingsData = try encoder.encode(self.appSettings)
+                    if let settingsDict = try JSONSerialization.jsonObject(with: settingsData) as? [String: Any] {
+                        json["settings"] = settingsDict
+                    }
+                } catch {
+                    Logger.dataError("Failed to encode settings in forceSync: \(error.localizedDescription)")
+                }
+                
+                // Encode last used values with error logging
+                var lastUsedDict: [String: [String: Any]] = [:]
+                for (eventType, values) in self.lastUsedValues {
+                    do {
+                        let valuesData = try encoder.encode(values)
+                        if let valuesDict = try JSONSerialization.jsonObject(with: valuesData) as? [String: Any] {
+                            lastUsedDict[eventType.rawValue] = valuesDict
+                        }
+                    } catch {
+                        Logger.dataError("Failed to encode last used values for \(eventType.rawValue) in forceSync: \(error.localizedDescription)")
+                    }
+                }
+                json["lastUsedValues"] = lastUsedDict
+                
+                // Write to disk
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: json)
+                    try jsonData.write(to: self.dataFileURL)
+                    Logger.data("Successfully force-synced data to disk")
+                    continuation.resume()
+                } catch {
+                    Logger.dataError("Failed to force-sync data to disk: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event] {
         return await withCheckedContinuation { continuation in
             queue.async {

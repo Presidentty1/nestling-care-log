@@ -10,6 +10,7 @@ enum BadgeVariant {
 struct Badge: View {
     let text: String
     let variant: BadgeVariant
+    @Environment(\.colorScheme) private var colorScheme
     
     init(_ text: String, variant: BadgeVariant = .default) {
         self.text = text
@@ -30,17 +31,17 @@ struct Badge: View {
     
     private var backgroundColor: Color {
         switch variant {
-        case .default: return Color.primary
-        case .secondary: return Color.mutedForeground
+        case .default: return Color.adaptivePrimary(colorScheme)
+        case .secondary: return Color.adaptiveMutedForeground(colorScheme)
         case .destructive: return Color.destructive
         case .outline: return Color.clear
         }
     }
-    
+
     private var textColor: Color {
         switch variant {
-        case .default, .secondary, .destructive: return .white
-        case .outline: return .foreground
+        case .default, .secondary, .destructive: return Color.adaptivePrimaryForeground(colorScheme)
+        case .outline: return Color.adaptiveForeground(colorScheme)
         }
     }
 }

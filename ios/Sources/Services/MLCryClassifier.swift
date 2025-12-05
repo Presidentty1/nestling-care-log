@@ -45,12 +45,12 @@ struct CryClassificationResult {
 }
 
 class MLCryClassifier {
-    // TODO: Load Core ML model
+        // NOTE: ML model loading deferred - using rule-based classification for MVP
     // private var model: MLModel?
     
     /// Initialize ML classifier
     init() {
-        // TODO: Load model
+        // NOTE: ML model not loaded in MVP - rule-based approach used
         // guard let modelURL = Bundle.main.url(forResource: "CryClassifier", withExtension: "mlmodelc") else {
         //     print("Warning: CryClassifier model not found")
         //     return
@@ -71,7 +71,7 @@ class MLCryClassifier {
         averagePower: Float,
         peakPower: Float
     ) -> CryClassificationResult {
-        // TODO: Use ML model for classification
+        // NOTE: Using rule-based classification instead of ML model for MVP
         // For now, fallback to rule-based classifier
         
         // If model is available, use it
@@ -89,7 +89,7 @@ class MLCryClassifier {
         features: [Float],
         duration: TimeInterval
     ) -> CryClassificationResult {
-        // TODO: Implement ML model inference
+        // NOTE: ML inference not implemented - rule-based approach provides basic functionality
         // Example:
         // let input = try MLMultiArray(shape: [features.count], dataType: .float32)
         // for (index, value) in features.enumerated() {
@@ -144,7 +144,9 @@ class MLCryClassifier {
         
         // Get top classification
         let sorted = probabilities.sorted { $0.value > $1.value }
-        let (classification, confidence) = sorted.first!
+        guard let (classification, confidence) = sorted.first else {
+            return ("unknown", 0.0)
+        }
         
         let explanation = generateExplanation(classification: classification, confidence: confidence)
         
@@ -177,7 +179,7 @@ class MLCryClassifier {
     /// - Parameter audioBuffer: AVAudioPCMBuffer
     /// - Returns: Feature vector (MFCC coefficients, spectral features, etc.)
     func extractFeatures(from audioBuffer: AVAudioPCMBuffer) -> [Float] {
-        // TODO: Implement feature extraction
+        // NOTE: Audio feature extraction not implemented - using basic amplitude analysis
         // This would extract:
         // - MFCC (Mel-frequency cepstral coefficients)
         // - Spectral features (centroid, rolloff, flux)

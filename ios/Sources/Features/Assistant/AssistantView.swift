@@ -32,8 +32,8 @@ struct AssistantView: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: .spacingMD) {
-                            // Empty state
-                            if viewModel.messages.isEmpty {
+                            // Empty state (only show if truly empty and not loading)
+                            if viewModel.messages.isEmpty && !viewModel.isSending {
                                 EmptyChatState()
                                     .padding(.top, .spacingXL)
                             }
@@ -76,6 +76,11 @@ struct AssistantView: View {
                     .padding(.horizontal, .spacingMD)
                 }
                 
+                // Paywall sheet (Epic 7 AC5)
+                .sheet(isPresented: $viewModel.showPaywall) {
+                    ProSubscriptionView()
+                }
+                
                 // Input Bar
                 ChatInputBar(
                     text: $viewModel.inputText,
@@ -91,7 +96,7 @@ struct AssistantView: View {
             }
             .navigationTitle("Ask Nestling")
             .navigationBarTitleDisplayMode(.inline)
-            .background(Color.background)
+            .background(NuzzleTheme.background)
         }
     }
 }
@@ -130,7 +135,7 @@ private struct ChatBubble: View {
                     .font(.caption)
                     .foregroundColor(.primary)
                     .frame(width: 24, height: 24)
-                    .background(Color.primary.opacity(0.1))
+                    .background(NuzzleTheme.primary.opacity(0.1))
                     .clipShape(Circle())
             }
             
@@ -141,8 +146,8 @@ private struct ChatBubble: View {
                     .padding(.spacingMD)
                     .background(
                         message.role == .user
-                            ? Color.primary
-                            : Color.surface
+                            ? NuzzleTheme.primary
+                            : NuzzleTheme.surface
                     )
                     .cornerRadius(.radiusMD)
             }
@@ -291,7 +296,7 @@ private struct NoBabyState: View {
                 Spacer()
             }
             .navigationTitle("Ask Nestling")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
         }
     }
 }

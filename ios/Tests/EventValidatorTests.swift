@@ -1,149 +1,141 @@
 import XCTest
-@testable import Nuzzle
+@testable import Nestling
 
 final class EventValidatorTests: XCTestCase {
-    var baby: Baby!
-    
-    override func setUp() {
-        super.setUp()
-        baby = Baby.mock()
-    }
-    
-    func testValidateFeedWithZeroAmount() {
+
+    func testValidFeedEvent() {
         let event = Event(
-            babyId: baby.id,
-            type: .feed,
-            subtype: "bottle",
-            amount: 0,
-            unit: "ml"
-        )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .zeroAmount)
-        }
-    }
-    
-    func testValidateFeedWithNegativeAmount() {
-        let event = Event(
-            babyId: baby.id,
-            type: .feed,
-            subtype: "bottle",
-            amount: -10,
-            unit: "ml"
-        )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .negativeAmount)
-        }
-    }
-    
-    func testValidateBreastFeedWithoutAmount() {
-        // Breast feeds don't require amount
-        let event = Event(
-            babyId: baby.id,
-            type: .feed,
-            subtype: "breast",
-            amount: nil,
-            unit: nil
-        )
-        
-        XCTAssertNoThrow(try EventValidator.validate(event))
-    }
-    
-    func testValidateSleepWithEndBeforeStart() {
-        let start = Date()
-        let end = start.addingTimeInterval(-3600) // 1 hour before start
-        
-        let event = Event(
-            babyId: baby.id,
-            type: .sleep,
-            subtype: "nap",
-            startTime: start,
-            endTime: end
-        )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .endBeforeStart)
-        }
-    }
-    
-    func testValidateSleepWithZeroDuration() {
-        let start = Date()
-        let end = start // Same time = 0 duration
-        
-        let event = Event(
-            babyId: baby.id,
-            type: .sleep,
-            subtype: "nap",
-            startTime: start,
-            endTime: end,
-            durationMinutes: 0
-        )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .zeroDuration)
-        }
-    }
-    
-    func testValidateSleepWithNegativeDuration() {
-        let event = Event(
-            babyId: baby.id,
-            type: .sleep,
-            subtype: "nap",
-            startTime: Date(),
-            durationMinutes: -10
-        )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .negativeDuration)
-        }
-    }
-    
-    func testValidateEventInFuture() {
-        let futureDate = Date().addingTimeInterval(48 * 3600) // 48 hours in future
-        
-        let event = Event(
-            babyId: baby.id,
+            babyId: UUID().uuidString,
             type: .feed,
             subtype: "bottle",
             amount: 120,
             unit: "ml",
-            startTime: futureDate
+            startTime: Date(),
+            note: "Test feed"
         )
-        
-        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
-            XCTAssertEqual(error as? EventValidationError, .invalidDateRange)
-        }
+
+        XCTAssertNoThrow(try EventValidator.validate(event))
     }
-    
-    func testValidateValidEvent() {
+
+    func testInvalidFeedAmount() {
         let event = Event(
-            babyId: baby.id,
+            babyId: UUID().uuidString,
             type: .feed,
             subtype: "bottle",
-            amount: 120,
+            amount: 0, // Invalid: zero amount
             unit: "ml",
             startTime: Date()
         )
-        
-        XCTAssertNoThrow(try EventValidator.validate(event))
-    }
-}
 
-extension EventValidationError: Equatable {
-    public static func == (lhs: EventValidationError, rhs: EventValidationError) -> Bool {
-        switch (lhs, rhs) {
-        case (.endBeforeStart, .endBeforeStart),
-             (.negativeDuration, .negativeDuration),
-             (.zeroDuration, .zeroDuration),
-             (.zeroAmount, .zeroAmount),
-             (.negativeAmount, .negativeAmount),
-             (.invalidDateRange, .invalidDateRange):
-            return true
-        default:
-            return false
+        XCTAssertThrowsError(try EventValidator.validate(event)) { error in
+            XCTAssertTrue(error.localizedDescription.contains("amount"))
         }
     }
+
+    func testValidSleepEvent() {
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(3600) // 1 hour later
+
+        XCTAssertNoThrow(try EventValidator.validateSleep(startTime: startTime, endTime: endTime))
+    }
+
+    func testInvalidSleepEndBeforeStart() {
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(-3600) // 1 hour earlier
+
+        XCTAssertThrowsError(try EventValidator.validateSleep(startTime: startTime, endTime: endTime))
+    }
+
+    func testInvalidSleepTooShort() {
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(10) // Only 10 seconds
+
+        XCTAssertThrowsError(try EventValidator.validateSleep(startTime: startTime, endTime: endTime))
+    }
+
+    func testValidDiaperEvent() {
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .diaper,
+            subtype: "wet",
+            startTime: Date()
+        )
+
+        XCTAssertNoThrow(try EventValidator.validate(event))
+    }
+
+    func testValidTummyTimeEvent() {
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(600) // 10 minutes
+
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .tummyTime,
+            startTime: startTime,
+            endTime: endTime
+        )
+
+        XCTAssertNoThrow(try EventValidator.validate(event))
+    }
+
+    func testInvalidTummyTimeTooLong() {
+        let startTime = Date()
+        let endTime = startTime.addingTimeInterval(7200) // 2 hours (too long)
+
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .tummyTime,
+            startTime: startTime,
+            endTime: endTime
+        )
+
+        XCTAssertThrowsError(try EventValidator.validate(event))
+    }
+
+    func testInvalidEmptyBabyId() {
+        let event = Event(
+            babyId: "", // Invalid: empty baby ID
+            type: .feed,
+            startTime: Date()
+        )
+
+        XCTAssertThrowsError(try EventValidator.validate(event))
+    }
+
+    func testInvalidFutureStartTime() {
+        let futureTime = Date().addingTimeInterval(86400) // Tomorrow
+
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .feed,
+            startTime: futureTime // Invalid: future time
+        )
+
+        XCTAssertThrowsError(try EventValidator.validate(event))
+    }
+
+    func testValidEventWithNotes() {
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .feed,
+            subtype: "breast",
+            startTime: Date(),
+            note: "This is a valid note with some details about the feeding session"
+        )
+
+        XCTAssertNoThrow(try EventValidator.validate(event))
+    }
+
+    func testInvalidNoteTooLong() {
+        let longNote = String(repeating: "a", count: 1001) // Over 1000 characters
+
+        let event = Event(
+            babyId: UUID().uuidString,
+            type: .feed,
+            startTime: Date(),
+            note: longNote
+        )
+
+        XCTAssertThrowsError(try EventValidator.validate(event))
+    }
 }
-
-

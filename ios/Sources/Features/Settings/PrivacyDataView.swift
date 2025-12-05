@@ -13,22 +13,47 @@ struct PrivacyDataView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: .spacingLG) {
+                    // Doctor Export Section
+                    CardView {
+                        VStack(alignment: .leading, spacing: .spacingSM) {
+                            Text("Export for Doctor/Caregiver")
+                                .font(.headline)
+                                .foregroundColor(.foreground)
+
+                            Text("Generate a clear summary suitable for sharing with pediatric professionals.")
+                                .font(.body)
+                                .foregroundColor(.mutedForeground)
+
+                            HStack(spacing: .spacingSM) {
+                                PrimaryButton("Last 24 Hours", icon: "doc.text") {
+                                    exportForDoctor(range: .last24Hours)
+                                }
+
+                                SecondaryButton("Last 7 Days", icon: "doc.text.fill") {
+                                    exportForDoctor(range: .last7Days)
+                                }
+                            }
+                            .padding(.top, .spacingSM)
+                        }
+                    }
+                    .padding(.horizontal, .spacingMD)
+
                     // Export Section
                     CardView {
                         VStack(alignment: .leading, spacing: .spacingSM) {
                             Text("Export Data")
                                 .font(.headline)
                                 .foregroundColor(.foreground)
-                            
+
                             Text("Export your events as CSV or JSON. The file can be shared or saved to Files.")
                                 .font(.body)
                                 .foregroundColor(.mutedForeground)
-                            
+
                             HStack(spacing: .spacingSM) {
                                 PrimaryButton("Export CSV", icon: "square.and.arrow.up") {
                                     exportToCSV()
                                 }
-                                
+
                                 SecondaryButton("Export JSON", icon: "doc.text") {
                                     exportToJSON()
                                 }
@@ -78,7 +103,7 @@ struct PrivacyDataView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.spacingMD)
-                                .background(Color.surface)
+                                .background(NuzzleTheme.surface)
                                 .cornerRadius(.radiusMD)
                             }
                             .padding(.top, .spacingSM)
@@ -108,7 +133,7 @@ struct PrivacyDataView: View {
                 .padding(.spacingMD)
             }
             .navigationTitle("Privacy & Data")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -137,7 +162,43 @@ struct PrivacyDataView: View {
             }
         }
     }
-    
+
+    private func exportForDoctor(range: DateRange) {
+        guard let baby = environment.currentBaby else { return }
+
+        Task {
+            do {
+                let dateRange = range.dateRange
+                let events = try await environment.dataStore.fetchEvents(for: baby, from: dateRange.start, to: dateRange.end)
+
+                // Generate summary and CSV
+                let summary = DoctorExportService.shared.generateSummary(for: baby, events: events, dateRange: dateRange)
+                let csv = DoctorExportService.shared.generateCSV(for: baby, events: events, dateRange: dateRange)
+
+                // Create temporary files
+                guard let summaryURL = DoctorExportService.shared.createSummaryFile(summary: summary, baby: baby),
+                      let csvURL = DoctorExportService.shared.createCSVFile(csv: csv, baby: baby) else {
+                    return
+                }
+
+                // Present share sheet
+                await MainActor.run {
+                    let activityVC = UIActivityViewController(
+                        activityItems: [summaryURL, csvURL],
+                        applicationActivities: nil
+                    )
+
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let rootVC = windowScene.windows.first?.rootViewController {
+                        rootVC.present(activityVC, animated: true)
+                    }
+                }
+            } catch {
+                Logger.dataError("Failed to export data for doctor: \(error.localizedDescription)")
+            }
+        }
+    }
+
     private func createBackup() {
         Task {
             do {

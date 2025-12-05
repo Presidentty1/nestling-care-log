@@ -38,11 +38,7 @@ actor Analytics {
 /// Console-based analytics (development)
 class ConsoleAnalytics: AnalyticsService {
     func logEvent(_ event: String, parameters: [String: Any]?) {
-        if let params = parameters {
-            print("[Analytics] \(event): \(params)")
-        } else {
-            print("[Analytics] \(event)")
-        }
+        Logger.analytics("\(event): \(parameters ?? [:])")
     }
 }
 

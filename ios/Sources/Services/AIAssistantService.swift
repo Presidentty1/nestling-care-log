@@ -1,4 +1,5 @@
 import Foundation
+import Supabase
 
 /// Protocol for AI Assistant service
 protocol AIAssistantServiceProtocol {
@@ -111,9 +112,19 @@ class AIAssistantService: AIAssistantServiceProtocol {
             throw AIAssistantError.authenticationRequired
         } else if httpResponse.statusCode == 403 {
             throw AIAssistantError.consentRequired
+        } else if httpResponse.statusCode == 429 {
+            // Free tier limit reached (Epic 7 AC5)
+            let errorData = try? JSONDecoder().decode([String: Any].self, from: data)
+            let upgradeRequired = errorData?["upgradeRequired"] as? Bool ?? false
+            throw AIAssistantError.upgradeRequired(errorData?["error"] as? String ?? "Free tier limit reached")
         } else if httpResponse.statusCode >= 400 {
-            let errorMessage = try? JSONDecoder().decode([String: String].self, from: data)
-            throw AIAssistantError.apiError(errorMessage?["error"] ?? "Unknown error")
+            let errorData = try? JSONDecoder().decode([String: Any].self, from: data)
+            let upgradeRequired = errorData?["upgradeRequired"] as? Bool ?? false
+            if upgradeRequired {
+                throw AIAssistantError.upgradeRequired(errorData?["error"] as? String ?? "Upgrade required")
+            } else {
+                throw AIAssistantError.apiError(errorData?["error"] as? String ?? "Unknown error")
+            }
         }
         
         // Parse response
@@ -160,7 +171,7 @@ class AIAssistantService: AIAssistantServiceProtocol {
                 sleepEvents = recentEvents.filter { $0.type == .sleep && $0.endTime != nil }
             } catch {
                 // If fetching fails, continue with basic context
-                print("Error fetching events for baby context: \(error)")
+                Logger.dataError("Error fetching events for baby context: \(error.localizedDescription)")
             }
         }
         
@@ -187,10 +198,8 @@ class AIAssistantService: AIAssistantServiceProtocol {
     }
     
     /// Extract session token from session object
-    private func getSessionToken(from session: Any) -> String? {
-        // TODO: Extract actual token from Supabase session
-        // For now, return nil - this will need to be implemented when Supabase SDK is added
-        return nil
+    private func getSessionToken(from session: Session) -> String? {
+        return session.accessToken
     }
 }
 
@@ -214,6 +223,7 @@ enum AIAssistantError: LocalizedError {
     case notConfigured
     case authenticationRequired
     case consentRequired
+    case upgradeRequired(String) // Epic 7: Paywall trigger
     case networkError(Error)
     case apiError(String)
     
@@ -225,6 +235,8 @@ enum AIAssistantError: LocalizedError {
             return "Authentication required to use AI features"
         case .consentRequired:
             return "AI features are disabled. Enable in Settings → AI & Data Sharing."
+        case .upgradeRequired(let message):
+            return message
         case .networkError(let error):
             return "Network error: \(error.localizedDescription)"
         case .apiError(let message):

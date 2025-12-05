@@ -448,5 +448,25 @@ class CoreDataDataStore: DataStore {
             }
         }
     }
+    
+    // MARK: - Data Persistence
+    
+    func forceSyncIfNeeded() async throws {
+        // Core Data automatically saves on context save
+        // This method ensures all pending changes are persisted
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            let context = stack.newBackgroundContext()
+            context.perform {
+                do {
+                    try stack.save(context: context)
+                    // Also save main context
+                    try stack.save()
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
 }
 

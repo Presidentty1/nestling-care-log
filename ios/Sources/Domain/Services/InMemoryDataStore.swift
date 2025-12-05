@@ -131,6 +131,10 @@ class InMemoryDataStore: DataStore {
         }
     }
     
+    func forceSyncIfNeeded() async throws {
+        // In-memory store doesn't need syncing
+    }
+
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event] {
         return await withCheckedContinuation { continuation in
             queue.async {

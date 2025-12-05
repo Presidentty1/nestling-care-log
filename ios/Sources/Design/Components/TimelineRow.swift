@@ -6,6 +6,7 @@ struct TimelineRow: View {
     let onDelete: () -> Void
     let onDuplicate: (() -> Void)?
     @State private var showDeleteConfirmation = false
+    @Environment(\.colorScheme) private var colorScheme
     
     init(event: Event, onEdit: @escaping () -> Void, onDelete: @escaping () -> Void, onDuplicate: (() -> Void)? = nil) {
         self.event = event
@@ -27,12 +28,12 @@ struct TimelineRow: View {
                 Text(event.type.displayName)
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.foreground)
+                    .foregroundColor(Color.adaptiveForeground(colorScheme))
                     .lineLimit(nil)
-                
+
                 Text(formatEventDetails(event))
                     .font(.caption)
-                    .foregroundColor(.mutedForeground)
+                    .foregroundColor(Color.adaptiveMutedForeground(colorScheme))
                     .lineLimit(nil)
             }
             
@@ -41,7 +42,7 @@ struct TimelineRow: View {
             // Time
             Text(formatTime(event.startTime))
                 .font(.caption)
-                .foregroundColor(.mutedForeground)
+                .foregroundColor(Color.adaptiveMutedForeground(colorScheme))
             
             // Menu
             Menu {
@@ -76,13 +77,13 @@ struct TimelineRow: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .foregroundColor(.mutedForeground)
+                    .foregroundColor(Color.adaptiveMutedForeground(colorScheme))
                     .padding(8)
             }
             .accessibilityLabel("More options for \(event.type.displayName)")
         }
         .padding(.spacingMD)
-        .background(Color.surface)
+        .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(.radiusMD)
         .contextMenu {
             Button(action: {
@@ -185,6 +186,14 @@ struct TimelineRow: View {
     }
     
     private func formatTime(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+        
+        // Show "Just now" for events within the last minute
+        if interval < 60 {
+            return "Just now"
+        }
+        
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)

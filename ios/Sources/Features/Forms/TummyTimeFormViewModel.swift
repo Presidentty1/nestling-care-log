@@ -42,11 +42,16 @@ class TummyTimeFormViewModel: ObservableObject {
     
     private func loadLastUsedValues() {
         Task {
-            if let lastUsed = try? await dataStore.getLastUsedValues(for: .tummyTime),
-               let duration = lastUsed.durationMinutes {
-                await MainActor.run {
-                    self.durationMinutes = String(duration)
+            do {
+                if let lastUsed = try await dataStore.getLastUsedValues(for: .tummyTime),
+                   let duration = lastUsed.durationMinutes {
+                    await MainActor.run {
+                        self.durationMinutes = String(duration)
+                    }
                 }
+            } catch {
+                Logger.dataError("Failed to load last used values: \(error.localizedDescription)")
+                // Continue with defaults
             }
         }
     }
@@ -54,7 +59,11 @@ class TummyTimeFormViewModel: ObservableObject {
     func startTimer() {
         guard !isTimerRunning else { return }
         timerStartTime = Date()
-        startTime = timerStartTime!
+        guard let startTime = timerStartTime else {
+            Logger.error("Failed to start timer: timerStartTime is nil")
+            return
+        }
+        self.startTime = startTime
         isTimerRunning = true
         startTimeUpdates()
     }
@@ -71,20 +80,47 @@ class TummyTimeFormViewModel: ObservableObject {
     }
     
     private func startTimeUpdates() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Update every 5 seconds for tummy time to save battery
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self = self, let start = self.timerStartTime else { return }
                 self.elapsedSeconds = Int(Date().timeIntervalSince(start))
             }
         }
+        // Ensure timer doesn't prevent app suspension
+        if let timer = timer {
+            RunLoop.current.add(timer, forMode: .common)
+        } else {
+            Logger.error("Failed to create timer for tummy time tracking")
+        }
+    }
+
+    deinit {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    /// Cleanup timer when view disappears
+    func cleanup() {
+        timer?.invalidate()
+        timer = nil
+        isTimerRunning = false
     }
     
     func validate() {
         if isTimerMode {
             isValid = isTimerRunning && elapsedSeconds > 0
         } else {
-            let duration = Int(durationMinutes) ?? 0
-            isValid = duration > 0
+            // Validate duration string: must be numeric, positive, and reasonable (max 120 minutes)
+            let trimmed = durationMinutes.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty,
+                  let duration = Int(trimmed),
+                  duration > 0,
+                  duration <= 120 else {
+                isValid = false
+                return
+            }
+            isValid = true
         }
     }
     
@@ -122,10 +158,6 @@ class TummyTimeFormViewModel: ObservableObject {
         // Save last used values
         let lastUsed = LastUsedValues(durationMinutes: duration)
         try await dataStore.saveLastUsedValues(for: .tummyTime, values: lastUsed)
-    }
-    
-    deinit {
-        timer?.invalidate()
     }
 }
 

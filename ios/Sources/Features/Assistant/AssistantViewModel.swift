@@ -8,6 +8,7 @@ class AssistantViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var isSending: Bool = false
     @Published var errorMessage: String?
+    @Published var showPaywall: Bool = false // Epic 7: Paywall trigger
     
     private let service: AIAssistantServiceProtocol
     private let baby: Baby?
@@ -23,10 +24,15 @@ class AssistantViewModel: ObservableObject {
     
     /// Initialize conversation with welcome message if needed
     private func bootstrapConversation() {
-        if messages.isEmpty {
-            // Optional: Add a welcome message from assistant
-            // For now, we'll start with empty messages
-        }
+        guard messages.isEmpty else { return }
+        
+        let introMessage = AIChatMessage(
+            role: .assistant,
+            content: "Hi, I'm Nestling's AI helper. I can help with quick questions about sleep, feeds, diapers, and what to do next. I'm not a doctor, so for medical concerns please contact a pediatric professional.",
+            createdAt: Date()
+        )
+        
+        messages.append(introMessage)
     }
     
     /// Send a message to the AI assistant
@@ -74,8 +80,12 @@ class AssistantViewModel: ObservableObject {
             messages.removeAll { $0.id == userMessage.id }
             inputText = previousInput
             
-            // Set error message
-            if let aiError = error as? AIAssistantError {
+            // Handle upgrade required (Epic 7 AC5)
+            if let aiError = error as? AIAssistantError,
+               case .upgradeRequired(let message) = aiError {
+                errorMessage = message
+                showPaywall = true
+            } else if let aiError = error as? AIAssistantError {
                 errorMessage = aiError.localizedDescription
             } else {
                 errorMessage = error.localizedDescription

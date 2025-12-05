@@ -44,13 +44,18 @@ class SleepFormViewModel: ObservableObject {
     
     private func checkActiveSleep() {
         Task {
-            if let activeSleep = try? await dataStore.getActiveSleep(for: baby) {
-                await MainActor.run {
-                    self.isTimerRunning = true
-                    self.timerStartTime = activeSleep.startTime
-                    self.startTime = activeSleep.startTime
-                    startTimer()
+            do {
+                if let activeSleep = try await dataStore.getActiveSleep(for: baby) {
+                    await MainActor.run {
+                        self.isTimerRunning = true
+                        self.timerStartTime = activeSleep.startTime
+                        self.startTime = activeSleep.startTime
+                        startTimer()
+                    }
                 }
+            } catch {
+                Logger.dataError("Failed to check active sleep: \(error.localizedDescription)")
+                // Continue without active sleep - user can start new timer
             }
         }
     }
@@ -58,13 +63,17 @@ class SleepFormViewModel: ObservableObject {
     func startTimer() {
         guard !isTimerRunning else { return }
         timerStartTime = Date()
-        startTime = timerStartTime!
+        guard let startTime = timerStartTime else {
+            Logger.error("Failed to start timer: timerStartTime is nil")
+            return
+        }
+        self.startTime = startTime
         isTimerRunning = true
         startTimeUpdates()
         
         // Start Live Activity
         if #available(iOS 16.1, *) {
-            LiveActivityManager.shared.startSleepActivity(for: baby, startTime: timerStartTime!)
+            LiveActivityManager.shared.startSleepActivity(for: baby, startTime: startTime)
         }
     }
     
@@ -83,16 +92,40 @@ class SleepFormViewModel: ObservableObject {
     }
     
     private func startTimeUpdates() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Update every 5 seconds instead of 1 to save battery during long sleep sessions
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self = self, let start = self.timerStartTime else { return }
                 self.elapsedSeconds = Int(Date().timeIntervalSince(start))
-                
+
                 // Update Live Activity
                 if #available(iOS 16.1, *) {
                     LiveActivityManager.shared.updateSleepActivity(elapsedSeconds: self.elapsedSeconds)
                 }
             }
+        }
+        // Ensure timer doesn't prevent app suspension
+        if let timer = timer {
+            RunLoop.current.add(timer, forMode: .common)
+        } else {
+            Logger.error("Failed to create timer for sleep tracking")
+        }
+    }
+
+    deinit {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    /// Cleanup timer when view disappears
+    func cleanup() {
+        timer?.invalidate()
+        timer = nil
+        isTimerRunning = false
+        
+        // Stop Live Activity
+        if #available(iOS 16.1, *) {
+            LiveActivityManager.shared.stopSleepActivity()
         }
     }
     
@@ -100,7 +133,11 @@ class SleepFormViewModel: ObservableObject {
         if isTimerMode {
             isValid = isTimerRunning && endTime != nil
         } else {
-            isValid = endTime != nil && endTime! > startTime
+            if let endTime = endTime {
+                isValid = endTime > startTime
+            } else {
+                isValid = false
+            }
         }
     }
     
@@ -145,10 +182,6 @@ class SleepFormViewModel: ObservableObject {
         } else {
             try await dataStore.addEvent(eventData)
         }
-    }
-    
-    deinit {
-        timer?.invalidate()
     }
 }
 

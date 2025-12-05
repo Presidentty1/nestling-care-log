@@ -6,6 +6,7 @@ class PredictionsViewModel: ObservableObject {
     @Published var nextNapPrediction: Prediction?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var showPaywall: Bool = false // Epic 7: Paywall trigger
     
     private let dataStore: DataStore
     private let baby: Baby
@@ -43,6 +44,13 @@ class PredictionsViewModel: ObservableObject {
     func generatePrediction(type: PredictionType) {
         guard aiEnabled else { return }
         
+        // Epic 7: Check if nap predictions require Pro (premium-only)
+        if type == .nextNap && !ProSubscriptionService.shared.isProUser {
+            showPaywall = true
+            errorMessage = "Nap predictions are a Premium feature. Upgrade to unlock AI-powered predictions."
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -79,14 +87,22 @@ class PredictionsViewModel: ObservableObject {
                     ])
                 }
             } catch {
-                self.errorMessage = "Failed to generate prediction: \(error.localizedDescription)"
+                // Check if error indicates upgrade required (Epic 7)
+                let errorString = error.localizedDescription.lowercased()
+                if errorString.contains("premium") || errorString.contains("upgrade") || errorString.contains("subscription") {
+                    showPaywall = true
+                    errorMessage = "This feature requires Nuzzle Pro. Upgrade to unlock AI-powered predictions."
+                } else {
+                    errorMessage = "Failed to generate prediction: \(error.localizedDescription)"
+                }
                 self.isLoading = false
                 
                 // Analytics
                 Task {
                     await Analytics.shared.log("error_occurred", parameters: [
                         "error_type": "prediction",
-                        "context": "PredictionsViewModel"
+                        "context": "PredictionsViewModel",
+                        "upgrade_required": errorString.contains("premium") || errorString.contains("upgrade")
                     ])
                 }
             }

@@ -2,9 +2,11 @@ import Foundation
 import os.signpost
 
 class SignpostLogger {
-    static let dataStore = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DataStore")
-    static let predictions = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Predictions")
-    static let ui = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UI")
+    private static let subsystem = Bundle.main.bundleIdentifier ?? "com.nestling.Nestling"
+    
+    static let dataStore = OSLog(subsystem: subsystem, category: "DataStore")
+    static let predictions = OSLog(subsystem: subsystem, category: "Predictions")
+    static let ui = OSLog(subsystem: subsystem, category: "UI")
     
     static func beginInterval(_ name: StaticString, log: OSLog = .default) -> OSSignpostID {
         let signpostID = OSSignpostID(log: log)

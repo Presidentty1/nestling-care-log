@@ -5,6 +5,7 @@ struct PrimaryButton: View {
     let icon: String?
     let action: () -> Void
     var isDisabled: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
     
     init(_ title: String, icon: String? = nil, isDisabled: Bool = false, action: @escaping () -> Void) {
         self.title = title
@@ -26,10 +27,10 @@ struct PrimaryButton: View {
                 Text(title)
             }
             .font(.body)
-            .foregroundColor(.white)
+            .foregroundColor(Color.adaptivePrimaryForeground(colorScheme))
             .frame(maxWidth: .infinity)
             .padding(.spacingMD)
-            .background(isDisabled ? Color.mutedForeground : Color.primary)
+            .background(isDisabled ? Color.adaptiveTextSecondary(colorScheme) : Color.adaptivePrimary(colorScheme))
             .cornerRadius(.radiusMD)
         }
         .disabled(isDisabled)

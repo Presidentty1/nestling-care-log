@@ -1,7 +1,5 @@
 import Foundation
 
-import Foundation
-
 struct DateUtils {
     /// Calendar instance for date operations (uses current timezone)
     private static var calendar: Calendar {
@@ -10,23 +8,33 @@ struct DateUtils {
         return cal
     }
     
-    /// Format time as "2:30 PM" (respects locale and 12/24h setting)
-    static func formatTime(_ date: Date) -> String {
+    /// Cached time formatter (expensive to create, so we cache it)
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         formatter.timeZone = TimeZone.current
         formatter.locale = Locale.current
-        return formatter.string(from: date)
-    }
+        return formatter
+    }()
     
-    /// Format date as "Nov 15, 2024" (respects locale)
-    static func formatDate(_ date: Date) -> String {
+    /// Cached date formatter (expensive to create, so we cache it)
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         formatter.timeZone = TimeZone.current
         formatter.locale = Locale.current
-        return formatter.string(from: date)
+        return formatter
+    }()
+    
+    /// Format time as "2:30 PM" (respects locale and 12/24h setting)
+    static func formatTime(_ date: Date) -> String {
+        return timeFormatter.string(from: date)
+    }
+    
+    /// Format date as "Nov 15, 2024" (respects locale)
+    static func formatDate(_ date: Date) -> String {
+        return dateFormatter.string(from: date)
     }
     
     /// Format relative time: "2h ago", "5m ago", "Just now"
@@ -119,6 +127,15 @@ struct DateUtils {
     static func adjustForTimezone(_ date: Date, from oldTimezone: TimeZone, to newTimezone: TimeZone) -> Date {
         let offset = newTimezone.secondsFromGMT(for: date) - oldTimezone.secondsFromGMT(for: date)
         return date.addingTimeInterval(TimeInterval(offset))
+    }
+
+    /// Format days text with proper pluralization
+    static func daysText(for count: Int) -> String {
+        if count == 1 {
+            return "1 day"
+        } else {
+            return "\(count) days"
+        }
     }
 }
 

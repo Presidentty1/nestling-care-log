@@ -41,7 +41,7 @@ class AudioRecorderService: NSObject, ObservableObject {
                 object: session
             )
         } catch {
-            print("Failed to setup audio session: \(error)")
+            Logger.dataError("Failed to setup audio session: \(error.localizedDescription)")
         }
     }
     
@@ -178,7 +178,7 @@ extension AudioRecorderService: AVAudioRecorderDelegate {
         isRecording = false
         recordingTimer?.invalidate()
         recordingTimer = nil
-        print("Audio recording error: \(error?.localizedDescription ?? "Unknown")")
+        Logger.dataError("Audio recording error: \(error?.localizedDescription ?? "Unknown")")
     }
 }
 

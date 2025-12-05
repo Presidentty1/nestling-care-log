@@ -9,6 +9,7 @@ enum ToastType {
 struct ToastView: View {
     let message: String
     let type: ToastType
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack(spacing: .spacingSM) {
@@ -17,12 +18,12 @@ struct ToastView: View {
             
             Text(message)
                 .font(.body)
-                .foregroundColor(.foreground)
+                .foregroundColor(Color.adaptiveForeground(colorScheme))
         }
         .padding(.spacingMD)
-        .background(Color.surface)
+        .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(.radiusMD)
-        .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+        .adaptiveShadow(.md, scheme: colorScheme)
         .padding(.horizontal, .spacingMD)
         .accessibilityLabel("\(type == .success ? "Success" : type == .error ? "Error" : "Information"): \(message)")
     }

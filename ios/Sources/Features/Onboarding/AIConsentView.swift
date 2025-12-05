@@ -57,7 +57,7 @@ struct AIConsentView: View {
                 .padding(.bottom, .spacing2XL)
             }
         }
-        .background(Color.background)
+        .background(NuzzleTheme.background)
     }
 }
 

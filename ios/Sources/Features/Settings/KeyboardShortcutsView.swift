@@ -34,7 +34,7 @@ struct ShortcutRow: View {
                 .foregroundColor(.mutedForeground)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.surface)
+                .background(NuzzleTheme.surface)
                 .cornerRadius(4)
         }
     }

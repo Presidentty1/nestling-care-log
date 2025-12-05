@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NotificationsIntroView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
+    @State private var isRequestingPermission = false
     
     var body: some View {
         ScrollView {
@@ -57,12 +58,32 @@ struct NotificationsIntroView: View {
                 .padding(.horizontal, .spacingMD)
                 
                 VStack(spacing: .spacingSM) {
-                    PrimaryButton("Get Started") {
-                        coordinator.completeOnboarding()
+                    // Epic 6 AC1: Only request permission after user taps "Allow notifications"
+                    PrimaryButton("Allow notifications", icon: "bell.fill", isDisabled: isRequestingPermission) {
+                        Task {
+                            isRequestingPermission = true
+                            let granted = await NotificationPermissionManager.shared.requestPermission()
+                            isRequestingPermission = false
+                            
+                            // Analytics
+                            await Analytics.shared.log("notification_permission_requested", parameters: [
+                                "granted": granted,
+                                "context": "onboarding"
+                            ])
+                            
+                            // Complete onboarding regardless of permission result
+                            coordinator.completeOnboarding()
+                        }
                     }
                     .padding(.horizontal, .spacingMD)
                     
-                    Button("Skip") {
+                    Button("Skip for now") {
+                        // Analytics
+                        Task {
+                            await Analytics.shared.log("notification_permission_skipped", parameters: [
+                                "context": "onboarding"
+                            ])
+                        }
                         coordinator.skip()
                     }
                     .foregroundColor(.mutedForeground)
@@ -70,7 +91,7 @@ struct NotificationsIntroView: View {
                 .padding(.bottom, .spacing2XL)
             }
         }
-        .background(Color.background)
+        .background(NuzzleTheme.background)
     }
 }
 

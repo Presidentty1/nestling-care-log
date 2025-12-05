@@ -45,12 +45,49 @@ serve(async (req) => {
       .single();
     
     if (!profile?.ai_data_sharing_enabled) {
-      return new Response(JSON.stringify({ 
-        error: 'AI Assistant is disabled. Enable AI features in Settings → AI & Data Sharing.' 
+      return new Response(JSON.stringify({
+        error: 'AI Assistant is disabled. Enable AI features in Settings → AI & Data Sharing.'
       }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Check subscription status
+    const { data: tierData, error: tierError } = await supabaseClient
+      .rpc('check_subscription_status', { user_uuid: user.id });
+
+    if (tierError) {
+      console.error('Subscription check error:', tierError);
+      return new Response(JSON.stringify({
+        error: 'Unable to verify subscription status'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const isPremium = tierData === 'premium';
+    if (!isPremium) {
+      // Check usage limit for free users (5 per day)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { count: usageCount } = await supabaseClient
+        .from('ai_conversations')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', today.toISOString());
+
+      if (usageCount >= 5) {
+        return new Response(JSON.stringify({
+          error: 'Free tier limit reached. Upgrade to Premium for unlimited AI Assistant access.',
+          upgradeRequired: true
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // SECURITY: Validate input

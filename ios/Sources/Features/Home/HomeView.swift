@@ -12,8 +12,9 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if let viewModel = viewModel {
+            ZStack(alignment: .topTrailing) {
+                Group {
+                    if let viewModel = viewModel {
                     ScrollView {
                         VStack(spacing: .spacingLG) {
                             // Baby Selector
@@ -24,51 +25,141 @@ struct HomeView: View {
                                 }
                                 .padding(.horizontal, .spacingMD)
                             }
-                            
-                            // Summary Cards
+
+                            // First Log Card (shown after onboarding)
+                            if viewModel.shouldShowFirstLogCard {
+                                FirstLogCardView {
+                                    // Open feed logging form
+                                    showFeedForm = true
+                                }
+                                .padding(.top, .spacingMD)
+                            }
+
+                            // Trial Offer Banner
+                            if viewModel.shouldShowTrialOffer {
+                                TrialOfferBanner(
+                                    onTryPro: {
+                                        // Navigate to Pro subscription view
+                                        // For now, just dismiss and show a message
+                                        viewModel.dismissTrialOffer()
+                                        // TODO: Navigate to ProSubscriptionView
+                                    },
+                                    onDismiss: {
+                                        viewModel.dismissTrialOffer()
+                                    }
+                                )
+                                .padding(.top, .spacingMD)
+                            }
+
+                            // Weekly Tip
+                            if let tip = viewModel.currentTip {
+                                TipCard(tip: tip, onDismiss: {
+                                    viewModel.dismissCurrentTip()
+                                })
+                                .padding(.top, .spacingMD)
+                            }
+
+                            // New Achievements
+                            if !viewModel.newAchievements.isEmpty {
+                                VStack(alignment: .leading, spacing: .spacingMD) {
+                                    HStack {
+                                        Image(systemName: "trophy.fill")
+                                            .foregroundColor(.yellow)
+                                        Text("New Achievements!")
+                                            .font(.headline)
+                                            .foregroundColor(Color.adaptiveForeground(colorScheme))
+
+                                        Spacer()
+
+                                        Button(action: {
+                                            viewModel.dismissNewAchievements()
+                                        }) {
+                                            Image(systemName: "xmark")
+                                                .foregroundColor(Color.adaptiveTextSecondary(colorScheme))
+                                                .font(.system(size: 16))
+                                        }
+                                    }
+
+                                    AchievementGrid(achievements: viewModel.newAchievements)
+                                }
+                                .padding(.spacingMD)
+                                .background(Color.adaptiveSurface(colorScheme))
+                                .cornerRadius(.radiusMD)
+                                .padding(.horizontal, .spacingMD)
+                                .padding(.top, .spacingMD)
+                            }
+
+                            // Summary Cards (stats tiles - Today tiles)
                             if let summary = viewModel.summary {
-                                SummaryCardsView(summary: summary)
+                                SummaryCardsView(summary: summary) { filter in
+                                    withAnimation {
+                                        // Toggle back to .all if tapping the same filter
+                                        if viewModel.selectedFilter == filter {
+                                            viewModel.selectedFilter = .all
+                                        } else {
+                                            viewModel.selectedFilter = filter
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, .spacingMD)
+                            }
+
+                            // Guidance Strip (Epic 4) - three-segment "Now / Next Nap / Next Feed"
+                            if let baby = environment.currentBaby {
+                                GuidanceStripView(dataStore: environment.dataStore, baby: baby)
                                     .padding(.horizontal, .spacingMD)
                             }
-                            
-                            // Next Nap Prediction Card
-                            if let napPrediction = viewModel.nextNapPrediction {
-                                NextNapCard(prediction: napPrediction)
-                                    .padding(.horizontal, .spacingMD)
+
+                            // Quick Actions (Quick Log) - Epic 3: Context-aware
+                            if let baby = environment.currentBaby {
+                                QuickActionsSection(
+                                    activeSleep: viewModel.activeSleep,
+                                    baby: baby,
+                                    events: viewModel.events,
+                                    onFeed: { viewModel.quickLogFeed() },
+                                    onSleep: { viewModel.quickLogSleep() },
+                                    onDiaper: { viewModel.quickLogDiaper() },
+                                    onTummyTime: { viewModel.quickLogTummyTime() },
+                                    onOpenFeedForm: { showFeedForm = true },
+                                    onOpenSleepForm: { showSleepForm = true },
+                                    onOpenDiaperForm: { showDiaperForm = true },
+                                    onOpenTummyForm: { showTummyForm = true }
+                                )
+                                .padding(.horizontal, .spacingMD)
                             }
                             
-                            // Quick Actions
-                            QuickActionsSection(
-                                activeSleep: viewModel.activeSleep,
-                                onFeed: { viewModel.quickLogFeed() },
-                                onSleep: { viewModel.quickLogSleep() },
-                                onDiaper: { viewModel.quickLogDiaper() },
-                                onTummyTime: { viewModel.quickLogTummyTime() },
-                                onOpenFeedForm: { showFeedForm = true },
-                                onOpenSleepForm: { showSleepForm = true },
-                                onOpenDiaperForm: { showDiaperForm = true },
-                                onOpenTummyForm: { showTummyForm = true }
-                            )
-                            .padding(.horizontal, .spacingMD)
+                            // Timeline filters
+                            if !viewModel.filteredEvents.isEmpty {
+                                FilterChipsView(
+                                    selectedFilter: $viewModel.selectedFilter,
+                                    filters: EventTypeFilter.allCases
+                                )
+                                .padding(.horizontal, .spacingMD)
+                                .padding(.vertical, .spacingSM)
+                            }
                             
-                            // Timeline
+                            // Timeline list
                             if viewModel.isLoading {
                                 LoadingStateView(message: "Loading events...")
                                     .frame(height: 200)
                             } else if viewModel.filteredEvents.isEmpty {
                                 EmptyStateView(
                                     icon: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "calendar" : "magnifyingglass",
-                                    title: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "No events logged today" : "No matching events",
-                                    message: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "Start logging events to see them here" : "Try adjusting your search or filter"
-                                )
+                                    title: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "Ready to start logging?" : "No matching events",
+                                    message: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "Log your first feed, diaper, or sleep to unlock nap predictions and insights" : "Try adjusting your search or filter",
+                                    actionTitle: viewModel.searchText.isEmpty && viewModel.selectedFilter == .all ? "Log First Event" : nil
+                                ) {
+                                    // Open quick log or feed form
+                                    showFeedForm = true
+                                }
                                 .frame(height: 200)
                             } else {
-                                // Filter chips
-                                FilterChipsView(
-                                    selectedFilter: $viewModel.selectedFilter,
-                                    filters: EventTypeFilter.allCases
-                                )
-                                .padding(.vertical, .spacingSM)
+                                // Example data banner (Epic 1 AC7)
+                                if viewModel.hasExampleData {
+                                    ExampleDataBanner()
+                                        .padding(.horizontal, .spacingMD)
+                                        .padding(.bottom, .spacingSM)
+                                }
                                 
                                 TimelineSection(
                                     events: viewModel.filteredEvents,
@@ -94,8 +185,9 @@ struct HomeView: View {
                                             }
                                         )
                                         // Auto-dismiss after 7 seconds
+                                        let toastId = showToast?.id
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-                                            if showToast?.id == showToast?.id {
+                                            if showToast?.id == toastId {
                                                 showToast = nil
                                             }
                                         }
@@ -118,7 +210,7 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Today")
-            .background(Color.background)
+                .background(NuzzleTheme.background)
             .searchable(text: $viewModel.searchText, suggestions: {
                 ForEach(viewModel.searchSuggestions, id: \.self) { suggestion in
                     Text(suggestion)
@@ -133,6 +225,17 @@ struct HomeView: View {
             .task {
                 if let baby = environment.currentBaby, viewModel == nil {
                     updateViewModel(for: baby)
+                }
+
+                // Check for review prompt
+                if ReviewPromptManager.shared.shouldShowReviewPrompt() {
+                    // Trigger review prompt after a brief delay to ensure UI is ready
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let rootVC = windowScene.windows.first?.rootViewController {
+                            ReviewPromptManager.shared.requestReviewIfAppropriate(from: rootVC)
+                        }
+                    }
                 }
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
@@ -285,6 +388,11 @@ struct BabySelectorView: View {
                     }
                 }
             }
+            .overlay(alignment: .top) {
+                OfflineIndicator()
+                    .padding(.top, .spacingMD)
+                    .padding(.trailing, .spacingMD)
+            }
         } label: {
             HStack {
                 Text(baby.name)
@@ -296,7 +404,7 @@ struct BabySelectorView: View {
             }
             .padding(.spacingMD)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.surface)
+            .background(NuzzleTheme.surface)
             .cornerRadius(.radiusMD)
         }
     }
@@ -306,6 +414,7 @@ struct BabySelectorView: View {
 
 struct SummaryCardsView: View {
     let summary: DaySummary
+    let onFilterSelected: (EventTypeFilter) -> Void
     
     var body: some View {
         HStack(spacing: .spacingSM) {
@@ -315,6 +424,9 @@ struct SummaryCardsView: View {
                 icon: "drop.fill",
                 color: .eventFeed
             )
+            .onTapGesture {
+                onFilterSelected(.feeds)
+            }
             
             SummaryCard(
                 title: "Diapers",
@@ -322,6 +434,9 @@ struct SummaryCardsView: View {
                 icon: "drop.circle.fill",
                 color: .eventDiaper
             )
+            .onTapGesture {
+                onFilterSelected(.diapers)
+            }
             
             SummaryCard(
                 title: "Sleep",
@@ -329,6 +444,9 @@ struct SummaryCardsView: View {
                 icon: "moon.fill",
                 color: .eventSleep
             )
+            .onTapGesture {
+                onFilterSelected(.sleep)
+            }
         }
     }
 }
@@ -356,7 +474,7 @@ struct SummaryCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.spacingMD)
-        .background(Color.surface)
+        .background(NuzzleTheme.surface)
         .cornerRadius(.radiusMD)
     }
 }
@@ -365,6 +483,8 @@ struct SummaryCard: View {
 
 struct QuickActionsSection: View {
     let activeSleep: Event?
+    let baby: Baby
+    let events: [Event]
     let onFeed: () -> Void
     let onSleep: () -> Void
     let onDiaper: () -> Void
@@ -373,6 +493,26 @@ struct QuickActionsSection: View {
     let onOpenSleepForm: () -> Void
     let onOpenDiaperForm: () -> Void
     let onOpenTummyForm: () -> Void
+    
+    // Epic 3 AC2: Context-aware primary action
+    private var timeSinceLastFeed: TimeInterval? {
+        let lastFeed = events
+            .filter { $0.type == .feed }
+            .sorted { $0.startTime > $1.startTime }
+            .first
+        guard let lastFeed = lastFeed else { return nil }
+        return Date().timeIntervalSince(lastFeed.startTime)
+    }
+    
+    private var shouldEmphasizeFeed: Bool {
+        guard let timeSince = timeSinceLastFeed else { return false }
+        // Emphasize if >= 2.5 hours (Epic 3 AC2)
+        return timeSince >= 2.5 * 3600
+    }
+    
+    private var isBabyAwake: Bool {
+        activeSleep == nil
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -383,14 +523,16 @@ struct QuickActionsSection: View {
             HStack(spacing: .spacingSM) {
                 QuickActionButton(
                     title: "Feed",
+                    isEmphasized: shouldEmphasizeFeed, // Epic 3 AC2: Visual emphasis
                     icon: "drop.fill",
                     color: .eventFeed,
                     action: onFeed,
                     longPressAction: onOpenFeedForm
                 )
                 
+                // Epic 3 AC2: Context-aware sleep button
                 QuickActionButton(
-                    title: activeSleep != nil ? "Stop Sleep" : "Sleep",
+                    title: activeSleep != nil ? "Stop Sleep" : (isBabyAwake ? "Start Nap" : "Sleep"),
                     icon: "moon.fill",
                     color: .eventSleep,
                     isActive: activeSleep != nil,

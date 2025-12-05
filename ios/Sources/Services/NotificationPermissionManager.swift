@@ -11,7 +11,7 @@ class NotificationPermissionManager {
             let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
-            print("Failed to request notification permission: \(error)")
+            Logger.dataError("Failed to request notification permission: \(error.localizedDescription)")
             return false
         }
     }

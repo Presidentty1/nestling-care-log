@@ -2,7 +2,7 @@ import Foundation
 import OSLog
 
 extension Logger {
-    private static var subsystem = Bundle.main.bundleIdentifier!
+    private static var subsystem = Bundle.main.bundleIdentifier ?? "com.nestling.Nestling"
     
     static let dataStore = Logger(subsystem: subsystem, category: "DataStore")
     static let predictions = Logger(subsystem: subsystem, category: "Predictions")

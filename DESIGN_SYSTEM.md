@@ -23,12 +23,22 @@ A comprehensive design system for the Nestling baby tracking app, optimized for 
 --primary-100: hsl(168, 57%, 90%)      /* #D8EFE9 - Light teal for subtle backgrounds */
 ```
 
-#### Dark Mode
+#### Dark Mode (iOS Implementation)
 ```css
---primary: hsl(168, 36%, 64%)          /* #82C6B6 - Lighter teal for dark backgrounds */
+--primary: hsl(168, 36%, 64%)          /* #2EC7A6 - Mint/teal for dark backgrounds */
 --primary-foreground: hsl(0, 0%, 100%) /* White text on primary */
---primary-600: hsl(168, 35%, 58%)      /* #73B5A5 - Darker variant */
+--primary-600: hsl(168, 35%, 58%)      /* #25A792 - Darker variant */
 --primary-100: hsl(168, 26%, 21%)      /* #24413A - Dark teal background */
+```
+
+#### iOS Light Mode Colors
+```swift
+// Light Mode - iOS Implementation
+static let backgroundLight = Color(red: 248/255, green: 250/255, blue: 251/255) // #F8FAFB
+static let surfaceLight = Color.white                                        // #FFFFFF
+static let primaryLight = Color(red: 46/255, green: 125/255, blue: 106/255)  // #2E7D6A
+static let textPrimaryLight = Color(red: 13/255, green: 27/255, blue: 30/255) // #0D1B1E
+static let textSecondaryLight = Color(red: 143/255, green: 161/255, blue: 168/255) // #8FA1A8
 ```
 
 ### Semantic Colors
@@ -93,18 +103,32 @@ extension Color {
 
 ### Background Layers
 
-#### Light Mode
+#### Light Mode (Web)
 ```css
 --background: hsl(210, 17%, 98%)       /* #F8FAFB - Main app background */
 --surface: hsl(0, 0%, 100%)            /* #FFFFFF - Cards, sheets */
 --elevated: hsl(0, 0%, 100%)           /* #FFFFFF - Elevated cards */
 ```
 
-#### Dark Mode
+#### Dark Mode (Web)
 ```css
 --background: hsl(210, 31%, 9%)        /* #0F1417 - Main app background */
 --surface: hsl(204, 20%, 12%)          /* #141A1E - Cards, sheets */
 --elevated: hsl(202, 17%, 14%)         /* #182127 - Elevated cards */
+```
+
+#### iOS Light Mode
+```swift
+static let backgroundLight = Color(red: 248/255, green: 250/255, blue: 251/255) // #F8FAFB
+static let surfaceLight = Color.white                                        // #FFFFFF
+static let elevatedLight = Color.white                                       // #FFFFFF
+```
+
+#### iOS Dark Mode
+```swift
+static let background = Color(red: 5/255, green: 10/255, blue: 16/255)     // #050A10
+static let surface = Color(red: 13/255, green: 21/255, blue: 31/255)       // #0D151F
+static let elevated = Color(red: 24/255, green: 39/255, blue: 55/255)      // #182737
 ```
 
 ### Text Hierarchy
@@ -394,6 +418,44 @@ Uses `Drawer` component from shadcn/ui:
 - Smooth slide-up animation
 - Large corner radius (20px)
 - Handle indicator for drag-to-dismiss
+
+---
+
+## iOS Adaptive Color System
+
+### Theme Management
+The iOS app uses a `ThemeManager` class to handle theme preferences with three modes:
+- **Light**: Always use light mode
+- **Dark**: Always use dark mode
+- **System**: Follow system preference (default)
+
+### Adaptive Color Methods
+All components use adaptive color methods that automatically respond to the current color scheme:
+
+```swift
+// In SwiftUI Views
+@Environment(\.colorScheme) private var colorScheme
+
+var body: some View {
+    Text("Hello")
+        .foregroundColor(Color.adaptiveForeground(colorScheme))
+        .background(Color.adaptiveSurface(colorScheme))
+        .adaptiveShadow(.md, scheme: colorScheme)
+}
+```
+
+### Available Adaptive Methods
+- `Color.adaptivePrimary(_:)` - Primary brand color
+- `Color.adaptiveBackground(_:)` - Main background
+- `Color.adaptiveSurface(_:)` - Card/sheet backgrounds
+- `Color.adaptiveForeground(_:)` - Primary text
+- `Color.adaptiveMutedForeground(_:)` - Secondary text
+- `Color.adaptiveBorder(_:)` - Border colors
+
+### Shadow System
+Adaptive shadows use different opacity levels for light and dark modes:
+- **Light Mode**: Subtle shadows with low opacity
+- **Dark Mode**: More prominent shadows with higher opacity
 
 ---
 

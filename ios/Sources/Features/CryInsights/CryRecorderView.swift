@@ -52,7 +52,7 @@ struct CryRecorderView: View {
                             }
                             .padding(.spacing2XL)
                             .frame(maxWidth: .infinity)
-                            .background(Color.surface)
+                            .background(NuzzleTheme.surface)
                             .cornerRadius(.radiusLG)
                             
                             PrimaryButton("Stop Recording", icon: "stop.fill") {
@@ -83,6 +83,11 @@ struct CryRecorderView: View {
                                     Text(viewModel.explanation)
                                         .font(.body)
                                         .foregroundColor(.mutedForeground)
+
+                                    Text("If you're worried or your baby seems very unwell, contact a pediatric professional.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .padding(.top, .spacingSM)
                                 }
                             }
                             .padding(.horizontal, .spacingMD)
@@ -125,7 +130,7 @@ struct CryRecorderView: View {
                 }
             }
             .navigationTitle("Cry Insights")
-            .background(Color.background)
+            .background(NuzzleTheme.background)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
