@@ -191,7 +191,8 @@ struct SexButton: View {
         switch sex {
         case .male: return "Boy"
         case .female: return "Girl"
-        case .other: return "Other"
+        case .intersex: return "Intersex"
+        case .preferNotToSay: return "Prefer not to say"        case .other: return "Other"
         }
     }
     
