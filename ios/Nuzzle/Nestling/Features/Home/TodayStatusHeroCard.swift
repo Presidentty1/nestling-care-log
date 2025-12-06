@@ -208,7 +208,7 @@ struct TodayStatusHeroCard: View {
         }
             .onAppear {
                 // Track prediction shown analytics
-                if let napWindow = nextNapWindow, let baby = baby {
+                if nextNapWindow != nil, let baby = baby {
                     Task {
                         await Analytics.shared.logPredictionShown(type: "nap", isPro: isPro, babyId: baby.id.uuidString)
                     }

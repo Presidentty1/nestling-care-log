@@ -159,7 +159,7 @@ struct BenefitRow: View {
 }
 
 #Preview {
-    @State var isPresented = true
+    @Previewable @State var isPresented = true
     return UpgradePromptModal(
         isPresented: $isPresented,
         trigger: .fiftyEvents,

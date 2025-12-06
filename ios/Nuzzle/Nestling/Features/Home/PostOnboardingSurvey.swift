@@ -119,7 +119,7 @@ struct PostOnboardingSurvey: View {
 }
 
 #Preview {
-    @State var isPresented = true
+    @Previewable @State var isPresented = true
     return PostOnboardingSurvey(isPresented: $isPresented)
 }
 

@@ -43,7 +43,7 @@ struct WakeWindowCalculator {
     static func nextNapTime(lastSleepEnd: Date, wakeWindow: (min: Int, max: Int)) -> Date {
         let timeSinceWake = Date().timeIntervalSince(lastSleepEnd)
         let minWakeWindowSeconds = Double(wakeWindow.min * 60)
-        let maxWakeWindowSeconds = Double(wakeWindow.max * 60)
+        _ = Double(wakeWindow.max * 60)
         
         // If we're past the minimum wake window, suggest nap soon
         if timeSinceWake >= minWakeWindowSeconds {

@@ -383,7 +383,7 @@ class HomeViewModel: ObservableObject {
                 let amountML = unit == "ml" ? amount : amount * AppConstants.mlPerOz
                 let finalAmount = max(amountML, AppConstants.minimumFeedAmountML)
                 let finalUnit = unit == "ml" ? "ml" : "oz"
-                let finalAmountDisplay = unit == "ml" ? finalAmount : finalAmount / AppConstants.mlPerOz
+                _ = unit == "ml" ? finalAmount : finalAmount / AppConstants.mlPerOz
                 
                 let event = Event(
                     babyId: baby.id,
@@ -434,9 +434,9 @@ class HomeViewModel: ObservableObject {
         print("quickLogSleep called")
         Task { @MainActor in
             do {
-                if let active = activeSleep {
+                if activeSleep != nil {
                     // Stop active sleep
-                    let completedEvent = try await dataStore.stopActiveSleep(for: baby)
+                    _ = try await dataStore.stopActiveSleep(for: baby)
                     await MainActor.run {
                         self.activeSleep = nil
                     }
@@ -546,7 +546,7 @@ class HomeViewModel: ObservableObject {
 
                 // Save last used duration for future reference (but don't use it for quick log timestamp)
                 if let lastUsed = try? await dataStore.getLastUsedValues(for: .tummyTime),
-                   let lastDuration = lastUsed.durationMinutes {
+                   _ = lastUsed.durationMinutes {
                     // Keep existing last used values
                 } else {
                     // Save default duration for future reference

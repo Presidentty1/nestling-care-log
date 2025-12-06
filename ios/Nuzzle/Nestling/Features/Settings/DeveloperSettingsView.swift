@@ -23,7 +23,7 @@ struct DeveloperSettingsView: View {
                 }
                 
                 Button("Verify App Groups") {
-                    let verified = WidgetTestHelper.verifyAppGroups()
+                    _ = WidgetTestHelper.verifyAppGroups()
                     // Could show alert with result
                 }
             }

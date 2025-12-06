@@ -116,7 +116,7 @@ struct SpotlightTutorialOverlay: View {
 }
 
 #Preview {
-    @State var isPresented = true
+    @Previewable @State var isPresented = true
     return SpotlightTutorialOverlay(isPresented: $isPresented) {
         print("Tutorial dismissed")
     }

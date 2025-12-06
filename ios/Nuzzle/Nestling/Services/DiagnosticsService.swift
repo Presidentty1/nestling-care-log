@@ -12,7 +12,7 @@ class DiagnosticsService {
     func generateDiagnostics(dataStore: DataStore) async throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory
         let bundleName = "nestling_diagnostics_\(Date().timeIntervalSince1970).zip"
-        let bundleURL = tempDir.appendingPathComponent(bundleName)
+        _ = tempDir.appendingPathComponent(bundleName)
         
         // Create temporary directory for bundle contents
         let contentsDir = tempDir.appendingPathComponent("diagnostics_contents")

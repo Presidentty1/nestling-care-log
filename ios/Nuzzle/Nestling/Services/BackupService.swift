@@ -49,7 +49,7 @@ class BackupService {
         // Load JSON
         let jsonURL = extractDir.appendingPathComponent("data.json")
         let jsonData = try Data(contentsOf: jsonURL)
-        let backupData = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
+        _ = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
         
         // Restore data (with conflict resolution - new IDs)
         // Implementation would restore babies, events, settings

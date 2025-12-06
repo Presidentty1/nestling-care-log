@@ -109,7 +109,7 @@ class NotificationScheduler {
         let startComponents = calendar.dateComponents([.hour, .minute], from: start)
         let endComponents = calendar.dateComponents([.hour, .minute], from: end)
         
-        var nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+        _ = calendar.dateComponents([.hour, .minute], from: now)
         let startTime = calendar.date(bySettingHour: startComponents.hour ?? 0, minute: startComponents.minute ?? 0, second: 0, of: now) ?? now
         let endTime = calendar.date(bySettingHour: endComponents.hour ?? 0, minute: endComponents.minute ?? 0, second: 0, of: now) ?? now
         

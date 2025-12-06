@@ -70,7 +70,7 @@ struct NotificationsIntroView: View {
     
     private func requestNotificationPermission() {
         Task {
-            let granted = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
             // Proceed with onboarding regardless of permission result
             coordinator.completeOnboarding()
         }

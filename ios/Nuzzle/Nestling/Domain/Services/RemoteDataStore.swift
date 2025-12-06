@@ -63,7 +63,7 @@ class RemoteDataStore: DataStore {
         }
         
         // TODO: Query family_members table to get user's family_id when SDK is added
-        // let userId = try await getCurrentUserId()
+        // _ = try await getCurrentUserId()
         // let response = try await client.database
         //     .from("family_members")
         //     .select("family_id")
@@ -98,7 +98,7 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
+        _ = try await getCurrentFamilyId()
         
         // TODO: Uncomment when Supabase Swift SDK is added
         // let response = try await client.database
@@ -119,10 +119,10 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
+        _ = try await getCurrentFamilyId()
         let babyDTO = BabyDTO.from(baby, familyId: familyId)
         let babyData = try jsonEncoder.encode(babyDTO)
-        let babyDict = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
+        _ = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
         
         // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.database
@@ -138,7 +138,7 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
+        _ = try await getCurrentFamilyId()
         var babyDTO = BabyDTO.from(baby, familyId: familyId)
         babyDTO = BabyDTO(
             id: babyDTO.id,
@@ -154,7 +154,7 @@ class RemoteDataStore: DataStore {
         )
         
         let babyData = try jsonEncoder.encode(babyDTO)
-        let babyDict = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
+        _ = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
         
         // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.database
@@ -195,8 +195,8 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
-        let userId = try await getCurrentUserId()
+        _ = try await getCurrentFamilyId()
+        _ = try await getCurrentUserId()
         
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -226,11 +226,11 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
-        let userId = try await getCurrentUserId()
+        _ = try await getCurrentFamilyId()
+        _ = try await getCurrentUserId()
         let eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
         let eventData = try jsonEncoder.encode(eventDTO)
-        let eventDict = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
+        _ = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
         
         // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.database
@@ -249,8 +249,8 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        let familyId = try await getCurrentFamilyId()
-        let userId = try await getCurrentUserId()
+        _ = try await getCurrentFamilyId()
+        _ = try await getCurrentUserId()
         var eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
         
         // Update timestamp
@@ -272,7 +272,7 @@ class RemoteDataStore: DataStore {
         )
         
         let eventData = try jsonEncoder.encode(eventDTO)
-        let eventDict = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
+        _ = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
         
         // TODO: Uncomment when Supabase Swift SDK is added
         // try await client.database
@@ -379,7 +379,7 @@ class RemoteDataStore: DataStore {
     }
     
     func stopActiveSleep(for baby: Baby) async throws -> Event {
-        guard var activeSleep = try await getActiveSleep(for: baby) else {
+        guard let activeSleep = try await getActiveSleep(for: baby) else {
             throw DataStoreError.notFound("No active sleep found")
         }
         

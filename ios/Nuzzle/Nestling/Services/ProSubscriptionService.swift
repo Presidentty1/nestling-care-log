@@ -128,7 +128,7 @@ class ProSubscriptionService: ObservableObject {
                         // Check if this is an introductory offer (trial)
                         if #available(iOS 17.2, *), let offerType = transaction.offer?.type, offerType == .introductory {
                             // Calculate remaining trial days
-                            if let expirationDate = transaction.expirationDate {
+                            if _ = transaction.expirationDate {
                                 let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
                                 if daysRemaining > 0 {
                                     trialDaysRemaining = daysRemaining
@@ -192,7 +192,7 @@ class ProSubscriptionService: ObservableObject {
 
                 // Check if this is a new activation or renewal
                 let originalPurchaseDate = transaction.originalPurchaseDate
-                if let expirationDate = transaction.expirationDate {
+                if _ = transaction.expirationDate {
                     let timeSincePurchase = Date().timeIntervalSince(originalPurchaseDate)
                     let isRenewal = timeSincePurchase > 86400 // More than 1 day since original purchase
 
@@ -262,7 +262,7 @@ class ProSubscriptionService: ObservableObject {
                         isProUser = true
 
                         // Check expiration
-                        if let expirationDate = transaction.expirationDate,
+                        if _ = transaction.expirationDate,
                            expirationDate < Date() {
                             subscriptionStatus = .expired
                             isProUser = false

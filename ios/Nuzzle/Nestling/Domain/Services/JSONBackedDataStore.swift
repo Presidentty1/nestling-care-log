@@ -33,7 +33,7 @@ class JSONBackedDataStore: DataStore {
     private func loadFromDisk() {
         guard let data = try? Data(contentsOf: dataFileURL),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let version = json["version"] as? Int else {
+              _ = json["version"] as? Int else {
             // First run - seed mock data
             seedMockData()
             saveToDisk()

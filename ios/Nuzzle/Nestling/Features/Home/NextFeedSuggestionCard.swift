@@ -50,7 +50,7 @@ struct NextFeedSuggestionCard: View {
         let timeFormatter = DateFormatter()
         timeFormatter.timeStyle = .short
         
-        let timeSinceLastFeed = now.timeIntervalSince(lastFeed.startTime) / 3600.0 // hours
+        _ = now.timeIntervalSince(lastFeed.startTime) / 3600.0 // hours
         let hoursUntilFeed = max(0, (nextFeedTime.timeIntervalSinceNow) / 3600.0)
         
         if hoursUntilFeed <= 0 {
