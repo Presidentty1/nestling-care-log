@@ -26,7 +26,7 @@ struct OnboardingProgressIndicatorEnhanced: View {
     
     var body: some View {
         if shouldShow {
-            VStack(spacing: .spacingMD) {
+            VStack(spacing: CGFloat.spacingMD) {
                 // Progress bar (new in Phase 4)
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
@@ -55,8 +55,8 @@ struct OnboardingProgressIndicatorEnhanced: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.mutedForeground)
             }
-            .padding(.horizontal, .spacingLG)
-            .padding(.vertical, .spacingMD)
+            .padding(.horizontal, CGFloat.spacingLG)
+            .padding(.vertical, CGFloat.spacingMD)
         } else {
             EmptyView()
         }
@@ -64,7 +64,7 @@ struct OnboardingProgressIndicatorEnhanced: View {
 }
 
 #Preview {
-    VStack(spacing: .spacingXL) {
+    VStack(spacing: CGFloat.spacingXL) {
         OnboardingProgressIndicatorEnhanced(currentStep: .welcome)
         OnboardingProgressIndicatorEnhanced(currentStep: .babyEssentials)
         OnboardingProgressIndicatorEnhanced(currentStep: .goalSelection)
