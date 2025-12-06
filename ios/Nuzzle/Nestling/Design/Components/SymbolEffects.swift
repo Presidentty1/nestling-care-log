@@ -25,9 +25,9 @@ struct SymbolEffects {
             return AnyView(view)
         } else {
             if let value = value {
-                return AnyView(view.symbolEffect(.bounce, options: .nonRepeating, value: value))
+                return AnyView(view.symbolEffect(.bounce, value: value))
             } else {
-                return AnyView(view.symbolEffect(.bounce, options: .nonRepeating))
+                return AnyView(view.symbolEffect(.bounce))
             }
         }
     }
@@ -53,9 +53,9 @@ extension View {
             return AnyView(self)
         } else {
             if let value = value {
-                return AnyView(self.symbolEffect(.bounce, options: .nonRepeating, value: value))
+                return AnyView(self.symbolEffect(.bounce, value: value))
             } else {
-                return AnyView(self.symbolEffect(.bounce, options: .nonRepeating))
+                return AnyView(self.symbolEffect(.bounce))
             }
         }
     }
