@@ -65,6 +65,7 @@ enum Sex: String, Codable, CaseIterable {
     case female = "f"
     case intersex = "i"
     case preferNotToSay = "pns"
+    case other = "other"
     
     var displayName: String {
         switch self {
@@ -72,6 +73,7 @@ enum Sex: String, Codable, CaseIterable {
         case .female: return "Girl"
         case .intersex: return "Intersex"
         case .preferNotToSay: return "Prefer not to say"
+        case .other: return "Other"
         }
     }
 }
