@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { patternInsightsService } from '@/services/patternInsightsService';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
@@ -12,12 +12,7 @@ export function PatternInsights({ babyId }: PatternInsightsProps) {
   const { data: patterns, isLoading } = useQuery({
     queryKey: ['behavior-patterns', babyId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('behavior_patterns')
-        .select('*')
-        .eq('baby_id', babyId)
-        .order('detected_at', { ascending: false });
-      return data || [];
+      return await patternInsightsService.getBehaviorPatterns(babyId);
     },
   });
 

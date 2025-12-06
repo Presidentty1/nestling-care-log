@@ -109,8 +109,8 @@ export default function History() {
 
   if (!activeBabyId) {
     return (
-      <div className="min-h-screen bg-surface pb-20">
-        <div className="max-w-2xl mx-auto p-4">
+      <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
+        <div className="max-w-2xl mx-auto p-4 w-full">
           <EmptyState
             icon={CalendarDays}
             title="No Baby Selected"
@@ -124,8 +124,8 @@ export default function History() {
   }
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+    <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
+      <div className="max-w-2xl mx-auto p-4 space-y-4 w-full">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="font-display text-left">History</h1>

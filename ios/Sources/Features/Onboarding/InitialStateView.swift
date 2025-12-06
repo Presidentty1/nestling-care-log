@@ -28,7 +28,7 @@ struct InitialStateView: View {
             title: "Right now, is \(coordinator.babyName.isEmpty ? "your baby" : coordinator.babyName) asleep or awake?",
             subtitle: "This helps us show you the right guidance right away",
             step: 3,
-            totalSteps: 4,
+            totalSteps: 3,
             content: {
                 VStack(spacing: .spacingLG) {
                     // Large buttons for asleep/awake

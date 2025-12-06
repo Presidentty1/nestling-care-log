@@ -12,6 +12,8 @@ class HistoryViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var searchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
+    @Published var eventCountsByDate: [Date: EventDayCounts] = [:]
+    @Published var useCalendarView: Bool = true // Toggle between calendar and 7-day strip
     
     private let dataStore: DataStore
     let baby: Baby // Made internal so HistoryView can check if baby changed
@@ -265,5 +267,57 @@ class HistoryViewModel: ObservableObject {
             }
         }
     }
+    
+    /// Load event counts for calendar view (entire month)
+    func loadEventCountsForMonth(_ month: Date) async {
+        let calendar = Calendar.current
+        guard let monthStart = calendar.dateComponents([.year, .month], from: month).date,
+              let monthEnd = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) else {
+            return
+        }
+        
+        do {
+            let allEventsInMonth = try await dataStore.fetchEvents(
+                for: baby,
+                from: monthStart,
+                to: monthEnd
+            )
+            
+            // Group events by date and count by type
+            var countsByDate: [Date: EventDayCounts] = [:]
+            for event in allEventsInMonth {
+                let eventDate = calendar.startOfDay(for: event.startTime)
+                var counts = countsByDate[eventDate] ?? EventDayCounts()
+                
+                switch event.type {
+                case .feed:
+                    counts.feeds += 1
+                case .sleep:
+                    counts.sleep += 1
+                case .diaper:
+                    counts.diapers += 1
+                case .tummyTime:
+                    counts.tummyTime += 1
+                }
+                
+                countsByDate[eventDate] = counts
+            }
+            
+            await MainActor.run {
+                self.eventCountsByDate = countsByDate
+            }
+        } catch {
+            print("Error loading event counts for month: \(error)")
+        }
+    }
+}
+
+// MARK: - Event Day Counts
+
+struct EventDayCounts {
+    var feeds: Int = 0
+    var sleep: Int = 0
+    var diapers: Int = 0
+    var tummyTime: Int = 0
 }
 

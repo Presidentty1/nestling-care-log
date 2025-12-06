@@ -9,7 +9,6 @@ import { useAppStore } from '@/store/appStore';
 import { Users, Bell, Shield, ChevronRight, Baby, FileText, Info, Sparkles, Heart, MessageSquare, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { abTestingService } from '@/services/abTestingService';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,7 +29,7 @@ import {
 export default function Settings() {
   const navigate = useNavigate();
   const { caregiverMode, setCaregiverMode, setActiveBabyId } = useAppStore();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium'>('free');
 
   // Get A/B testing variant for paywall
@@ -49,7 +48,7 @@ export default function Settings() {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await signOut();
       if (error) throw error;
       
       // Clear local state
@@ -57,7 +56,7 @@ export default function Settings() {
       setActiveBabyId(null);
       
       toast.success('Signed out successfully');
-      navigate('/auth');
+      // Navigation is handled in useAuth
     } catch (error) {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out. Please try again.');

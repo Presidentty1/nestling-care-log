@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { MessageSquare, Star } from 'lucide-react';
+import { feedbackService } from '@/services/feedbackService';
 
 export default function Feedback() {
   const { toast } = useToast();
   const [feedback, setFeedback] = useState({
-    type: 'general',
+    type: 'general' as 'bug' | 'feature_request' | 'general' | 'rating',
     subject: '',
     message: '',
     rating: 0,
@@ -21,18 +21,12 @@ export default function Feedback() {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase.from('user_feedback').insert({
-        user_id: user.id,
+      await feedbackService.submitFeedback({
         feedback_type: feedback.type,
         subject: feedback.subject,
         message: feedback.message,
         rating: feedback.rating > 0 ? feedback.rating : null,
       });
-
-      if (error) throw error;
     },
     onSuccess: () => {
       toast({ title: 'Thank you for your feedback!' });

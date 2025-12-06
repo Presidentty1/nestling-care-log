@@ -122,14 +122,50 @@ struct HistoryView: View {
                             switch selectedTab {
                             case .timeline:
                                 VStack(spacing: .spacingMD) {
-                                    // Date Picker
-                                    DatePickerView(selectedDate: Binding(
-                                        get: { viewModel.selectedDate },
-                                        set: { viewModel.selectDate($0) }
-                                    )) { date in
-                                        viewModel.selectDate(date)
+                                    // View toggle button
+                                    HStack {
+                                        Spacer()
+                                        Button(action: {
+                                            withAnimation {
+                                                viewModel.useCalendarView.toggle()
+                                            }
+                                            Haptics.light()
+                                        }) {
+                                            Image(systemName: viewModel.useCalendarView ? "list.bullet" : "calendar")
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundColor(.primary)
+                                                .frame(width: 40, height: 40)
+                                                .background(Color.surface)
+                                                .cornerRadius(.radiusMD)
+                                        }
                                     }
                                     .padding(.horizontal, .spacingMD)
+                                    .padding(.top, .spacingSM)
+                                    
+                                    // Date Picker (Calendar or 7-day strip)
+                                    if viewModel.useCalendarView {
+                                        MonthlyCalendarView(
+                                            selectedDate: Binding(
+                                                get: { viewModel.selectedDate },
+                                                set: { viewModel.selectDate($0) }
+                                            ),
+                                            eventCountsByDate: viewModel.eventCountsByDate,
+                                            onDateSelected: { date in
+                                                viewModel.selectDate(date)
+                                                Task {
+                                                    await viewModel.loadEventCountsForMonth(date)
+                                                }
+                                            }
+                                        )
+                                    } else {
+                                        DatePickerView(selectedDate: Binding(
+                                            get: { viewModel.selectedDate },
+                                            set: { viewModel.selectDate($0) }
+                                        )) { date in
+                                            viewModel.selectDate(date)
+                                        }
+                                        .padding(.horizontal, .spacingMD)
+                                    }
 
                                     // Timeline
                                     timelineContent(for: viewModel)
@@ -169,15 +205,19 @@ struct HistoryView: View {
             }
             .navigationTitle("History")
             .background(Color.background)
-            .searchable(text: Binding(
-                get: { viewModel?.searchText ?? "" },
-                set: { viewModel?.searchText = $0 }
-            ), suggestions: {
-                ForEach(viewModel?.searchSuggestions ?? [], id: \.self) { suggestion in
-                    Text(suggestion)
-                        .searchCompletion(suggestion)
+            .searchable(
+                text: Binding(
+                    get: { viewModel?.searchText ?? "" },
+                    set: { viewModel?.searchText = $0 }
+                ),
+                placement: .navigationBarDrawer(displayMode: .automatic),
+                suggestions: {
+                    ForEach(viewModel?.searchSuggestions ?? [], id: \.self) { suggestion in
+                        Text(suggestion)
+                            .searchCompletion(suggestion)
+                    }
                 }
-            })
+            )
             .onChange(of: viewModel?.searchText ?? "") { _, newValue in
                 if newValue.isEmpty {
                     viewModel?.selectedFilter = .all
@@ -188,16 +228,22 @@ struct HistoryView: View {
                 if viewModel == nil {
                     if let baby = environment.currentBaby {
                         updateViewModel(for: baby)
+                        // Load event counts for calendar view
+                        await viewModel?.loadEventCountsForMonth(Date())
                     } else {
                         // Wait for babies to load
                         try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                         if let baby = environment.currentBaby {
                             updateViewModel(for: baby)
+                            // Load event counts for calendar view
+                            await viewModel?.loadEventCountsForMonth(Date())
                         } else if !environment.babies.isEmpty {
                             // If babies exist but currentBaby isn't set, use first one
                             environment.currentBaby = environment.babies.first
                             if let baby = environment.currentBaby {
                                 updateViewModel(for: baby)
+                                // Load event counts for calendar view
+                                await viewModel?.loadEventCountsForMonth(Date())
                             }
                         }
                     }
@@ -333,7 +379,7 @@ struct DatePickerView: View {
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: .spacingSM) {
+            HStack(spacing: 10) {
                 ForEach(last7Days, id: \.self) { date in
                     DateButton(
                         date: date,
@@ -370,20 +416,37 @@ struct DateButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: 6) {
                 Text(dayName)
-                    .font(.caption)
-                    .foregroundColor(isSelected ? .white : .mutedForeground)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(isSelected ? .primary : .mutedForeground)
                 
                 Text(dayNumber)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isSelected ? .white : .foreground)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(isSelected ? .primary : .foreground)
             }
-            .frame(width: 60, height: 70)
-            .background(isSelected ? Color.primary : Color.surface)
-            .cornerRadius(.radiusMD)
+            .frame(width: 68, height: 72)
+            .background(
+                isSelected 
+                    ? Color.primary.opacity(0.12)
+                    : Color.surface.opacity(0.6)
+            )
+            .cornerRadius(.radiusLG)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusLG)
+                    .stroke(
+                        isSelected ? Color.primary : Color.cardBorder,
+                        lineWidth: isSelected ? 2.5 : 1
+                    )
+            )
+            .shadow(
+                color: isSelected ? Color.primary.opacity(0.15) : .clear,
+                radius: isSelected ? 6 : 0,
+                x: 0,
+                y: isSelected ? 2 : 0
+            )
         }
+        .buttonStyle(PlainButtonStyle())
     }
     
     private var dayName: String {

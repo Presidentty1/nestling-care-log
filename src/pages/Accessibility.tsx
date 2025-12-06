@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,30 +7,26 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Type, Moon, Sun } from 'lucide-react';
+import { appSettingsService } from '@/services/appSettingsService';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Accessibility() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [settings, setSettings] = useState({
-    theme: 'system',
-    font_size: 'medium',
+    theme: 'system' as 'light' | 'dark' | 'system',
+    font_size: 'medium' as 'small' | 'medium' | 'large' | 'xlarge',
     caregiver_mode: false,
   });
 
   const { data: userSettings } = useQuery({
-    queryKey: ['app-settings'],
+    queryKey: ['app-settings', user?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-
-      const { data } = await supabase
-        .from('app_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      return data;
+      return await appSettingsService.getAppSettings(user.id);
     },
+    enabled: !!user,
   });
 
   useEffect(() => {
@@ -83,17 +78,11 @@ export default function Accessibility() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
-        .from('app_settings')
-        .upsert({
-          user_id: user.id,
-          theme: settings.theme,
-          font_size: settings.font_size,
-          caregiver_mode: settings.caregiver_mode,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (error) throw error;
+      await appSettingsService.createOrUpdateAppSettings({
+        theme: settings.theme,
+        font_size: settings.font_size,
+        caregiver_mode: settings.caregiver_mode,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['app-settings'] });

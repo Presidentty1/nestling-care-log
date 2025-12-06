@@ -1,0 +1,33 @@
+Nestling – The Fastest Shared Baby Logger
+
+Track your baby's daily care with speed and simplicity. Log feeds, sleep, diapers, and tummy time in seconds. Share with caregivers, get smart predictions, and keep everything organized—all while keeping your data private.
+
+KEY FEATURES
+
+⚡ Lightning-Fast Logging
+Quick actions let you log events with a single tap. No forms, no waiting—just tap and go. Perfect for those middle-of-the-night feeds.
+
+📊 Smart Predictions
+Get AI-powered predictions for next feed and nap times based on your baby's patterns. All processing happens on-device for privacy.
+
+👥 Share with Caregivers
+Multiple caregivers can log events for the same baby. Perfect for families, nannies, and daycare.
+
+📈 Insights & History
+View your baby's patterns over time. See trends, track milestones, and understand your baby's unique rhythms.
+
+🔒 Privacy First
+Your data stays on your device. Export anytime as CSV or JSON. No cloud required unless you choose to sync.
+
+🎯 Designed for Parents
+Built by parents, for parents. Simple, calm, and supportive—no judgment, no complexity.
+
+PERFECT FOR:
+• New parents tracking daily care
+• Families sharing caregiving duties
+• Parents monitoring feeding and sleep patterns
+• Anyone who wants a simple, fast baby tracker
+
+Download Nestling today and make baby tracking effortless.
+
+

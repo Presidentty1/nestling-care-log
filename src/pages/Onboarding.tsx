@@ -1,152 +1,350 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
-import { useOnboarding } from '@/hooks/useOnboarding';
-import { familyService } from '@/services/familyService';
-import { babyService } from '@/services/babyService';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon, Baby, Sparkles } from 'lucide-react';
+import { format } from 'date-fns';
+import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
-import { Baby, ChevronRight } from 'lucide-react';
-import { DateInput } from '@/components/DateInput';
+import { detectTimeZone, parseLocalDate } from '@/services/time';
+import { logger } from '@/lib/logger';
+import { sanitizeBabyName } from '@/lib/sanitization';
+import { validateBaby } from '@/services/validation';
+import { toast } from 'sonner';
+import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
+import { cn } from '@/lib/utils';
+import { trackOnboardingComplete } from '@/analytics/analytics';
+import { MESSAGING } from '@/lib/messaging';
 
 export default function Onboarding() {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { checking } = useOnboarding();
   const { setActiveBabyId } = useAppStore();
+  
+  // State - Reduced to 3 steps for faster onboarding
+  const [step, setStep] = useState(0); // 0: Name, 1: DOB, 2: Preferences
+  const [onboardingStartTime] = useState(Date.now());
+  
+  // Form Data
+  const [name, setName] = useState('');
+  const [dob, setDob] = useState<Date>();
+  const [dobInput, setDobInput] = useState('');
+  const [sex, setSex] = useState<'m' | 'f' | 'other'>('m');
+  const [timeZone, setTimeZone] = useState(detectTimeZone());
+  const [units, setUnits] = useState<'metric' | 'imperial'>('imperial');
+  
+  // Errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [babyName, setBabyName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [sex, setSex] = useState('');
-  const [feedingStyle, setFeedingStyle] = useState('');
-
-  if (checking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-surface">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
-  const handleComplete = async () => {
-    if (!babyName || !dateOfBirth) {
-      toast.error('Please fill in required fields');
-      return;
+  const validateStep = (currentStep: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (currentStep === 0) {
+      if (!name.trim()) {
+        newErrors.name = 'Name is required';
+      } else if (name.length > 40) {
+        newErrors.name = 'Name must be 40 characters or less';
+      }
+    }
+    
+    if (currentStep === 1) {
+      if (!dob) {
+        newErrors.dob = 'Date of birth is required';
+      } else if (dob > new Date()) {
+        newErrors.dob = 'Date of birth cannot be in the future';
+      }
     }
 
-    setLoading(true);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+    
+    setErrors({});
+    return true;
+  };
 
-    try {
-      const { baby } = await familyService.createFamilyWithBaby(
-        `${babyName}'s Family`,
-        babyName,
-        dateOfBirth
-      );
-
-      if (sex || feedingStyle) {
-        await babyService.updateBaby(baby.id, {
-          sex: sex as any,
-          primary_feeding_style: feedingStyle as any,
-        });
-      }
-
-      setActiveBabyId(baby.id);
-      localStorage.setItem('activeBabyId', baby.id);
-      
-      toast.success('Setup complete! Welcome to Nestling');
-      navigate('/home');
-    } catch (error) {
-      console.error('Onboarding error:', error);
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setStep(s => s + 1);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-surface p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Baby className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <CardTitle>Add Your Baby</CardTitle>
-              <CardDescription>Tell us about your little one</CardDescription>
-            </div>
+  const prevStep = () => {
+    setStep(s => s - 1);
+  };
+
+  const handleCreateBaby = async () => {
+    if (!validateStep(step)) return;
+    
+    try {
+      const babyData = {
+        name: name.trim(),
+        dobISO: dob ? format(dob, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+        sex,
+        timeZone,
+        units,
+      };
+      
+      const validation = validateBaby(babyData);
+      if (!validation.success) {
+        toast.error('Please check your input');
+        return;
+      }
+      
+      const sanitizedName = sanitizeBabyName(babyData.name);
+      const baby = await dataService.addBaby({ ...babyData, name: sanitizedName });
+      setActiveBabyId(baby.id);
+      
+      // Track onboarding completion
+      const timeSpent = Date.now() - onboardingStartTime;
+      trackOnboardingComplete(3, timeSpent);
+      
+      // Store onboarding completion time for first log tracking
+      localStorage.setItem('onboardingCompletedAt', Date.now().toString());
+      
+      // Success & Redirect
+      toast.success(`Welcome to Nestling, ${baby.name}!`);
+      navigate('/home');
+    } catch (error) {
+      logger.error('Failed to create baby', error, 'Onboarding');
+      toast.error('Could not create profile. Please try again.');
+    }
+  };
+
+  // Step 0: Name (with inline value messaging)
+  if (step === 0) {
+    return (
+      <OnboardingStepView
+        stepNumber={1}
+        totalSteps={3}
+        icon={<Baby className="h-12 w-12" />}
+        title={MESSAGING.onboarding.babyName.title}
+        description="Track feeds, sleep & diapers in 2 taps. We'll personalize everything for your baby."
+        primaryAction={{
+          label: "Next",
+          onClick: nextStep,
+          disabled: !name.trim()
+        }}
+        secondaryAction={{
+          label: "Back",
+          onClick: prevStep
+        }}
+      >
+        <div className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-base font-semibold">Baby's Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => {
+                setName(sanitizeBabyName(e.target.value));
+                if (errors.name) setErrors({ ...errors, name: '' });
+              }}
+              placeholder="Enter name"
+              className="h-16 text-lg px-4 bg-surface border-2 border-border focus-visible:border-primary transition-colors"
+              autoFocus
+              autoComplete="off"
+              maxLength={40}
+            />
+            {errors.name && (
+              <p className="text-sm text-destructive font-medium animate-in slide-in-from-top-1">
+                {errors.name}
+              </p>
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="baby-name">Baby's Name *</Label>
+        </div>
+      </OnboardingStepView>
+    );
+  }
+
+  // Step 1: DOB
+  if (step === 1) {
+    return (
+      <OnboardingStepView
+        stepNumber={2}
+        totalSteps={3}
+        icon={<CalendarIcon className="h-12 w-12" />}
+        title={MESSAGING.onboarding.dateOfBirth.title}
+        description="We'll use this to provide age-appropriate insights and smart nap predictions."
+        primaryAction={{
+          label: "Next",
+          onClick: nextStep,
+          disabled: !dob
+        }}
+        secondaryAction={{
+          label: "Back",
+          onClick: prevStep
+        }}
+      >
+        <div className="space-y-6 pt-4">
+          <div className="space-y-2">
+            <Label className="text-base font-semibold">Date of Birth</Label>
+            <div className="flex gap-3">
               <Input
-                id="baby-name"
-                placeholder="Enter baby's name"
-                value={babyName}
-                onChange={(e) => setBabyName(e.target.value)}
+                value={dobInput}
+                onChange={(e) => setDobInput(e.target.value)}
+                placeholder="MM/DD/YYYY"
+                className="h-16 text-lg flex-1 px-4 bg-surface border-2 border-border focus-visible:border-primary transition-colors"
+                autoComplete="off"
+                onBlur={() => {
+                  const parsed = parseLocalDate(dobInput);
+                  if (parsed) {
+                    setDob(parsed);
+                    setErrors({ ...errors, dob: '' });
+                  }
+                }}
               />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="h-16 w-16 p-0 shrink-0 border-2">
+                    <CalendarIcon className="h-7 w-7 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={dob}
+                    onSelect={(date) => {
+                      setDob(date);
+                      if (date) {
+                        setDobInput(format(date, 'MM/dd/yyyy'));
+                        setErrors({ ...errors, dob: '' });
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dob">Date of Birth *</Label>
-              <DateInput
-                value={dateOfBirth}
-                onChange={setDateOfBirth}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sex">Sex (optional)</Label>
-              <Select value={sex} onValueChange={setSex}>
-                <SelectTrigger id="sex">
-                  <SelectValue placeholder="Select sex" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="m">Male</SelectItem>
-                  <SelectItem value="f">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="feeding">Primary Feeding Style (optional)</Label>
-              <Select value={feedingStyle} onValueChange={setFeedingStyle}>
-                <SelectTrigger id="feeding">
-                  <SelectValue placeholder="Select feeding style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="breast">Breast</SelectItem>
-                  <SelectItem value="bottle">Bottle</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {errors.dob && (
+              <p className="text-sm text-destructive font-medium animate-in slide-in-from-top-1">
+                {errors.dob}
+              </p>
+            )}
           </div>
           
-          <Button 
-            className="w-full" 
-            onClick={handleComplete}
-            disabled={loading || !babyName || !dateOfBirth}
+          <Button
+            variant="outline"
+            onClick={() => {
+              const today = new Date();
+              setDob(today);
+              setDobInput(format(today, 'MM/dd/yyyy'));
+              setErrors({ ...errors, dob: '' });
+            }}
+            className="w-full h-14 font-semibold text-base border-2"
           >
-            {loading ? 'Setting up...' : (
-              <>
-                Get Started
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </>
-            )}
+            Just Born Today
           </Button>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </OnboardingStepView>
+    );
+  }
+
+  // Step 2: Preferences (final step)
+  return (
+    <OnboardingStepView
+      stepNumber={3}
+      totalSteps={3}
+      icon={<Sparkles className="h-12 w-12" />}
+      title="Almost done!"
+      description="Quick preferences to personalize your experience."
+      primaryAction={{
+        label: "Start Tracking",
+        onClick: handleCreateBaby,
+        loading: loading
+      }}
+      secondaryAction={{
+        label: "Back",
+        onClick: prevStep
+      }}
+    >
+      <div className="space-y-8 pt-4">
+        <div className="space-y-3">
+          <Label className="text-base font-semibold">Measurement Units</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              className={cn(
+                "cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 text-left min-h-[88px]",
+                "active:scale-[0.98]",
+                units === 'imperial' 
+                  ? "border-primary bg-primary/10 shadow-sm" 
+                  : "border-border bg-surface hover:border-primary/40"
+              )}
+              onClick={() => setUnits('imperial')}
+            >
+              <div className="font-semibold text-base mb-1.5">Imperial</div>
+              <div className="text-sm text-muted-foreground">lb, oz, in</div>
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 text-left min-h-[88px]",
+                "active:scale-[0.98]",
+                units === 'metric' 
+                  ? "border-primary bg-primary/10 shadow-sm" 
+                  : "border-border bg-surface hover:border-primary/40"
+              )}
+              onClick={() => setUnits('metric')}
+            >
+              <div className="font-semibold text-base mb-1.5">Metric</div>
+              <div className="text-sm text-muted-foreground">kg, g, cm</div>
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-base font-semibold">Sex (Optional)</Label>
+          <RadioGroup value={sex} onValueChange={(v) => setSex(v as any)} className="grid grid-cols-3 gap-3">
+            <div>
+              <RadioGroupItem value="m" id="male" className="peer sr-only" />
+              <Label 
+                htmlFor="male"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-surface p-5 hover:border-primary/40 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all h-[88px] active:scale-[0.98]"
+              >
+                <span className="font-semibold text-base">Boy</span>
+              </Label>
+            </div>
+            <div>
+              <RadioGroupItem value="f" id="female" className="peer sr-only" />
+              <Label 
+                htmlFor="female"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-surface p-5 hover:border-primary/40 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all h-[88px] active:scale-[0.98]"
+              >
+                <span className="font-semibold text-base">Girl</span>
+              </Label>
+            </div>
+            <div>
+              <RadioGroupItem value="other" id="other" className="peer sr-only" />
+              <Label 
+                htmlFor="other"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-surface p-5 hover:border-primary/40 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all h-[88px] active:scale-[0.98]"
+              >
+                <span className="font-semibold text-base">Other</span>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-base font-semibold">Time Zone</Label>
+          <Input
+            value={timeZone}
+            onChange={(e) => setTimeZone(e.target.value)}
+            placeholder="America/New_York"
+            className="h-14 bg-surface border-2 border-border px-4 text-base"
+            readOnly
+          />
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5 px-1">
+            <Sparkles className="h-3.5 w-3.5" /> Auto-detected from your device
+          </p>
+        </div>
+      </div>
+    </OnboardingStepView>
   );
 }

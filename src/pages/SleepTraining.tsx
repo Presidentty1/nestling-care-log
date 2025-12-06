@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
+import { babyService } from '@/services/babyService';
+import { sleepTrainingService } from '@/services/sleepTrainingService';
 import { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,19 +25,7 @@ export default function SleepTraining() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (!familyMembers || familyMembers.length === 0) return [];
-
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyMembers.map(fm => fm.family_id));
-
-      return babies as Baby[];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -44,12 +33,7 @@ export default function SleepTraining() {
     queryKey: ['sleep-training-sessions', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('sleep_training_sessions')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('created_at', { ascending: false });
-      return data || [];
+      return await sleepTrainingService.getSessions(selectedBabyId);
     },
     enabled: !!selectedBabyId,
   });
@@ -58,12 +42,7 @@ export default function SleepTraining() {
     queryKey: ['sleep-regressions', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('sleep_regressions')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('detected_at', { ascending: false });
-      return data || [];
+      return await sleepTrainingService.getRegressions(selectedBabyId);
     },
     enabled: !!selectedBabyId,
   });

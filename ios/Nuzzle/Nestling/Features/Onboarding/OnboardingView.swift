@@ -23,21 +23,18 @@ struct OnboardingView: View {
                     switch coordinator.currentStep {
                     case .welcome:
                         WelcomeView(coordinator: coordinator)
-                    case .babySetup:
-                        BabySetupView(coordinator: coordinator)
-                    case .initialState:
-                        InitialStateView(coordinator: coordinator)
-                    case .preferences:
-                        PreferencesView(coordinator: coordinator)
-                    case .aiConsent:
-                        AIConsentView(coordinator: coordinator)
-                    case .notificationsIntro:
-                        NotificationsIntroView(coordinator: coordinator)
-                    case .proTrial:
-                        ProTrialView(coordinator: coordinator)
+                    case .babyEssentials:
+                        BabyEssentialsView(coordinator: coordinator)
+                    case .goalSelection:
+                        GoalSelectionView(coordinator: coordinator)
+                    case .complete:
+                        ReadyToGoView(coordinator: coordinator)
                     }
                 }
-                .transition(.slide)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
             }
         }
         .onChange(of: coordinator.isCompleted) { _, completed in

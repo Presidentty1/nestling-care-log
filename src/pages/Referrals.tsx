@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Share2, Copy, Users } from 'lucide-react';
+import { referralsService } from '@/services/referralsService';
 
 export default function Referrals() {
   const { toast } = useToast();
@@ -12,26 +12,7 @@ export default function Referrals() {
   const { data: referralCode } = useQuery({
     queryKey: ['referral-code'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
-      let { data: existing } = await supabase
-        .from('referral_codes')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!existing) {
-        const code = `NEST-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
-        const { data: created } = await supabase
-          .from('referral_codes')
-          .insert({ user_id: user.id, code })
-          .select()
-          .single();
-        existing = created;
-      }
-
-      return existing;
+      return await referralsService.getOrCreateReferralCode();
     },
   });
 

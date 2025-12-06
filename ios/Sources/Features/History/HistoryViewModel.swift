@@ -8,9 +8,12 @@ class HistoryViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var searchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
+    @Published var eventsByDate: [Date: DayEventSummary] = [:]
+    @Published var currentMonth: Date = Date()
     
     private let dataStore: DataStore
     private let baby: Baby
+    private let calendar = Calendar.current
     
     /// Filtered events based on search text and selected filter
     var filteredEvents: [Event] {
@@ -92,6 +95,7 @@ class HistoryViewModel: ObservableObject {
         self.dataStore = dataStore
         self.baby = baby
         loadEvents()
+        loadMonthEventSummaries()
     }
     
     func loadEvents() {
@@ -119,6 +123,96 @@ class HistoryViewModel: ObservableObject {
     func selectDate(_ date: Date) {
         selectedDate = date
         loadEvents()
+    }
+    
+    func selectMonth(_ month: Date) {
+        currentMonth = month
+        loadMonthEventSummaries()
+    }
+    
+    /// Load event summaries for entire month (for calendar display)
+    func loadMonthEventSummaries() {
+        Task {
+            do {
+                // Get start and end of month
+                guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)),
+                      let monthEnd = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) else {
+                    return
+                }
+                
+                // Fetch all events for the month
+                let allEvents = try await dataStore.fetchEventsInRange(
+                    for: baby,
+                    start: monthStart,
+                    end: calendar.date(byAdding: .day, value: 1, to: monthEnd) ?? monthEnd
+                )
+                
+                // Group by date
+                var summaries: [Date: DayEventSummary] = [:]
+                for event in allEvents {
+                    let normalizedDate = calendar.startOfDay(for: event.startTime)
+                    
+                    if var existing = summaries[normalizedDate] {
+                        // Update counts
+                        switch event.type {
+                        case .feed:
+                            existing = DayEventSummary(
+                                date: existing.date,
+                                feedCount: existing.feedCount + 1,
+                                sleepCount: existing.sleepCount,
+                                diaperCount: existing.diaperCount,
+                                tummyTimeCount: existing.tummyTimeCount
+                            )
+                        case .sleep:
+                            existing = DayEventSummary(
+                                date: existing.date,
+                                feedCount: existing.feedCount,
+                                sleepCount: existing.sleepCount + 1,
+                                diaperCount: existing.diaperCount,
+                                tummyTimeCount: existing.tummyTimeCount
+                            )
+                        case .diaper:
+                            existing = DayEventSummary(
+                                date: existing.date,
+                                feedCount: existing.feedCount,
+                                sleepCount: existing.sleepCount,
+                                diaperCount: existing.diaperCount + 1,
+                                tummyTimeCount: existing.tummyTimeCount
+                            )
+                        case .tummyTime:
+                            existing = DayEventSummary(
+                                date: existing.date,
+                                feedCount: existing.feedCount,
+                                sleepCount: existing.sleepCount,
+                                diaperCount: existing.diaperCount,
+                                tummyTimeCount: existing.tummyTimeCount + 1
+                            )
+                        }
+                        summaries[normalizedDate] = existing
+                    } else {
+                        // Create new summary
+                        let feedCount = event.type == .feed ? 1 : 0
+                        let sleepCount = event.type == .sleep ? 1 : 0
+                        let diaperCount = event.type == .diaper ? 1 : 0
+                        let tummyTimeCount = event.type == .tummyTime ? 1 : 0
+                        
+                        summaries[normalizedDate] = DayEventSummary(
+                            date: normalizedDate,
+                            feedCount: feedCount,
+                            sleepCount: sleepCount,
+                            diaperCount: diaperCount,
+                            tummyTimeCount: tummyTimeCount
+                        )
+                    }
+                }
+                
+                await MainActor.run {
+                    self.eventsByDate = summaries
+                }
+            } catch {
+                Logger.dataError("Failed to load month summaries: \(error.localizedDescription)")
+            }
+        }
     }
     
     func deleteEvent(_ event: Event) {

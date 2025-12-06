@@ -16,11 +16,20 @@ struct TimelineRow: View {
     
     var body: some View {
         HStack(spacing: .spacingMD) {
-            // Color indicator bar (for colorblind accessibility)
+            // Color indicator bar - BOLDER for better scanning
             Rectangle()
-                .fill(colorForEventType(event.type))
-                .frame(width: 3)
-                .opacity(0.6)
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            colorForEventType(event.type),
+                            colorForEventType(event.type).opacity(0.7)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 6)
+                .cornerRadius(3)
             
             // Icon with background circle
             ZStack {
@@ -34,16 +43,15 @@ struct TimelineRow: View {
             }
             .accessibilityHidden(true)
             
-            // Content
+            // Content with improved typography hierarchy
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.type.displayName)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.foreground)
                     .lineLimit(nil)
                 
                 Text(formatEventDetails(event))
-                    .font(.caption)
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.mutedForeground)
                     .lineLimit(nil)
             }
@@ -75,27 +83,27 @@ struct TimelineRow: View {
 
             Spacer()
 
-            // Time
+            // Time with lighter color
             Text(formatTime(event.startTime))
-                .font(.caption)
-                .foregroundColor(.mutedForeground)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(.mutedForeground.opacity(0.7))
             
             // Menu
             Menu {
+                Button(action: {
+                    Haptics.light()
+                    if let onDuplicate = onDuplicate {
+                        onDuplicate()
+                    }
+                }) {
+                    Label("Log Again", systemImage: "arrow.clockwise")
+                }
+                
                 Button(action: {
                     Haptics.medium()
                     onEdit()
                 }) {
                     Label("Edit", systemImage: "pencil")
-                }
-                
-                if let onDuplicate = onDuplicate {
-                    Button(action: {
-                        Haptics.light()
-                        onDuplicate()
-                    }) {
-                        Label("Duplicate", systemImage: "doc.on.doc")
-                    }
                 }
                 
                 Button(action: {
@@ -119,37 +127,27 @@ struct TimelineRow: View {
             .accessibilityLabel("More options for \(event.type.displayName)")
         }
         .padding(.spacingMD)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.surface,
-                    Color.surface.opacity(0.98)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(Color.surface)
         .cornerRadius(.radiusMD)
-        .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
         .overlay(
             RoundedRectangle(cornerRadius: .radiusMD)
-                .stroke(Color.separator, lineWidth: 0.5)
+                .stroke(Color.cardBorder, lineWidth: 1)
         )
         .contextMenu {
+            Button(action: {
+                Haptics.light()
+                if let onDuplicate = onDuplicate {
+                    onDuplicate()
+                }
+            }) {
+                Label("Log Again", systemImage: "arrow.clockwise")
+            }
+            
             Button(action: {
                 Haptics.medium()
                 onEdit()
             }) {
                 Label("Edit", systemImage: "pencil")
-            }
-            
-            if let onDuplicate = onDuplicate {
-                Button(action: {
-                    Haptics.light()
-                    onDuplicate()
-                }) {
-                    Label("Duplicate", systemImage: "doc.on.doc")
-                }
             }
             
             Button(action: {

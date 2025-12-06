@@ -50,8 +50,9 @@ struct ExportDataView: View {
                             .foregroundColor(Color.adaptiveForeground(colorScheme))
 
                         Picker("Format", selection: $selectedFormat) {
-                            Text("CSV (Doctor-friendly)").tag(DataExportService.ExportFormat.csv)
-                            Text("JSON (Complete data)").tag(DataExportService.ExportFormat.json)
+                            Text("CSV").tag(DataExportService.ExportFormat.csv)
+                            Text("PDF").tag(DataExportService.ExportFormat.pdf)
+                            Text("JSON").tag(DataExportService.ExportFormat.json)
                         }
                         .pickerStyle(.segmented)
 
@@ -154,7 +155,9 @@ struct ExportDataView: View {
     private func formatDescription(for format: DataExportService.ExportFormat) -> String {
         switch format {
         case .csv:
-            return "Best for doctors, spreadsheets, and other apps. Includes date, time, event type, duration, and amounts in an easy-to-read format."
+            return "Best for spreadsheets and data analysis. Includes date, time, event type, duration, and amounts in an easy-to-read format."
+        case .pdf:
+            return "Professional report for pediatrician visits. Includes activity summary, feeding analysis, growth records, and space for doctor notes. Premium feature."
         case .json:
             return "Complete export with all metadata. Best for backing up data or importing into other Nestling installations."
         }

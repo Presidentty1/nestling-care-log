@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { familyService } from '@/services/familyService';
+import { authService } from '@/services/authService';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,39 +13,22 @@ import { formatDistanceToNow } from 'date-fns';
 export default function ActivityFeed() {
   const navigate = useNavigate();
 
-  const { data: familyMembers } = useQuery({
-    queryKey: ['family-members'],
+  const { data: families } = useQuery({
+    queryKey: ['user-families'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { user } = await authService.getUser();
       if (!user) return [];
-
-      const { data: members } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-
-      if (!members || members.length === 0) return [];
-
-      return members;
+      return await familyService.getUserFamilies();
     },
   });
 
-  const familyId = familyMembers?.[0]?.family_id;
+  const familyId = families?.[0]?.id;
 
   const { data: activities } = useQuery({
     queryKey: ['activity-feed', familyId],
     queryFn: async () => {
       if (!familyId) return [];
-      const { data } = await supabase
-        .from('activity_feed')
-        .select(`
-          *,
-          profiles:actor_id (name, email)
-        `)
-        .eq('family_id', familyId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      return data || [];
+      return await familyService.getActivityFeed(familyId);
     },
     enabled: !!familyId,
   });

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby, Milestone } from '@/lib/types';
 import { milestoneCategories } from '@/lib/milestoneCategories';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, Camera } from 'lucide-react';
 import { format, differenceInMonths } from 'date-fns';
 import { MilestoneModal } from '@/components/MilestoneModal';
+import { babyService } from '@/services/babyService';
+import { milestonesService } from '@/services/milestonesService';
 
 export default function Milestones() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
@@ -20,12 +21,11 @@ export default function Milestones() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('babies').select('*');
-      if (error) throw error;
-      if (data && data.length > 0 && !selectedBaby) {
-        setSelectedBaby(data[0]);
+      const babyList = await babyService.getUserBabies();
+      if (babyList && babyList.length > 0 && !selectedBaby) {
+        setSelectedBaby(babyList[0]);
       }
-      return data as Baby[];
+      return babyList;
     },
   });
 
@@ -33,13 +33,7 @@ export default function Milestones() {
     queryKey: ['milestones', selectedBaby?.id],
     queryFn: async () => {
       if (!selectedBaby) return [];
-      const { data, error } = await supabase
-        .from('milestones')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .order('achieved_date', { ascending: false });
-      if (error) throw error;
-      return data as Milestone[];
+      return await milestonesService.getMilestones(selectedBaby.id);
     },
     enabled: !!selectedBaby,
   });

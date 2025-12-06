@@ -13,8 +13,8 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
   const days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-      <div className="flex gap-2">
+    <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      <div className="flex gap-2.5 flex-nowrap">
         {days.map((day) => {
           const isSelected = isSameDay(day, selectedDate);
           const isDisabled = isFuture(day);
@@ -26,28 +26,28 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
               onClick={() => !isDisabled && onDateSelect(day)}
               disabled={isDisabled}
               className={cn(
-                'flex flex-col items-center justify-center min-w-[60px] h-16 rounded-lg border-2 transition-all',
-                'hover:border-primary/50 active:scale-95',
-                isSelected && 'border-primary bg-primary/10',
-                !isSelected && 'border-border bg-card',
-                isDisabled && 'opacity-50 cursor-not-allowed',
-                today && !isSelected && 'border-primary/30'
+                'flex flex-col items-center justify-center min-w-[68px] h-[72px] rounded-2xl border-2 transition-all shrink-0',
+                'active:scale-95',
+                isSelected && 'border-primary bg-primary/10 shadow-sm',
+                !isSelected && 'border-border bg-surface hover:border-primary/40',
+                isDisabled && 'opacity-40 cursor-not-allowed',
+                today && !isSelected && 'border-primary/30 bg-primary/5'
               )}
             >
               <span className={cn(
-                'text-xs font-medium',
+                'text-xs font-semibold mb-0.5',
                 isSelected ? 'text-primary' : 'text-muted-foreground'
               )}>
                 {format(day, 'EEE')}
               </span>
               <span className={cn(
-                'text-lg font-bold',
+                'text-xl font-bold',
                 isSelected ? 'text-primary' : 'text-foreground'
               )}>
                 {format(day, 'd')}
               </span>
               {today && (
-                <span className="text-[10px] text-primary">Today</span>
+                <span className="text-[9px] font-semibold text-primary mt-0.5">Today</span>
               )}
             </button>
           );
@@ -58,9 +58,9 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
         variant="outline"
         size="icon"
         onClick={onOpenCalendar}
-        className="shrink-0 h-16 w-16"
+        className="shrink-0 h-[72px] w-[72px] rounded-2xl border-2"
       >
-        <Calendar className="h-5 w-5" />
+        <Calendar className="h-6 w-6" />
       </Button>
     </div>
   );

@@ -1,80 +1,103 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format, differenceInMonths, subDays, startOfDay, endOfDay } from 'date-fns';
-import { EventType } from '@/types/events';
-import { DailySummary } from '@/types/summary';
+import { format, differenceInMonths } from 'date-fns';
+import type { EventType } from '@/types/events';
 import { BabySwitcherModal } from '@/components/BabySwitcherModal';
 import { QuickActions } from '@/components/QuickActions';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import { SummaryChips } from '@/components/today/SummaryChips';
-import { TodayPlanStrip } from '@/components/today/TodayPlanStrip';
 import { UnifiedDashboardCard } from '@/components/today/UnifiedDashboardCard';
 import { FloatingActionButtonRadial } from '@/components/FloatingActionButtonRadial';
 import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { eventsService, EventRecord } from '@/services/eventsService';
-import { babyService, Baby } from '@/services/babyService';
-import { napPredictorService } from '@/services/napPredictorService';
-import { reminderService } from '@/services/reminderService';
-import { useAppStore } from '@/store/appStore';
+import { eventsService } from '@/services/eventsService';
+import type { EventRecord } from '@/services/eventsService';
 import { logger } from '@/lib/logger';
 import { SafeComponentBoundary, DataComponentBoundary } from '@/components/errorBoundaries/ComponentErrorBoundary';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { TimelineList } from '@/components/today/TimelineList';
-import { NapWindowCard } from '@/components/today/NapWindowCard';
-import { NapPill } from '@/components/today/NapPill';
-import { triggerConfetti } from '@/lib/confetti';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDismissibleBanner } from '@/hooks/useDismissibleBanner';
 import { useLastUsedValues } from '@/hooks/useLastUsedValues';
 import { Lock, Users, X } from 'lucide-react';
-import { MedicalDisclaimer } from '@/components/MedicalDisclaimer';
 import { ContextualTipCard } from '@/components/ContextualTipCard';
 import { getContextualTips } from '@/lib/contextualTips';
 import { GuestModeBanner } from '@/components/GuestModeBanner';
 import { StreakCounter } from '@/components/StreakCounter';
-import { DailyAffirmation } from '@/components/DailyAffirmation';
 import { TrialCountdown } from '@/components/TrialCountdown';
-import { TrialStartModal } from '@/components/TrialStartModal';
-import { guestModeService } from '@/services/guestModeService';
-import { streakService } from '@/services/streakService';
-import { achievementService } from '@/services/achievementService';
-import { trialService } from '@/services/trialService';
-import { dataService } from '@/services/dataService';
-import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
+import { WelcomeCard } from '@/components/onboarding/WelcomeCard';
+import { FirstLogCelebration } from '@/components/onboarding/FirstLogCelebration';
+import { InstantAhaModal } from '@/components/InstantAhaModal';
+import { MilestoneModal } from '@/components/MilestoneModal';
+import { FeatureDiscoveryCard } from '@/components/FeatureDiscoveryCard';
+import { ProgressionCard } from '@/components/ProgressionCard';
+import { useHomeData } from '@/hooks/useHomeData';
+import { useAppStore } from '@/store/appStore';
+import { useFeatureDiscovery } from '@/hooks/useFeatureDiscovery';
+import { trackFirstLog, trackDailyEngagement } from '@/analytics/analytics';
+import { MESSAGING } from '@/lib/messaging';
 
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
-  const { activeBabyId, setActiveBabyId, guestMode } = useAppStore();
-  const [babies, setBabies] = useState<Baby[]>([]);
-  const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
-  const [events, setEvents] = useState<EventRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string; prefillData?: any }>({
+  const { activeBabyId, guestMode, setActiveBabyId } = useAppStore();
+  
+  // Use custom hook for data
+  const {
+    babies,
+    selectedBaby,
+    events,
+    loading,
+    summary,
+    napWindow,
+    streakDays,
+    showGuestBanner,
+    trialDaysRemaining,
+  } = useHomeData();
+
+  // UI State
+  const [modalState, setModalState] = useState<{ open: boolean; type: EventType; editingId?: string; prefillData?: Record<string, unknown> }>({
     open: false,
     type: 'feed',
   });
-  const [napWindow, setNapWindow] = useState<{ start: Date; end: Date; reason: string } | null>(null);
-  const [summary, setSummary] = useState<DailySummary | null>(null);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
-  const [hasShownConfetti, setHasShownConfetti] = useState(false);
-  const [hasShownFirstLogCelebration, setHasShownFirstLogCelebration] = useState(() => {
-    const stored = localStorage.getItem(`first_log_celebration_${activeBabyId}`);
-    return stored !== null ? JSON.parse(stored) : false;
-  });
-  const [streakDays, setStreakDays] = useState(0);
-  const [showGuestBanner, setShowGuestBanner] = useState(false);
-  const [showAffirmation, setShowAffirmation] = useState(false);
-  const [trialDaysRemaining, setTrialDaysRemaining] = useState<number | null>(null);
+  const [showFirstLogCelebration, setShowFirstLogCelebration] = useState(false);
+  const [showInstantAha, setShowInstantAha] = useState(false);
+  const [showMilestone, setShowMilestone] = useState<3 | 5 | 10 | null>(null);
+  const [firstLogType, setFirstLogType] = useState<EventType>('feed');
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   
   const privacyBanner = useDismissibleBanner('privacy_stance');
   const caregiverBanner = useDismissibleBanner('caregiver_invite');
-  const { getLastUsed, saveLastUsed } = useLastUsedValues();
+  const { getLastUsed } = useLastUsedValues();
+  const { getNextFeatureToIntroduce, markFeatureIntroduced, dismissFeature } = useFeatureDiscovery();
+
+  // Check if this is a first-time user
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    const hasAnyEvents = events.length > 0;
+    setIsFirstTimeUser(!hasSeenWelcome && !hasAnyEvents);
+  }, [events.length]);
+
+  // Track days since first log for progressive banner display
+  const daysSinceFirstLog = (() => {
+    const firstLogTime = localStorage.getItem('onboardingCompletedAt');
+    if (!firstLogTime) return 0;
+    const daysSince = Math.floor((Date.now() - parseInt(firstLogTime)) / (1000 * 60 * 60 * 24));
+    return daysSince;
+  })();
+
+  // Only show privacy banner for very new users (first 2 days)
+  const shouldShowPrivacyBanner = !privacyBanner.isDismissed && daysSinceFirstLog < 2;
+  
+  // Only show caregiver banner after 3+ days of usage
+  const shouldShowCaregiverBanner = !caregiverBanner.isDismissed && daysSinceFirstLog >= 3 && babies.length > 0;
+
+  // Get next feature to introduce
+  const nextFeature = getNextFeatureToIntroduce();
+  
   const [dismissedTips, setDismissedTips] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('dismissedTips');
@@ -83,23 +106,11 @@ export default function Home() {
       return [];
     }
   });
-  const [floatingButtonEnabled, setFloatingButtonEnabled] = useState(() => {
-    const stored = localStorage.getItem('floating_button_enabled');
-    return stored !== null ? JSON.parse(stored) : true;
-  });
 
   useKeyboardShortcuts({
     escape: () => setModalState({ open: false, type: 'feed' }),
     newEvent: () => setModalState({ open: true, type: 'feed' }),
   });
-
-  useEffect(() => {
-    if (guestMode) {
-      loadGuestMode();
-    } else if (user) {
-      loadBabies();
-    }
-  }, [user, guestMode]);
 
   // Handle notification quick actions
   useEffect(() => {
@@ -109,250 +120,18 @@ export default function Home() {
         type: location.state.openSheet,
         prefillData: location.state.prefillData || {},
       });
-      
-      // Clear navigation state to prevent reopening
       window.history.replaceState({}, document.title);
     }
   }, [location]);
 
-  useEffect(() => {
-    if (activeBabyId) {
-      loadBabyData();
-      loadStreakData();
-      checkTrialStatus();
-    }
-  }, [activeBabyId]);
-
-  useEffect(() => {
-    const unsubscribe = eventsService.subscribe((action, data) => {
-      if (action === 'add') {
-      // Gentle animation on first event (subtle instead of confetti)
-      if (events.length === 0 && !hasShownConfetti) {
-        // Subtle success animation - no confetti for sleep-deprived parents
-        setHasShownConfetti(true);
-      }
-
-        // Show first-log celebration after 2-3 logs with feeds and naps
-        if (!hasShownFirstLogCelebration && activeBabyId) {
-          const hasFeeds = events.some(e => e.type === 'feed');
-          const hasNaps = events.some(e => e.type === 'sleep');
-          const totalLogs = events.length;
-
-          if (totalLogs >= 2 && hasFeeds && hasNaps) {
-            setTimeout(() => {
-              toast.success('Great! With feeds + naps logged, we can now predict your next nap. Keep logging for a more accurate plan.', {
-                duration: 6000,
-              });
-              setHasShownFirstLogCelebration(true);
-              localStorage.setItem(`first_log_celebration_${activeBabyId}`, 'true');
-            }, 1000); // Small delay to ensure UI has updated
-          }
-        }
-
-        // Increment guest event count and update streak
-        if (guestMode) {
-          guestModeService.incrementGuestEventCount().then(count => {
-            if (count >= 3) setShowGuestBanner(true);
-          });
-        }
-        
-        if (data && activeBabyId) {
-          const event = data as EventRecord;
-          // Update streak
-          const today = format(new Date(), 'yyyy-MM-dd');
-          streakService.markEventLogged(activeBabyId, today, event.type).then(() => {
-            streakService.updateStreak(activeBabyId).then(streak => {
-              setStreakDays(streak.currentStreak);
-              // Check for achievements
-              achievementService.checkAndUnlockAchievements(activeBabyId, {
-                streakDays: streak.currentStreak,
-                eventType: event.type,
-                eventTime: new Date(event.start_time),
-              }).then(newAchievements => {
-                newAchievements.forEach(achievement => {
-                  toast.success(`Achievement unlocked: ${achievement.title}!`, {
-                    description: achievement.description,
-                    icon: achievement.icon,
-                  });
-                });
-              });
-            });
-          });
-          
-          // Check for daily affirmation
-          streakService.shouldShowAffirmation(activeBabyId).then(should => {
-            if (should) setShowAffirmation(true);
-          });
-        }
-        
-        // Save last used values for quick log
-        if (data && !modalState.editingId) {
-          const event = data as EventRecord;
-          const values: any = {};
-          if (event.type === 'feed') {
-            values.subtype = event.subtype;
-            values.amount = event.amount;
-            values.unit = event.unit;
-            values.side = event.side;
-          } else if (event.type === 'diaper') {
-            values.subtype = event.subtype;
-          } else if (event.type === 'tummy_time') {
-            values.duration_min = event.duration_min;
-          }
-          saveLastUsed(event.type as EventType, values);
-        }
-        
-        loadTodayEvents();
-      } else if (action === 'update' || action === 'delete') {
-        loadTodayEvents();
-      }
-    });
-    return unsubscribe;
-  }, [activeBabyId, events.length, hasShownConfetti, hasShownFirstLogCelebration, modalState.editingId]);
-
-  const loadGuestMode = async () => {
-    const guestBaby = await guestModeService.getGuestBaby();
-    if (!guestBaby) {
-      await guestModeService.enableGuestMode();
-      const baby = await dataService.addBaby({
-        name: 'Demo Baby',
-        dobISO: format(subDays(new Date(), 60), 'yyyy-MM-dd'),
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        units: 'imperial',
-      });
-      await guestModeService.setGuestBaby(baby);
-      setActiveBabyId(baby.id);
-    } else {
-      setActiveBabyId(guestBaby.id);
-    }
-    
-    const count = await guestModeService.getGuestEventCount();
-    setShowGuestBanner(count >= 3);
-    setLoading(false);
-  };
-
-  const loadStreakData = async () => {
-    if (!activeBabyId) return;
-    const streak = await streakService.getStreak(activeBabyId);
-    setStreakDays(streak.currentStreak);
-  };
-
-  const checkTrialStatus = async () => {
-    if (!activeBabyId || !selectedBaby) return;
-    const daysRemaining = await trialService.getTrialDaysRemaining();
-    setTrialDaysRemaining(daysRemaining);
-  };
-
-  const loadBabies = async () => {
-    try {
-      const babyList = await babyService.getUserBabies();
-      setBabies(babyList);
-      
-      if (babyList.length === 0) {
-        // Auto-provision a demo baby via backend, then continue to Home
-        try {
-          const { data: { session } } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
-          if (session) {
-            const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const { supabase } = await import('@/integrations/supabase/client');
-            const response = await supabase.functions.invoke('bootstrap-user', {
-              body: { babyName: 'Demo Baby', dateOfBirth: demoBirthdate, timezone },
-              headers: { Authorization: `Bearer ${session.access_token}` }
-            });
-            if (!response.error) {
-              const { babyId } = response.data as any;
-              setActiveBabyId(babyId);
-              localStorage.setItem('activeBabyId', babyId);
-              setLoading(false);
-              return; // Stay on Home, data effects will load
-            }
-          }
-        } catch (e) {
-          logger.error('Auto-provision error', e, 'Home');
-        }
-        navigate('/onboarding');
-        return;
-      }
-      
-      const storedBabyId = localStorage.getItem('activeBabyId');
-      const activeId = babyList.find(b => b.id === storedBabyId)?.id || babyList[0].id;
-      setActiveBabyId(activeId);
-      
-      setLoading(false);
-    } catch (error) {
-      logger.error('Failed to load babies', error, 'Home');
-      toast.error("Couldn't load your babies. Check your connection?");
-      setLoading(false);
-    }
-  };
-
-  const loadBabyData = async () => {
-    if (!activeBabyId) return;
-    
-    try {
-      const baby = await babyService.getBaby(activeBabyId);
-      setSelectedBaby(baby);
-      
-      await loadTodayEvents();
-    } catch (error) {
-      logger.error('Failed to load baby data', error, 'Home');
-      toast.error('Failed to load data');
-    }
-  };
-
-  const loadTodayEvents = useCallback(async () => {
-    if (!activeBabyId) return;
-    
-    try {
-      // Use same date calculation as History for consistency
-      const today = new Date();
-      const start = startOfDay(today);
-      const end = endOfDay(today);
-      
-      // Use getEventsByRange to match History exactly
-      const todayEvents = await eventsService.getEventsByRange(
-        activeBabyId,
-        start.toISOString(),
-        end.toISOString()
-      );
-      
-      setEvents(todayEvents);
-      
-      // Calculate summary
-      const sum = eventsService.calculateSummary(todayEvents);
-      setSummary(sum);
-      
-      // Calculate nap window
-      if (selectedBaby) {
-        const window = napPredictorService.calculateFromEvents(todayEvents, selectedBaby.date_of_birth);
-        setNapWindow(window);
-        
-        // Update reminder service
-        const lastFeed = await eventsService.getLastEventByType(activeBabyId, 'feed');
-        reminderService.updateLastFeed(lastFeed);
-        if (window) {
-          reminderService.updateNapWindow({ start: window.start, end: window.end });
-        }
-      }
-    } catch (error) {
-      logger.error('Failed to load events', error, 'Home');
-      toast.error('Failed to load events');
-    }
-  }, [activeBabyId, selectedBaby]);
-
-  // Real-time updates from Supabase (for multi-caregiver sync and immediate updates)
-  // Memoize callback to prevent re-subscriptions on every render
-  const handleRealtimeUpdate = useCallback(() => {
-    if (activeBabyId) {
-      loadTodayEvents();
-    }
-  }, [activeBabyId, loadTodayEvents]);
-  
-  useRealtimeEvents(selectedBaby?.family_id, handleRealtimeUpdate);
-
   const handleQuickAction = (type: EventType) => {
     setModalState({ open: true, type });
+    
+    // Mark that user has seen welcome when they first interact
+    if (isFirstTimeUser) {
+      localStorage.setItem('hasSeenWelcome', 'true');
+      setIsFirstTimeUser(false);
+    }
   };
 
   const handleQuickLog = async (type: EventType) => {
@@ -375,7 +154,6 @@ export default function Home() {
       feedAmount = 120; // Minimum 120ml
     }
     
-    // For sleep, use default 10 minutes if no duration specified
     const sleepDurationMinutes = lastUsed.duration_min || 10;
     const sleepStartTime = new Date(now.getTime() - sleepDurationMinutes * 60000);
     
@@ -395,7 +173,6 @@ export default function Home() {
       }),
       ...(type === 'sleep' && {
         end_time: now.toISOString(),
-        // Note indicating this was a quick log
         note: `Quick log nap (${sleepDurationMinutes} min)`,
       }),
       ...(type === 'tummy_time' && {
@@ -405,7 +182,36 @@ export default function Home() {
     };
 
     try {
-      await eventsService.createEvent(quickEvent as EventRecord);
+      await eventsService.createEvent(quickEvent as Parameters<typeof eventsService.createEvent>[0]);
+      
+      // Track first log if this is the user's first event
+      const onboardingCompletedAt = localStorage.getItem('onboardingCompletedAt');
+      const hasTrackedFirstLog = localStorage.getItem('hasTrackedFirstLog');
+      if (onboardingCompletedAt && !hasTrackedFirstLog) {
+        const timeFromOnboarding = Date.now() - parseInt(onboardingCompletedAt);
+        trackFirstLog(timeFromOnboarding);
+        localStorage.setItem('hasTrackedFirstLog', 'true');
+        
+        // Show instant aha moment instead of just celebration
+        setFirstLogType(type);
+        setShowInstantAha(true);
+      } else {
+        // Check for milestone celebrations (3rd, 5th, 10th log)
+        const newEventCount = events.length + 1;
+        const milestoneKey = `milestone_${newEventCount}`;
+        const hasSeenMilestone = localStorage.getItem(milestoneKey);
+        
+        if (!hasSeenMilestone && (newEventCount === 3 || newEventCount === 5 || newEventCount === 10)) {
+          localStorage.setItem(milestoneKey, 'true');
+          setShowMilestone(newEventCount as 3 | 5 | 10);
+        }
+      }
+      
+      // Mark that user has seen welcome
+      if (isFirstTimeUser) {
+        localStorage.setItem('hasSeenWelcome', 'true');
+        setIsFirstTimeUser(false);
+      }
       
       const formattedTime = format(now, 'h:mm a');
       let details = '';
@@ -419,12 +225,7 @@ export default function Home() {
         description: `${formattedTime}${details}`,
       });
 
-      // Gentle success feedback (no flashy animations)
-      if (events.length === 0 && !hasShownConfetti) {
-        setHasShownConfetti(true);
-      }
-
-      loadTodayEvents();
+      // No need to call loadTodayEvents, subscription in useHomeData handles it
     } catch (error) {
       logger.error('Quick log error', error, 'Home');
       toast.error('Failed to log event', {
@@ -446,7 +247,7 @@ export default function Home() {
     try {
       await eventsService.deleteEvent(eventId);
       toast.success('Event deleted');
-      loadTodayEvents(); // Reload events after deletion
+      // Subscription handles refresh
     } catch (error) {
       logger.error('Failed to delete event', error, 'Home');
       toast.error('Failed to delete event');
@@ -469,8 +270,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
+      <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5 w-full">
         {/* Page Title */}
         <h1 className="font-display text-left mb-6">Home</h1>
 
@@ -500,7 +301,17 @@ export default function Home() {
 
         {guestMode && showGuestBanner && <GuestModeBanner />}
 
-        {/* Unified Dashboard Card - Single panel with all key info */}
+        {/* First-time user welcome card */}
+        {isFirstTimeUser && events.length === 0 && (
+          <WelcomeCard onLogFirstEvent={handleQuickAction} />
+        )}
+
+        {/* Progression Card - Show what's unlocking */}
+        {events.length > 0 && events.length < 10 && (
+          <ProgressionCard currentLogs={events.length} />
+        )}
+
+        {/* Unified Dashboard Card */}
         {(summary || napWindow || events.length > 0) && (
           <DataComponentBoundary componentName="UnifiedDashboardCard">
             <UnifiedDashboardCard
@@ -508,7 +319,6 @@ export default function Home() {
               napWindow={napWindow}
               summary={summary}
               activeSleepTimer={(() => {
-                // Find active sleep event (no end_time)
                 const activeSleep = events.find(e => e.type === 'sleep' && !e.end_time);
                 if (activeSleep) {
                   return {
@@ -522,24 +332,35 @@ export default function Home() {
           </DataComponentBoundary>
         )}
 
-        {/* Summary Chips - Secondary info, lower in hierarchy */}
+        {/* Summary Chips */}
         {summary && (
           <DataComponentBoundary componentName="SummaryChips">
             <SummaryChips summary={summary} />
           </DataComponentBoundary>
         )}
 
-        {/* AI Contextual Tips */}
-        {selectedBaby && (() => {
+        {/* Feature Discovery - introduce new features progressively */}
+        {nextFeature && (
+          <FeatureDiscoveryCard
+            featureKey={nextFeature as keyof typeof MESSAGING.features}
+            onDismiss={() => dismissFeature(nextFeature)}
+            onTryIt={() => {
+              markFeatureIntroduced(nextFeature);
+              // Navigation will be handled by the FeatureDiscoveryCard
+            }}
+          />
+        )}
+
+        {/* AI Contextual Tips - show max 1 at a time, only after first day, and only if no feature discovery card */}
+        {!nextFeature && selectedBaby && daysSinceFirstLog >= 1 && (() => {
           const tips = getContextualTips(selectedBaby.date_of_birth, events);
-          // Essential tips that should always show (non-dismissible)
           const essentialTipIds = ['loose-logging', 'trust-yourself'];
           const essentialTips = tips.filter(tip => essentialTipIds.includes(tip.id));
           const otherTips = tips.filter(tip => !essentialTipIds.includes(tip.id));
           const visibleOtherTips = otherTips.filter(tip => !dismissedTips.includes(tip.id));
           
-          // Always show essential tips, plus other non-dismissed tips
-          const visibleTips = [...essentialTips, ...visibleOtherTips];
+          // Show only 1 tip at a time for cleaner UX
+          const visibleTips = [...essentialTips, ...visibleOtherTips].slice(0, 1);
           
           return visibleTips.length > 0 ? (
             <div className="space-y-2">
@@ -548,7 +369,6 @@ export default function Home() {
                   key={tip.id}
                   tip={tip}
                   onDismiss={(tipId) => {
-                    // Don't allow dismissing essential tips
                     if (essentialTipIds.includes(tipId)) return;
                     setDismissedTips(prev => {
                       const newDismissed = [...prev, tipId];
@@ -562,7 +382,8 @@ export default function Home() {
           ) : null;
         })()}
 
-        {!privacyBanner.isDismissed && (
+        {/* Privacy banner - only for very new users */}
+        {shouldShowPrivacyBanner && (
           <Card className="bg-primary/5 border-primary/20">
             <CardContent className="p-4 flex items-start gap-3">
               <Lock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -584,7 +405,8 @@ export default function Home() {
           </Card>
         )}
 
-        {!caregiverBanner.isDismissed && babies.length > 0 && (
+        {/* Caregiver invite banner - only after 3+ days */}
+        {shouldShowCaregiverBanner && (
           <Card className="bg-secondary/5 border-secondary/20">
             <CardContent className="p-4">
               <div className="flex items-start gap-3 mb-3">
@@ -616,7 +438,7 @@ export default function Home() {
           </Card>
         )}
 
-        {/* Primary Actions - Most prominent for quick logging */}
+        {/* Primary Actions */}
         <div className="space-y-3">
           <h2 className="text-headline">Quick Log</h2>
           <SafeComponentBoundary componentName="QuickActions">
@@ -628,7 +450,7 @@ export default function Home() {
           </SafeComponentBoundary>
         </div>
 
-        {/* Secondary Content - Timeline (lower in visual hierarchy) */}
+        {/* Secondary Content - Timeline */}
         <div className="space-y-3">
           <h2 className="text-headline text-muted-foreground/70">Today's Timeline</h2>
           <DataComponentBoundary componentName="TimelineList">
@@ -669,6 +491,35 @@ export default function Home() {
         onSelect={handleBabySwitch}
         onAddNew={() => navigate('/onboarding')}
       />
+
+      {/* First log celebration */}
+      <FirstLogCelebration
+        isOpen={showFirstLogCelebration}
+        onClose={() => setShowFirstLogCelebration(false)}
+      />
+
+      {/* Instant Aha Moment - Show AI value immediately */}
+      {selectedBaby && (
+        <InstantAhaModal
+          isOpen={showInstantAha}
+          onClose={() => {
+            setShowInstantAha(false);
+            // Show celebration after aha moment
+            setShowFirstLogCelebration(true);
+          }}
+          babyAgeInWeeks={Math.floor(differenceInMonths(new Date(), new Date(selectedBaby.date_of_birth)) * 4.33)}
+          eventType={firstLogType}
+        />
+      )}
+
+      {/* Milestone Celebrations - 3rd, 5th, 10th log */}
+      {showMilestone && (
+        <MilestoneModal
+          isOpen={true}
+          onClose={() => setShowMilestone(null)}
+          milestone={showMilestone}
+        />
+      )}
     </div>
   );
 }

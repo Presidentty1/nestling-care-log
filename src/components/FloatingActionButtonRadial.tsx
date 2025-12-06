@@ -19,8 +19,13 @@ export function FloatingActionButtonRadial({ className }: FloatingActionButtonRa
   useEffect(() => {
     const checkAIConsent = async () => {
       if (!user) return;
-      const canUse = await aiPreferencesService.canUseAI(user.id);
-      setAiEnabled(canUse);
+      try {
+        const canUse = await aiPreferencesService.canUseAI(user.id);
+        setAiEnabled(canUse);
+      } catch (error) {
+        console.error('Failed to check AI consent:', error);
+        setAiEnabled(false);
+      }
     };
     checkAIConsent();
   }, [user]);

@@ -25,12 +25,18 @@ struct BabySetupView: View {
                 .padding(.top, .spacing2XL)
                 
                 Form {
-                    Section("Name") {
+                    Section {
                         TextField("Baby's name", text: $coordinator.babyName)
                             .textInputAutocapitalization(.words)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding(.vertical, 4)
+                    } header: {
+                        Text("Name")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.foreground)
                     }
                     
-                    Section("Date of Birth") {
+                    Section {
                         DatePicker(
                             "Date of Birth",
                             selection: $coordinator.dateOfBirth,
@@ -38,6 +44,8 @@ struct BabySetupView: View {
                             displayedComponents: .date
                         )
                         .datePickerStyle(.compact)
+                        .font(.system(size: 17, weight: .regular))
+                        .padding(.vertical, 4)
                         .onChange(of: coordinator.dateOfBirth) { _, newDate in
                             if newDate > Date() {
                                 dobError = "Birth date can't be in the future"
@@ -76,7 +84,7 @@ struct BabySetupView: View {
                         }
                     }
                     
-                    Section("Sex (Optional)") {
+                    Section {
                         Picker("Sex", selection: $coordinator.sex) {
                             Text("Not specified").tag(nil as Sex?)
                             Text("Girl").tag(Sex.female as Sex?)
@@ -84,22 +92,46 @@ struct BabySetupView: View {
                             Text("Intersex").tag(Sex.intersex as Sex?)
                             Text("Prefer not to say").tag(Sex.preferNotToSay as Sex?)
                         }
+                        .font(.system(size: 17, weight: .regular))
+                    } header: {
+                        Text("Sex (Optional)")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.foreground)
                     }
                 }
-                .frame(height: 320)
+                .frame(height: 360)
                 .scrollDismissesKeyboard(.interactively)
                 
                 VStack(spacing: .spacingSM) {
-                    PrimaryButton(
-                        "Continue",
-                        isDisabled: coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid
-                    ) {
+                    Button(action: {
                         if !isDOBValid {
                             dobError = "Birth date can't be in the future"
                         } else {
+                            Haptics.light()
                             coordinator.next()
                         }
+                    }) {
+                        Text("Continue")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid
+                                    ? Color.primary.opacity(0.5)
+                                    : Color.primary
+                            )
+                            .cornerRadius(.radiusXL)
+                            .shadow(
+                                color: coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid
+                                    ? .clear
+                                    : Color.primary.opacity(0.3),
+                                radius: 12,
+                                x: 0,
+                                y: 6
+                            )
                     }
+                    .disabled(coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid)
                     .padding(.horizontal, .spacingMD)
                 }
                 .padding(.bottom, .spacing2XL)

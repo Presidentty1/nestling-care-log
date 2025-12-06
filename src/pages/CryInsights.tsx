@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
+import { babyService } from '@/services/babyService';
+import { cryLogsService } from '@/services/cryLogsService';
 import { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,19 +35,7 @@ export default function CryInsights() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (!familyMembers || familyMembers.length === 0) return [];
-
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyMembers.map(fm => fm.family_id));
-
-      return babies as Baby[];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -54,13 +43,7 @@ export default function CryInsights() {
     queryKey: ['cry-logs', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('cry_logs')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('start_time', { ascending: false })
-        .limit(20);
-      return data || [];
+      return await cryLogsService.getCryLogs(selectedBabyId, 20);
     },
     enabled: !!selectedBabyId,
   });

@@ -38,7 +38,7 @@ struct CryRecorderView: View {
                     // Beta disclaimer
                     InfoBanner(
                         title: "Experimental Feature",
-                        message: "Beta feature. May be inaccurate and shouldn't be used for medical decisions.",
+                        message: "This is an experimental tool and not a medical device. If you’re worried about your baby’s health or pain, contact a pediatric professional or urgent care.",
                         variant: .warning
                     )
                     .padding(.horizontal, .spacingMD)

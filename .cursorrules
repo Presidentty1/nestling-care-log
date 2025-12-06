@@ -126,3 +126,12 @@ This is a React + TypeScript baby tracking app with:
 - Sanitize data before displaying
 - Use parameterized queries
 - Follow OWASP best practices
+
+## Workspace Verification
+- **CRITICAL**: Always verify workspace path before making changes
+- Check for `.workspace-verification` file in root directory
+- Current correct workspace: `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq`
+- Never edit files outside current workspace
+- Use relative paths in all documentation and scripts
+- Alert if worktree paths from other locations are detected
+- Before committing, verify you're in the correct workspace

@@ -19,8 +19,8 @@ class SpeechRecognitionService: ObservableObject {
     private var recognitionTask: SFSpeechRecognitionTask?
 
     private init() {
-        setupSpeechRecognizer()
-        checkPermissions()
+        // Lazy initialization - don't setup speech recognizer until actually needed
+        // This prevents crashes if Info.plist doesn't have speech recognition permission
     }
 
     private func setupSpeechRecognizer() {
@@ -28,16 +28,21 @@ class SpeechRecognitionService: ObservableObject {
         speechRecognizer?.supportsOnDeviceRecognition = true
     }
 
-    private func checkPermissions() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            DispatchQueue.main.async {
-                switch authStatus {
-                case .authorized:
-                    self.isAuthorized = true
-                case .denied, .restricted, .notDetermined:
-                    self.isAuthorized = false
-                @unknown default:
-                    self.isAuthorized = false
+    private func checkPermissions() async -> Bool {
+        return await withCheckedContinuation { continuation in
+            SFSpeechRecognizer.requestAuthorization { authStatus in
+                DispatchQueue.main.async {
+                    switch authStatus {
+                    case .authorized:
+                        self.isAuthorized = true
+                        continuation.resume(returning: true)
+                    case .denied, .restricted, .notDetermined:
+                        self.isAuthorized = false
+                        continuation.resume(returning: false)
+                    @unknown default:
+                        self.isAuthorized = false
+                        continuation.resume(returning: false)
+                    }
                 }
             }
         }
@@ -45,9 +50,18 @@ class SpeechRecognitionService: ObservableObject {
 
     /// Start speech recognition recording
     func startRecording() async -> Bool {
-        guard isAuthorized else {
-            errorMessage = "Speech recognition not authorized. Please enable microphone access in Settings."
-            return false
+        // Setup speech recognizer on first use (lazy initialization)
+        if speechRecognizer == nil {
+            setupSpeechRecognizer()
+        }
+        
+        // Check permissions if not already authorized
+        if !isAuthorized {
+            let authorized = await checkPermissions()
+            if !authorized {
+                errorMessage = "Speech recognition not authorized. Please enable microphone access in Settings."
+                return false
+            }
         }
 
         guard !isRecording else { return false }

@@ -66,5 +66,13 @@ createRoot(document.getElementById("root")!).render(
   </ErrorBoundary>
 );
 
-// Register service worker for offline support
-registerServiceWorker();
+// Register service worker for offline support (defer to avoid blocking)
+// Skip in Capacitor as it's not supported and can cause WebContent to hang
+if (typeof window !== 'undefined' && !(window as any).Capacitor) {
+  // Defer service worker registration to avoid blocking initial render
+  setTimeout(() => {
+    registerServiceWorker().catch(() => {
+      // Silently fail - service workers are optional
+    });
+  }, 1000);
+}

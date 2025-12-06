@@ -8,20 +8,58 @@ struct HistoryView: View {
     @State private var showDiaperForm = false
     @State private var showTummyForm = false
     @State private var editingEvent: Event?
+    @State private var showHeatmap = false
+    @State private var showUpgradeSheet = false
     
     var body: some View {
         NavigationStack {
             Group {
                 if let viewModel = viewModel {
                     VStack(spacing: .spacingMD) {
-                        // Date Picker
-                        DatePickerView(selectedDate: Binding(
-                            get: { viewModel.selectedDate },
-                            set: { viewModel.selectDate($0) }
-                        )) { date in
-                            viewModel.selectDate(date)
+                        // Calendar view toggle
+                        CalendarViewToggle(
+                            showHeatmap: $showHeatmap,
+                            isPro: ProSubscriptionService.shared.isProUser,
+                            onUpgrade: {
+                                showUpgradeSheet = true
+                            }
+                        )
+                        .padding(.top, .spacingMD)
+                        
+                        // Calendar View (switches between dots and heatmap)
+                        if showHeatmap && ProSubscriptionService.shared.isProUser {
+                            CalendarHeatmapView(
+                                selectedDate: viewModel.selectedDate,
+                                eventsByDate: viewModel.eventsByDate,
+                                onDateSelected: { date in
+                                    viewModel.selectDate(date)
+                                },
+                                onMonthChanged: { month in
+                                    viewModel.selectMonth(month)
+                                },
+                                currentMonth: Binding(
+                                    get: { viewModel.currentMonth },
+                                    set: { viewModel.currentMonth = $0 }
+                                )
+                            )
+                            .padding(.horizontal, .spacingMD)
+                        } else {
+                            MonthlyCalendarView(
+                                selectedDate: viewModel.selectedDate,
+                                eventsByDate: viewModel.eventsByDate,
+                                onDateSelected: { date in
+                                    viewModel.selectDate(date)
+                                },
+                                onMonthChanged: { month in
+                                    viewModel.selectMonth(month)
+                                },
+                                currentMonth: Binding(
+                                    get: { viewModel.currentMonth },
+                                    set: { viewModel.currentMonth = $0 }
+                                )
+                            )
+                            .padding(.horizontal, .spacingMD)
                         }
-                        .padding(.horizontal, .spacingMD)
                         
                         // Timeline
                         if viewModel.isLoading {
@@ -225,6 +263,22 @@ struct HistoryView: View {
                             }
                     }
                 }
+            }
+            .sheet(isPresented: $showUpgradeSheet) {
+                // Premium upgrade sheet for calendar heatmap
+                ProSubscriptionView(
+                    feature: "Calendar Heatmap",
+                    description: "Visualize activity patterns at a glance. Days with more events show darker colors.",
+                    benefits: [
+                        "See activity patterns instantly",
+                        "Identify busy vs. calm days",
+                        "Track consistency over time",
+                        "All other Premium features included"
+                    ],
+                    onDismiss: {
+                        showUpgradeSheet = false
+                    }
+                )
             }
         }
     }

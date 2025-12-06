@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Pill, Plus, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { parentWellnessService } from '@/services/parentWellnessService';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -29,14 +29,13 @@ export function ParentMedicationTracker({ medications, onRefresh }: ParentMedica
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('parent_medications')
-        .insert({
-          user_id: user.id,
-          ...formData,
-        });
-
-      if (error) throw error;
+      await parentWellnessService.createMedication({
+        user_id: user.id,
+        name: formData.medication_name,
+        dosage: formData.dosage || null,
+        frequency: formData.frequency || null,
+        is_active: true,
+      });
 
       toast.success('Medication added!');
       setShowDialog(false);
@@ -56,12 +55,7 @@ export function ParentMedicationTracker({ medications, onRefresh }: ParentMedica
 
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('parent_medications')
-        .update({ is_active: false })
-        .eq('id', id);
-
-      if (error) throw error;
+      await parentWellnessService.updateMedication(id, { is_active: false });
 
       toast.success('Medication removed');
       onRefresh();

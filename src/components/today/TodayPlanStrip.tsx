@@ -1,6 +1,7 @@
 import { format, differenceInMinutes } from 'date-fns';
 import { Clock, Timer } from 'lucide-react';
-import type { EventRecord, DailySummary } from '@/types/events';
+import type { DailySummary } from '@/types/summary';
+import type { EventRecord } from '@/services/eventsService';
 
 interface TodayPlanStripProps {
   events: EventRecord[];

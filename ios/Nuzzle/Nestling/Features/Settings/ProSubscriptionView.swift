@@ -495,10 +495,15 @@ struct ProSubscriptionView: View {
         do {
             await proService.loadProducts()
             
-            // Auto-select first product if none selected
+            // Auto-select yearly product if none selected
             if selectedProductID == nil, !proService.getProducts().isEmpty {
                 await MainActor.run {
-                    selectedProductID = proService.getProducts().first?.id
+                    // Prefer yearly plan as default (AC3.3)
+                    if let yearly = proService.getProducts().first(where: { $0.id.contains("yearly") || $0.id.contains("annual") }) {
+                        selectedProductID = yearly.id
+                    } else {
+                        selectedProductID = proService.getProducts().first?.id
+                    }
                 }
             }
             

@@ -4,10 +4,11 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mic, Square, Loader2, AlertCircle, Lock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { usePro } from '@/hooks/usePro';
 import { trialService } from '@/services/trialService';
+import { eventsService } from '@/services/eventsService';
+import { cryAnalysisService } from '@/services/cryAnalysisService';
 
 interface CryRecorderProps {
   babyId: string;
@@ -24,6 +25,7 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const timerRef = useRef<NodeJS.Timeout>();
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     if (!isPro) {
@@ -34,7 +36,9 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
   }, [isPro]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
       stopRecording();
     };
@@ -106,16 +110,20 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
   };
 
   const analyzeCry = async (blob: Blob) => {
+    if (!isMountedRef.current) return;
     setIsAnalyzing(true);
 
     try {
       // Fetch recent events for context (same pattern as CryTimer)
-      const { data: recentEvents } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', babyId)
-        .gte('start_time', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('start_time', { ascending: false });
+      const recentEvents = await eventsService.getEvents({
+        babyId,
+        startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      });
+
+      if (!isMountedRef.current) {
+        setIsAnalyzing(false);
+        return;
+      }
 
       const now = new Date();
       const timeOfDay = now.getHours();
@@ -134,55 +142,85 @@ export function CryRecorder({ babyId, onAnalysisComplete }: CryRecorderProps) {
 
       // Convert blob to base64
       const reader = new FileReader();
-      reader.readAsDataURL(blob);
+      
+      // Set up error handler for FileReader
+      reader.onerror = () => {
+        if (isMountedRef.current) {
+          setIsAnalyzing(false);
+          toast.error('Failed to read audio file. Please try again.');
+        }
+      };
 
       reader.onloadend = async () => {
+        // Check if component is still mounted before proceeding
+        if (!isMountedRef.current) {
+          setIsAnalyzing(false);
+          return;
+        }
+
         const base64Audio = reader.result as string;
+        if (!base64Audio) {
+          if (isMountedRef.current) {
+            setIsAnalyzing(false);
+            toast.error('Failed to process audio. Please try again.');
+          }
+          return;
+        }
 
         try {
-          const { data, error } = await supabase.functions.invoke('analyze-cry-pattern', {
-            body: {
-              babyId,
-              recentEvents: recentEvents?.slice(0, 5) || [],
-              timeOfDay,
-              timeSinceLastFeed,
-              lastSleepDuration,
-              audioData: base64Audio, // Keep for future audio processing
-            },
+          const data = await cryAnalysisService.analyzeCryPattern({
+            babyId,
+            recentEvents: recentEvents?.slice(0, 5) || [],
+            timeOfDay,
+            timeSinceLastFeed,
+            lastSleepDuration,
           });
 
-          if (error) {
-            if (error.message?.includes('not found')) {
-              toast.error('AI analysis temporarily unavailable. Your logs are safe.');
-            } else {
-              throw error;
-            }
+          // Check again before state updates (component might have unmounted)
+          if (!isMountedRef.current) {
+            setIsAnalyzing(false);
             return;
           }
 
           // Increment free usage counter for non-Pro users
           if (!isPro) {
             await trialService.incrementFreeCryInsights();
-            setFreeUsesLeft(prev => prev ? prev - 1 : null);
+            if (isMountedRef.current) {
+              setFreeUsesLeft(prev => prev ? prev - 1 : null);
+            }
           }
 
-          onAnalysisComplete(data);
-          toast.success('Analysis complete!');
+          if (isMountedRef.current) {
+            onAnalysisComplete(data);
+            toast.success('Analysis complete!');
+          }
         } catch (error) {
           console.error('Analysis error:', error);
+          if (!isMountedRef.current) {
+            setIsAnalyzing(false);
+            return;
+          }
+          
           if (error instanceof Error && error.message?.includes('network')) {
             toast.error('Network error. Please check your connection.');
           } else {
             toast.error('Failed to analyze cry. Please try again.');
           }
         } finally {
-          setIsAnalyzing(false);
+          if (isMountedRef.current) {
+            setIsAnalyzing(false);
+          }
         }
       };
+
+      // Start reading the blob
+      reader.readAsDataURL(blob);
     } catch (error) {
-      console.error('FileReader error:', error);
-      toast.error('Failed to process audio. Please try again.');
-      setIsAnalyzing(false);
+      console.error('Error setting up cry analysis:', error);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+        toast.error('Failed to process audio. Please try again.');
+      }
     }
   };
 

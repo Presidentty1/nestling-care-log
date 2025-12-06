@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,28 +12,14 @@ import { ChevronLeft, UserPlus, Trash2, Mail, Clock, Lock, Sparkles } from 'luci
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePro } from '@/hooks/usePro';
-
-interface FamilyMember {
-  id: string;
-  user_id: string;
-  role: 'admin' | 'member' | 'viewer';
-  profiles: {
-    name: string | null;
-    email: string | null;
-  } | null;
-}
-
-interface Invite {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  created_at: string;
-}
+import { familyService, FamilyMember, Invite } from '@/services/familyService';
+import { babyService } from '@/services/babyService';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ManageCaregivers() {
   const navigate = useNavigate();
   const { isPro, loading: proLoading } = usePro();
+  const { user } = useAuth();
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -49,124 +34,66 @@ export default function ManageCaregivers() {
   });
 
   useEffect(() => {
-    loadData();
+    if (user) {
+      loadData();
+    } else if (!loading && !user) {
+      navigate('/auth');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const loadData = async () => {
+    if (!user) return;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-
       // Get user's family - try to get first family membership
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id, role')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
-
-      let currentFamilyId = familyMembers?.family_id;
+      const membership = await familyService.getUserFamilyMembership(user.id);
+      
+      let currentFamilyId = membership?.family_id;
 
       // If no family exists, create one
       if (!currentFamilyId) {
         // Get user's first baby to use for family name
-        const { data: babies } = await supabase
-          .from('babies')
-          .select('id, name')
-          .limit(1)
-          .maybeSingle();
+        const babies = await babyService.getUserBabies();
+        const firstBaby = babies[0];
 
-        const familyName = babies?.name 
-          ? `${babies.name}'s Family`
+        const familyName = firstBaby?.name 
+          ? `${firstBaby.name}'s Family`
           : 'My Family';
 
         // Create family
-        const { data: newFamily, error: familyError } = await supabase
-          .from('families')
-          .insert({ name: familyName })
-          .select('id')
-          .single();
-
-        if (familyError) {
-          console.error('Error creating family:', familyError);
-          toast.error('Failed to create family. Please try again.');
-          navigate('/home');
-          return;
-        }
-
-        currentFamilyId = newFamily.id;
+        const family = await familyService.createFamily(familyName);
+        currentFamilyId = family.id;
 
         // Add user as admin
-        const { error: memberError } = await supabase
-          .from('family_members')
-          .insert({
-            family_id: currentFamilyId,
-            user_id: user.id,
-            role: 'admin',
-          });
-
-        if (memberError) {
-          console.error('Error adding user to family:', memberError);
-          toast.error('Failed to set up family. Please try again.');
-          navigate('/home');
-          return;
-        }
+        await familyService.addFamilyMember(currentFamilyId, user.id, 'admin');
 
         // If we have a baby, update its family_id
-        if (babies) {
-          await supabase
-            .from('babies')
-            .update({ family_id: currentFamilyId })
-            .eq('id', babies.id);
+        if (firstBaby) {
+          await babyService.updateBaby(firstBaby.id, { family_id: currentFamilyId });
         }
       }
 
       setFamilyId(currentFamilyId);
 
       // Load family members with profiles
-      const { data: membersData } = await supabase
-        .from('family_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          profiles (
-            name,
-            email
-          )
-        `)
-        .eq('family_id', familyMembers.family_id);
-
-      // Transform the data
-      type MemberData = {
-        id: string;
-        user_id: string;
-        role: string;
-        profiles: Array<{ name: string | null; email: string | null }> | { name: string | null; email: string | null } | null;
-      };
-      const transformedMembers = (membersData || []).map((m: MemberData) => ({
+      const membersData = await familyService.getFamilyMembers(currentFamilyId);
+      
+      // Transform the data (flatten profiles)
+      const transformedMembers = (membersData || []).map((m: any) => ({
         id: m.id,
         user_id: m.user_id,
         role: m.role,
-        profiles: Array.isArray(m.profiles) && m.profiles.length > 0 ? m.profiles[0] : null,
+        profiles: Array.isArray(m.profiles) && m.profiles.length > 0 ? m.profiles[0] : (m.profiles || null),
       }));
 
-      setMembers(transformedMembers as FamilyMember[]);
+      setMembers(transformedMembers);
 
       // Load pending invites
-      const { data: invitesData } = await supabase
-        .from('caregiver_invites')
-        .select('*')
-        .eq('family_id', familyMembers.family_id)
-        .eq('status', 'pending');
-
+      const invitesData = await familyService.getPendingInvites(currentFamilyId);
       setInvites(invitesData || []);
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Failed to load family data');
     } finally {
       setLoading(false);
     }
@@ -193,33 +120,22 @@ export default function ManageCaregivers() {
 
     setInviting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('invite-caregiver', {
-        body: {
-          email: inviteEmail,
-          familyId,
-          role: inviteRole,
-        },
-      });
-
-      if (error) {
-        // Handle specific error cases
-        if (error.message?.includes('404') || error.message?.includes('FunctionsRelayError')) {
-          toast.error('Invite feature is temporarily unavailable. Please try again later.');
-          console.error('Edge function not found:', error);
-          return;
-        }
-        throw error;
-      }
+      await familyService.inviteCaregiverViaEdgeFunction(familyId, inviteEmail, inviteRole);
 
       toast.success('Invite sent!');
       setIsInviteSheetOpen(false);
       setInviteEmail('');
       setInviteRole('member');
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending invite:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send invite. Please check the email address and try again.';
-      toast.error(errorMessage);
+      // Handle specific error cases
+      if (error.message?.includes('404') || error.message?.includes('FunctionsRelayError')) {
+        toast.error('Invite feature is temporarily unavailable. Please try again later.');
+      } else {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to send invite. Please check the email address and try again.';
+        toast.error(errorMessage);
+      }
     } finally {
       setInviting(false);
     }
@@ -227,13 +143,7 @@ export default function ManageCaregivers() {
 
   const removeMember = async (memberId: string) => {
     try {
-      const { error } = await supabase
-        .from('family_members')
-        .delete()
-        .eq('id', memberId);
-
-      if (error) throw error;
-
+      await familyService.removeMember(memberId);
       toast.success('Caregiver removed');
       loadData();
     } catch (error) {
@@ -336,7 +246,7 @@ export default function ManageCaregivers() {
                 <p className="text-[15px]">No caregivers yet</p>
               </div>
             ) : (
-              members.map((member) => (
+              members.map((member: any) => (
                 <div
                   key={member.id}
                   className="flex items-center gap-4 p-4 rounded-[12px] bg-surface border border-border hover:bg-accent/5 transition-colors min-h-[64px]"

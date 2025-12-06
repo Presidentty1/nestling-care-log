@@ -1,0 +1,29 @@
+/* 
+  Localizable.strings
+  Nuzzle
+
+  Created for Nuzzle App.
+*/
+
+// General
+"app_name" = "Nuzzle";
+"ok" = "OK";
+"cancel" = "Cancel";
+"save" = "Save";
+"done" = "Done";
+
+// Onboarding
+"onboarding_welcome_title" = "Welcome to Nuzzle";
+"onboarding_welcome_subtitle" = "Your AI-powered parenting assistant";
+
+// Home
+"home_tab" = "Home";
+"quick_actions" = "Quick Actions";
+"feed" = "Feed";
+"sleep" = "Sleep";
+"diaper" = "Diaper";
+"cry_aid" = "Cry Aid";
+
+// AI Features
+"ai_demo_mode" = "Demo Mode";
+"ai_demo_disclaimer" = "This is a simulated response.";

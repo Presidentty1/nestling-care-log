@@ -13,7 +13,8 @@ class CoreDataStack {
         let container = NSPersistentContainer(name: "Nestling")
         
         // Configure for App Groups (shared with widgets)
-        let storeURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
+        // Note: Must match the App Group ID used in widgets (group.com.nestling.Nestling)
+        let storeURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling")?
             .appendingPathComponent("Nestling.sqlite")
         
         let defaultURL = container.persistentStoreDescriptions.first?.url ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("Nestling.sqlite")

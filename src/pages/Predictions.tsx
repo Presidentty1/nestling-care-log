@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
+import { babyService } from '@/services/babyService';
+import { predictionsService } from '@/services/predictionsService';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BabySelector } from '@/components/BabySelector';
@@ -36,19 +37,7 @@ export default function Predictions() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (!familyMembers || familyMembers.length === 0) return [];
-
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyMembers.map(fm => fm.family_id));
-
-      return babies as Baby[];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -56,13 +45,7 @@ export default function Predictions() {
     queryKey: ['predictions', selectedBaby?.id],
     queryFn: async () => {
       if (!selectedBaby) return [];
-      const { data } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .order('predicted_at', { ascending: false})
-        .limit(10);
-      return data || [];
+      return await predictionsService.getPredictions(selectedBaby.id, 10);
     },
     enabled: !!selectedBaby,
   });
@@ -74,23 +57,7 @@ export default function Predictions() {
         throw new Error('AI_DATA_SHARING_DISABLED');
       }
       
-      const { data, error } = await supabase.functions.invoke('generate-predictions', {
-        body: { babyId: selectedBaby.id, predictionType },
-      });
-
-      if (error) {
-        // Handle specific error cases
-        if (error.message?.includes('404') || error.message?.includes('FunctionsRelayError')) {
-          throw new Error('FUNCTION_NOT_FOUND');
-        }
-        throw error;
-      }
-      
-      if (!data) {
-        throw new Error('No data returned from prediction service');
-      }
-      
-      return data;
+      return await predictionsService.generatePrediction(selectedBaby.id, predictionType);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['predictions', selectedBaby?.id] });

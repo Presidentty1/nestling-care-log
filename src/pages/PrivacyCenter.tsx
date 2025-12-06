@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -13,6 +12,9 @@ import { parseImportFile, validateImportData, importEventsToDataService } from '
 import { dataService } from '@/services/dataService';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
+import { familyService } from '@/services/familyService';
+import { profileService } from '@/services/profileService';
+import { babyService } from '@/services/babyService';
 
 export default function PrivacyCenter() {
   const { toast } = useToast();
@@ -24,21 +26,15 @@ export default function PrivacyCenter() {
 
   const exportDataMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       // Get family info
-      const { data: familyMember } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!familyMember) throw new Error('No family found');
+      const membership = await familyService.getUserFamilyMembership(user.id);
+      if (!membership) throw new Error('No family found');
 
       // Export using dataService (IndexedDB)
       await exportToJSON(
-        familyMember.family_id,
+        membership.family_id,
         new Date(0),
         new Date()
       );
@@ -87,25 +83,16 @@ export default function PrivacyCenter() {
       if (!importPreview) throw new Error('No import data');
       if (!user) throw new Error('Not authenticated');
 
-      const { data: familyMember } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id)
-        .single();
-
+      const familyMember = await familyService.getUserFamilyMembership(user.id);
       if (!familyMember) throw new Error('No family found');
 
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('id')
-        .eq('family_id', familyMember.family_id)
-        .single();
-
-      if (!babies) throw new Error('No baby found');
+      const babies = await babyService.getUserBabies();
+      const firstBaby = babies[0];
+      if (!firstBaby) throw new Error('No baby found');
 
       const result = await importEventsToDataService(
         importPreview,
-        babies.id,
+        firstBaby.id,
         familyMember.family_id
       );
 
@@ -162,7 +149,6 @@ export default function PrivacyCenter() {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       // Clear local data first
@@ -172,12 +158,12 @@ export default function PrivacyCenter() {
 
       // Delete all Supabase data
       await Promise.all([
-        supabase.from('app_settings').delete().eq('user_id', user.id),
-        supabase.from('profiles').delete().eq('id', user.id),
+        profileService.deleteAppSettings(user.id),
+        profileService.deleteProfile(user.id),
       ]);
 
       // Sign out
-      await supabase.auth.signOut();
+      await authService.signOut();
     },
     onSuccess: () => {
       toast({ title: 'Account deleted successfully' });

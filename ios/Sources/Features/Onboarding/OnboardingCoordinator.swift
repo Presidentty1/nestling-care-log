@@ -21,6 +21,9 @@ class OnboardingCoordinator: ObservableObject {
     private var preferredUnit: String = "ml"
     private var timeFormat24Hour: Bool = false
     private var aiDataSharingEnabled: Bool = true
+    
+    // Analytics tracking
+    private let onboardingStartTime: Date = Date()
 
     private let dataStore: DataStore
     private let onboardingService: OnboardingService
@@ -108,13 +111,15 @@ class OnboardingCoordinator: ObservableObject {
 
                 await MainActor.run {
                     // Analytics for onboarding completion
+                    let timeToComplete = Date().timeIntervalSince(onboardingStartTime)
                     Task {
                         await Analytics.shared.log("onboarding_completed", parameters: [
                             "skipped": false,
                             "steps_completed": 3,
                             "goal_selected": primaryGoal,
                             "initial_state": initialBabyState ?? "skipped",
-                            "sample_data_requested": loadSampleData
+                            "sample_data_requested": loadSampleData,
+                            "time_to_complete_seconds": Int(timeToComplete)
                         ])
                     }
                     onComplete()

@@ -6,9 +6,9 @@ struct BabySetupView: View {
     var body: some View {
         OnboardingContainer(
             title: "Tell us about your baby",
-            subtitle: "We'll use this to personalize your experience. You can edit this later in Settings.",
+            subtitle: "Just the basics to get started. You can add more details later in Settings.",
             step: 1,
-            totalSteps: 4,
+            totalSteps: 3,
             content: {
                 VStack(alignment: .leading, spacing: .spacingLG) {
                     VStack(alignment: .leading, spacing: .spacingSM) {
@@ -66,24 +66,6 @@ struct BabySetupView: View {
                             .background(NuzzleTheme.surfaceSoft)
                             .cornerRadius(.radiusSM)
                         }
-                    }
-
-                    VStack(alignment: .leading, spacing: .spacingSM) {
-                        Text("Sex (Optional)")
-                            .font(.body)
-                            .foregroundColor(NuzzleTheme.textPrimary)
-                        
-                        Picker("Sex (Optional)", selection: $coordinator.sex) {
-                            Text("Not specified").tag(nil as Sex?)
-                            ForEach(Sex.allCases, id: \.self) { s in
-                                Text(s.displayName).tag(s as Sex?)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .padding(.spacingMD)
-                        .background(NuzzleTheme.surfaceSoft)
-                        .cornerRadius(.radiusMD)
-                        .accessibilityLabel("Sex, Optional")
                     }
                 }
             },

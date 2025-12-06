@@ -65,11 +65,6 @@ struct CardView<Content: View>: View {
     }
 }
 
-extension Color {
-    static let border = Color(red: 0.9, green: 0.9, blue: 0.9)
-    static let info = Color(red: 0.13, green: 0.59, blue: 0.95) // #2196F3
-}
-
 #Preview {
     VStack(spacing: 16) {
         CardView(variant: .default) {

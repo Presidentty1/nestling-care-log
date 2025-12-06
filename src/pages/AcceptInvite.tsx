@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { familyService } from '@/services/familyService';
+import { authService } from '@/services/authService';
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -23,14 +24,9 @@ export default function AcceptInvite() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('caregiver_invites')
-        .select('*, families(name)')
-        .eq('token', token)
-        .eq('status', 'pending')
-        .single();
+      const data = await familyService.getInviteByToken(token);
 
-      if (error || !data) {
+      if (!data) {
         toast.error('Invalid or expired invite');
         navigate('/home');
         return;
@@ -58,7 +54,7 @@ export default function AcceptInvite() {
 
     setAccepting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await authService.getUser();
 
       if (!user) {
         // Redirect to auth with return URL
@@ -67,20 +63,7 @@ export default function AcceptInvite() {
         return;
       }
 
-      // Add user to family
-      const { error: memberError } = await supabase.from('family_members').insert({
-        family_id: invite.family_id,
-        user_id: user.id,
-        role: invite.role,
-      });
-
-      if (memberError) throw memberError;
-
-      // Mark invite as accepted
-      await supabase
-        .from('caregiver_invites')
-        .update({ status: 'accepted' })
-        .eq('id', invite.id);
+      await familyService.acceptInvite(invite.id, user.id, invite.family_id, invite.role);
 
       toast.success('Successfully joined the family!');
       navigate('/home');
@@ -96,11 +79,7 @@ export default function AcceptInvite() {
     if (!invite) return;
 
     try {
-      await supabase
-        .from('caregiver_invites')
-        .update({ status: 'declined' })
-        .eq('id', invite.id);
-
+      await familyService.declineInvite(invite.id);
       toast.success('Invite declined');
       navigate('/home');
     } catch (error) {

@@ -17,6 +17,9 @@ struct AppSettings: Codable, Equatable {
     var spotlightIndexingEnabled: Bool // Index events in Spotlight
     var primaryGoal: String? // User's primary goal: "better_naps", "track_feeds", etc.
     var trialOffersDismissed: Bool // Whether user has dismissed trial offers
+    var hasExploredPredictions: Bool? // Whether user has visited predictions view
+    var hasDismissedFirstTasksChecklist: Bool? // Whether user dismissed first tasks checklist
+    var hasSeenHomeTutorial: Bool? // Whether user has seen the home screen tutorial
     
     init(
         aiDataSharingEnabled: Bool = true,
@@ -34,7 +37,10 @@ struct AppSettings: Codable, Equatable {
         preferMediumSheet: Bool = true,
         spotlightIndexingEnabled: Bool = true,
         primaryGoal: String? = nil,
-        trialOffersDismissed: Bool = false
+        trialOffersDismissed: Bool = false,
+        hasExploredPredictions: Bool? = nil,
+        hasDismissedFirstTasksChecklist: Bool? = nil,
+        hasSeenHomeTutorial: Bool? = nil
     ) {
         self.aiDataSharingEnabled = aiDataSharingEnabled
         self.feedReminderEnabled = feedReminderEnabled
@@ -52,6 +58,9 @@ struct AppSettings: Codable, Equatable {
         self.spotlightIndexingEnabled = spotlightIndexingEnabled
         self.primaryGoal = primaryGoal
         self.trialOffersDismissed = trialOffersDismissed
+        self.hasExploredPredictions = hasExploredPredictions
+        self.hasDismissedFirstTasksChecklist = hasDismissedFirstTasksChecklist
+        self.hasSeenHomeTutorial = hasSeenHomeTutorial
     }
     
     // MARK: - Default Settings

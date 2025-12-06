@@ -41,7 +41,7 @@ class WidgetTestHelper {
                 "TodaySummaryWidget",
                 "SleepActivityWidget"
             ],
-            "appGroup": "group.com.nestling.app",
+            "appGroup": "group.com.nestling.Nestling",
             "note": "Use WidgetCenter.shared.reloadAllTimelines() to refresh widgets"
         ]
     }
@@ -73,7 +73,7 @@ class WidgetTestHelper {
     /// - Returns: True if App Groups is properly configured
     static func verifyAppGroups() -> Bool {
         let fileManager = FileManager.default
-        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
             print("[Widget] ❌ App Groups not configured")
             return false
         }
@@ -120,7 +120,7 @@ class WidgetTestHelper {
  Widget Testing Checklist:
  
  ✅ Setup:
- - [ ] App Groups configured in Xcode (group.com.nestling.app)
+ - [ ] App Groups configured in Xcode (group.com.nestling.Nestling)
  - [ ] Widget extension target created
  - [ ] Widgets added to app target
  

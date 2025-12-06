@@ -16,6 +16,9 @@ class HomeViewModel: ObservableObject {
     @Published var currentTip: ParentalTip?
     @Published var newAchievements: [Achievement] = []
     @Published var hasExampleData: Bool = false // Epic 1 AC6-AC7: Track if timeline contains example data
+    @Published var firstTasksProgress: FirstTasksProgress = FirstTasksProgress()
+    @Published var shouldShowFirstTasksChecklist: Bool = false
+    @Published var shouldShowHomeTutorial: Bool = false
     
     private let dataStore: DataStore
     private let baby: Baby
@@ -128,6 +131,8 @@ class HomeViewModel: ObservableObject {
         checkShouldShowTrialOffer()
         loadCurrentTip()
         checkForAchievements()
+        updateFirstTasksProgress()
+        checkShouldShowHomeTutorial()
     }
     
     func checkActiveSleep() {
@@ -198,6 +203,108 @@ class HomeViewModel: ObservableObject {
             }
         }
     }
+    
+    func updateFirstTasksProgress() {
+        Task {
+            do {
+                // Get user progress from settings
+                let settings = try await dataStore.fetchAppSettings()
+                
+                // Check if user has logged feed and sleep
+                let hasLoggedFeed = events.contains { $0.type == .feed }
+                let hasLoggedSleep = events.contains { $0.type == .sleep }
+                
+                // Check if user has explored predictions (from settings flag)
+                let hasExploredPredictions = settings.hasExploredPredictions ?? false
+                
+                await MainActor.run {
+                    self.firstTasksProgress = FirstTasksProgress(
+                        hasLoggedFeed: hasLoggedFeed,
+                        hasLoggedSleep: hasLoggedSleep,
+                        hasExploredPredictions: hasExploredPredictions
+                    )
+                    
+                    // Show checklist if:
+                    // - User has completed onboarding
+                    // - User hasn't completed all tasks
+                    // - User hasn't dismissed the checklist
+                    self.shouldShowFirstTasksChecklist = settings.onboardingCompleted 
+                        && !self.firstTasksProgress.allCompleted 
+                        && !(settings.hasDismissedFirstTasksChecklist ?? false)
+                }
+            } catch {
+                Logger.dataError("Failed to update first tasks progress: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func dismissFirstTasksChecklist() {
+        shouldShowFirstTasksChecklist = false
+        Task {
+            do {
+                var settings = try await dataStore.fetchAppSettings()
+                settings.hasDismissedFirstTasksChecklist = true
+                try await dataStore.saveAppSettings(settings)
+                
+                // Track dismissal in analytics
+                await Analytics.shared.log("first_tasks_dismissed", parameters: [
+                    "completed_count": firstTasksProgress.completedCount,
+                    "has_logged_feed": firstTasksProgress.hasLoggedFeed,
+                    "has_logged_sleep": firstTasksProgress.hasLoggedSleep,
+                    "has_explored_predictions": firstTasksProgress.hasExploredPredictions
+                ])
+            } catch {
+                Logger.dataError("Failed to dismiss first tasks checklist: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func markPredictionsExplored() {
+        Task {
+            do {
+                var settings = try await dataStore.fetchAppSettings()
+                settings.hasExploredPredictions = true
+                try await dataStore.saveAppSettings(settings)
+                updateFirstTasksProgress()
+            } catch {
+                Logger.dataError("Failed to mark predictions explored: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func checkShouldShowHomeTutorial() {
+        Task {
+            do {
+                let settings = try await dataStore.fetchAppSettings()
+                // Show tutorial if:
+                // - User has completed onboarding
+                // - User hasn't seen tutorial before
+                // - It's their first time on home screen (no events logged)
+                let shouldShow = settings.onboardingCompleted 
+                    && !(settings.hasSeenHomeTutorial ?? false)
+                    && events.isEmpty
+                
+                await MainActor.run {
+                    self.shouldShowHomeTutorial = shouldShow
+                }
+            } catch {
+                Logger.dataError("Failed to check home tutorial: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func completeHomeTutorial() {
+        shouldShowHomeTutorial = false
+        Task {
+            do {
+                var settings = try await dataStore.fetchAppSettings()
+                settings.hasSeenHomeTutorial = true
+                try await dataStore.saveAppSettings(settings)
+            } catch {
+                Logger.dataError("Failed to mark home tutorial complete: \(error.localizedDescription)")
+            }
+        }
+    }
 
     func loadCurrentTip() {
         Task {
@@ -261,6 +368,9 @@ class HomeViewModel: ObservableObject {
                 checkActiveSleep()
                 self.summary = calculateSummary(from: todayEvents)
                 self.isLoading = false
+                
+                // Update first tasks progress when events change
+                updateFirstTasksProgress()
                 
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             } catch {

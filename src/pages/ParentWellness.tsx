@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { parentWellnessService } from '@/services/parentWellnessService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,16 +34,8 @@ export default function ParentWellness() {
     if (!user) return;
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const { data, error } = await supabase
-        .from('parent_wellness_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('log_date', dateStr)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      setTodayLog(data);
+      const log = await parentWellnessService.getTodayLog(user.id, selectedDate);
+      setTodayLog(log);
     } catch (error) {
       console.error('Error loading wellness log:', error);
     }
@@ -53,15 +45,8 @@ export default function ParentWellness() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('parent_medications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setMedications(data || []);
+      const meds = await parentWellnessService.getActiveMedications(user.id);
+      setMedications(meds);
     } catch (error) {
       console.error('Error loading medications:', error);
     }
@@ -71,18 +56,11 @@ export default function ParentWellness() {
     if (!user) return;
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const { error } = await supabase
-        .from('parent_wellness_logs')
-        .upsert({
-          user_id: user.id,
-          log_date: dateStr,
-          mood,
-        }, {
-          onConflict: 'user_id,log_date',
-        });
-
-      if (error) throw error;
+      await parentWellnessService.upsertLog({
+        user_id: user.id,
+        log_date: format(selectedDate, 'yyyy-MM-dd'),
+        mood,
+      });
       toast.success('Mood recorded!');
       loadTodayLog();
     } catch (error) {
@@ -95,19 +73,12 @@ export default function ParentWellness() {
     if (!user) return;
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
       const currentWater = todayLog?.water_intake_ml || 0;
-      const { error } = await supabase
-        .from('parent_wellness_logs')
-        .upsert({
-          user_id: user.id,
-          log_date: dateStr,
-          water_intake_ml: currentWater + amount,
-        }, {
-          onConflict: 'user_id,log_date',
-        });
-
-      if (error) throw error;
+      await parentWellnessService.upsertLog({
+        user_id: user.id,
+        log_date: format(selectedDate, 'yyyy-MM-dd'),
+        water_intake_ml: currentWater + amount,
+      });
       loadTodayLog();
     } catch (error) {
       console.error('Error saving water intake:', error);
@@ -119,18 +90,11 @@ export default function ParentWellness() {
     if (!user) return;
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const { error } = await supabase
-        .from('parent_wellness_logs')
-        .upsert({
-          user_id: user.id,
-          log_date: dateStr,
-          sleep_quality: quality,
-        }, {
-          onConflict: 'user_id,log_date',
-        });
-
-      if (error) throw error;
+      await parentWellnessService.upsertLog({
+        user_id: user.id,
+        log_date: format(selectedDate, 'yyyy-MM-dd'),
+        sleep_quality: quality,
+      });
       toast.success('Sleep quality recorded!');
       loadTodayLog();
     } catch (error) {

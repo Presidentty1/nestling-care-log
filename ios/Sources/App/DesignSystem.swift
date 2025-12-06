@@ -150,6 +150,7 @@ extension Color {
 
     // Legacy colors - redirect to dark mode for backward compatibility
     static let primary = NuzzleTheme.primary
+    static let primaryAction = NuzzleTheme.primary // Alias for primary action color
     static let primaryForeground = NuzzleTheme.primaryForeground
 
     // Semantic colors (adaptive versions should be used in new code)
@@ -171,6 +172,9 @@ extension Color {
     // Text - use theme colors (legacy)
     static let foreground = NuzzleTheme.textPrimary
     static let mutedForeground = NuzzleTheme.textSecondary
+    
+    // Border - use theme colors (legacy)
+    static let border = NuzzleTheme.border
 }
 
 // MARK: - Spacing

@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showTummyForm = false
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
+    @State private var showCelebration: (show: Bool, eventType: EventType?) = (false, nil)
     
     var body: some View {
         NavigationStack {
@@ -32,6 +33,29 @@ struct HomeView: View {
                                     // Open feed logging form
                                     showFeedForm = true
                                 }
+                                .padding(.top, .spacingMD)
+                            }
+                            
+                            // First Tasks Checklist (Phase 2: Personalization)
+                            if viewModel.shouldShowFirstTasksChecklist {
+                                FirstTasksChecklistView(
+                                    tasksCompleted: viewModel.firstTasksProgress,
+                                    onLogFeed: {
+                                        showFeedForm = true
+                                    },
+                                    onLogSleep: {
+                                        showSleepForm = true
+                                    },
+                                    onExplorePredictions: {
+                                        // Navigate to PredictionsView
+                                        // Mark as explored for analytics
+                                        viewModel.markPredictionsExplored()
+                                    },
+                                    onDismiss: {
+                                        viewModel.dismissFirstTasksChecklist()
+                                    }
+                                )
+                                .padding(.horizontal, .spacingMD)
                                 .padding(.top, .spacingMD)
                             }
 
@@ -348,6 +372,23 @@ struct HomeView: View {
                 }
             }
             .toast($showToast)
+            .overlay {
+                // Celebration modal for first log
+                if showCelebration.show, let eventType = showCelebration.eventType {
+                    FirstLogCelebrationView(eventType: eventType) {
+                        showCelebration = (false, nil)
+                    }
+                    .transition(.opacity)
+                }
+                
+                // Tutorial overlay for first-time users
+                if let vm = viewModel, vm.shouldShowHomeTutorial {
+                    HomeTutorialOverlay {
+                        vm.completeHomeTutorial()
+                    }
+                    .transition(.opacity)
+                }
+            }
         }
     }
     

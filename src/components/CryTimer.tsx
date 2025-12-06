@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
+import { authService } from '@/services/authService';
+import { familyService } from '@/services/familyService';
+import { eventsService } from '@/services/eventsService';
+import { cryLogsService } from '@/services/cryLogsService';
+import { cryAnalysisService } from '@/services/cryAnalysisService';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,21 +40,17 @@ export function CryTimer({ baby }: CryTimerProps) {
 
   const analyzeCryMutation = useMutation({
     mutationFn: async () => {
-      const { data: familyMember } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+      const user = await authService.getUser();
+      if (!user) throw new Error('Not authenticated');
 
+      const familyMember = await familyService.getUserFamilyMembership(user.id);
       if (!familyMember) throw new Error('Family not found');
 
       // Get recent events for context
-      const { data: recentEvents } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', baby.id)
-        .gte('start_time', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('start_time', { ascending: false });
+      const recentEvents = await eventsService.getEvents({
+        babyId: baby.id,
+        startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      });
 
       const now = new Date();
       const timeOfDay = now.getHours();
@@ -67,18 +67,13 @@ export function CryTimer({ baby }: CryTimerProps) {
         ? Math.floor((new Date(lastSleep.end_time).getTime() - new Date(lastSleep.start_time).getTime()) / (1000 * 60))
         : 0;
 
-      const { data, error } = await supabase.functions.invoke('analyze-cry-pattern', {
-        body: {
-          babyId: baby.id,
-          recentEvents: recentEvents?.slice(0, 5),
-          timeOfDay,
-          timeSinceLastFeed,
-          lastSleepDuration,
-        },
+      return await cryAnalysisService.analyzeCryPattern({
+        babyId: baby.id,
+        recentEvents: recentEvents?.slice(0, 5) || [],
+        timeOfDay,
+        timeSinceLastFeed,
+        lastSleepDuration,
       });
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: (data) => {
       setAnalysis(data);
@@ -97,12 +92,10 @@ export function CryTimer({ baby }: CryTimerProps) {
 
   const saveCryLogMutation = useMutation({
     mutationFn: async (resolvedBy: string) => {
-      const { data: familyMember } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+      const user = await authService.getUser();
+      if (!user) throw new Error('Not authenticated');
 
+      const familyMember = await familyService.getUserFamilyMembership(user.id);
       if (!familyMember) throw new Error('Family not found');
 
       const cryLogData = {
@@ -122,9 +115,7 @@ export function CryTimer({ baby }: CryTimerProps) {
         throw new Error(validationResult.error.issues[0].message);
       }
 
-      const { error } = await supabase.from('cry_logs').insert(validationResult.data);
-
-      if (error) throw error;
+      await cryLogsService.createCryLog(baby.id, validationResult.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cry-logs'] });

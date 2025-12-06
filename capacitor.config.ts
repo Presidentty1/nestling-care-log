@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.3be850d6430e4062887da465d2abf643',
+  appId: 'com.lovable.nestlingcarelog',
   appName: 'nestling-care-log',
   webDir: 'dist',
   server: {
@@ -10,14 +10,14 @@ const config: CapacitorConfig = {
     // url: 'http://192.168.1.10:5173',
     // cleartext: true
   },
+  ios: {
+    contentInset: 'always',
+  },
   plugins: {
-    LocalNotifications: {
-      smallIcon: "ic_stat_icon_config_sample",
-      iconColor: "#488AFF",
-      sound: "beep.wav",
-    },
-    Haptics: {
-      enabled: true
+    Keyboard: {
+      resize: 'native',
+      style: 'dark',
+      resizeOnFullScreen: true,
     },
     LocalNotifications: {
       smallIcon: "ic_stat_icon_config_sample",

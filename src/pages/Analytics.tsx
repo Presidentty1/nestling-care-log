@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
+import { babyService } from '@/services/babyService';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,19 +26,7 @@ export default function Analytics() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (!familyMembers || familyMembers.length === 0) return [];
-
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyMembers.map(fm => fm.family_id));
-
-      return babies as Baby[];
+      return await babyService.getUserBabies();
     },
   });
 

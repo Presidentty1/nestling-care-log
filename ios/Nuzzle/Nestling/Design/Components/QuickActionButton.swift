@@ -56,6 +56,7 @@ struct QuickActionButton: View {
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
+            .frame(height: isCaregiverMode ? 120 : 100)
             .padding(isCaregiverMode ? .spacingLG : .spacingMD)
             .background(
                 Group {
@@ -80,16 +81,26 @@ struct QuickActionButton: View {
                     }
                 }
             )
-            .cornerRadius(.radiusMD)
-            .shadow(color: isActive ? color.opacity(0.2) : Color.black.opacity(0.05), radius: isActive ? 6 : 2, x: 0, y: isActive ? 3 : 1)
+            .cornerRadius(.radiusLG)
+            .shadow(color: isActive ? color.opacity(0.25) : Color.black.opacity(0.05), radius: isActive ? 8 : 3, x: 0, y: isActive ? 4 : 2)
             .overlay(
-                RoundedRectangle(cornerRadius: .radiusMD)
-                    .stroke(isActive ? color.opacity(0.3) : Color.separator, lineWidth: isActive ? 1.5 : 0.5)
+                RoundedRectangle(cornerRadius: .radiusLG)
+                    .stroke(isActive ? color.opacity(0.4) : Color.cardBorder, lineWidth: isActive ? 2 : 1)
             )
         }
         .contentShape(Rectangle()) // Ensure entire button area is tappable
         .buttonStyle(QuickActionButtonStyle(isActive: isActive))
         .simultaneousGesture(
+            // Double-tap for instant log with defaults
+            TapGesture(count: 2)
+                .onEnded { _ in
+                    print("🔵 QuickActionButton double-tap: \(title)")
+                    Haptics.medium()
+                    action() // Quick log with defaults
+                }
+        )
+        .simultaneousGesture(
+            // Long press for detailed form
             LongPressGesture(minimumDuration: 0.5)
                 .onEnded { _ in
                     print("🔵 QuickActionButton long press: \(title)")

@@ -4,8 +4,11 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby, BabyEvent } from '@/lib/types';
+import { authService } from '@/services/authService';
+import { babyService } from '@/services/babyService';
+import { eventsService } from '@/services/eventsService';
+import { napFeedbackService } from '@/services/napFeedbackService';
 import { predictNextNap } from '@/lib/napPredictor';
 import { format, formatDistanceToNow, isBefore, isAfter } from 'date-fns';
 import { ArrowLeft, Moon } from 'lucide-react';
@@ -24,26 +27,13 @@ export default function NapDetails() {
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await authService.getUser();
       if (!user) {
         navigate('/auth');
         return;
       }
 
-      // Get user's families
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-
-      if (!familyMembers || familyMembers.length === 0) return;
-
-      // Get babies
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('family_id', familyMembers[0].family_id);
-
+      const babies = await babyService.getUserBabies();
       if (!babies || babies.length === 0) return;
 
       const selectedBabyId = localStorage.getItem('selected_baby_id') || babies[0].id;
@@ -54,13 +44,11 @@ export default function NapDetails() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const { data: sleepEvents } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .eq('type', 'sleep')
-        .gte('start_time', sevenDaysAgo.toISOString())
-        .order('start_time', { ascending: false });
+      const sleepEvents = await eventsService.getEvents({
+        babyId: selectedBaby.id,
+        type: 'sleep',
+        startTime: sevenDaysAgo.toISOString(),
+      });
 
       setEvents(sleepEvents || []);
     } catch (error) {
@@ -76,7 +64,7 @@ export default function NapDetails() {
     try {
       const prediction = predictNextNap(baby, events);
 
-      await supabase.from('nap_feedback').insert({
+      await napFeedbackService.createFeedback({
         baby_id: baby.id,
         predicted_start: prediction.napWindowStart.toISOString(),
         predicted_end: prediction.napWindowEnd.toISOString(),

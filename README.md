@@ -91,6 +91,15 @@ This project is optimized for Cursor 2.0:
 4. Read `DEVELOPMENT.md` for full setup guide
 5. AI rules are in `.cursorrules`
 
+### ⚠️ Workspace Verification
+
+**IMPORTANT**: This repository uses git worktrees. Always verify you're in the correct workspace before making changes.
+
+- Check for `.workspace-verification` file in the root directory
+- Run `./scripts/verify-workspace.sh` to verify workspace location
+- Use relative paths in all documentation and scripts
+- See `WORKSPACE_VERIFICATION.md` for complete verification guide
+
 ## 🚀 Deployment
 
 See `DEPLOYMENT.md` for:

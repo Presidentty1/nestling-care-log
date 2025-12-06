@@ -20,36 +20,41 @@ struct StreaksView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingMD) {
-            // Header with current streak
-            HStack {
+            // Prominent streak display
+            HStack(alignment: .center, spacing: .spacingMD) {
+                // Large flame emoji with glow
+                ZStack {
+                    Circle()
+                        .fill(Color.warning.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Text("🔥")
+                        .font(.system(size: 36))
+                }
+                
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Current Streak")
-                        .font(.headline)
-                        .foregroundColor(.foreground)
-
                     HStack(spacing: .spacingXS) {
-                        Image(systemName: "flame.fill")
-                            .foregroundColor(.orange)
-                        Text("\(currentStreak) day\(currentStreak == 1 ? "" : "s")")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                        Text("\(currentStreak)")
+                            .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.foreground)
-                    }
-
-                    if longestStreak > currentStreak {
-                        Text("Personal best: \(longestStreak) days")
-                            .font(.caption)
+                        
+                        Text("day\(currentStreak == 1 ? "" : "s")")
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.mutedForeground)
+                    }
+                    
+                    Text("Current Streak")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.mutedForeground)
+                    
+                    if longestStreak > currentStreak {
+                        Text("Best: \(longestStreak) days")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(.mutedForeground.opacity(0.8))
                     }
                 }
 
                 Spacer()
-
-                // Fire emoji for active streak
-                if currentStreak > 0 {
-                    Text("🔥")
-                        .font(.system(size: 40))
-                }
             }
 
             // Streak badges

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Medication, Baby } from '@/lib/types';
+import { medicationService } from '@/services/medicationService';
+import { eventsService } from '@/services/eventsService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -27,13 +28,7 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
   const { data: medications = [] } = useQuery({
     queryKey: ['medications', baby.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('medications')
-        .select('*')
-        .eq('baby_id', baby.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Medication[];
+      return await medicationService.getMedications(baby.id);
     },
   });
 
@@ -44,7 +39,7 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
   const markAsGivenMutation = useMutation({
     mutationFn: async (medication: Medication) => {
       // Create an event for this medication dose
-      const { error } = await supabase.from('events').insert({
+      await eventsService.createEvent({
         baby_id: baby.id,
         family_id: baby.family_id,
         type: 'medication',
@@ -52,7 +47,6 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
         start_time: new Date().toISOString(),
         note: `${medication.dose || 'Dose'} given`,
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Medication logged');
@@ -62,11 +56,9 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
 
   const stopMedicationMutation = useMutation({
     mutationFn: async (medicationId: string) => {
-      const { error } = await supabase
-        .from('medications')
-        .update({ end_date: format(new Date(), 'yyyy-MM-dd') })
-        .eq('id', medicationId);
-      if (error) throw error;
+      await medicationService.updateMedication(medicationId, {
+        end_date: format(new Date(), 'yyyy-MM-dd'),
+      });
     },
     onSuccess: () => {
       toast.success('Medication stopped');
@@ -198,21 +190,12 @@ function MedicationModal({
       };
 
       if (medication?.id) {
-        const { error } = await supabase
-          .from('medications')
-          .update(data)
-          .eq('id', medication.id);
-        if (error) throw error;
+        await medicationService.updateMedication(medication.id, data);
       } else {
-        const { data: newMed, error } = await supabase
-          .from('medications')
-          .insert(data)
-          .select()
-          .single();
-        if (error) throw error;
+        const newMed = await medicationService.createMedication(data);
 
         if (reminderEnabled && newMed) {
-          await notificationManager.scheduleMedicationReminder(newMed as Medication);
+          await notificationManager.scheduleMedicationReminder(newMed);
         }
       }
     },

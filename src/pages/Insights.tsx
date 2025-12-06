@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { authService } from '@/services/authService';
+import { babyService } from '@/services/babyService';
+import { patternInsightsService } from '@/services/patternInsightsService';
 import { BabySelector } from '@/components/BabySelector';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,18 +16,7 @@ export default function Insights() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-      if (!familyMembers || familyMembers.length === 0) return [];
-      const { data } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('family_id', familyMembers[0].family_id);
-      return data || [];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -33,13 +24,7 @@ export default function Insights() {
     queryKey: ['pattern-insights', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('pattern_insights')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .is('acknowledged_at', null)
-        .order('detected_at', { ascending: false });
-      return data || [];
+      return await patternInsightsService.getPatternInsights(selectedBabyId, false);
     },
     enabled: !!selectedBabyId,
   });
@@ -48,13 +33,7 @@ export default function Insights() {
     queryKey: ['correlations', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('correlation_analysis')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      return data || [];
+      return await patternInsightsService.getCorrelations(selectedBabyId, 5);
     },
     enabled: !!selectedBabyId,
   });

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -9,29 +8,22 @@ import { Download, Share2, Trash2, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/common/EmptyState';
-
-interface PhotoItem {
-  url: string;
-  date: string;
-  category: 'milestone' | 'health' | 'event';
-  title: string;
-  id: string;
-}
+import { babyService } from '@/services/babyService';
+import { photoService, PhotoItem } from '@/services/photoService';
 
 export default function PhotoGallery() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'milestone' | 'health' | 'event'>('all');
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null);
 
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('babies').select('*');
-      if (error) throw error;
-      if (data && data.length > 0 && !selectedBaby) {
-        setSelectedBaby(data[0]);
+      const babyList = await babyService.getUserBabies();
+      if (babyList && babyList.length > 0 && !selectedBaby) {
+        setSelectedBaby(babyList[0]);
       }
-      return data as Baby[];
+      return babyList;
     },
   });
 
@@ -39,58 +31,7 @@ export default function PhotoGallery() {
     queryKey: ['photos', selectedBaby?.id, activeCategory],
     queryFn: async () => {
       if (!selectedBaby) return [];
-      
-      const allPhotos: PhotoItem[] = [];
-
-      // Get milestone photos
-      const { data: milestones } = await supabase
-        .from('milestones')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .not('photo_url', 'is', null);
-      
-      if (milestones) {
-        allPhotos.push(...milestones.map(m => ({
-          url: m.photo_url!,
-          date: m.achieved_date,
-          category: 'milestone' as const,
-          title: m.title,
-          id: m.id,
-        })));
-      }
-
-      // Get health record photos
-      const { data: healthRecords } = await supabase
-        .from('health_records')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .not('attachments', 'is', null);
-      
-      if (healthRecords) {
-        healthRecords.forEach(record => {
-          if (record.attachments && Array.isArray(record.attachments)) {
-            record.attachments.forEach((url: string) => {
-              allPhotos.push({
-                url,
-                date: record.recorded_at,
-                category: 'health' as const,
-                title: record.title,
-                id: record.id,
-              });
-            });
-          }
-        });
-      }
-
-      // Filter by category
-      const filtered = activeCategory === 'all' 
-        ? allPhotos 
-        : allPhotos.filter(p => p.category === activeCategory);
-
-      // Sort by date
-      return filtered.sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
+      return await photoService.getPhotos(selectedBaby.id, activeCategory);
     },
     enabled: !!selectedBaby,
   });

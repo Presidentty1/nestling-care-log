@@ -1,7 +1,8 @@
 import { format, differenceInMinutes } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Milk, Droplet, Moon, Timer, CheckCircle2, CloudOff, RefreshCw } from 'lucide-react';
-import type { EventRecord, DailySummary } from '@/types/events';
+import type { DailySummary } from '@/types/summary';
+import type { EventRecord } from '@/services/eventsService';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { offlineQueue } from '@/lib/offlineQueue';
 import { useState, useEffect } from 'react';

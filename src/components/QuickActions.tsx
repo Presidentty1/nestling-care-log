@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import type { EventRecord } from '@/services/eventsService';
 import { useState, useRef, useEffect } from 'react';
 import { track } from '@/analytics/analytics';
+import { getPressEffect } from '@/lib/animations';
 
 interface QuickActionsProps {
   onActionSelect: (type: EventType) => void;
@@ -32,15 +33,21 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
   };
 
   const handleClick = (type: EventType) => {
-    // Track analytics
-    track('quick_action_used', {
-      action_type: type,
-      method: onQuickLog ? 'quick_log' : 'open_form'
-    });
-    
-    if (onQuickLog) {
-      onQuickLog(type);
-    } else {
+    try {
+      // Track analytics
+      track('quick_action_used', {
+        action_type: type,
+        method: onQuickLog ? 'quick_log' : 'open_form'
+      });
+      
+      if (onQuickLog) {
+        onQuickLog(type);
+      } else {
+        onActionSelect(type);
+      }
+    } catch (error) {
+      console.error('Quick action error:', error);
+      // Fallback to opening the form
       onActionSelect(type);
     }
   };
@@ -92,7 +99,14 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
               handleLongPress(action.type);
             }}
             variant="outline"
-            className={`h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 ${action.borderColor} ${action.bgColor} hover:${action.bgColor} hover:${action.borderColor} active:scale-[0.98] transition-all duration-100 ${longPressType === action.type ? 'scale-[0.98]' : ''}`}
+            className={`
+              h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 
+              ${action.borderColor} ${action.bgColor} 
+              hover:${action.bgColor} hover:${action.borderColor} hover:shadow-md
+              ${getPressEffect()}
+              transition-all duration-200
+              ${longPressType === action.type ? 'scale-[0.96] shadow-inner' : 'hover:scale-[1.02]'}
+            `}
             style={{ minHeight: '44px', minWidth: '44px' }}
           >
             <action.icon className={`h-8 w-8 ${action.color}`} strokeWidth={2} />

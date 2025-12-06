@@ -31,62 +31,81 @@ import { reportWebVitals } from '@/hooks/usePerformance';
 import * as Sentry from '@sentry/react';
 
 // Initialize Sentry for web app
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN || 'https://your-sentry-dsn@sentry.io/project-id',
-  environment: import.meta.env.MODE || 'development',
-  release: import.meta.env.VITE_APP_VERSION || '1.0.0',
-
-  // Performance monitoring
-  tracesSampleRate: 1.0,
-
-  // Capture console logs as breadcrumbs
-  integrations: [
-    new Sentry.BrowserTracing({
-      tracePropagationTargets: ['localhost', /^https:\/\/your-domain\.com/],
-    }),
-    new Sentry.Replay({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
-
-  // Capture more context
-  beforeSend: (event) => {
-    // Add user context if available
-    const user = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
-    if (user?.user?.id) {
-      event.user = {
-        id: user.user.id,
-        email: user.user.email,
-      };
+// Only initialize if DSN is provided and we're not in Capacitor (Capacitor has its own Sentry plugin)
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
+  try {
+    // Build integrations array conditionally (some may not be available in all environments)
+    const integrations = [];
+    
+    // Only add browser tracing if available (not in Capacitor native)
+    if (typeof Sentry.browserTracingIntegration === 'function') {
+      integrations.push(
+        Sentry.browserTracingIntegration({
+          tracePropagationTargets: ['localhost', /^https:\/\/your-domain\.com/],
+        })
+      );
+    }
+    
+    // Only add replay if available
+    if (typeof Sentry.replayIntegration === 'function') {
+      integrations.push(
+        Sentry.replayIntegration({
+          maskAllText: true,
+          blockAllMedia: true,
+        })
+      );
     }
 
-    // Add app context
-    event.tags = {
-      ...event.tags,
-      app_version: import.meta.env.VITE_APP_VERSION || '1.0.0',
-      user_agent: navigator.userAgent,
-    };
+    Sentry.init({
+      dsn: sentryDsn,
+      environment: import.meta.env.MODE || 'development',
+      release: import.meta.env.VITE_APP_VERSION || '1.0.0',
 
-    return event;
-  },
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+      // Performance monitoring
+      tracesSampleRate: 1.0,
 
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+      // Integrations (only add if available)
+      integrations,
 
-  // Configure breadcrumbs
-  maxBreadcrumbs: 100,
+      // Capture more context
+      beforeSend: (event) => {
+        // Add user context if available
+        try {
+          const user = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
+          if (user?.user?.id) {
+            event.user = {
+              id: user.user.id,
+              email: user.user.email,
+            };
+          }
+        } catch (e) {
+          // Ignore parsing errors
+        }
 
-  // Release health
-  enableTracing: true,
-});
+        // Add app context
+        event.tags = {
+          ...event.tags,
+          app_version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+          user_agent: navigator.userAgent,
+        };
+
+        return event;
+      },
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+
+      // Configure breadcrumbs
+      maxBreadcrumbs: 100,
+
+      // Release health
+      enableTracing: true,
+    });
+  } catch (error) {
+    // Silently fail Sentry initialization if it errors (e.g., in Capacitor)
+    console.warn('Sentry initialization failed:', error);
+  }
+}
 
 // Initialize performance monitoring
 if (typeof window !== 'undefined') {
@@ -97,9 +116,9 @@ if (typeof window !== 'undefined') {
 }
 
 // Core pages (eager loaded for fast initial load)
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
-import OnboardingSimple from "./pages/OnboardingSimple";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
@@ -210,7 +229,7 @@ function AppContent() {
         <NotificationBanner />
         <Routes>
           {/* Root and auth routes */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
 
           {/* Onboarding flow with specific error boundary */}

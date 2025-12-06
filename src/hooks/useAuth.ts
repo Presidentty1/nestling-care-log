@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { authService } from '@/services/authService';
+import { supabase } from '@/integrations/supabase/client'; // Needed for profile creation still
 import { useNavigate } from 'react-router-dom';
 import { identify, track } from '@/analytics/analytics';
 
@@ -12,7 +13,7 @@ export function useAuth() {
 
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const subscription = authService.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -33,7 +34,7 @@ export function useAuth() {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    authService.getSession().then(({ session }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -43,19 +44,17 @@ export function useAuth() {
   }, []);
 
   const signUp = async (email: string, password: string, name?: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: {
-          name: name || '',
-        },
+    const { data, error } = await authService.signUp(email, password, {
+      emailRedirectTo: `${window.location.origin}/`,
+      data: {
+        name: name || '',
       },
     });
 
     if (!error && data.user) {
       // Create profile
+      // Note: keeping direct supabase call here for now as profile service doesn't exist yet
+      // Ideally this should move to profileService.createProfile(user.id, email, name)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -79,7 +78,7 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await authService.signInWithPassword({
       email,
       password,
     });
@@ -87,11 +86,13 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
+    try {
+      await authService.signOut();
       navigate('/auth');
+      return { error: null };
+    } catch (error) {
+      return { error };
     }
-    return { error };
   };
 
   return {

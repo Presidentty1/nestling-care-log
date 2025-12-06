@@ -4,6 +4,7 @@ struct PredictionsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var viewModel: PredictionsViewModel?
     @Environment(\.dismiss) var dismiss
+    @State private var showUpgradeSheet = false
     
     var body: some View {
         NavigationStack {
@@ -11,6 +12,17 @@ struct PredictionsView: View {
                 if let viewModel = viewModel {
                     ScrollView {
                         VStack(spacing: .spacingLG) {
+                            // Free tier usage indicator
+                            if !ProSubscriptionService.shared.isProUser {
+                                FreeTierUsageCard(
+                                    used: viewModel.dailyPredictionCount,
+                                    limit: 3,
+                                    featureName: "predictions today",
+                                    onUpgrade: { showUpgradeSheet = true }
+                                )
+                                .padding(.horizontal, .spacingMD)
+                            }
+                            
                             // Medical Disclaimer
                             MedicalDisclaimer(variant: .predictions)
                                 .accessibilityElement(children: .combine)
@@ -106,6 +118,15 @@ struct PredictionsView: View {
             .task {
                 if let baby = environment.currentBaby {
                     updateViewModel(for: baby)
+                }
+            }
+            .sheet(isPresented: $showUpgradeSheet) {
+                ProSubscriptionView()
+            }
+            .onChange(of: viewModel?.showUpgradePrompt ?? false) { _, showPrompt in
+                if showPrompt {
+                    showUpgradeSheet = true
+                    viewModel?.showUpgradePrompt = false
                 }
             }
         }

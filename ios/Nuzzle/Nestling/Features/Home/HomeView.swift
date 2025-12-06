@@ -7,12 +7,111 @@ struct HomeView: View {
     @State private var showSleepForm = false
     @State private var showDiaperForm = false
     @State private var showTummyForm = false
+    @State private var showCryRecorder = false
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
     @State private var showProSubscription = false
+    @State private var showFabMenu = false
+    @State private var showTutorial = false
     
     var body: some View {
-        navigationContent
+        ZStack(alignment: .bottomTrailing) {
+            navigationContent
+            
+            // Spotlight Tutorial Overlay (Phase 3)
+            if showTutorial {
+                SpotlightTutorialOverlay(isPresented: $showTutorial) {
+                    // Mark tutorial as seen
+                    UserDefaults.standard.set(true, forKey: "hasSeenHomeTutorial")
+                }
+                .zIndex(1000)
+            }
+            
+            // Floating Action Button (North Star)
+            VStack(alignment: .trailing, spacing: .spacingSM) {
+                if showFabMenu {
+                    fabActionButton(title: "Diaper", icon: "drop.circle.fill", color: .eventDiaper) {
+                        showFabMenu = false
+                        showDiaperForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    
+                    fabActionButton(title: "Sleep", icon: "moon.fill", color: .eventSleep) {
+                        showFabMenu = false
+                        showSleepForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    
+                    fabActionButton(title: "Feed", icon: "drop.fill", color: .eventFeed) {
+                        showFabMenu = false
+                        showFeedForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        showFabMenu.toggle()
+                    }
+                    Haptics.light()
+                }) {
+                    Image(systemName: "plus")
+                        .font(.title.weight(.semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.primary.opacity(1.1),
+                                    Color.primary
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Circle())
+                        .shadow(color: Color.primary.opacity(0.4), radius: 12, x: 0, y: 6)
+                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                        .rotationEffect(.degrees(showFabMenu ? 45 : 0))
+                        .scaleEffect(showFabMenu ? 1.05 : 1.0)
+                }
+            }
+            .padding(.spacingLG)
+            
+            // Offline Indicator (Epic 4)
+            VStack {
+                OfflineIndicatorView()
+                Spacer()
+            }
+            .padding(.top, 40) // Safe area padding
+        }
+    }
+    
+    private func fabActionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            Haptics.selection()
+            action()
+        }) {
+            HStack {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.foreground)
+                    .padding(.horizontal, .spacingSM)
+                    .padding(.vertical, .spacingXS)
+                    .background(Color.surface)
+                    .cornerRadius(.radiusSM)
+                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(color)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
+            }
+        }
     }
     
     private var navigationContent: some View {
@@ -28,6 +127,11 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showTummyForm) {
                 tummyFormSheet
+            }
+            .sheet(isPresented: $showCryRecorder) {
+                if let baby = environment.currentBaby {
+                    CryRecorderView(dataStore: environment.dataStore, baby: baby)
+                }
             }
             .sheet(isPresented: $showProSubscription) {
                 ProSubscriptionView()
@@ -78,6 +182,7 @@ struct HomeView: View {
                 showSleepForm: $showSleepForm,
                 showDiaperForm: $showDiaperForm,
                 showTummyForm: $showTummyForm,
+                showCryRecorder: $showCryRecorder,
                 editingEvent: $editingEvent,
                 showToast: $showToast,
                 showProSubscription: $showProSubscription,
@@ -140,6 +245,17 @@ struct HomeView: View {
                     environment.currentBaby = environment.babies.first
                     if let baby = environment.currentBaby {
                         updateViewModel(for: baby)
+                    }
+                }
+            }
+            
+            // Show tutorial on first visit (Phase 3)
+            await MainActor.run {
+                let hasSeenTutorial = UserDefaults.standard.bool(forKey: "hasSeenHomeTutorial")
+                if !hasSeenTutorial {
+                    // Delay tutorial slightly so user sees the home screen first
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        showTutorial = true
                     }
                 }
             }
@@ -384,6 +500,7 @@ struct QuickActionsSection: View {
     let onOpenSleepForm: () -> Void
     let onOpenDiaperForm: () -> Void
     let onOpenTummyForm: () -> Void
+    let onCryAnalysis: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -391,39 +508,44 @@ struct QuickActionsSection: View {
                 .font(.title)
                 .foregroundColor(.foreground)
             
-            HStack(spacing: .spacingSM) {
-                QuickActionButton(
-                    title: "Feed",
-                    icon: "drop.fill",
-                    color: .eventFeed,
-                    action: onFeed,
-                    longPressAction: onOpenFeedForm
-                )
+            // Balanced 2x2 Grid - Most-used actions
+            VStack(spacing: .spacingMD) {
+                HStack(spacing: .spacingMD) {
+                    QuickActionButton(
+                        title: "Feed",
+                        icon: "drop.fill",
+                        color: .eventFeed,
+                        action: onFeed,
+                        longPressAction: onOpenFeedForm
+                    )
+                    
+                    QuickActionButton(
+                        title: activeSleep != nil ? "Stop Sleep" : "Sleep",
+                        icon: "moon.fill",
+                        color: .eventSleep,
+                        isActive: activeSleep != nil,
+                        action: onSleep,
+                        longPressAction: onOpenSleepForm
+                    )
+                }
                 
-                QuickActionButton(
-                    title: activeSleep != nil ? "Stop Sleep" : "Sleep",
-                    icon: "moon.fill",
-                    color: .eventSleep,
-                    isActive: activeSleep != nil,
-                    action: onSleep,
-                    longPressAction: onOpenSleepForm
-                )
-                
-                QuickActionButton(
-                    title: "Diaper",
-                    icon: "drop.circle.fill",
-                    color: .eventDiaper,
-                    action: onDiaper,
-                    longPressAction: onOpenDiaperForm
-                )
-                
-                QuickActionButton(
-                    title: "Tummy",
-                    icon: "figure.child",
-                    color: .eventTummy,
-                    action: onTummyTime,
-                    longPressAction: onOpenTummyForm
-                )
+                HStack(spacing: .spacingMD) {
+                    QuickActionButton(
+                        title: "Diaper",
+                        icon: "drop.circle.fill",
+                        color: .eventDiaper,
+                        action: onDiaper,
+                        longPressAction: onOpenDiaperForm
+                    )
+                    
+                    QuickActionButton(
+                        title: "Tummy",
+                        icon: "figure.child",
+                        color: .eventTummy,
+                        action: onTummyTime,
+                        longPressAction: onOpenTummyForm
+                    )
+                }
             }
         }
     }
@@ -462,207 +584,9 @@ struct TimelineSection: View {
     }
 }
 
-// MARK: - Home Content View (Properly Observes ViewModel)
+// MARK: - Home Content View (Moved to HomeContentView.swift)
+// The implementation has been moved to its own file for better maintainability and dynamic layout support.
 
-struct HomeContentView: View {
-    @ObservedObject var viewModel: HomeViewModel
-    @EnvironmentObject var environment: AppEnvironment
-    @Binding var showFeedForm: Bool
-    @Binding var showSleepForm: Bool
-    @Binding var showDiaperForm: Bool
-    @Binding var showTummyForm: Bool
-    @Binding var editingEvent: Event?
-    @Binding var showToast: ToastMessage?
-    @Binding var showProSubscription: Bool
-    let onBabySelected: (Baby) -> Void
-    let onEventEdited: (Event) -> Void
-    
-    var body: some View {
-        ScrollView {
-            VStack(spacing: .spacingLG) {
-                // Baby Selector
-                if let baby = environment.currentBaby {
-                    BabySelectorView(baby: baby, babies: environment.babies) { selectedBaby in
-                        onBabySelected(selectedBaby)
-                    }
-                    .padding(.horizontal, .spacingMD)
-                }
-                
-                // Guidance Strip (Epic 4)
-                if let baby = environment.currentBaby {
-                    GuidanceStripView(dataStore: environment.dataStore, baby: baby)
-                        .padding(.horizontal, .spacingMD)
-                }
-                
-                // Summary Cards
-                if let summary = viewModel.summary {
-                    SummaryCardsView(summary: summary)
-                        .padding(.horizontal, .spacingMD)
-                }
-
-                // Today's Insight (Personalized Recommendations) - Pro Feature
-                if let topRecommendation = viewModel.recommendations.first {
-                    FeatureGate.check(.todaysInsight, accessible: {
-                        TodaysInsightCard(recommendation: topRecommendation)
-                            .padding(.horizontal, .spacingMD)
-                            .onTapGesture {
-                                // Handle recommendation tap - could show detail or dismiss
-                                Haptics.light()
-                            }
-                    }, paywall: {
-                        // Show upgrade prompt for non-Pro users
-                        TodaysInsightCard(recommendation: topRecommendation)
-                            .padding(.horizontal, .spacingMD)
-                            .blur(radius: 4)
-                            .overlay(
-                                // Semi-transparent overlay to make button stand out
-                                Color.background.opacity(0.3)
-                                    .overlay(
-                                        VStack {
-                                            Spacer()
-                                            PrimaryButton("Upgrade to Pro", icon: "star.fill") {
-                                                showProSubscription = true
-                                            }
-                                            .padding(.horizontal, .spacingMD)
-                                            Spacer()
-                                        }
-                                    )
-                            )
-                            .onTapGesture {
-                                showProSubscription = true
-                            }
-                    })
-                }
-
-                // Streaks & Milestones
-                if viewModel.currentStreak > 0 || viewModel.longestStreak > 0 {
-                    StreaksView(currentStreak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
-                        .padding(.horizontal, .spacingMD)
-                }
-
-                // Quick Actions - Always show, even during loading
-                QuickActionsSection(
-                    activeSleep: viewModel.activeSleep,
-                    onFeed: { 
-                        print("🔵 HomeContentView: Quick action Feed tapped")
-                        print("🔵 HomeContentView: Calling viewModel.quickLogFeed()")
-                        viewModel.quickLogFeed()
-                        print("🔵 HomeContentView: viewModel.quickLogFeed() called")
-                    },
-                    onSleep: { 
-                        print("🔵 HomeContentView: Quick action Sleep tapped")
-                        viewModel.quickLogSleep() 
-                    },
-                    onDiaper: { 
-                        print("🔵 HomeContentView: Quick action Diaper tapped")
-                        viewModel.quickLogDiaper() 
-                    },
-                    onTummyTime: { 
-                        print("🔵 HomeContentView: Quick action TummyTime tapped")
-                        viewModel.quickLogTummyTime() 
-                    },
-                    onOpenFeedForm: { 
-                        print("🔵 HomeContentView: Opening feed form")
-                        showFeedForm = true 
-                    },
-                    onOpenSleepForm: { 
-                        print("🔵 HomeContentView: Opening sleep form")
-                        showSleepForm = true 
-                    },
-                    onOpenDiaperForm: { 
-                        print("🔵 HomeContentView: Opening diaper form")
-                        showDiaperForm = true 
-                    },
-                    onOpenTummyForm: { 
-                        print("🔵 HomeContentView: Opening tummy form")
-                        showTummyForm = true 
-                    }
-                )
-                .padding(.horizontal, .spacingMD)
-                
-                // Timeline
-                timelineContent(for: viewModel)
-            }
-            .padding(.bottom, .spacingLG)
-        }
-    }
-    
-    @ViewBuilder
-    private func timelineContent(for viewModel: HomeViewModel) -> some View {
-        if viewModel.isLoading {
-            LoadingStateView(message: "Loading events...")
-                .frame(height: 200)
-        } else {
-            let isEmpty = viewModel.filteredEvents.isEmpty
-            let noSearch = viewModel.searchText.isEmpty
-            let allFilter = viewModel.selectedFilter == .all
-            
-            if isEmpty {
-                EmptyStateView(
-                    icon: noSearch && allFilter ? "calendar" : "magnifyingglass",
-                    title: noSearch && allFilter ? "No events logged today" : "No matching events",
-                    message: noSearch && allFilter ? "Start logging events to see them here" : "Try adjusting your search or filter"
-                )
-                .frame(height: 200)
-            } else {
-                // Example data banner (Epic 1 AC7)
-                if viewModel.filteredEvents.count > 0 && viewModel.baby.createdAt > Date().addingTimeInterval(-86400) {
-                    ExampleDataBanner()
-                        .padding(.horizontal, .spacingMD)
-                }
-                
-                // Filter chips
-                FilterChipsView(
-                    selectedFilter: Binding(
-                        get: { viewModel.selectedFilter },
-                        set: { viewModel.selectedFilter = $0 }
-                    ),
-                    filters: EventTypeFilter.allCases
-                )
-                .padding(.vertical, .spacingSM)
-                
-                TimelineSection(
-                    events: viewModel.filteredEvents,
-                    onEdit: onEventEdited,
-                    onDelete: { event in
-                        viewModel.deleteEvent(event)
-                        // Show undo toast
-                        let toastId = UUID()
-                        showToast = ToastMessage(
-                            id: toastId,
-                            message: "Event deleted",
-                            type: .success,
-                            undoAction: {
-                                Task {
-                                    do {
-                                        try await viewModel.undoDeletion()
-                                        showToast = ToastMessage(message: "Event restored", type: .success)
-                                    } catch {
-                                        showToast = ToastMessage(message: "Could not undo: \(error.localizedDescription)", type: .error)
-                                    }
-                                }
-                            }
-                        )
-                        // Auto-dismiss after 7 seconds
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-                            if showToast?.id == toastId {
-                                showToast = nil
-                            }
-                        }
-                    },
-                    onDuplicate: { event in
-                        viewModel.duplicateEvent(event)
-                        showToast = ToastMessage(message: "Event duplicated", type: .success)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            showToast = nil
-                        }
-                    }
-                )
-                .padding(.horizontal, .spacingMD)
-            }
-        }
-    }
-}
 
 #Preview {
     HomeView()

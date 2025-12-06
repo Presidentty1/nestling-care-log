@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { sleepTrainingService } from '@/services/sleepTrainingService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,7 +56,7 @@ export default function NewSleepTrainingSession() {
       const method = sleepMethods.find(m => m.name === selectedMethod);
       if (!method) throw new Error('Invalid method');
 
-      const { error } = await supabase.from('sleep_training_sessions').insert({
+      await sleepTrainingService.createSession({
         baby_id: selectedBabyId,
         method: method.name,
         start_date: formData.start_date,
@@ -66,8 +66,6 @@ export default function NewSleepTrainingSession() {
         notes: formData.notes,
         status: 'active',
       });
-
-      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sleep-training-sessions'] });

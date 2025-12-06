@@ -1,0 +1,92 @@
+/* Pseudo-localization strings for testing UI truncation and layout issues */
+/* Format: [original text] with brackets and expanded length */
+
+/* Common */
+"app.name" = "[Nestling]";
+"common.save" = "[Save]";
+"common.cancel" = "[Cancel]";
+"common.delete" = "[Delete]";
+"common.edit" = "[Edit]";
+"common.undo" = "[Undo]";
+
+/* Home */
+"home.title" = "[Today]";
+"home.quickActions.feed" = "[Feed]";
+"home.quickActions.sleep" = "[Sleep]";
+"home.quickActions.diaper" = "[Diaper]";
+"home.quickActions.tummyTime" = "[Tummy Time]";
+"home.summary.feeds" = "[Feeds]";
+"home.summary.diapers" = "[Diapers]";
+"home.summary.sleep" = "[Sleep]";
+"home.timeline.title" = "[Today's Timeline]";
+"home.empty.title" = "[No events logged today]";
+"home.empty.message" = "[Start logging events to see them here]";
+
+/* History */
+"history.title" = "[History]";
+"history.empty.title" = "[No events logged]";
+"history.empty.message" = "[Nothing logged on this day]";
+
+/* Labs */
+"labs.title" = "[Labs]";
+"labs.predictions.title" = "[Smart Predictions]";
+"labs.predictions.description" = "[Get AI-powered predictions for feeds and naps]";
+"labs.cryInsights.title" = "[Cry Insights]";
+"labs.cryInsights.description" = "[Analyze baby's cry patterns (Beta)]";
+
+/* Predictions */
+"predictions.title" = "[Predictions]";
+"predictions.nextFeed" = "[Predict Next Feed]";
+"predictions.nextNap" = "[Predict Next Nap]";
+"predictions.aiDisabled.title" = "[AI Features Disabled]";
+"predictions.aiDisabled.message" = "[Enable AI Data Sharing in Settings to use predictions]";
+"predictions.localInfo.title" = "[Local Predictions]";
+"predictions.localInfo.message" = "[Predictions use on-device heuristics based on your baby's age and recent patterns. No data is sent to external servers.]";
+
+/* Settings */
+"settings.title" = "[Settings]";
+"settings.notifications" = "[Notifications]";
+"settings.aiDataSharing" = "[AI & Data Sharing]";
+"settings.privacy" = "[Privacy & Data]";
+"settings.manageBabies" = "[Manage Babies]";
+"settings.manageCaregivers" = "[Manage Caregivers]";
+
+/* Forms */
+"form.feed.title" = "[Log Feed]";
+"form.feed.editTitle" = "[Edit Feed]";
+"form.feed.type" = "[Type]";
+"form.feed.amount" = "[Amount]";
+"form.feed.side" = "[Side]";
+"form.feed.time" = "[Time]";
+"form.feed.notes" = "[Notes]";
+"form.feed.validation.minimum" = "[Minimum %d milliliters required]";
+
+"form.sleep.title" = "[Log Sleep]";
+"form.sleep.editTitle" = "[Edit Sleep]";
+"form.sleep.start" = "[Start]";
+"form.sleep.stop" = "[Stop]";
+"form.sleep.duration" = "[Duration]";
+
+"form.diaper.title" = "[Log Diaper]";
+"form.diaper.editTitle" = "[Edit Diaper]";
+"form.diaper.type" = "[Type]";
+
+"form.tummyTime.title" = "[Log Tummy Time]";
+"form.tummyTime.editTitle" = "[Edit Tummy Time]";
+
+/* Errors */
+"error.loadFailed" = "[Failed to load data]";
+"error.saveFailed" = "[Failed to save]";
+"error.deleteFailed" = "[Failed to delete]";
+"error.validationFailed" = "[Validation failed]";
+
+/* Success */
+"success.saved" = "[Saved successfully]";
+"success.deleted" = "[Deleted successfully]";
+"success.restored" = "[Event restored]";
+
+/* Medical Disclaimer */
+"disclaimer.predictions" = "[This information is not medical advice. Consult your healthcare provider for medical decisions.]";
+"disclaimer.cryInsights" = "[Cry analysis is for informational purposes only and is not a substitute for professional medical advice.]";
+
+

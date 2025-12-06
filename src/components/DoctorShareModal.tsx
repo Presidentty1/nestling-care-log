@@ -9,7 +9,9 @@ import { CalendarIcon, Download, Mail, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { exportEventsCSV } from '@/lib/csvExport';
 import { generateDoctorReport, downloadDoctorReport } from '@/lib/doctorReportPDF';
-import { supabase } from '@/integrations/supabase/client';
+import { eventsService } from '@/services/eventsService';
+import { growthRecordsService } from '@/services/growthRecordsService';
+import { healthRecordsService } from '@/services/healthRecordsService';
 import { toast } from 'sonner';
 
 interface DoctorShareModalProps {
@@ -52,26 +54,17 @@ export function DoctorShareModal({
       setIsExporting(true);
 
       // Fetch events
-      const { data: events } = await supabase
-        .from('events')
-        .select('*')
-        .eq('baby_id', babyId)
-        .gte('start_time', startDate.toISOString())
-        .lte('start_time', endDate.toISOString());
+      const events = await eventsService.getEvents({
+        babyId,
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+      });
 
       // Fetch growth records
-      const { data: growthRecords } = await supabase
-        .from('growth_records')
-        .select('*')
-        .eq('baby_id', babyId)
-        .order('recorded_at', { ascending: false });
+      const growthRecords = await growthRecordsService.getGrowthRecords(babyId);
 
       // Fetch health records
-      const { data: healthRecords } = await supabase
-        .from('health_records')
-        .select('*')
-        .eq('baby_id', babyId)
-        .order('recorded_at', { ascending: false });
+      const healthRecords = await healthRecordsService.getHealthRecords(babyId);
 
       const baby = {
         id: babyId,

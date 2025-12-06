@@ -5,7 +5,7 @@ require 'pathname'
 
 # Get project directory
 script_dir = File.dirname(__FILE__)
-project_dir = File.expand_path(File.join(script_dir, '..', 'Nestling'))
+project_dir = File.expand_path(File.join(script_dir, '..', 'Nuzzle'))
 project_path = File.join(project_dir, 'Nestling.xcodeproj')
 
 puts "🔍 Opening Xcode project..."
@@ -21,12 +21,12 @@ project = Xcodeproj::Project.open(project_path)
 puts "✅ Project opened"
 
 # Find targets
-nestling_target = project.targets.find { |t| t.name == 'Nestling' }
-tests_target = project.targets.find { |t| t.name == 'NestlingTests' }
-uitests_target = project.targets.find { |t| t.name == 'NestlingUITests' }
+nestling_target = project.targets.find { |t| t.name == 'Nuzzle' }
+tests_target = project.targets.find { |t| t.name == 'NuzzleTests' }
+uitests_target = project.targets.find { |t| t.name == 'NuzzleUITests' }
 
 unless nestling_target
-  puts "❌ ERROR: Could not find 'Nestling' target"
+  puts "❌ ERROR: Could not find 'Nuzzle' target"
   exit 1
 end
 
@@ -38,13 +38,13 @@ puts "   - #{uitests_target.name}" if uitests_target
 # Find main groups
 main_group = project.main_group
 nestling_group = main_group['Nestling'] || main_group.find_subpath('Nestling', true)
-tests_group = main_group['NestlingTests'] || main_group.find_subpath('NestlingTests', true)
-uitests_group = main_group['NestlingUITests'] || main_group.find_subpath('NestlingUITests', true)
+tests_group = main_group['NuzzleTests'] || main_group.find_subpath('NuzzleTests', true)
+uitests_group = main_group['NuzzleUITests'] || main_group.find_subpath('NuzzleUITests', true)
 
 puts "\n📁 Found groups:"
 puts "   - Nestling: #{nestling_group.path}"
-puts "   - NestlingTests: #{tests_group.path}" if tests_group
-puts "   - NestlingUITests: #{uitests_group.path}" if uitests_group
+puts "   - NuzzleTests: #{tests_group.path}" if tests_group
+puts "   - NuzzleUITests: #{uitests_group.path}" if uitests_group
 
 # Helper function to find or create nested groups
 def find_or_create_group(parent_group, path_parts)
@@ -137,28 +137,28 @@ end
 
 # Add test files
 if tests_target && tests_group
-  tests_source_dir = File.join(project_dir, 'NestlingTests')
+  tests_source_dir = File.join(project_dir, 'NuzzleTests')
   if Dir.exist?(tests_source_dir)
     test_files = find_swift_files(tests_source_dir)
-    puts "\n   Found #{test_files.length} files in NestlingTests/"
+    puts "\n   Found #{test_files.length} files in NuzzleTests/"
     
     test_files.each do |file_info|
       file_path = file_info[:path]
-      add_file_to_project(project, tests_group, file_path, tests_target, 'NestlingTests')
+      add_file_to_project(project, tests_group, file_path, tests_target, 'NuzzleTests')
     end
   end
 end
 
 # Add UI test files
 if uitests_target && uitests_group
-  uitests_source_dir = File.join(project_dir, 'NestlingUITests')
+  uitests_source_dir = File.join(project_dir, 'NuzzleUITests')
   if Dir.exist?(uitests_source_dir)
     uitest_files = find_swift_files(uitests_source_dir)
-    puts "\n   Found #{uitest_files.length} files in NestlingUITests/"
+    puts "\n   Found #{uitest_files.length} files in NuzzleUITests/"
     
     uitest_files.each do |file_info|
       file_path = file_info[:path]
-      add_file_to_project(project, uitests_group, file_path, uitests_target, 'NestlingUITests')
+      add_file_to_project(project, uitests_group, file_path, uitests_target, 'NuzzleUITests')
     end
   end
 end

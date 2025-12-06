@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby, NotificationSettings as NotificationSettingsType } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { toast } from 'sonner';
 import { Bell } from 'lucide-react';
+import { babyService } from '@/services/babyService';
+import { notificationSettingsService } from '@/services/notificationSettingsService';
 
 export default function NotificationSettings() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
@@ -20,12 +21,11 @@ export default function NotificationSettings() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('babies').select('*');
-      if (error) throw error;
-      if (data && data.length > 0 && !selectedBaby) {
-        setSelectedBaby(data[0]);
+      const babyList = await babyService.getUserBabies();
+      if (babyList && babyList.length > 0 && !selectedBaby) {
+        setSelectedBaby(babyList[0]);
       }
-      return data as Baby[];
+      return babyList;
     },
   });
 
@@ -33,44 +33,7 @@ export default function NotificationSettings() {
     queryKey: ['notification-settings', selectedBaby?.id],
     queryFn: async () => {
       if (!selectedBaby) return null;
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return null;
-
-      const { data, error } = await supabase
-        .from('notification_settings')
-        .select('*')
-        .eq('baby_id', selectedBaby.id)
-        .eq('user_id', user.user.id)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (!data) {
-        // Create default settings
-        const defaultSettings: Partial<NotificationSettingsType> = {
-          baby_id: selectedBaby.id,
-          user_id: user.user.id,
-          enabled: true,
-          feed_reminders_enabled: false,
-          feed_reminder_interval_hours: 3,
-          nap_reminders_enabled: true,
-          nap_window_reminder_minutes: 15,
-          diaper_reminders_enabled: false,
-          diaper_reminder_interval_hours: 3,
-          medication_reminders_enabled: true,
-        };
-
-        const { data: newSettings, error: insertError } = await supabase
-          .from('notification_settings')
-          .insert(defaultSettings)
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        return newSettings as NotificationSettingsType;
-      }
-
-      return data as NotificationSettingsType;
+      return await notificationSettingsService.getNotificationSettings(selectedBaby.id);
     },
     enabled: !!selectedBaby,
   });
@@ -78,11 +41,7 @@ export default function NotificationSettings() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (updates: Partial<NotificationSettingsType>) => {
       if (!settings) return;
-      const { error } = await supabase
-        .from('notification_settings')
-        .update(updates)
-        .eq('id', settings.id);
-      if (error) throw error;
+      await notificationSettingsService.updateNotificationSettings(settings.id, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-settings'] });

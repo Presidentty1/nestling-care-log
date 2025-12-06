@@ -6,6 +6,11 @@ const isProduction = import.meta.env.PROD;
 const SW_PATH = '/sw.js';
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  // Skip service workers in Capacitor (not supported and can cause issues)
+  if (window.Capacitor) {
+    return null;
+  }
+
   if (!('serviceWorker' in navigator)) {
     console.warn('[SW] Service workers not supported');
     return null;

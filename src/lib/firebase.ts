@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import type { Analytics } from 'firebase/analytics';
 import { getAnalytics } from 'firebase/analytics';
 
@@ -13,18 +13,71 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Analytics (only in browser environment)
+// Lazy Firebase initialization (only if config is valid and not in Capacitor)
+let app: FirebaseApp | null = null;
 let analytics: Analytics | null = null;
-if (typeof window !== 'undefined') {
-  try {
-    analytics = getAnalytics(app);
-  } catch (error) {
-    console.warn('Firebase Analytics initialization failed:', error);
+
+function initializeFirebase(): { app: FirebaseApp | null; analytics: Analytics | null } {
+  // Skip in Capacitor (has its own analytics)
+  if (typeof window !== 'undefined' && (window as any).Capacitor) {
+    return { app: null, analytics: null };
   }
+
+  // Only initialize if we have required config
+  if (!firebaseConfig.projectId || !firebaseConfig.apiKey) {
+    return { app: null, analytics: null };
+  }
+
+  // Return existing instance if already initialized
+  if (app) {
+    return { app, analytics };
+  }
+
+  try {
+    // Check if Firebase is already initialized
+    const existingApps = getApps();
+    if (existingApps.length > 0) {
+      app = existingApps[0];
+    } else {
+      app = initializeApp(firebaseConfig);
+    }
+
+    // Initialize Analytics lazily (defer to avoid blocking)
+    if (typeof window !== 'undefined') {
+      try {
+        analytics = getAnalytics(app);
+      } catch (error) {
+        console.warn('[Analytics] Firebase Analytics initialization failed:', error);
+      }
+    }
+  } catch (error) {
+    console.warn('[Firebase] Initialization failed:', error);
+    app = null;
+    analytics = null;
+  }
+
+  return { app, analytics };
 }
 
+// Lazy getters
+export function getFirebaseApp(): FirebaseApp | null {
+  if (!app) {
+    const result = initializeFirebase();
+    app = result.app;
+    analytics = result.analytics;
+  }
+  return app;
+}
+
+export function getFirebaseAnalytics(): Analytics | null {
+  if (!analytics && typeof window !== 'undefined') {
+    const result = initializeFirebase();
+    app = result.app;
+    analytics = result.analytics;
+  }
+  return analytics;
+}
+
+// For backward compatibility, export lazy-initialized values
 export { app, analytics };
 

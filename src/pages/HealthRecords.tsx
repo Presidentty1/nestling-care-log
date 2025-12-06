@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Baby, HealthRecord, HealthRecordType } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,10 +16,14 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Plus, Thermometer, Stethoscope, Syringe, AlertCircle } from 'lucide-react';
 import { validateHealthRecord } from '@/services/validation';
+import { babyService } from '@/services/babyService';
+import { healthRecordsService } from '@/services/healthRecordsService';
+import { useAppStore } from '@/store/appStore';
 
 export default function HealthRecords() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { activeBabyId } = useAppStore();
   const [baby, setBaby] = useState<Baby | null>(null);
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,34 +48,21 @@ export default function HealthRecords() {
       return;
     }
     loadBabyAndRecords();
-  }, [user, navigate]);
+  }, [user, navigate, activeBabyId]);
 
   const loadBabyAndRecords = async () => {
     try {
-      const selectedBabyId = localStorage.getItem('selectedBabyId');
-      if (!selectedBabyId) {
+      const babyId = activeBabyId || localStorage.getItem('selectedBabyId') || localStorage.getItem('activeBabyId');
+      if (!babyId) {
         navigate('/home');
         return;
       }
 
-      const { data: babyData } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('id', selectedBabyId)
-        .single();
-
+      const babyData = await babyService.getBaby(babyId);
       if (babyData) {
         setBaby(babyData);
-        
-        const { data: healthData } = await supabase
-          .from('health_records')
-          .select('*')
-          .eq('baby_id', selectedBabyId)
-          .order('recorded_at', { ascending: false });
-
-        if (healthData) {
-          setRecords(healthData);
-        }
+        const healthData = await healthRecordsService.getHealthRecords(babyId);
+        setRecords(healthData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -93,7 +83,6 @@ export default function HealthRecords() {
         title: formData.title,
         recorded_at: formData.recorded_at,
         note: formData.note || null,
-        created_by: user?.id,
       };
 
       if (formData.record_type === 'temperature' && formData.temperature) {
@@ -115,9 +104,7 @@ export default function HealthRecords() {
         return;
       }
 
-      const { error } = await supabase.from('health_records').insert(validationResult.data);
-
-      if (error) throw error;
+      await healthRecordsService.createHealthRecord(validationResult.data);
 
       toast.success('Health record saved!');
       setShowDialog(false);

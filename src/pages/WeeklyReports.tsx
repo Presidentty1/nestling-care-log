@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { BabySwitcher } from '@/components/BabySwitcher';
+import { authService } from '@/services/authService';
+import { babyService } from '@/services/babyService';
+import { weeklySummariesService } from '@/services/weeklySummariesService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -21,18 +23,7 @@ export default function WeeklyReports() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-      if (!familyMembers || familyMembers.length === 0) return [];
-      const { data } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('family_id', familyMembers[0].family_id);
-      return data || [];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -40,13 +31,7 @@ export default function WeeklyReports() {
     queryKey: ['weekly-summaries', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('weekly_summaries')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('week_start', { ascending: false })
-        .limit(10);
-      return data || [];
+      return await weeklySummariesService.getSummaries(selectedBabyId, 10);
     },
     enabled: !!selectedBabyId,
   });
@@ -54,16 +39,7 @@ export default function WeeklyReports() {
   const generateMutation = useMutation({
     mutationFn: async () => {
       if (!selectedBabyId) return;
-      
-      const { data, error } = await supabase.functions.invoke('generate-weekly-summary', {
-        body: { 
-          babyId: selectedBabyId,
-          weekStart: weekStart.toISOString().split('T')[0]
-        }
-      });
-
-      if (error) throw error;
-      return data;
+      return await weeklySummariesService.generateSummary(selectedBabyId, weekStart.toISOString());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weekly-summaries'] });

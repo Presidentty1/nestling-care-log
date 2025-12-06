@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Baby, GrowthRecord } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,10 +14,14 @@ import { Plus, TrendingUp, Ruler, Weight, Circle, Download } from 'lucide-react'
 import { calculateWeightPercentile, calculateLengthPercentile, calculateHeadPercentile } from '@/lib/whoPercentiles';
 import { generateDoctorReport, downloadDoctorReport } from '@/lib/doctorReportPDF';
 import { validateGrowthRecord } from '@/services/validation';
+import { babyService } from '@/services/babyService';
+import { growthRecordsService } from '@/services/growthRecordsService';
+import { useAppStore } from '@/store/appStore';
 
 export default function GrowthTracker() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { activeBabyId } = useAppStore();
   const [baby, setBaby] = useState<Baby | null>(null);
   const [records, setRecords] = useState<GrowthRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,34 +40,21 @@ export default function GrowthTracker() {
       return;
     }
     loadBabyAndRecords();
-  }, [user, navigate]);
+  }, [user, navigate, activeBabyId]);
 
   const loadBabyAndRecords = async () => {
     try {
-      const selectedBabyId = localStorage.getItem('selectedBabyId');
-      if (!selectedBabyId) {
+      const babyId = activeBabyId || localStorage.getItem('selectedBabyId') || localStorage.getItem('activeBabyId');
+      if (!babyId) {
         navigate('/home');
         return;
       }
 
-      const { data: babyData } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('id', selectedBabyId)
-        .single();
-
+      const babyData = await babyService.getBaby(babyId);
       if (babyData) {
         setBaby(babyData);
-        
-        const { data: growthData } = await supabase
-          .from('growth_records')
-          .select('*')
-          .eq('baby_id', selectedBabyId)
-          .order('recorded_at', { ascending: false });
-
-        if (growthData) {
-          setRecords(growthData);
-        }
+        const growthData = await growthRecordsService.getGrowthRecords(babyId);
+        setRecords(growthData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -114,9 +104,7 @@ export default function GrowthTracker() {
         return;
       }
 
-      const { error } = await supabase.from('growth_records').insert(validationResult.data);
-
-      if (error) throw error;
+      await growthRecordsService.createGrowthRecord(validationResult.data);
 
       toast.success('Growth measurement saved!');
       setShowDialog(false);

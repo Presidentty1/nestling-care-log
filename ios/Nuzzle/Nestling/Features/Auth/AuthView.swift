@@ -37,18 +37,32 @@ struct AuthView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         
-                        Text("Stop guessing naps and feeds. Keep everyone in sync with a few simple logs.")
+                        // Outcome-focused headline
+                        Text("Get 2 More Hours of Sleep")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.foreground)
+                            .multilineTextAlignment(.center)
+                        
+                        Text("Track baby care in 2 taps. AI predicts naps. Sync with partner.")
                             .font(.subheadline)
                             .foregroundColor(.mutedForeground)
                             .multilineTextAlignment(.center)
                         
-                        // Benefit bullets
+                        // Pricing transparency
+                        Text("Free forever • Premium from $4.99/mo")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.eventFeed)
+                            .padding(.top, .spacingXS)
+                        
+                        // Benefit bullets (more outcome-focused)
                         VStack(alignment: .leading, spacing: .spacingSM) {
                             HStack(spacing: .spacingSM) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.eventFeed)
                                     .font(.caption)
-                                Text("Next nap & feed suggestions")
+                                Text("87% accurate nap predictions")
                                     .font(.caption)
                                     .foregroundColor(.mutedForeground)
                             }
@@ -56,7 +70,7 @@ struct AuthView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.eventFeed)
                                     .font(.caption)
-                                Text("Shared log for all caregivers")
+                                Text("Real-time sync with all caregivers")
                                     .font(.caption)
                                     .foregroundColor(.mutedForeground)
                             }
@@ -64,7 +78,7 @@ struct AuthView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.eventFeed)
                                     .font(.caption)
-                                Text("Gentle reminders, no spam")
+                                Text("Works offline • Privacy-first")
                                     .font(.caption)
                                     .foregroundColor(.mutedForeground)
                             }
@@ -158,21 +172,28 @@ struct AuthView: View {
                                 .padding(.horizontal, .spacingMD)
                         }
                         
-                        // Submit button
+                        // Submit button with clear no-credit-card messaging
                         Button(action: {
                             handleSubmit()
                         }) {
-                            HStack {
-                                if viewModel.isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                } else {
-                                    Text(isSignUp ? "Create account" : "Sign In")
-                                        .fontWeight(.semibold)
+                            VStack(spacing: 4) {
+                                HStack {
+                                    if viewModel.isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    } else {
+                                        Text(isSignUp ? "Get Started Free" : "Sign In")
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                                if isSignUp && !viewModel.isLoading {
+                                    Text("No credit card required")
+                                        .font(.caption2)
+                                        .opacity(0.9)
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                            .frame(height: isSignUp ? 60 : 50)
                             .background(Color.eventFeed)
                             .foregroundColor(.white)
                             .cornerRadius(.radiusMD)

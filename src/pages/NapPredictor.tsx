@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { authService } from '@/services/authService';
+import { babyService } from '@/services/babyService';
+import { napPredictorService } from '@/services/napPredictorService';
 import { BabySelector } from '@/components/BabySelector';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,18 +23,7 @@ export default function NapPredictor() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-      if (!familyMembers || familyMembers.length === 0) return [];
-      const { data } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('family_id', familyMembers[0].family_id);
-      return data || [];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -40,13 +31,7 @@ export default function NapPredictor() {
     queryKey: ['nap-prediction', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return null;
-      
-      const { data, error } = await supabase.functions.invoke('calculate-nap-window', {
-        body: { babyId: selectedBabyId }
-      });
-
-      if (error) throw error;
-      return data;
+      return await napPredictorService.calculateNapWindow(selectedBabyId);
     },
     enabled: !!selectedBabyId,
     retry: 2,
@@ -55,13 +40,7 @@ export default function NapPredictor() {
   const refreshMutation = useMutation({
     mutationFn: async () => {
       if (!selectedBabyId) return;
-      
-      const { data, error } = await supabase.functions.invoke('calculate-nap-window', {
-        body: { babyId: selectedBabyId }
-      });
-
-      if (error) throw error;
-      return data;
+      return await napPredictorService.calculateNapWindow(selectedBabyId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nap-prediction'] });

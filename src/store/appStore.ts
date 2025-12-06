@@ -19,19 +19,27 @@ export const useAppStore = create<AppState>()(
       setActiveBabyId: (id) => set({ activeBabyId: id }),
       setCaregiverMode: (enabled) => {
         set({ caregiverMode: enabled });
-        // Apply to body element
+        // Apply to body element (defer to avoid blocking)
         if (typeof document !== 'undefined') {
-          if (enabled) {
-            document.body.classList.add('caregiver-mode');
-          } else {
-            document.body.classList.remove('caregiver-mode');
-          }
+          requestAnimationFrame(() => {
+            if (enabled) {
+              document.body.classList.add('caregiver-mode');
+            } else {
+              document.body.classList.remove('caregiver-mode');
+            }
+          });
         }
       },
       setGuestMode: (enabled) => set({ guestMode: enabled }),
     }),
     {
       name: 'nestling-app-store',
+      // Use async storage to avoid blocking
+      partialize: (state) => ({
+        activeBabyId: state.activeBabyId,
+        caregiverMode: state.caregiverMode,
+        guestMode: state.guestMode,
+      }),
     }
   )
 );

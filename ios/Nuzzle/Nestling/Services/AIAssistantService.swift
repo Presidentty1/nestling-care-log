@@ -1,6 +1,5 @@
 import Foundation
-// TODO: Uncomment when Supabase Swift SDK is added
-// import Supabase
+import Supabase
 
 /// Service for calling Supabase Edge Functions for AI features.
 /// 
@@ -31,38 +30,60 @@ class AIAssistantService {
         predictionType: String,
         lookbackDays: Int = 7
     ) async throws -> PredictionResponse {
-        guard provider.isConfigured else {
-            throw AIError.notConfigured
+        if !provider.isConfigured {
+            // Demo Mode Fallback
+            try? await Task.sleep(nanoseconds: 1_000_000_000) // Simulate delay
+            
+            let now = Date()
+            let nextNapStart = now.addingTimeInterval(3600) // 1 hour from now
+            let nextNapEnd = nextNapStart.addingTimeInterval(2700) // 45 min nap
+            
+            return PredictionResponse(
+                predictionId: UUID().uuidString,
+                predictionType: predictionType,
+                confidence: 0.85,
+                prediction: PredictionResponse.PredictionData(
+                    nextNapWindow: PredictionResponse.NapWindow(
+                        start: ISO8601DateFormatter().string(from: nextNapStart),
+                        end: ISO8601DateFormatter().string(from: nextNapEnd),
+                        confidence: 0.85
+                    ),
+                    feedingPattern: nil,
+                    insights: ["Demo: Baby tends to nap around this time."]
+                ),
+                generatedAt: ISO8601DateFormatter().string(from: now)
+            )
         }
         
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     // Verify AI consent first
-        //     let hasConsent = try await checkAIConsent()
-        //     guard hasConsent else {
-        //         throw AIError.consentRequired
-        //     }
-        //     
-        //     let response = try await provider.client.functions.invoke(
-        //         "generate-predictions",
-        //         options: FunctionInvokeOptions(
-        //             body: [
-        //                 "babyId": babyId.uuidString,
-        //                 "predictionType": predictionType,
-        //                 "lookbackDays": lookbackDays
-        //             ]
-        //         )
-        //     )
-        //     
-        //     return try JSONDecoder().decode(PredictionResponse.self, from: response.data)
-        // } catch {
-        //     if error is AIError {
-        //         throw error
-        //     }
-        //     throw AIError.networkError(error)
-        // }
-        
-        throw AIError.notImplemented("AI features require Supabase SDK - see SUPABASE_SETUP.md")
+        do {
+            // Verify AI consent first
+            let hasConsent = try await checkAIConsent()
+            guard hasConsent else {
+                throw AIError.consentRequired
+            }
+            
+            guard let client = provider.client else {
+                throw AIError.notConfigured
+            }
+            
+            let requestBody = GeneratePredictionBody(
+                babyId: babyId.uuidString,
+                predictionType: predictionType,
+                lookbackDays: String(lookbackDays)
+            )
+            
+            let response: PredictionResponse = try await client.functions.invoke(
+                "generate-predictions",
+                options: FunctionInvokeOptions(body: requestBody)
+            )
+            
+            return response
+        } catch {
+            if error is AIError {
+                throw error
+            }
+            throw AIError.networkError(error)
+        }
     }
     
     // MARK: - Cry Analysis
@@ -80,47 +101,57 @@ class AIAssistantService {
         duration: Int? = nil,
         context: CryAnalysisContext? = nil
     ) async throws -> CryAnalysisResponse {
-        guard provider.isConfigured else {
-            throw AIError.notConfigured
+        if !provider.isConfigured {
+            // Demo Mode Fallback
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // Simulate processing
+            
+            return CryAnalysisResponse(
+                sessionId: UUID().uuidString,
+                category: "hungry",
+                confidence: 0.92,
+                suggestions: ["Demo: Offer a feed", "Check for hunger cues"],
+                detectedAt: ISO8601DateFormatter().string(from: Date())
+            )
         }
         
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     // Verify AI consent first
-        //     let hasConsent = try await checkAIConsent()
-        //     guard hasConsent else {
-        //         throw AIError.consentRequired
-        //     }
-        //     
-        //     var body: [String: Any] = ["babyId": babyId.uuidString]
-        //     if let audioBase64 = audioBase64 {
-        //         body["audioBase64"] = audioBase64
-        //     }
-        //     if let duration = duration {
-        //         body["duration"] = duration
-        //     }
-        //     if let context = context {
-        //         body["context"] = [
-        //             "timeSinceLastFeed": context.timeSinceLastFeed,
-        //             "timeSinceLastSleep": context.timeSinceLastSleep,
-        //             "timeSinceLastDiaper": context.timeSinceLastDiaper
-        //         ]
-        //     }
-        //     
-        //     let response = try await provider.client.functions.invoke(
-        //         "analyze-cry-pattern",
-        //         options: FunctionInvokeOptions(body: body)
-        //     )
-        //     
-        //     return try JSONDecoder().decode(CryAnalysisResponse.self, from: response.data)
-        // } catch {
-        //     if error is AIError {
-        //         throw error
-        //     }
-        //     throw AIError.networkError(error)
-        // }
-        
-        throw AIError.notImplemented("AI features require Supabase SDK - see SUPABASE_SETUP.md")
+        do {
+            // Verify AI consent first
+            let hasConsent = try await checkAIConsent()
+            guard hasConsent else {
+                throw AIError.consentRequired
+            }
+            
+            guard let client = provider.client else {
+                throw AIError.notConfigured
+            }
+            
+            let contextBody: AnalyzeCryBody.CryContextBody? = context.map { ctx in
+                AnalyzeCryBody.CryContextBody(
+                    timeSinceLastFeed: ctx.timeSinceLastFeed.map { String($0) },
+                    timeSinceLastSleep: ctx.timeSinceLastSleep.map { String($0) },
+                    timeSinceLastDiaper: ctx.timeSinceLastDiaper.map { String($0) }
+                )
+            }
+            
+            let requestBody = AnalyzeCryBody(
+                babyId: babyId.uuidString,
+                audioBase64: audioBase64,
+                duration: duration.map { String($0) },
+                context: contextBody
+            )
+            
+            let response: CryAnalysisResponse = try await client.functions.invoke(
+                "analyze-cry-pattern",
+                options: FunctionInvokeOptions(body: requestBody)
+            )
+            
+            return response
+        } catch {
+            if error is AIError {
+                throw error
+            }
+            throw AIError.networkError(error)
+        }
     }
     
     // MARK: - AI Assistant Chat
@@ -136,63 +167,72 @@ class AIAssistantService {
         babyId: UUID?,
         conversationId: String? = nil
     ) async throws -> AIAssistantResponse {
-        guard provider.isConfigured else {
-            throw AIError.notConfigured
+        if !provider.isConfigured {
+            // Demo Mode Fallback
+            try? await Task.sleep(nanoseconds: 1_000_000_000) // Simulate delay
+            
+            return AIAssistantResponse(
+                conversationId: conversationId ?? UUID().uuidString,
+                message: "Demo: I'm Nuzzle's AI assistant. I can help with general baby care questions.",
+                timestamp: ISO8601DateFormatter().string(from: Date()),
+                disclaimer: "Demo Mode: This is a simulated response."
+            )
         }
         
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // do {
-        //     // Verify AI consent first
-        //     let hasConsent = try await checkAIConsent()
-        //     guard hasConsent else {
-        //         throw AIError.consentRequired
-        //     }
-        //     
-        //     var body: [String: Any] = ["message": message]
-        //     if let babyId = babyId {
-        //         body["babyId"] = babyId.uuidString
-        //     }
-        //     if let conversationId = conversationId {
-        //         body["conversationId"] = conversationId
-        //     }
-        //     
-        //     let response = try await provider.client.functions.invoke(
-        //         "ai-assistant",
-        //         options: FunctionInvokeOptions(body: body)
-        //     )
-        //     
-        //     return try JSONDecoder().decode(AIAssistantResponse.self, from: response.data)
-        // } catch {
-        //     if error is AIError {
-        //         throw error
-        //     }
-        //     throw AIError.networkError(error)
-        // }
-        
-        throw AIError.notImplemented("AI features require Supabase SDK - see SUPABASE_SETUP.md")
+        do {
+            // Verify AI consent first
+            let hasConsent = try await checkAIConsent()
+            guard hasConsent else {
+                throw AIError.consentRequired
+            }
+            
+            guard let client = provider.client else {
+                throw AIError.notConfigured
+            }
+            
+            let requestBody = AIAssistantBody(
+                message: message,
+                babyId: babyId?.uuidString,
+                conversationId: conversationId
+            )
+            
+            let response: AIAssistantResponse = try await client.functions.invoke(
+                "ai-assistant",
+                options: FunctionInvokeOptions(body: requestBody)
+            )
+            
+            return response
+        } catch {
+            if error is AIError {
+                throw error
+            }
+            throw AIError.networkError(error)
+        }
     }
     
     // MARK: - Helper Methods
     
     /// Check if user has AI consent enabled
     private func checkAIConsent() async throws -> Bool {
-        // TODO: Uncomment when Supabase Swift SDK is added
-        // let session = try await provider.getCurrentSession()
-        // guard let session = session else {
-        //     throw AIError.authenticationRequired
-        // }
-        // 
-        // let response = try await provider.client.database
-        //     .from("profiles")
-        //     .select("ai_data_sharing_enabled")
-        //     .eq("id", value: session.userId.uuidString)
-        //     .single()
-        //     .execute()
-        // 
-        // let profile = try JSONDecoder().decode(ProfileDTO.self, from: response.data)
-        // return profile.aiDataSharingEnabled ?? false
+        if !provider.isConfigured {
+            return true // Allow in demo mode
+        }
         
-        return false
+        guard let client = provider.client else {
+            return true // Allow in demo mode if client not available
+        }
+        
+        let session = try await client.auth.session
+        
+        let response: ProfileDTO = try await client
+            .from("profiles")
+            .select("ai_data_sharing_enabled")
+            .eq("id", value: session.user.id.uuidString)
+            .single()
+            .execute()
+            .value
+        
+        return response.aiDataSharingEnabled ?? false
     }
 }
 
@@ -249,6 +289,33 @@ struct CryAnalysisContext {
     let timeSinceLastFeed: Int? // minutes
     let timeSinceLastSleep: Int? // minutes
     let timeSinceLastDiaper: Int? // minutes
+}
+
+// MARK: - Function Request Bodies (Encodable)
+
+struct GeneratePredictionBody: Encodable {
+    let babyId: String
+    let predictionType: String
+    let lookbackDays: String
+}
+
+struct AnalyzeCryBody: Encodable {
+    let babyId: String
+    let audioBase64: String?
+    let duration: String?
+    let context: CryContextBody?
+    
+    struct CryContextBody: Encodable {
+        let timeSinceLastFeed: String?
+        let timeSinceLastSleep: String?
+        let timeSinceLastDiaper: String?
+    }
+}
+
+struct AIAssistantBody: Encodable {
+    let message: String
+    let babyId: String?
+    let conversationId: String?
 }
 
 struct ProfileDTO: Codable {

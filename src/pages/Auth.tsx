@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Baby, Loader2 } from 'lucide-react';
+import { Baby, Loader2, Zap, Brain, Users, Shield } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 export default function Auth() {
@@ -111,6 +111,12 @@ export default function Auth() {
     setLoading(false);
   };
 
+  const features = [
+    { icon: Zap, label: 'Fast Logging', color: 'text-event-feed' },
+    { icon: Brain, label: 'AI Insights', color: 'text-primary' },
+    { icon: Users, label: 'Partner Sync', color: 'text-secondary' },
+  ];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-soft">
@@ -120,7 +126,7 @@ export default function Auth() {
           </div>
           <div>
             <CardTitle className="text-[28px] leading-[34px]">Nestling</CardTitle>
-            <CardDescription className="text-secondary">The fastest shared baby logger</CardDescription>
+            <CardDescription className="text-base">The fastest way to track baby care</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -216,6 +222,30 @@ export default function Auth() {
               </Button>
             </div>
           )}
+
+          {/* Value highlights */}
+          <div className="mt-6 pt-6 border-t">
+            <div className="grid grid-cols-3 gap-4">
+              {features.map((feature) => (
+                <div key={feature.label} className="flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-surface border-2 border-border flex items-center justify-center">
+                    <feature.icon className={`h-5 w-5 ${feature.color}`} />
+                  </div>
+                  <span className="text-xs text-center text-muted-foreground leading-tight">
+                    {feature.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Privacy message */}
+          <div className="mt-4 flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
+            <Shield className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Your data stays private. No ads, no tracking.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

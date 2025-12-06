@@ -6,6 +6,7 @@ import { track } from '@/analytics/analytics';
 import { sanitizeEventNote, sanitizeAmount, sanitizeDuration } from '@/lib/sanitization';
 import { logger } from '@/lib/logger';
 import { dateUtils, validationUtils } from '@/lib/sharedUtils';
+import { DbEvent, DbEventType } from '@/types/db';
 
 export interface CreateEventData {
   baby_id: string;
@@ -24,12 +25,8 @@ export interface CreateEventData {
   note?: string;
 }
 
-export interface EventRecord extends CreateEventData {
-  id: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-}
+// Alias DbEvent to EventRecord for backward compatibility
+export type EventRecord = DbEvent;
 
 class EventsService {
   private listeners: Array<EventListener> = [];
@@ -550,8 +547,8 @@ class EventsService {
       typeof event.type === 'string' &&
       ['feed', 'sleep', 'diaper', 'tummy_time'].includes(event.type) &&
       typeof event.start_time === 'string' &&
-      !isNaN(Date.parse(event.start_time)) &&
-      typeof event.created_by === 'string'
+      !isNaN(Date.parse(event.start_time))
+      // created_by check removed as it might be optional/null in DbEvent
     );
   }
 

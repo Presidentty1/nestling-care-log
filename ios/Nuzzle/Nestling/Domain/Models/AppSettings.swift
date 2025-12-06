@@ -18,6 +18,7 @@ struct AppSettings: Codable, Equatable {
     var cryInsightsWeeklyCount: Int // Number of Cry Insights recordings this week
     var cryInsightsWeekStart: Date? // Start date of current week for quota tracking
     var remindersPaused: Bool // Whether all reminders are temporarily paused
+    var userGoal: String? // User's primary goal: "Track Sleep", "Monitor Feeding", "Just Survive", "All of the Above"
 
     enum CodingKeys: String, CodingKey {
         case aiDataSharingEnabled
@@ -37,6 +38,7 @@ struct AppSettings: Codable, Equatable {
         case cryInsightsWeeklyCount
         case cryInsightsWeekStart
         case remindersPaused
+        case userGoal
     }
 
     init(
@@ -56,7 +58,8 @@ struct AppSettings: Codable, Equatable {
         spotlightIndexingEnabled: Bool = true,
         cryInsightsWeeklyCount: Int = 0,
         cryInsightsWeekStart: Date? = nil,
-        remindersPaused: Bool = false
+        remindersPaused: Bool = false,
+        userGoal: String? = nil
     ) {
         self.aiDataSharingEnabled = aiDataSharingEnabled
         self.feedReminderEnabled = feedReminderEnabled
@@ -75,6 +78,7 @@ struct AppSettings: Codable, Equatable {
         self.cryInsightsWeeklyCount = cryInsightsWeeklyCount
         self.cryInsightsWeekStart = cryInsightsWeekStart
         self.remindersPaused = remindersPaused
+        self.userGoal = userGoal
     }
 
     // MARK: - Default Settings

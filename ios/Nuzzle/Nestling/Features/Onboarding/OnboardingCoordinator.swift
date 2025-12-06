@@ -3,12 +3,9 @@ import Combine
 
 enum OnboardingStep {
     case welcome
-    case babySetup
-    case initialState
-    case preferences
-    case aiConsent
-    case notificationsIntro
-    case proTrial
+    case babyEssentials // Combines name + DOB + sex in one screen
+    case goalSelection // New: "What's your biggest challenge?" - drives personalization
+    case complete // Final step with quick demo
 }
 
 @MainActor
@@ -17,12 +14,31 @@ class OnboardingCoordinator: ObservableObject {
     @Published var babyName: String = ""
     @Published var dateOfBirth: Date = Date()
     @Published var sex: Sex?
-    @Published var preferredUnit: String = "ml"
-    @Published var timeFormat24Hour: Bool = false
+    @Published var selectedGoal: String? // Epic 1 AC1.2
+    @Published var preferredUnit: String = detectSmartDefaultUnit()
+    @Published var timeFormat24Hour: Bool = detectSmartDefaultTimeFormat()
     @Published var aiDataSharingEnabled: Bool = true
     @Published var isCompleted: Bool = false
     @Published var initialBabyState: String? = nil // "asleep" or "awake"
     @Published var showAgeWarning: Bool = false // Epic 1 AC4: Show warning for >6mo babies
+    
+    // Smart defaults based on locale
+    private static func detectSmartDefaultUnit() -> String {
+        let locale = Locale.current
+        let usesMetric = locale.measurementSystem == .metric
+        return usesMetric ? "ml" : "oz"
+    }
+    
+    private static func detectSmartDefaultTimeFormat() -> Bool {
+        let locale = Locale.current
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = locale
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .short
+        let timeString = dateFormatter.string(from: Date())
+        // If time string contains AM/PM, user's locale uses 12-hour format
+        return !timeString.contains("AM") && !timeString.contains("PM")
+    }
     
     private let dataStore: DataStore
     private let onboardingService: OnboardingService
@@ -35,24 +51,19 @@ class OnboardingCoordinator: ObservableObject {
     func next() {
         switch currentStep {
         case .welcome:
-            currentStep = .babySetup
-        case .babySetup:
-            currentStep = .initialState
-        case .initialState:
-            currentStep = .preferences
-        case .preferences:
-            currentStep = .aiConsent
-        case .aiConsent:
-            currentStep = .notificationsIntro
-        case .notificationsIntro:
-            currentStep = .proTrial
-        case .proTrial:
+            currentStep = .babyEssentials
+        case .babyEssentials:
+            currentStep = .goalSelection
+        case .goalSelection:
+            currentStep = .complete
+        case .complete:
             completeOnboarding()
         }
     }
     
     func skip() {
-        if currentStep == .aiConsent || currentStep == .notificationsIntro || currentStep == .proTrial {
+        // Allow skipping goal selection and complete screens
+        if currentStep == .goalSelection || currentStep == .complete {
             completeOnboarding()
         } else {
             next()
@@ -75,12 +86,19 @@ class OnboardingCoordinator: ObservableObject {
                 // Analytics: onboarding completed
                 await Analytics.shared.logOnboardingCompleted(babyId: baby.id.uuidString)
 
-                // Save preferences
+                // Save preferences (moved to post-onboarding, use smart defaults)
                 var settings = try await dataStore.fetchAppSettings()
-                settings.preferredUnit = preferredUnit
-                settings.timeFormat24Hour = timeFormat24Hour
-                settings.aiDataSharingEnabled = aiDataSharingEnabled
+                // Auto-detect unit based on locale
+                let locale = Locale.current
+                let usesMetric = locale.usesMetricSystem
+                settings.preferredUnit = usesMetric ? "ml" : "oz"
+                settings.timeFormat24Hour = locale.identifier.contains("_US") ? false : true
+                settings.aiDataSharingEnabled = aiDataSharingEnabled // Keep AI consent in onboarding
                 settings.onboardingCompleted = true
+                // Save user goal for personalization
+                if let goal = selectedGoal {
+                    settings.userGoal = goal
+                }
                 try await dataStore.saveAppSettings(settings)
                 
                 await MainActor.run {
@@ -89,6 +107,39 @@ class OnboardingCoordinator: ObservableObject {
                 }
             } catch {
                 print("Error completing onboarding: \(error)")
+            }
+        }
+    }
+    
+    // Epic 2 AC2.2: Sample Data
+    func loadSampleData() {
+        Task {
+            do {
+                let sampleBaby = Baby(
+                    name: "Sample Baby",
+                    dateOfBirth: Date().addingTimeInterval(-86400 * 60), // 2 months old
+                    sex: .female,
+                    timezone: TimeZone.current.identifier
+                )
+                try await dataStore.addBaby(sampleBaby)
+                
+                // Add some sample events for today
+                let now = Date()
+                let events = [
+                    Event(babyId: sampleBaby.id, type: .sleep, subtype: "nap", startTime: now.addingTimeInterval(-3600 * 2), endTime: now.addingTimeInterval(-3600 * 1), note: "Good nap"),
+                    Event(babyId: sampleBaby.id, type: .feed, subtype: "bottle", startTime: now.addingTimeInterval(-3600 * 0.5), amount: 120, unit: "ml"),
+                    Event(babyId: sampleBaby.id, type: .diaper, subtype: "wet", startTime: now.addingTimeInterval(-3600 * 3))
+                ]
+                
+                for event in events {
+                    try await dataStore.addEvent(event)
+                }
+                
+                await MainActor.run {
+                    isCompleted = true
+                }
+            } catch {
+                print("Error loading sample data: \(error)")
             }
         }
     }

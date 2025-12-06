@@ -19,6 +19,37 @@ class HomeViewModel: ObservableObject {
     @Published var activeSleep: Event?
     @Published var searchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
+    @Published var hasAnyEvents: Bool = true // Epic 2 AC2.1
+    @Published var userGoal: String? // User's selected goal from onboarding
+    
+    enum TimeOfDay {
+        case morning, day, evening, night
+    }
+    
+    var timeOfDay: TimeOfDay {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return .morning
+        case 12..<17: return .day
+        case 17..<22: return .evening
+        default: return .night
+        }
+    }
+    
+    /// Determines whether to show nap prediction prominently based on user goal
+    var shouldPrioritizeSleep: Bool {
+        userGoal == "Track Sleep" || userGoal == "All of the Above"
+    }
+    
+    /// Determines whether to show feeding insights prominently based on user goal
+    var shouldPrioritizeFeeding: Bool {
+        userGoal == "Monitor Feeding" || userGoal == "All of the Above"
+    }
+    
+    /// Returns true if user selected "Just Survive" - simplify UI
+    var shouldSimplifyUI: Bool {
+        userGoal == "Just Survive"
+    }
     
     private let dataStore: DataStore
     let baby: Baby // Made internal so HomeView can check if baby changed
@@ -45,9 +76,8 @@ class HomeViewModel: ObservableObject {
     }
     
     var nextNapWindow: NapWindow? {
-        // Note: For now, using basic calculation. Pro personalization would require async call to PredictionsEngine
-        // This is a simplified version - full Pro personalization would be in PredictionsEngine
-        calculateNextNapWindow()
+        // Use NapPredictorService for consistent nap predictions
+        NapPredictorService.predictNextNapWindow(for: baby, lastSleep: lastSleep)
     }
     
     var nextFeedSuggestion: Date? {
@@ -131,9 +161,21 @@ class HomeViewModel: ObservableObject {
         self.showToast = showToast
         print("HomeViewModel.init: Created for baby \(baby.id)")
         Task { @MainActor in
+            await loadUserGoal()
             await loadTodayEvents()
         }
         checkActiveSleep()
+    }
+    
+    func loadUserGoal() async {
+        do {
+            let settings = try await dataStore.fetchAppSettings()
+            await MainActor.run {
+                self.userGoal = settings.userGoal
+            }
+        } catch {
+            print("Error loading user goal: \(error)")
+        }
     }
     
     deinit {
@@ -159,6 +201,15 @@ class HomeViewModel: ObservableObject {
         let wasAlreadyLoading = isLoadingTask != nil
         isLoadingTask?.cancel()
         isLoadingTask = nil
+        
+        // Check total history for "First Log" card (Epic 2 AC2.1)
+        Task {
+            if let allEvents = try? await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture) {
+                await MainActor.run {
+                    self.hasAnyEvents = !allEvents.isEmpty
+                }
+            }
+        }
         
         print("loadTodayEvents called for baby: \(baby.id), wasAlreadyLoading: \(wasAlreadyLoading)")
         
@@ -818,8 +869,50 @@ extension HomeViewModel {
                     showToast("Got it 👍 We'll use this to suggest naps and feeds", "success")
                 }
             }
+            
+            // Check if we should show upgrade prompts at milestones
+            await checkUpgradeMilestones(totalEvents: allEvents.count)
         } catch {
             print("Error checking for first event toast: \(error)")
+        }
+    }
+    
+    /// Check if user has reached milestones that warrant showing upgrade prompts
+    private func checkUpgradeMilestones(totalEvents: Int) async {
+        // Skip if already Pro
+        if ProSubscriptionService.shared.isProUser {
+            return
+        }
+        
+        let hasShown50EventsPrompt = UserDefaults.standard.bool(forKey: "hasShown50EventsUpgradePrompt")
+        let hasShown7DaysPrompt = UserDefaults.standard.bool(forKey: "hasShown7DaysUpgradePrompt")
+        
+        // Milestone 1: After 50 events logged
+        if totalEvents == 50 && !hasShown50EventsPrompt {
+            UserDefaults.standard.set(true, forKey: "hasShown50EventsUpgradePrompt")
+            showToast("🎉 50 events logged! Unlock AI insights with Premium", "upgrade")
+            
+            // Analytics
+            await Analytics.shared.log("upgrade_prompt_shown", parameters: [
+                "trigger": "50_events_milestone",
+                "total_events": totalEvents
+            ])
+        }
+        
+        // Milestone 2: After 7 days of usage
+        if let onboardingDate = UserDefaults.standard.object(forKey: "onboardingCompletedDate") as? Date {
+            let daysSinceOnboarding = Calendar.current.dateComponents([.day], from: onboardingDate, to: Date()).day ?? 0
+            
+            if daysSinceOnboarding == 7 && !hasShown7DaysPrompt {
+                UserDefaults.standard.set(true, forKey: "hasShown7DaysUpgradePrompt")
+                showToast("📊 You're an active user! Get weekly insights with Premium", "upgrade")
+                
+                // Analytics
+                await Analytics.shared.log("upgrade_prompt_shown", parameters: [
+                    "trigger": "7_days_usage",
+                    "days_since_onboarding": daysSinceOnboarding
+                ])
+            }
         }
     }
 }

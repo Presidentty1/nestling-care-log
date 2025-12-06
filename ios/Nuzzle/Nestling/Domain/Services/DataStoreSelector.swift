@@ -29,8 +29,9 @@ class DataStoreSelector {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         // TODO: Update database filename from Nestling.sqlite to Nuzzle.sqlite when ready
         let coreDataURL = documentsPath.appendingPathComponent("Nestling.sqlite")
-        // TODO: Update app group ID from group.com.nestling.app to group.com.nuzzle.app when ready
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
+        // TODO: Update app group ID from group.com.nestling.Nestling to group.com.nuzzle.Nuzzle when ready
+        // Note: Must match the App Group ID used in CoreDataStack and widgets
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling")?
             .appendingPathComponent("Nestling.sqlite")
         
         // Check both possible locations

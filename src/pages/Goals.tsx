@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { authService } from '@/services/authService';
+import { babyService } from '@/services/babyService';
+import { goalsService } from '@/services/goalsService';
 import { BabySwitcher } from '@/components/BabySwitcher';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -33,18 +35,7 @@ export default function Goals() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', user.id);
-      if (!familyMembers || familyMembers.length === 0) return [];
-      const { data } = await supabase
-        .from('babies')
-        .select('*')
-        .eq('family_id', familyMembers[0].family_id);
-      return data || [];
+      return await babyService.getUserBabies();
     },
   });
 
@@ -52,12 +43,7 @@ export default function Goals() {
     queryKey: ['goals', selectedBabyId],
     queryFn: async () => {
       if (!selectedBabyId) return [];
-      const { data } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('baby_id', selectedBabyId)
-        .order('created_at', { ascending: false });
-      return data || [];
+      return await goalsService.getGoals(selectedBabyId);
     },
     enabled: !!selectedBabyId,
   });
@@ -66,10 +52,10 @@ export default function Goals() {
     mutationFn: async () => {
       if (!selectedBabyId) return;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await authService.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase.from('goals').insert({
+      await goalsService.createGoal({
         baby_id: selectedBabyId,
         goal_type: newGoal.goal_type,
         title: newGoal.title,
@@ -79,8 +65,6 @@ export default function Goals() {
         notes: newGoal.notes || null,
         created_by: user.id,
       });
-
-      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });

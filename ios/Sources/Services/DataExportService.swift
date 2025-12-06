@@ -7,11 +7,13 @@ import UIKit
 class DataExportService {
     enum ExportFormat {
         case csv
+        case pdf
         case json
 
         var fileExtension: String {
             switch self {
             case .csv: return "csv"
+            case .pdf: return "pdf"
             case .json: return "json"
             }
         }
@@ -19,6 +21,7 @@ class DataExportService {
         var mimeType: String {
             switch self {
             case .csv: return "text/csv"
+            case .pdf: return "application/pdf"
             case .json: return "application/json"
             }
         }
@@ -61,6 +64,8 @@ class DataExportService {
         switch format {
         case .csv:
             try await exportToCSV(events: events, baby: baby, to: tempURL)
+        case .pdf:
+            try await exportToPDF(events: events, baby: baby, dateRange: dateRange, to: tempURL)
         case .json:
             try await exportToJSON(events: events, baby: baby, to: tempURL)
         }
@@ -185,6 +190,23 @@ class DataExportService {
 
         let jsonData = try JSONSerialization.data(withJSONObject: exportData, options: .prettyPrinted)
         try jsonData.write(to: url)
+    }
+    
+    private func exportToPDF(events: [Event], baby: Baby, dateRange: DateRange?, to url: URL) async throws {
+        // Use DoctorReportService to generate PDF
+        let start = dateRange?.start ?? events.map { $0.startTime }.min() ?? Date()
+        let end = dateRange?.end ?? Date()
+        
+        guard let pdfData = await DoctorReportService.shared.generateReport(
+            baby: baby,
+            events: events,
+            growthRecords: [], // TODO: Fetch growth records when GrowthTracker is implemented
+            dateRange: (start, end)
+        ) else {
+            throw ExportError.exportFailed("Failed to generate PDF")
+        }
+        
+        try pdfData.write(to: url)
     }
 }
 

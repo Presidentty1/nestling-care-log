@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import type { Baby } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { aiPreferencesService } from '@/services/aiPreferencesService';
 import { useAuth } from '@/hooks/useAuth';
+import { babyService } from '@/services/babyService';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
@@ -36,19 +36,7 @@ export default function AIAssistant() {
   const { data: babies } = useQuery({
     queryKey: ['babies'],
     queryFn: async () => {
-      const { data: familyMembers } = await supabase
-        .from('family_members')
-        .select('family_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (!familyMembers || familyMembers.length === 0) return [];
-
-      const { data: babies } = await supabase
-        .from('babies')
-        .select('*')
-        .in('family_id', familyMembers.map(fm => fm.family_id));
-
-      return babies as Baby[];
+      return await babyService.getUserBabies();
     },
   });
 

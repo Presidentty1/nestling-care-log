@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Save, Smile, Meh, Frown } from 'lucide-react';
 import { validateJournalEntry } from '@/services/validation';
+import { journalService } from '@/services/journalService';
+import { useAppStore } from '@/store/appStore';
 
 export default function JournalEntry() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function JournalEntry() {
   const queryClient = useQueryClient();
   const { id } = useParams();
   const isNew = id === 'new';
+  const { activeBabyId } = useAppStore();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -34,14 +36,9 @@ export default function JournalEntry() {
     queryKey: ['journal-entry', id],
     queryFn: async () => {
       if (isNew) return null;
-      const { data } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('id', id)
-        .single();
-      return data;
+      return await journalService.getJournalEntry(id!);
     },
-    enabled: !isNew,
+    enabled: !isNew && !!id,
   });
 
   useEffect(() => {
@@ -61,34 +58,36 @@ export default function JournalEntry() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // Get baby ID
+      let babyId = activeBabyId;
+      if (!babyId) {
+        const selectedBabyId = localStorage.getItem('selectedBabyId') || localStorage.getItem('activeBabyId');
+        if (!selectedBabyId) throw new Error('No baby selected');
+        babyId = selectedBabyId;
+      }
 
-      const selectedBabyId = localStorage.getItem('selectedBabyId');
-      if (!selectedBabyId) throw new Error('No baby selected');
-
+      // Prepare entry data
       const entryData = {
         ...formData,
-        baby_id: selectedBabyId,
-        created_by: user.id,
+        baby_id: babyId,
       };
 
+      // Validate entry data
       const validationResult = validateJournalEntry(entryData);
       if (!validationResult.success) {
         throw new Error(validationResult.error.issues[0].message);
       }
 
+      // Perform database operations
       if (isNew) {
-        const { error } = await supabase.from('journal_entries').insert(validationResult.data);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('journal_entries')
-          .update(validationResult.data)
-          .eq('id', id);
-        if (error) throw error;
+        await journalService.createJournalEntry(validationResult.data);
+      } else if (id) {
+        await journalService.updateJournalEntry(id, validationResult.data);
       }
+
+      return babyId;
     },
+    mutationKey: ['save-journal-entry'],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journal-entries'] });
       toast({ title: isNew ? 'Entry created!' : 'Entry updated!' });
@@ -114,7 +113,7 @@ export default function JournalEntry() {
               </Button>
               <h1 className="text-2xl font-bold">{isNew ? 'New Entry' : 'Edit Entry'}</h1>
             </div>
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || !activeBabyId}>
               <Save className="mr-2 h-4 w-4" />
               Save
             </Button>

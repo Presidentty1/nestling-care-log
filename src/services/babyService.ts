@@ -1,18 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeBabyName, sanitizeTimeZone } from '@/lib/sanitization';
 import { logger } from '@/lib/logger';
+import { DbBaby } from '@/types/db';
 
-export interface Baby {
-  id: string;
-  family_id: string;
-  name: string;
-  date_of_birth: string;
-  sex?: 'm' | 'f' | 'other' | null;
-  primary_feeding_style?: 'breast' | 'bottle' | 'both' | null;
-  timezone: string;
-  created_at: string;
-  updated_at: string;
-}
+// Alias DbBaby to Baby for backward compatibility
+export type Baby = DbBaby;
 
 class BabyService {
   async getUserBabies(): Promise<Baby[]> {

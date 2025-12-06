@@ -47,6 +47,10 @@ actor Analytics {
     func logOnboardingCompleted(babyId: String) {
         log("onboarding_completed", parameters: ["baby_id": babyId])
     }
+    
+    func logOnboardingGoalSelected(goal: String) {
+        log("onboarding_goal_selected", parameters: ["goal": goal])
+    }
 
     func logFirstLogCreated(eventType: String, babyId: String) {
         log("first_log_created", parameters: ["event_type": eventType, "baby_id": babyId])
