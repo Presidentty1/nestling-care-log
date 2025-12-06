@@ -35,7 +35,8 @@ struct BabyDTO: Codable {
             switch dbValue.lowercased() {
             case "male", "m": return .male
             case "female", "f": return .female
-            default: return .preferNotToSay
+            case "intersex": return .intersex
+            case "other": return .other            default: return .preferNotToSay
             }
         }
         
@@ -68,7 +69,9 @@ struct BabyDTO: Codable {
             switch swiftValue {
             case .male: return "male"
             case .female: return "female"
-            case .intersex: return "intersex"            case .preferNotToSay: return "prefer_not_to_say"
+            case .intersex: return "intersex"
+            case .preferNotToSay: return "prefer_not_to_say"
+            case .other: return "other"
             }
         }
         
