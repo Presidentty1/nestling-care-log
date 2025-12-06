@@ -1,7 +1,7 @@
 import Foundation
 
 /// Service to provide smart defaults based on baby age and user context (Phase 4)
-struct SmartDefaultsService {
+struct OnboardingDefaultsHelper {
     
     /// Suggests primary goal based on baby's age
     static func suggestGoalForBabyAge(dateOfBirth: Date) -> String {
