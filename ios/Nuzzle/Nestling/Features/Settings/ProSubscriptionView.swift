@@ -3,7 +3,7 @@ import StoreKit
 
 // MARK: - Contextual Upgrade Prompt
 
-struct UpgradePromptView: View {
+struct ContextualUpgradePrompt: View {
     let feature: ProFeature
     @Environment(\.dismiss) var dismiss
     @State private var showPaywall = false

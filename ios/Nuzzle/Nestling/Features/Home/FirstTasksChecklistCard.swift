@@ -39,14 +39,14 @@ struct FirstTasksChecklistCard: View {
             }
             
             VStack(alignment: .leading, spacing: .spacingMD) {
-                TaskRow(
+                ChecklistCardTaskRow(
                     icon: "drop.fill",
                     iconColor: .eventFeed,
                     title: "Log first feed",
                     isCompleted: hasLoggedFeed
                 )
                 
-                TaskRow(
+                ChecklistCardTaskRow(
                     icon: "moon.fill",
                     iconColor: .eventSleep,
                     title: "Log first sleep",
@@ -125,7 +125,7 @@ struct FirstTasksChecklistCard: View {
     }
 }
 
-struct TaskRow: View {
+private struct ChecklistCardTaskRow: View {
     let icon: String
     let iconColor: Color
     let title: String
