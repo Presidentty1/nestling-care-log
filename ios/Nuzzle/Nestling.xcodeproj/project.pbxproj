@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		00DD022BB745243508B30128 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7AEE12597766D7CA40E492C /* Haptics.swift */; };
-		01A2D5E21D0863D90FCF8D3D /* PostOnboardingSurvey.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD26D6DD86009E698AEB598B /* PostOnboardingSurvey.swift */; };
 		02A5F8302AABE4DF18A6E28A /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0206CEB3041C28184B563A98 /* CrashReportingService.swift */; };
 		02AD1970D365F5945B2E10BC /* TimelineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F82D9077D12DA207488E /* TimelineRow.swift */; };
 		0326E300BB13AD6AD46C02A8 /* CoreDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AA989849B56733C298CA36 /* CoreDataStore.swift */; };
@@ -21,7 +20,6 @@
 		0A325BC669E809EA674F7BE1 /* VoiceInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64F78832AFF7B63C3DC5775 /* VoiceInputView.swift */; };
 		0A81472555D8B5546BC6576D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72EDDCFFFA46546A37843C2 /* Logger.swift */; };
 		0B1B96B24B98BEDD2A5963BC /* NuzzleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8D159BF48B06BB051AFB7D /* NuzzleUITestsLaunchTests.swift */; };
-		0B61390570E9D6C5C702456F /* OnboardingProgressIndicatorEnhanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15004B15E61C141125738FE6 /* OnboardingProgressIndicatorEnhanced.swift */; };
 		0C4A3BABE1D3317A954186C1 /* CryRecorderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6138A2BA0B7699B1F057B1 /* CryRecorderViewModel.swift */; };
 		0E499BB23AB4D773684D91FD /* FreeTierUsageCard.swift in Resources */ = {isa = PBXBuildFile; fileRef = C2C825ABA7E66AB9219E20E8 /* FreeTierUsageCard.swift */; };
 		0EC074F0B560C8E5813FBC0C /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECACBCF989206BC24A864FFE /* WelcomeView.swift */; };
@@ -31,7 +29,6 @@
 		12B1B269110DF75930D55ED7 /* RemindersStatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7663A6A8D7CA98DF6A28F4 /* RemindersStatusBadge.swift */; };
 		12E7D51E839EB1F0DFB9B6C2 /* DestructiveButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD5F6ECF84F66D3BE77A3EF /* DestructiveButton.swift */; };
 		13A814326C0F9B7757A3CFAD /* NotificationsIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B9B0094D40A199FDF64DBB /* NotificationsIntroView.swift */; };
-		1521CED1662377FCDE1345F4 /* SpotlightTutorialOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5213C5274F04C50E4211090C /* SpotlightTutorialOverlay.swift */; };
 		15582AD02D908F9A0E36B830 /* CoreDataDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC2B96CDCBCFDD68C7D9DF5 /* CoreDataDataStore.swift */; };
 		17E6AAE06B0271706ECF85DD /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15198C351C6AB538FCE15004 /* Achievement.swift */; };
 		1811726FE38908DDEFBDF2CB /* BabySetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2096C019F46641A410CE3A1B /* BabySetupView.swift */; };
@@ -83,7 +80,6 @@
 		4A83E8CAC1BA1D5A0E46ED85 /* AccessibilityHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C92FD2227F4BE0425B23D76 /* AccessibilityHelpers.swift */; };
 		4ABE9E3631C4ACA4E3C70586 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA73F2027DBD810792E4D87C /* AppSettings.swift */; };
 		4B031625FCFF6C4E348127EF /* WidgetDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7D5E9B0A22AA6491E2E094 /* WidgetDataManager.swift */; };
-		4C902CAD23776F77D3140283 /* UpgradePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A172A1E4692409A37CE3A3D /* UpgradePromptView.swift */; };
 		4CAC0861CAE001123B91F748 /* PostOnboardingSurvey.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4263A82E7067C523E78D1C /* PostOnboardingSurvey.swift */; };
 		4D9E72545DC3BA15E7578C3C /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCE3E9BA6C6A3255DAE8790 /* AppEnvironment.swift */; };
 		4DBED35924459311FFF82B82 /* PredictionMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038D0DE6FCD4454A64CA6BCA /* PredictionMO+CoreDataClass.swift */; };
@@ -155,7 +151,6 @@
 		9461F5E10F7CA3312A04697E /* SpeechRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 328FAEAC10EF65C4F84D0911 /* SpeechRecognitionService.swift */; };
 		9549452C0CB55B4FD1827B6B /* PrivacyDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F664B438049272960EE43BA4 /* PrivacyDataView.swift */; };
 		97E1504833BC3DC42128BCE5 /* BabyEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABAC07A16F6C86D05C5E141 /* BabyEntity+CoreDataProperties.swift */; };
-		999672B0C096AA7E18DA62FA /* UpgradePromptModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0177734CA18EEC872CE06ED6 /* UpgradePromptModal.swift */; };
 		9A2BF6361B484E350EA77C6E /* LastUsedValuesEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19935D2052D018F4263761C /* LastUsedValuesEntity+CoreDataClass.swift */; };
 		9A578D91B3BF5023EC0AD445 /* DataMigrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45FD5214817437E14EADDAFD /* DataMigrationService.swift */; };
 		9F5F0B840705F3D088EA795F /* PredictionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A04604661148407BC30C13 /* PredictionsViewModel.swift */; };
@@ -164,7 +159,6 @@
 		A50336002E69F3EF5C358B48 /* StreaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC36356C5E05321779F90BBB /* StreaksView.swift */; };
 		A5AD6648A88518AC8682F272 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6454AA4753EDE6E63D664E /* NotificationSettingsView.swift */; };
 		A6D39AF81E67473004A5B746 /* NapPredictorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D91579BF0C79DA07C3A2BC6 /* NapPredictorService.swift */; };
-		A9573A0084FE6D90EF5F0926 /* SmartDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D231A26C4EA84520C13AE04E /* SmartDefaultsService.swift */; };
 		A9B70DAED3768DB55090A063 /* EventEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75731ED300D5E798B05CA3D8 /* EventEntity+CoreDataClass.swift */; };
 		AA8EFB37CC3CE8D1D3973C84 /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59F79258F12A940B3171222F /* GoalSelectionView.swift */; };
 		AAE3CFB2DB2BD9C2E83334ED /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B522AA591432FF86557B2D /* AuthView.swift */; };
@@ -194,7 +188,6 @@
 		C5C5BD31168ACE449DB0432E /* EventEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BCFE0A60038B5725767EA6 /* EventEntity+CoreDataProperties.swift */; };
 		C8E86C4BE4CF4FF4815BF766 /* LastUsedValuesEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F082587F52997FB1F77F241 /* LastUsedValuesEntity+CoreDataProperties.swift */; };
 		CA197CDFD9B5817F91CD525F /* EventMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDC6A31884F69377C472CE83 /* EventMO+CoreDataProperties.swift */; };
-		CB707D128F3C40FB046323FC /* FirstTasksChecklist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507F76986F761FDCBA3B5AC2 /* FirstTasksChecklist.swift */; };
 		CD3F6064C3FBEB32571791E3 /* PersonalizedRecommendationsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34010ADE8227F423D5B6F513 /* PersonalizedRecommendationsService.swift */; };
 		CD463F3DDD7A81034A41253D /* FeedFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDCF0279200C4B902A4A44FC /* FeedFormView.swift */; };
 		CE5A3CB749ADB0D2B4142811 /* UpgradePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5504C1574C95BE2555921466 /* UpgradePromptView.swift */; };
@@ -3471,7 +3464,6 @@
 				E00AF82D40A459F2F920B6E4 /* EmptyStateView.swift in Sources */,
 				7315FB2AA243C56D8576F780 /* ErrorStateView.swift in Sources */,
 				1BC04731DF6A0FD911C6C9EB /* FilterChipsView.swift in Sources */,
-				CB707D128F3C40FB046323FC /* FirstTasksChecklist.swift in Sources */,
 				694033A1C0B07F67DC4BC9D7 /* FreeTierUsageCard.swift in Sources */,
 				00DD022BB745243508B30128 /* Haptics.swift in Sources */,
 				678F19287297567CFB6CA123 /* InfoBanner.swift in Sources */,
@@ -3495,7 +3487,6 @@
 				ADCA2A6AAF6230009A5BA7A5 /* ToastView.swift in Sources */,
 				5527E0429EA7035592C0B093 /* TodaysInsightCard.swift in Sources */,
 				30AB790AB74706C58183FA52 /* UpgradePromptBanner.swift in Sources */,
-				4C902CAD23776F77D3140283 /* UpgradePromptView.swift in Sources */,
 				0A325BC669E809EA674F7BE1 /* VoiceInputView.swift in Sources */,
 				17E6AAE06B0271706ECF85DD /* Achievement.swift in Sources */,
 				4ABE9E3631C4ACA4E3C70586 /* AppSettings.swift in Sources */,
@@ -3563,15 +3554,12 @@
 				64EFDC5820FFA49E9E580816 /* NextFeedSuggestionCard.swift in Sources */,
 				BAD94BCD2AA14D74E070FF92 /* NowNextViewModel.swift in Sources */,
 				7DDEB01C49C8274EF38EBD88 /* OfflineIndicatorView.swift in Sources */,
-				01A2D5E21D0863D90FCF8D3D /* PostOnboardingSurvey.swift in Sources */,
 				12B1B269110DF75930D55ED7 /* RemindersStatusBadge.swift in Sources */,
-				1521CED1662377FCDE1345F4 /* SpotlightTutorialOverlay.swift in Sources */,
 				34583026677A2B7FB6C8FDF8 /* StatusTilesView.swift in Sources */,
 				6F62FD5C83B5F050E84571FB /* StatusTilesViewNew.swift in Sources */,
 				4F915F8B8C068D1D03E54F2E /* TimeSinceChipsView.swift in Sources */,
 				603A58349B7A81F258232A82 /* TodayPatternsCard.swift in Sources */,
 				DCC3A070526B5657A0B10E39 /* TodayStatusHeroCard.swift in Sources */,
-				999672B0C096AA7E18DA62FA /* UpgradePromptModal.swift in Sources */,
 				48AF742D8338003B43C17DB2 /* LabsView.swift in Sources */,
 				D4CA44F3992D1D2485EC359A /* PredictionsView.swift in Sources */,
 				9F5F0B840705F3D088EA795F /* PredictionsViewModel.swift in Sources */,
@@ -3587,7 +3575,6 @@
 				13A814326C0F9B7757A3CFAD /* NotificationsIntroView.swift in Sources */,
 				4DC3BB0D43F01C9ACC347D49 /* OnboardingCoordinator.swift in Sources */,
 				1855B9E1BFB266158233AC4B /* OnboardingProgressIndicator.swift in Sources */,
-				0B61390570E9D6C5C702456F /* OnboardingProgressIndicatorEnhanced.swift in Sources */,
 				72E1C4B4BA180506652F409F /* OnboardingView.swift in Sources */,
 				083E730544BFC9140EB6C7D4 /* PreferencesAndConsentView.swift in Sources */,
 				32E440ACE07EF001AFB2B968 /* PreferencesView.swift in Sources */,
@@ -3639,7 +3626,6 @@
 				34EBE0E2B73178B7D8CA651A /* ScenarioSeeder.swift in Sources */,
 				5B958A30E9B4D968FFAB3B0F /* Secrets.swift in Sources */,
 				04EA00B2C39D8235894A5640 /* SleepActivityAttributes.swift in Sources */,
-				A9573A0084FE6D90EF5F0926 /* SmartDefaultsService.swift in Sources */,
 				9461F5E10F7CA3312A04697E /* SpeechRecognitionService.swift in Sources */,
 				9FF53275F6293BCFA86D8B6D /* SpotlightIndexer.swift in Sources */,
 				F0DDAC9FD6DFF0B824316787 /* StreakService.swift in Sources */,
