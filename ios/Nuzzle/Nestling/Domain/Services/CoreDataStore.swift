@@ -4,7 +4,7 @@ import os.signpost
 
 /// Core Data implementation of the DataStore protocol.
 /// Provides persistent, offline-first data storage for the iOS app.
-@MainActor
+
 class CoreDataStore: DataStore {
     // TODO: Update logger subsystem from com.nestling.app to com.nuzzle.app when ready
     private let logger = Logger(subsystem: "com.nestling.app", category: "CoreDataStore")

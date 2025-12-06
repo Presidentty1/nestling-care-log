@@ -125,6 +125,7 @@ extension CGFloat {
     static let radiusMD: CGFloat = 16
     static let radiusLG: CGFloat = 20
     static let radiusXL: CGFloat = 24
+    static let radius2XL: CGFloat = 32
 }
 
 // MARK: - Typography (Optimized for tired eyes)
