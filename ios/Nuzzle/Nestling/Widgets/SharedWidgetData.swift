@@ -3,7 +3,7 @@ import WidgetKit
 
 /// Shared data manager for widgets using App Groups
 class SharedWidgetData {
-    private static let appGroupId = "group.com.nestling.app.shared"
+    private static let appGroupId = "group.com.nestling.app"
     private static let predictionsKey = "predictions"
     private static let eventsKey = "recentEvents"
     private static let babyKey = "activeBaby"

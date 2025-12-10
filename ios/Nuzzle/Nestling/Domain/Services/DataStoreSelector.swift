@@ -31,7 +31,7 @@ class DataStoreSelector {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let coreDataURL = documentsPath.appendingPathComponent("Nestling.sqlite")
         // App Group container (must match widgets/intents capabilities)
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app.shared")?
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
             .appendingPathComponent("Nestling.sqlite")
         
         // Check both possible locations
