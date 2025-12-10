@@ -75,7 +75,7 @@ export const MESSAGING = {
   // First-Time User Experience
   firstTime: {
     welcome: {
-      title: 'Welcome! Let's log your first event',
+      title: "Welcome! Let's log your first event",
       subtitle: 'Tap below to get started',
       cta: 'Log First Event',
     },
