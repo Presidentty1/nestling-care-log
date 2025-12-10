@@ -135,6 +135,7 @@
 		77DE2F27EA7DF28CE397DB00 /* SheetDetentWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865F02F02AF16B1CB3738C00 /* SheetDetentWrapper.swift */; };
 		785A70BC5CB771F6A11784DC /* IDGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3613A6868D0B8B37921478C /* IDGenerator.swift */; };
 		799969B970028E8FBAD1651E /* Nestling.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 6D819B9BB77581E80AE19F17 /* Nestling.entitlements */; };
+		62DCA01F0A6D51FBF5A32404 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 948DC7A787561B56550A90E2 /* Assets.xcassets */; };
 		7C52967CE192BEFA4A7B5FF5 /* JSONBackedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC274CF4F455FD227D6085F /* JSONBackedDataStore.swift */; };
 		7CFDC2E8B5C7EF69AA129E13 /* UpgradePromptModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EE15D781DEE1566CCFA83E /* UpgradePromptModal.swift */; };
 		7DDEB01C49C8274EF38EBD88 /* OfflineIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36E75D9926E1CA1207867C0 /* OfflineIndicatorView.swift */; };
@@ -865,6 +866,7 @@
 		6D0BD7C088FBC79F66EC7E7B /* Baby.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Baby.swift; sourceTree = "<group>"; };
 		6D3D06DC6B3F5BD91CE7C8CB /* EventMO+CoreDataProperties.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "EventMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		6D819B9BB77581E80AE19F17 /* Nestling.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nestling.entitlements; sourceTree = "<group>"; };
+		948DC7A787561B56550A90E2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6E0147526DF179B202BDBE7A /* AccessibilityHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccessibilityHelpers.swift; sourceTree = "<group>"; };
 		6E0CA01EF0B425F74D59F9DB /* DateUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateUtils.swift; sourceTree = "<group>"; };
 		6E3287FDFC855731F5835D0B /* StreaksView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreaksView.swift; sourceTree = "<group>"; };
@@ -2867,16 +2869,17 @@
 		C7A2C51B5C4808F05750D5CF /* Nestling */ = {
 			isa = PBXGroup;
 			children = (
-				2346403CFF7FD320972EB7C5 /* App */,
-				4D26F654FC24F64BD1B36661 /* Design */,
-				D2A58C62391613397B8FCA8E /* Domain */,
-				DB4B9D2EBE0C81C18E6F1A77 /* Features */,
-				934378F6423AEE4A00177267 /* Services */,
-				71D2AD0AF9769425131699AB /* Utilities */,
-				48C99AE2028DAF395CA12B3A /* Widgets */,
-				6D819B9BB77581E80AE19F17 /* Nestling.entitlements */,
-			);
-			path = Nestling;
+			2346403CFF7FD320972EB7C5 /* App */,
+			4D26F654FC24F64BD1B36661 /* Design */,
+			D2A58C62391613397B8FCA8E /* Domain */,
+			DB4B9D2EBE0C81C18E6F1A77 /* Features */,
+			934378F6423AEE4A00177267 /* Services */,
+			71D2AD0AF9769425131699AB /* Utilities */,
+			48C99AE2028DAF395CA12B3A /* Widgets */,
+			948DC7A787561B56550A90E2 /* Assets.xcassets */,
+			6D819B9BB77581E80AE19F17 /* Nestling.entitlements */,
+		);
+		path = Nestling;
 			sourceTree = "<group>";
 		};
 		CC1B26361A2F02F6FA982305 /* Validators */ = {
@@ -3434,19 +3437,20 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		86420AC9A1CAA67441DD7AC8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				799969B970028E8FBAD1651E /* Nestling.entitlements in Resources */,
-				C394192466888929957E5EBB /* Localizable.strings in Resources */,
-				2E0EA8186D76080E186FC9B0 /* MonthlyCalendarView.swift in Resources */,
-				0E499BB23AB4D773684D91FD /* FreeTierUsageCard.swift in Resources */,
-				C3EDE7E35FB1ACC751DF0E89 /* UpgradePromptBanner.swift in Resources */,
-				BF0D5970DB9A5705090382F0 /* FirstTasksChecklistCard.swift in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+	86420AC9A1CAA67441DD7AC8 /* Resources */ = {
+		isa = PBXResourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+			799969B970028E8FBAD1651E /* Nestling.entitlements in Resources */,
+			62DCA01F0A6D51FBF5A32404 /* Assets.xcassets in Resources */,
+			C394192466888929957E5EBB /* Localizable.strings in Resources */,
+			2E0EA8186D76080E186FC9B0 /* MonthlyCalendarView.swift in Resources */,
+			0E499BB23AB4D773684D91FD /* FreeTierUsageCard.swift in Resources */,
+			C3EDE7E35FB1ACC751DF0E89 /* UpgradePromptBanner.swift in Resources */,
+			BF0D5970DB9A5705090382F0 /* FirstTasksChecklistCard.swift in Resources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
 		9196AE48731742E5AB9535A2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3719,6 +3723,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Nestling/Nestling.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -3804,6 +3809,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Nestling/Nestling.dev.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
