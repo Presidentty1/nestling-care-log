@@ -3,7 +3,7 @@
 # Workspace Verification Script
 # Verifies that we're working in the correct workspace before making changes
 
-EXPECTED_WORKSPACE="/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq"
+EXPECTED_WORKSPACE="/Users/tyhorton/Coding Projects/nestling-care-log"
 EXPECTED_REMOTE="https://github.com/Presidentty1/nestling-care-log.git"
 
 CURRENT_DIR=$(pwd)

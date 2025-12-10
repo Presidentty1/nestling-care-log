@@ -32,3 +32,4 @@ final class NetworkMonitorTests: XCTestCase {
         await networkMonitor.waitForConnectivity()
     }
 }
+

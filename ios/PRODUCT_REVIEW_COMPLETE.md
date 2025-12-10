@@ -4,7 +4,7 @@
 
 Conducted comprehensive product review and implemented all recommendations for Nestling iOS baby tracker at:
 
-**Project:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+**Project:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 

@@ -100,3 +100,4 @@ final class RevenueCatServiceTests: XCTestCase {
         // In real implementation, this would check RevenueCat status
     }
 }
+

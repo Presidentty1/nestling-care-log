@@ -1,7 +1,7 @@
 # Workspace Verification File
 
 ## Current Workspace
-Path: /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+Path: /Users/tyhorton/Coding Projects/nestling-care-log
 
 ## Git Remote
 URL: https://github.com/Presidentty1/nestling-care-log.git
@@ -13,12 +13,11 @@ Date: 2025-01-06
 1. Always check this file exists before making changes
 2. Verify the current working directory matches the path above
 3. Use relative paths in all documentation and scripts
-4. Never reference other worktree locations (jet, vig, vcc, etc.)
-5. All changes should be made in this workspace only
+4. All changes should be made in this workspace only
 
 ## Verification Command
 Run this to verify you're in the correct workspace:
 ```bash
-pwd | grep -q "/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq" && echo "✓ Correct workspace" || echo "✗ Wrong workspace!"
+pwd | grep -q "/Users/tyhorton/Coding Projects/nestling-care-log" && echo "✓ Correct workspace" || echo "✗ Wrong workspace!"
 ```
 

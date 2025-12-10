@@ -76,3 +76,4 @@ struct TipCard: View {
     TipCard(tip: sampleTip, onDismiss: {})
         .padding()
 }
+

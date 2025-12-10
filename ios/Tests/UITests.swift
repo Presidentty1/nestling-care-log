@@ -74,3 +74,4 @@ extension XCUIApplication {
         staticTexts[option].tap()
     }
 }
+

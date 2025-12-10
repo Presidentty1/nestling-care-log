@@ -258,3 +258,4 @@ class OfflineQueueService: ObservableObject {
         queueOperation(operation)
     }
 }
+

@@ -60,3 +60,5 @@ class GoalsService {
 }
 
 export const goalsService = new GoalsService();
+
+

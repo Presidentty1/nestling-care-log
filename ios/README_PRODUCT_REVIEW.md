@@ -1,7 +1,7 @@
 # ✅ Product Review Implementation Complete
 
 ## All Changes Applied to Xcode Project
-**Location:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+**Location:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 
@@ -82,7 +82,7 @@ Nestling/Domain/Models/
 
 1. **Open Xcode:**
    ```bash
-   open /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj
+   open ios/Nuzzle/Nestling.xcodeproj
    ```
 
 2. **Build & Run (⌘R)**

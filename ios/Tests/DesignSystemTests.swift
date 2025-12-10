@@ -80,3 +80,4 @@ final class DesignSystemTests: XCTestCase {
         XCTAssertNotEqual(feedColorLight, feedColorDark)
     }
 }
+

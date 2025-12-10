@@ -3,7 +3,7 @@
 ## Status: READY FOR TESTING
 
 All UX overhaul changes have been successfully implemented in:
-**`/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/`**
+the project root directory
 
 This worktree contains the iOS Xcode project at:
 **`ios/Nuzzle/Nestling.xcodeproj`**
@@ -77,7 +77,7 @@ UX_IMPLEMENTATION_COMPLETE.md (this file)
 
 ### Web App Testing
 ```bash
-cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+cd "/Users/tyhorton/Coding Projects/nestling-care-log"
 npm install
 npm run dev
 ```
@@ -86,7 +86,7 @@ Then navigate to `http://localhost:5173`
 
 ### iOS App Testing
 ```bash
-cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+cd "/Users/tyhorton/Coding Projects/nestling-care-log"
 npm run build
 npx cap sync ios
 npx cap open ios
@@ -206,7 +206,7 @@ The web app runs inside the iOS app via Capacitor. All UX improvements will be v
 
 The iOS Xcode project location:
 ```
-/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj
+ios/Nuzzle/Nestling.xcodeproj
 ```
 
 ---

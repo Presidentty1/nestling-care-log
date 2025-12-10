@@ -2,7 +2,7 @@
 
 ## Status: ALL CHANGES APPLIED TO GNQ WORKTREE
 
-**Location**: `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/`
+**Location**: Project root directory
 **iOS Xcode Project**: `gnq/ios/Nuzzle/Nestling.xcodeproj`
 
 ---
@@ -43,7 +43,7 @@
 
 ### 1. Start Web App
 ```bash
-cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+cd "/Users/tyhorton/Coding Projects/nestling-care-log"
 npm install
 npm run dev
 ```
@@ -174,7 +174,7 @@ No known issues. All linting errors resolved.
 
 ### Build for iOS
 ```bash
-cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+cd "/Users/tyhorton/Coding Projects/nestling-care-log"
 npm run build
 npx cap sync ios
 npx cap open ios

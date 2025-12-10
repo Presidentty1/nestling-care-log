@@ -122,3 +122,5 @@ struct LogEntryPayloadTummyTime: Codable, Equatable {
         self.durationMinutes = durationMinutes
     }
 }
+
+

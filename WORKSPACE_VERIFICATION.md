@@ -2,13 +2,13 @@
 
 ## Overview
 
-This repository uses git worktrees, which means there are multiple working directories for the same repository. It's critical to ensure you're working in the correct workspace to avoid editing the wrong codebase.
+This repository is located in a single working directory. It's important to ensure you're working in the correct location before making changes.
 
 ## Correct Workspace
 
 **Current Active Workspace:**
 ```
-/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
+/Users/tyhorton/Coding Projects/nestling-care-log
 ```
 
 ## Verification Steps
@@ -20,7 +20,7 @@ Run this command to verify your location:
 pwd
 ```
 
-You should see: `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq`
+You should see: `/Users/tyhorton/Coding Projects/nestling-care-log`
 
 ### 2. Check Verification File
 
@@ -68,9 +68,8 @@ Instead, use:
 
 ## Common Mistakes to Avoid
 
-1. **Don't reference other worktrees**: Avoid paths like `/Users/.../worktrees/.../jet/` or `/Users/.../worktrees/.../vig/`
-2. **Don't use absolute paths in docs**: Use relative paths or generic instructions
-3. **Don't assume workspace location**: Always verify before making changes
+1. **Don't use absolute paths in docs**: Use relative paths or generic instructions
+2. **Don't assume workspace location**: Always verify before making changes
 
 ## For AI Assistants
 
@@ -87,7 +86,7 @@ Before making any changes:
 ### Wrong Workspace Detected
 
 If you're in the wrong workspace:
-1. Navigate to the correct workspace: `cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq`
+1. Navigate to the correct workspace: `cd "/Users/tyhorton/Coding Projects/nestling-care-log"`
 2. Verify with `./scripts/verify-workspace.sh`
 3. Check git status: `git status`
 
@@ -95,8 +94,8 @@ If you're in the wrong workspace:
 
 If `.workspace-verification` is missing:
 1. This may indicate you're in the wrong location
-2. Check the git worktree list: `git worktree list`
-3. Navigate to the correct worktree
+2. Check the git remote: `git remote -v`
+3. Navigate to the correct directory
 
 ### Git Remote Mismatch
 
@@ -116,9 +115,6 @@ pwd
 
 # Verify git remote
 git remote get-url origin
-
-# List all worktrees
-git worktree list
 ```
 
 ## Last Updated

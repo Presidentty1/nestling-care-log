@@ -38,3 +38,4 @@ struct ThemeToggleButton: View {
         .environmentObject(ThemeManager())
         .padding()
 }
+

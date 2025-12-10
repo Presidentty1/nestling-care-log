@@ -142,3 +142,5 @@ struct GoalCard: View {
 #Preview {
     GoalSelectionView(coordinator: OnboardingCoordinator(dataStore: InMemoryDataStore()))
 }
+
+

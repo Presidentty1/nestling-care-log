@@ -59,3 +59,4 @@ struct OfflineIndicator_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+

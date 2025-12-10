@@ -70,3 +70,5 @@ class GrowthRecordsService {
 }
 
 export const growthRecordsService = new GrowthRecordsService();
+
+

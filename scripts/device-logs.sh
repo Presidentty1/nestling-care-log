@@ -25,3 +25,5 @@ if [ -n "$FILTER" ]; then
 else
     log stream --predicate "processImagePath contains '${BUNDLE_ID}'" --style compact
 fi
+
+

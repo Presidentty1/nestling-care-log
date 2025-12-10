@@ -334,3 +334,5 @@ class NowViewModel: ObservableObject {
         // refreshData() will be called automatically via binding
     }
 }
+
+

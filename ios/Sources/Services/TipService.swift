@@ -239,3 +239,4 @@ struct ParentalTip: Identifiable {
         case general
     }
 }
+

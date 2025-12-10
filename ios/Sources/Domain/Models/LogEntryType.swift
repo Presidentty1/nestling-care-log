@@ -45,3 +45,5 @@ enum LogEntrySource: String, Codable {
     case aiSuggestion
     case quickAction
 }
+
+

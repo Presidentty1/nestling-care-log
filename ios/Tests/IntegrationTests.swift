@@ -244,3 +244,4 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(retrievedPrediction?.id, prediction.id)
     }
 }
+

@@ -70,3 +70,5 @@ class HealthRecordsService {
 }
 
 export const healthRecordsService = new HealthRecordsService();
+
+

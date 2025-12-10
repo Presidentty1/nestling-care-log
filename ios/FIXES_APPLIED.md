@@ -3,7 +3,7 @@
 ## Summary
 
 All configuration issues have been fixed in the gnq worktree:
-**`/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`**
+`ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 
@@ -115,7 +115,7 @@ This is **REQUIRED** or the app will crash:
 
 ```bash
 # 1. Open Xcode
-open /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj
+open ios/Nuzzle/Nestling.xcodeproj
 
 # 2. In Xcode:
 #    - Right-click "Nestling" folder in left sidebar
@@ -248,7 +248,7 @@ Configure Supabase credentials
 All these files exist in gnq worktree:
 
 ```
-/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling/
+ios/Nuzzle/Nestling/
   ├── Info.plist (NEW - must add to Xcode)
   ├── Nestling.entitlements
   ├── PrivacyInfo.xcprivacy
@@ -257,7 +257,7 @@ All these files exist in gnq worktree:
       ├── SupabaseClient.swift (already handles missing config)
       └── SpeechRecognitionService.swift (UPDATED - lazy init)
 
-/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/
+ios/Nuzzle/
   └── Environment.xcconfig (NEW - template for env vars)
 ```
 

@@ -147,3 +147,5 @@ struct SmartDefaults {
         self.durationMinutes = durationMinutes
     }
 }
+
+

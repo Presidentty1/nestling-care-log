@@ -3,7 +3,7 @@
 ## Summary
 
 All UX improvements have been successfully implemented in the **gnq** worktree, which contains the iOS Xcode project at:
-`/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+`ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 
@@ -127,10 +127,10 @@ All UX improvements have been successfully implemented in the **gnq** worktree, 
 ## iOS Xcode Project
 
 The web app changes are in:
-`/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/`
+the project root directory
 
 The iOS Xcode project is at:
-`/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+`ios/Nuzzle/Nestling.xcodeproj`
 
 These web app improvements will be visible when:
 1. Running the web app locally (`npm run dev`)

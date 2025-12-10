@@ -102,3 +102,4 @@ struct MigrationSummary {
         "\(babyCount) babies, \(eventCount) events (\(estimatedSize))"
     }
 }
+

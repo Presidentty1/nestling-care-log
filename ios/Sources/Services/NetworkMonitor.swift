@@ -60,3 +60,4 @@ class NetworkMonitor: ObservableObject {
         }
     }
 }
+

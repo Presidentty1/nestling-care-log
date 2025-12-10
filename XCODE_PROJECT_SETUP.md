@@ -4,7 +4,7 @@
 
 **USE THIS PROJECT:**
 ```
-/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj
+ios/Nuzzle/Nestling.xcodeproj
 ```
 
 **CLOSE THIS PROJECT (wrong location):**
@@ -17,7 +17,7 @@
 1. **Close both Xcode windows**
 
 2. **Open ONLY the correct project:**
-   - In Finder, navigate to: `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/`
+   - In Finder, navigate to: `ios/Nuzzle/`
    - Double-click `Nestling.xcodeproj` to open it
 
 3. **Resolve Swift Package Dependencies:**

@@ -3,7 +3,7 @@
 All product review improvements have been successfully copied from `syq` to `gnq` worktree.
 
 ## Location
-**Xcode Project:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+**Xcode Project:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ## Files Added (7 New Swift Files)
 
@@ -54,7 +54,7 @@ All product review improvements have been successfully copied from `syq` to `gnq
 ### 1. Add New Files to Xcode Project
 You need to add the 7 new Swift files to your Xcode project targets:
 
-1. Open: `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+1. Open: `ios/Nuzzle/Nestling.xcodeproj`
 2. Right-click on appropriate folder in Project Navigator
 3. Choose "Add Files to Nestling..."
 4. Select the new files:
@@ -124,6 +124,6 @@ For detailed information, see:
 ---
 
 *Applied: December 6, 2025*  
-*Source: syq worktree → gnq worktree*  
+*Source: Previous changes merged into main*  
 *Status: ✅ Ready for Xcode integration*
 

@@ -229,3 +229,4 @@ struct LogEventIntent: AppIntent {
         return .result()
     }
 }
+

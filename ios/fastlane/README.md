@@ -51,3 +51,4 @@ Set these in your CI environment:
 - `FASTLANE_APPLE_ID` - Apple ID for App Store Connect
 - `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD` - App-specific password
 - `FASTLANE_TEAM_ID` - Developer team ID
+

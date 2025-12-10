@@ -162,3 +162,4 @@ class MockAIAssistantService: AIAssistantServiceProtocol {
         return messages + [assistantMessage]
     }
 }
+

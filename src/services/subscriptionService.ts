@@ -170,3 +170,4 @@ export class SubscriptionService {
 
 export const subscriptionService = new SubscriptionService();
 export default subscriptionService;
+

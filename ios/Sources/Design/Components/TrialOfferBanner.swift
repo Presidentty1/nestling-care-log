@@ -53,3 +53,4 @@ struct TrialOfferBanner: View {
     TrialOfferBanner(onTryPro: {}, onDismiss: {})
         .padding()
 }
+

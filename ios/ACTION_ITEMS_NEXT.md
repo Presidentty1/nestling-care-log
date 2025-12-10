@@ -4,7 +4,7 @@
 
 All 5 phases of UX optimization have been implemented in the **CORRECT location:**
 
-**Project:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+**Project:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 

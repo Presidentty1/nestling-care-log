@@ -37,3 +37,5 @@ class WeeklySummariesService {
 }
 
 export const weeklySummariesService = new WeeklySummariesService();
+
+

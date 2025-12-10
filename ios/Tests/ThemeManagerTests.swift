@@ -87,3 +87,4 @@ final class ThemeManagerTests: XCTestCase {
         XCTAssertEqual(newThemeManager.effectiveTheme, .light)
     }
 }
+

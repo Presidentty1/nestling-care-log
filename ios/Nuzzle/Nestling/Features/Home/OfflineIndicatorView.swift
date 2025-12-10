@@ -28,3 +28,5 @@ struct OfflineIndicatorView: View {
 #Preview {
     OfflineIndicatorView()
 }
+
+

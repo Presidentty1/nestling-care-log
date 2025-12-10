@@ -182,9 +182,9 @@
 
 ## Location
 
-**All files are in:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling/`
+**All files are in:** `ios/Nuzzle/Nestling/`
 
-**Xcode Project:** `/Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj`
+**Xcode Project:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ---
 

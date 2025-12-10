@@ -100,3 +100,5 @@ struct FirstLogCard: View {
     FirstLogCard(onLog: {})
         .padding()
 }
+
+

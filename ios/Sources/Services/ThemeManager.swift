@@ -66,3 +66,4 @@ class ThemeManager: ObservableObject {
         #endif
     }
 }
+

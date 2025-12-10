@@ -238,3 +238,4 @@ final class SyncAppSettings {
         )
     }
 }
+

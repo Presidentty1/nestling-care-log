@@ -57,3 +57,4 @@ BEGIN
     RETURN 'free';
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+

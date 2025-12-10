@@ -151,3 +151,5 @@ struct AcceptInviteView: View {
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
 }
 
+
+

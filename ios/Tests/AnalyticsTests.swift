@@ -172,3 +172,4 @@ class MockAnalyticsService {
         loggedEvents.append(event)
     }
 }
+

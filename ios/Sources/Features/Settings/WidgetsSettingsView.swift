@@ -196,3 +196,4 @@ struct ShortcutExample: View {
         .cornerRadius(.radiusSM)
     }
 }
+

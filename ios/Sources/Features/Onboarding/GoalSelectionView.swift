@@ -142,3 +142,4 @@ struct GoalOptionView: View {
     let coordinator = OnboardingCoordinator(dataStore: InMemoryDataStore()) {}
     GoalSelectionView(coordinator: coordinator)
 }
+

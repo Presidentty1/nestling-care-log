@@ -39,3 +39,4 @@ struct FirstLogCardView: View {
     FirstLogCardView(onLogFirstEvent: {})
         .padding()
 }
+

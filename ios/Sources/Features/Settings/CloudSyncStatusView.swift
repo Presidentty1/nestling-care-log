@@ -268,3 +268,4 @@ enum CloudSyncStatus {
         }
     }
 }
+

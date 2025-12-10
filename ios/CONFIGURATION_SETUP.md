@@ -118,12 +118,12 @@ This is **REQUIRED** to prevent crashes:
 
 1. Open Xcode:
    ```bash
-   open /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling.xcodeproj
+   open ios/Nuzzle/Nestling.xcodeproj
    ```
 
 2. In Finder, navigate to:
    ```
-   /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq/ios/Nuzzle/Nestling/
+   ios/Nuzzle/Nestling/
    ```
 
 3. Drag `Info.plist` from Finder into the "Nestling" folder in Xcode's left sidebar

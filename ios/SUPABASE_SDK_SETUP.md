@@ -72,3 +72,4 @@ cd ios && find . -name "*.pbxproj" -exec grep -l "Supabase" {} \;
 # Verify environment variables
 echo $SUPABASE_URL $SUPABASE_ANON_KEY
 ```
+
