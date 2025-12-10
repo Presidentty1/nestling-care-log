@@ -37,7 +37,10 @@
 		193635778B98B33354F88CD2 /* DateUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECBF272B4710C3D86B453533 /* DateUtils.swift */; };
 		1BAF5638B31ADA1DBA067A04 /* OnboardingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E18C9BBBC59F3193697A320 /* OnboardingContainer.swift */; };
 		1BBEEEA8FD3E84FEEF918180 /* WidgetActionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3934A69DB6D4538A628C7173 /* WidgetActionService.swift */; };
+		1BC0BADD0F1A4F3B9D2C445E /* InviteCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */; };
 		1BC04731DF6A0FD911C6C9EB /* FilterChipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1D94FC8C3C3C34584C0A63 /* FilterChipsView.swift */; };
+		3E2D1C0B9A8F7E6D5C4B3A2F /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */; };
+		2A1B0C9D8E7F6A5B4C3D2E1F /* AcceptInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */; };
 		1E1D7DD4A802B5FE083C64B9 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F92EBC80E731548A57B991 /* UndoManager.swift */; };
 		1E247D78EEFD0B6A8F9F9DC4 /* FirstTasksChecklistCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2DDBBCCF21412D0D66AEE4 /* FirstTasksChecklistCard.swift */; };
 		207AA0548CBCEBA92ADEDB7E /* FirstLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C778EC93B0D1180566E12116 /* FirstLogView.swift */; };
@@ -353,6 +356,8 @@
 		12295DC5659C9C0B9B6E1189 /* Event.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		124837645FB65C9BE217FD45 /* EventValidator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventValidator.swift; sourceTree = "<group>"; };
 		124FB94AEA88C23CA0D499EE /* BackupService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
+		5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AcceptInviteView.swift; sourceTree = "<group>"; };
+		6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeService.swift; sourceTree = "<group>"; };
 		127357D7B8DE83A06E5C5895 /* Prediction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Prediction.swift; sourceTree = "<group>"; };
 		128E3B4A38746C119A34D181 /* AIAssistantService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIAssistantService.swift; sourceTree = "<group>"; };
 		12ED6C6C29BF6802F18A6B92 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
@@ -374,6 +379,7 @@
 		1542C5B72FB50063A674A4E6 /* AIConsentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConsentView.swift; sourceTree = "<group>"; };
 		158088E1902F72D415884E2F /* AppEnvironment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		1584DEDEFD35B5C7F17BA3A6 /* ReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
+		15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
 		15CA5BE9752B739DCE67B227 /* SheetDetentWrapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SheetDetentWrapper.swift; sourceTree = "<group>"; };
 		15E7DCBA2F78742C0CB1472D /* PredictionsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictionsView.swift; sourceTree = "<group>"; };
 		15E9433821B40F565901A158 /* StatusTilesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatusTilesView.swift; sourceTree = "<group>"; };
@@ -2524,6 +2530,8 @@
 				6C51B9C3ACC815725E58731D /* MLCryClassifier.swift */,
 				6440CF2CAABCA4B1086A1DD8 /* NotificationPermissionManager.swift */,
 				07BE39356A83CDEED00CBB78 /* NotificationScheduler.swift */,
+				15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */,
+				6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */,
 				9C057847032325D137E50AC7 /* OnboardingService.swift */,
 				F4CDBFE413DBCBBA8F2BA35F /* PDFExportService.swift */,
 				FFF37D51FCA4BF9388FC8A91 /* PredictionsEngine.swift */,
@@ -3193,6 +3201,7 @@
 				A78F9458CC1D2658396FBC91 /* KeyboardShortcutsView.swift */,
 				E5B8DF25F30FAF32D5E81342 /* ManageBabiesView.swift */,
 				358E44BDA502177466041745 /* ManageCaregiversView.swift */,
+				5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */,
 				0B2E3B7EA4DCB91AEBD10046 /* NotificationSettingsView.swift */,
 				29B5C1ADDD77EE6EFA8E9228 /* PrivacyDataView.swift */,
 				7FD5C2643E73A90269C441A7 /* PrivacySettingsView.swift */,
@@ -3596,6 +3605,7 @@
 				3A25E6E0F77E1D9E363E782F /* KeyboardShortcutsView.swift in Sources */,
 				FDE2C895D680A5E9AA991145 /* ManageBabiesView.swift in Sources */,
 				2914AEE3009183106BCB0E01 /* ManageCaregiversView.swift in Sources */,
+				2A1B0C9D8E7F6A5B4C3D2E1F /* AcceptInviteView.swift in Sources */,
 				A5AD6648A88518AC8682F272 /* NotificationSettingsView.swift in Sources */,
 				9549452C0CB55B4FD1827B6B /* PrivacyDataView.swift in Sources */,
 				F56A376AAC8E47166EF7FFB6 /* PrivacySettingsView.swift in Sources */,
@@ -3618,6 +3628,8 @@
 				7F03F850BDDE0BA9E788DEF5 /* NetworkMonitor.swift in Sources */,
 				54BB35AFAE7633BA04CB2517 /* NotificationPermissionManager.swift in Sources */,
 				20B90F7A26241EAB8B6B9D4F /* NotificationScheduler.swift in Sources */,
+				3E2D1C0B9A8F7E6D5C4B3A2F /* NotificationDelegate.swift in Sources */,
+				1BC0BADD0F1A4F3B9D2C445E /* InviteCodeService.swift in Sources */,
 				3B22BD10CAE21773C6A56D38 /* OnboardingService.swift in Sources */,
 				8D191A6AEFDB97E53F98C57E /* PDFExportService.swift in Sources */,
 				CD3F6064C3FBEB32571791E3 /* PersonalizedRecommendationsService.swift in Sources */,

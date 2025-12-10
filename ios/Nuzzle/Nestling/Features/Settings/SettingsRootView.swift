@@ -69,7 +69,7 @@ struct SettingsRootView: View {
                 }
                 
                 Section("Display") {
-                    Toggle("Night Mode", isOn: $themeManager.nightModeEnabled) {
+                    Toggle(isOn: $themeManager.nightModeEnabled) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Night Mode")
                                 .font(.body)

@@ -47,156 +47,136 @@ struct NuzzleApp: App {
     
     var body: some Scene {
         WindowGroup {
-            Group {
-                if isCheckingAuth {
-                    // Show loading screen while checking auth status
-                    ZStack {
-                        Color.background
-                            .ignoresSafeArea()
+            if isCheckingAuth {
+                ZStack {
+                    Color.background
+                        .ignoresSafeArea()
+                    VStack(spacing: .spacingMD) {
+                        ProgressView()
+                        Text("Loading...")
+                            .font(.caption)
+                            .foregroundColor(.mutedForeground)
+                    }
+                }
+                .task {
+                    let timeoutTask = Task {
+                        try? await Task.sleep(nanoseconds: 5_000_000_000)
+                        if isCheckingAuth {
+                            await MainActor.run { isCheckingAuth = false }
+                        }
+                    }
+                    
+                    await authViewModel.restoreSession()
+                    timeoutTask.cancel()
+                    
+                    await MainActor.run {
+                        isCheckingAuth = false
+                        if authViewModel.session != nil || authViewModel.hasSkippedAuth {
+                            isCheckingOnboarding = true
+                            checkOnboarding()
+                        }
+                    }
+                }
+                .onChange(of: authViewModel.hasSkippedAuth) { oldValue, newValue in
+                    if newValue && !oldValue {
+                        isCheckingOnboarding = true
+                        checkOnboarding()
+                    }
+                }
+            } else if authViewModel.session == nil && !authViewModel.hasSkippedAuth {
+                AuthView(viewModel: authViewModel) {
+                    isCheckingOnboarding = true
+                    checkOnboarding()
+                }
+                .onChange(of: authViewModel.hasSkippedAuth) { oldValue, newValue in
+                    if newValue && !oldValue {
+                        isCheckingOnboarding = true
+                        checkOnboarding()
+                    }
+                }
+            } else if isCheckingOnboarding {
+                Color.background
+                    .ignoresSafeArea()
+                    .overlay {
                         VStack(spacing: .spacingMD) {
                             ProgressView()
-                            Text("Loading...")
+                            Text("Checking setup...")
                                 .font(.caption)
                                 .foregroundColor(.mutedForeground)
                         }
                     }
                     .task {
-                        // Add timeout to prevent infinite loading
-                        let timeoutTask = Task {
-                            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
-                            if isCheckingAuth {
-                                print("⚠️ WARNING: Auth check timed out, proceeding to auth screen")
-                                await MainActor.run {
-                                    isCheckingAuth = false
-                                }
-                            }
-                        }
-                        
-                        // Check for existing session
-                        await authViewModel.restoreSession()
-                        timeoutTask.cancel()
-                        
-                        await MainActor.run {
-                            isCheckingAuth = false
-                            // If session exists or auth was skipped, check onboarding
-                            if authViewModel.session != nil || authViewModel.hasSkippedAuth {
-                                isCheckingOnboarding = true
-                                checkOnboarding()
-                            }
+                        try? await Task.sleep(nanoseconds: 5_000_000_000)
+                        if isCheckingOnboarding {
+                            isCheckingOnboarding = false
                         }
                     }
-                } else if authViewModel.session == nil && !authViewModel.hasSkippedAuth {
-                    // No session and hasn't skipped - show Auth
-                    AuthView(viewModel: authViewModel) {
-                        // On authenticated or skipped, check onboarding immediately
-                        isCheckingOnboarding = true
-                        checkOnboarding()
+            } else if showOnboarding {
+                OnboardingView(dataStore: environment.dataStore) {
+                    showOnboarding = false
+                    showTrialCelebration = true
+                    Task {
+                        await environment.refreshBabies()
+                        await environment.refreshSettings()
                     }
-                    .onChange(of: authViewModel.hasSkippedAuth) { oldValue, newValue in
-                        // React to hasSkippedAuth changes immediately
-                        if newValue && !oldValue {
-                            isCheckingOnboarding = true
-                            checkOnboarding()
+                }
+            } else {
+                ContentView()
+                    .environmentObject(environment)
+                    .environmentObject(ThemeManager.shared)
+                    .nightModeOverlay(themeManager: ThemeManager.shared)
+                    .appPrivacy(enabled: PrivacyManager.shared.isAppPrivacyEnabled)
+                    .sheet(isPresented: $showTrialCelebration) {
+                        VStack(spacing: .spacing2XL) {
+                            Spacer()
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.yellow)
+                            Text("Welcome! 🎉")
+                                .font(.system(size: 32, weight: .bold))
+                            Text("Your 7-day free trial has started")
+                                .font(.system(size: 18, weight: .regular))
+                                .foregroundColor(.mutedForeground)
+                            Spacer()
+                            Button("Start Tracking") {
+                                showTrialCelebration = false
+                            }
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.primary)
+                            .cornerRadius(.radiusXL)
+                            .padding(.horizontal, .spacingLG)
+                            .padding(.bottom, .spacing2XL)
                         }
+                        .background(Color.background)
                     }
-                } else if isCheckingOnboarding {
-                    // Show loading screen while checking onboarding status
-                    Color.background
-                        .ignoresSafeArea()
-                        .overlay {
-                            VStack(spacing: .spacingMD) {
-                                ProgressView()
-                                Text("Checking setup...")
-                                    .font(.caption)
-                                    .foregroundColor(.mutedForeground)
-                            }
-                        }
-                        .task {
-                            // Fallback timeout - if checkOnboarding doesn't complete in 5 seconds, proceed anyway
-                            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
-                            if isCheckingOnboarding {
-                                print("⚠️ WARNING: Onboarding check timed out, proceeding to app")
-                                isCheckingOnboarding = false
-                            }
-                        }
-                } else if showOnboarding {
-                    OnboardingView(dataStore: environment.dataStore) {
-                        showOnboarding = false
-                        // Show trial celebration after onboarding
-                        showTrialCelebration = true
-                        // Refresh babies and settings after onboarding completes
-                        Task {
-                            await environment.refreshBabies()
-                            await environment.refreshSettings()
-                        }
+                    .onAppear {
+                        SignpostLogger.endInterval("AppLaunch", signpostID: launchSignpostID, log: SignpostLogger.ui)
+                        processWidgetActions()
                     }
-                } else {
-                    ContentView()
-                        .environmentObject(environment)
-                        .environmentObject(ThemeManager.shared)
-                        .nightModeOverlay(themeManager: ThemeManager.shared)
-                        .appPrivacy(enabled: PrivacyManager.shared.isAppPrivacyEnabled)
-                        // Trial celebration - will work after clean build
-                        // Component exists in TrialBannerView.swift
-                        .sheet(isPresented: $showTrialCelebration) {
-                            // Inline celebration view to avoid compilation order issues
-                            VStack(spacing: .spacing2XL) {
-                                Spacer()
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 80))
-                                    .foregroundColor(.yellow)
-                                Text("Welcome! 🎉")
-                                    .font(.system(size: 32, weight: .bold))
-                                Text("Your 7-day free trial has started")
-                                    .font(.system(size: 18, weight: .regular))
-                                    .foregroundColor(.mutedForeground)
-                                Spacer()
-                                Button("Start Tracking") {
-                                    showTrialCelebration = false
-                                }
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(Color.primary)
-                                .cornerRadius(.radiusXL)
-                                .padding(.horizontal, .spacingLG)
-                                .padding(.bottom, .spacing2XL)
-                            }
-                            .background(Color.background)
-                        }
-                        .onAppear {
-                            // End launch signpost when ContentView appears
-                            SignpostLogger.endInterval("AppLaunch", signpostID: launchSignpostID, log: SignpostLogger.ui)
-                            
-                            // Process pending widget actions
-                            processWidgetActions()
-                        }
-                        .onOpenURL { url in
+                    .onOpenURL { url in
+                        let route = DeepLinkRouter.parse(url: url)
+                        environment.navigationCoordinator.handleDeepLink(route)
+                    }
+                    .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
+                        if let url = userActivity.webpageURL {
                             let route = DeepLinkRouter.parse(url: url)
                             environment.navigationCoordinator.handleDeepLink(route)
                         }
-                        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
-                            // Handle Universal Links
-                            if let url = userActivity.webpageURL {
-                                let route = DeepLinkRouter.parse(url: url)
-                                environment.navigationCoordinator.handleDeepLink(route)
+                    }
+                    .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
+                        handleSpotlightActivity(userActivity)
+                    }
+                    .task {
+                        if PrivacyManager.shared.isFaceIDEnabled {
+                            let authenticated = await AuthenticationManager.shared.authenticate()
+                            if !authenticated {
+                                // Handle authentication failure
                             }
                         }
-                        .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
-                            // Handle Spotlight search results
-                            handleSpotlightActivity(userActivity)
-                        }
-                        .task {
-                            // Check Face ID if enabled
-                            if PrivacyManager.shared.isFaceIDEnabled {
-                                let authenticated = await AuthenticationManager.shared.authenticate()
-                                if !authenticated {
-                                    // Handle authentication failure
-                                }
-                            }
-                        }
-                }
+                    }
             }
         }
     }
