@@ -5,7 +5,7 @@ import WidgetKit
 class WidgetDataManager {
     static let shared = WidgetDataManager()
 
-    private let appGroupId = "group.com.nestling.app.shared"
+    private let appGroupId = "group.com.nestling.app"
 
     private init() {}
 
