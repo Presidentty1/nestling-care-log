@@ -101,7 +101,7 @@ export const MESSAGING = {
   features: {
     predictions: {
       title: 'Smart Nap Predictions',
-      description: 'AI learns your baby's patterns to predict optimal nap times',
+      description: "AI learns your baby's patterns to predict optimal nap times",
     },
     insights: {
       title: 'Today's Insights',
