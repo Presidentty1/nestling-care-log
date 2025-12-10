@@ -38,3 +38,18 @@ ios/**/.swiftpm/
 ios/**/.swiftpm/checkouts/
 ios/**/.swiftpm/repositories/
 ios/**/.swiftpm/artifacts/
+
+# Test Coverage
+coverage/
+*.lcov
+
+# Xcode Logs
+Xcode Logs/
+
+# Xcode User Data
+*.xcuserstate
+xcuserdata/
+
+# Temporary files
+*.tmp
+.tmp/
