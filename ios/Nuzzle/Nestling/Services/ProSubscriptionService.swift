@@ -88,7 +88,6 @@ class ProSubscriptionService: ObservableObject {
     }
 
     // Product IDs (configure in App Store Connect)
-    // TODO: Update bundle identifier from com.nestling.* to com.nuzzle.* when ready
     // Note: Product IDs remain unchanged for StoreKit continuity with existing subscriptions
     private let monthlyProductID = "com.nestling.pro.monthly"
     private let yearlyProductID = "com.nestling.pro.yearly"
