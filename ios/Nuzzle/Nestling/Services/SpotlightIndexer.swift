@@ -8,7 +8,6 @@ class SpotlightIndexer {
     static let shared = SpotlightIndexer()
     
     private let maxIndexedEvents = 500
-    // TODO: Update Spotlight domain identifier from com.nestling.events to com.nuzzle.events when ready
     private let indexDomainIdentifier = "com.nestling.events"
     
     private init() {}

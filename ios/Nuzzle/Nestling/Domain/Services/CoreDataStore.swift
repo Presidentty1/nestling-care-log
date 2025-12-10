@@ -6,7 +6,6 @@ import os.signpost
 /// Provides persistent, offline-first data storage for the iOS app.
 
 class CoreDataStore: DataStore {
-    // TODO: Update logger subsystem from com.nestling.app to com.nuzzle.app when ready
     private let logger = Logger(subsystem: "com.nestling.app", category: "CoreDataStore")
     private lazy var signpostID = OSSignpostID(log: SignpostLogger.dataStore)
 

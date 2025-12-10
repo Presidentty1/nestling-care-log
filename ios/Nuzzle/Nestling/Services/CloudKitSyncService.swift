@@ -20,7 +20,6 @@ class CloudKitSyncService: ObservableObject {
     private let daysBackToSync = 30
     
     private init() {
-        // TODO: Update container identifier from com.nestling to com.nuzzle when ready
         let containerID = "iCloud.com.nestling.app"
         self.container = CKContainer(identifier: containerID)
         self.privateDatabase = container.privateCloudDatabase
