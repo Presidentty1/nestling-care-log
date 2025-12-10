@@ -26,6 +26,7 @@ npm run ios:logs:save
 ```
 
 **Options:**
+
 - `-b, --bundle-id ID` - Filter logs by bundle identifier (default: `com.nuzzle.Nuzzle`)
 - `-o, --output FILE` - Save logs to a file
 - `-t, --type TYPE` - Device type: `auto`, `simulator`, `device` (default: `auto`)
@@ -36,31 +37,37 @@ npm run ios:logs:save
 ### Examples
 
 **Stream all logs from running simulator:**
+
 ```bash
 npm run ios:logs
 ```
 
 **Filter logs by bundle ID:**
+
 ```bash
 ./scripts/xcode-logs.sh -b com.nuzzle.Nuzzle
 ```
 
 **Stream only error logs:**
+
 ```bash
 ./scripts/xcode-logs.sh -l error
 ```
 
 **Filter for specific text pattern:**
+
 ```bash
 ./scripts/xcode-logs.sh -f "NetworkError"
 ```
 
 **Save filtered logs to file:**
+
 ```bash
 ./scripts/xcode-logs.sh -l error -f "Error" -o error-logs.txt
 ```
 
 **Stream from simulator only:**
+
 ```bash
 ./scripts/xcode-logs.sh -t simulator
 ```
@@ -68,12 +75,14 @@ npm run ios:logs
 ## How It Works
 
 ### Simulator Logs
+
 - Automatically detects running iOS simulators
 - Uses `xcrun simctl spawn booted log stream` to stream logs
 - Provides real-time log output with color coding
 - Supports filtering by process, log level, and text patterns
 
 ### Device Logs
+
 - Detects connected physical devices
 - **Note:** Device log streaming has limitations
 - **Recommended:** Use Xcode Console for best results with physical devices
@@ -81,18 +90,21 @@ npm run ios:logs
 ## Alternative Methods
 
 ### Xcode Console
+
 1. Open your project in Xcode
 2. Run the app on simulator/device
 3. View logs in the bottom console pane
 4. Filter by process or search text
 
 ### Xcode Devices Window
+
 1. Xcode → Window → Devices and Simulators
 2. Select your device
 3. Click "Open Console" or "View Device Logs"
 4. Filter by app bundle identifier
 
 ### Console.app (macOS)
+
 1. Open Console.app (Applications → Utilities)
 2. Select your device from the sidebar
 3. Filter by process name or search text
@@ -101,25 +113,29 @@ npm run ios:logs
 ## Tips
 
 1. **Start simulator first**: Boot a simulator before running the log script
+
    ```bash
    # Boot a specific simulator
    xcrun simctl boot <UDID>
-   
+
    # Or open Simulator app and boot from there
    open -a Simulator
    ```
 
 2. **Filter for your app**: Use bundle ID to see only your app's logs
+
    ```bash
    ./scripts/xcode-logs.sh -b com.nuzzle.Nuzzle
    ```
 
 3. **Save important logs**: Redirect to file for later analysis
+
    ```bash
    ./scripts/xcode-logs.sh -o debug-session-$(date +%Y%m%d-%H%M%S).txt
    ```
 
 4. **Combine filters**: Use multiple filters for precise log viewing
+
    ```bash
    ./scripts/xcode-logs.sh -l error -f "Crash" -b com.nuzzle.Nuzzle
    ```
@@ -129,28 +145,33 @@ npm run ios:logs
 ## Troubleshooting
 
 ### "No running simulator found"
+
 - Boot a simulator first: `open -a Simulator` or boot from Xcode
 - Or specify a simulator to boot:
+
   ```bash
   # List available simulators
   xcrun simctl list devices available
-  
+
   # Boot a specific simulator
   xcrun simctl boot <UDID>
   ```
 
 ### "xcrun not found"
+
 - Install Xcode Command Line Tools:
   ```bash
   xcode-select --install
   ```
 
 ### Logs not showing
+
 - Ensure the app is running on the simulator/device
 - Check that the bundle ID is correct
 - Try removing filters to see all logs first
 
 ### Device logs not working
+
 - Device log streaming requires proper Xcode setup
 - **Recommended:** Use Xcode Console for physical devices
 - Ensure device is trusted and connected via USB
@@ -158,6 +179,7 @@ npm run ios:logs
 ## Integration with Development Workflow
 
 ### During Development
+
 ```bash
 # Terminal 1: Start dev server
 npm run dev
@@ -169,6 +191,7 @@ npm run ios:logs
 ```
 
 ### Debugging Session
+
 ```bash
 # Stream only errors and save to file
 ./scripts/xcode-logs.sh -l error -o errors.txt
@@ -178,6 +201,7 @@ npm run ios:logs
 ```
 
 ### CI/CD
+
 ```bash
 # Save all logs during test run
 npm run ios:logs:save &
@@ -195,5 +219,4 @@ kill $LOG_PID
 - [DEVELOPMENT.md](../DEVELOPMENT.md) - General development setup
 - [ios/README.md](../ios/README.md) - iOS-specific documentation
 - [Xcode Documentation](https://developer.apple.com/documentation/xcode) - Official Xcode docs
-
 

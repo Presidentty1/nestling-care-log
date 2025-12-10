@@ -27,11 +27,7 @@ class GoalsService {
   }
 
   async createGoal(data: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
-    const { data: result, error } = await supabase
-      .from('goals')
-      .insert(data)
-      .select()
-      .single();
+    const { data: result, error } = await supabase.from('goals').insert(data).select().single();
 
     if (error) throw error;
     return result;
@@ -50,15 +46,11 @@ class GoalsService {
   }
 
   async deleteGoal(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('goals')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('goals').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const goalsService = new GoalsService();
-
 

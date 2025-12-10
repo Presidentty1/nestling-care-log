@@ -7,6 +7,7 @@ All the code changes were successfully saved, but you need to rebuild the app to
 ## Quick Rebuild Steps
 
 ### Option 1: Full Clean Rebuild (Recommended)
+
 ```bash
 # 1. Clean and rebuild the web assets
 npm run build
@@ -19,11 +20,13 @@ npx cap open ios
 ```
 
 Then in Xcode:
+
 1. Product → Clean Build Folder (Shift + Cmd + K)
 2. Product → Build (Cmd + B)
 3. Run on simulator/device
 
 ### Option 2: Quick Rebuild
+
 ```bash
 # Just rebuild and sync
 npm run build && npx cap sync ios && npx cap open ios
@@ -32,6 +35,7 @@ npm run build && npx cap sync ios && npx cap open ios
 ## What Changed (You'll See After Rebuild)
 
 ### Onboarding Screen
+
 - ✅ Input fields are **taller** (h-16 = 64pt instead of 56pt)
 - ✅ Labels are **bolder** (font-semibold)
 - ✅ Inputs have **2px borders** (more visible)
@@ -41,11 +45,13 @@ npm run build && npx cap sync ios && npx cap open ios
 - ✅ Unit selection cards are bigger with better touch targets
 
 ### History Screen
+
 - ✅ Day selector buttons are **larger** (68x72pt)
 - ✅ Better spacing between days
 - ✅ Improved visual states
 
 ### General
+
 - ✅ No horizontal scrolling
 - ✅ Safe area insets for notch/home indicator
 - ✅ Better text contrast in dark mode
@@ -55,6 +61,7 @@ npm run build && npx cap sync ios && npx cap open ios
 If you still don't see changes after rebuild:
 
 ### Clear All Caches
+
 ```bash
 # Clear npm cache
 rm -rf node_modules
@@ -70,6 +77,7 @@ rm -rf ios/App/DerivedData
 ```
 
 ### Then rebuild from scratch
+
 ```bash
 npm run build
 npx cap sync ios
@@ -77,6 +85,7 @@ npx cap open ios
 ```
 
 In Xcode:
+
 - Product → Clean Build Folder
 - Delete app from simulator/device
 - Rebuild and run
@@ -108,4 +117,3 @@ All should show results if changes are saved.
 ---
 
 **Note**: The code changes ARE there, you just need to rebuild the iOS app to see them!
-

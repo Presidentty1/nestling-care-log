@@ -1,5 +1,7 @@
 import Foundation
 import CloudKit
+import Combine
+import OSLog
 
 /// Service for multi-caregiver sync using CloudKit
 /// Only syncs when user explicitly enables family sharing
@@ -124,8 +126,8 @@ class CaregiverSyncService: ObservableObject {
         
         record["name"] = baby.name as CKRecordValue
         record["dateOfBirth"] = baby.dateOfBirth as CKRecordValue
-        record["sex"] = baby.sex as CKRecordValue?
-        record["primaryFeedingStyle"] = baby.primaryFeedingStyle as CKRecordValue?
+        record["sex"] = baby.sex?.rawValue as CKRecordValue?
+        record["primaryFeedingStyle"] = baby.primaryFeedingStyle?.rawValue as CKRecordValue?
         record["timezone"] = baby.timezone as CKRecordValue
         record["createdAt"] = baby.createdAt as CKRecordValue
         record["updatedAt"] = baby.updatedAt as CKRecordValue
@@ -200,7 +202,7 @@ class CaregiverSyncService: ObservableObject {
         let query = CKQuery(recordType: "Invite", predicate: NSPredicate(format: "inviteCode == %@", code))
         let (results, _) = try await sharedDatabase.records(matching: query)
         
-        guard let (recordID, result) = results.first(where: { _ in true }) else {
+        guard let (_, result) = results.first(where: { _ in true }) else {
             throw CaregiverSyncError.inviteNotFound
         }
         
@@ -235,7 +237,7 @@ class CaregiverSyncService: ObservableObject {
         }
         
         if !recordIDsToDelete.isEmpty {
-            try await sharedDatabase.modifyRecords(saving: [], deleting: recordIDsToDelete)
+            _ = try await sharedDatabase.modifyRecords(saving: [], deleting: recordIDsToDelete)
         }
         
         // Track analytics
@@ -287,3 +289,4 @@ enum CaregiverSyncError: LocalizedError {
         }
     }
 }
+

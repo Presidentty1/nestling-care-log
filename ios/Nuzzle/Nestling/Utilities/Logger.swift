@@ -1,5 +1,6 @@
 import Foundation
 import os.log
+import OSLog
 
 /// Centralized logging utility using OSLog
 /// Replaces print statements with proper logging that integrates with Console.app and crash reporting
@@ -88,5 +89,19 @@ class AppLogger {
         #if !DEBUG
         CrashReporter.shared.reportIssue(message, level: .fatal, file: file, function: function, line: line)
         #endif
+    }
+}
+
+// MARK: - Logger Extension for OSLog.Logger
+extension Logger {
+    private static var subsystem = Bundle.main.bundleIdentifier ?? "com.nestling.Nestling"
+    private static let dataLogger = Logger(subsystem: subsystem, category: "Data")
+    
+    static func dataError(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
+        dataLogger.error("\(message) [\((file as NSString).lastPathComponent):\(line)]")
+    }
+    
+    static func dataInfo(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
+        dataLogger.info("\(message) [\((file as NSString).lastPathComponent):\(line)]")
     }
 }

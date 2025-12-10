@@ -98,9 +98,7 @@ class OfflineQueue {
     for (let i = 0; i < operations.length; i += batchSize) {
       const batch = operations.slice(i, i + batchSize);
 
-      const results = await Promise.allSettled(
-        batch.map(op => this.processOperation(op))
-      );
+      const results = await Promise.allSettled(batch.map(op => this.processOperation(op)));
 
       results.forEach((result, index) => {
         const op = batch[index];
@@ -156,14 +154,14 @@ class OfflineQueue {
   private async handleCreateOperation(table: string, data: any, op: QueuedOperation) {
     // For create operations, check if item already exists (might have been created elsewhere)
     if (table === 'events' && data.id) {
-      const { data: existing } = await supabase
-        .from(table)
-        .select('id')
-        .eq('id', data.id)
-        .single();
+      const { data: existing } = await supabase.from(table).select('id').eq('id', data.id).single();
 
       if (existing) {
-        logger.warn('Create operation failed - item already exists, skipping', { id: data.id }, 'OfflineQueue');
+        logger.warn(
+          'Create operation failed - item already exists, skipping',
+          { id: data.id },
+          'OfflineQueue'
+        );
         return; // Skip, item already exists
       }
     }
@@ -171,14 +169,20 @@ class OfflineQueue {
     await supabase.from(table).insert(data);
   }
 
-  private async handleUpdateOperation(table: string, data: any, op: QueuedOperation, strategy: string) {
+  private async handleUpdateOperation(
+    table: string,
+    data: any,
+    op: QueuedOperation,
+    strategy: string
+  ) {
     const { data: existing, error: fetchError } = await supabase
       .from(table)
       .select('*')
       .eq('id', data.id)
       .single();
 
-    if (fetchError?.code === 'PGRST116') { // Not found
+    if (fetchError?.code === 'PGRST116') {
+      // Not found
       throw new Error('Item not found for update operation');
     }
 
@@ -187,7 +191,7 @@ class OfflineQueue {
         operation: op,
         serverData: existing,
         conflictReason: 'concurrent_edit',
-        suggestedResolution: 'manual'
+        suggestedResolution: 'manual',
       };
 
       this.conflicts.push(conflictInfo);
@@ -198,8 +202,8 @@ class OfflineQueue {
         duration: 5000,
         action: {
           label: 'Resolve',
-          onClick: () => this.showConflictResolution(conflictInfo)
-        }
+          onClick: () => this.showConflictResolution(conflictInfo),
+        },
       });
 
       throw new Error('Conflict detected - requires manual resolution');
@@ -217,8 +221,13 @@ class OfflineQueue {
   private async handleDeleteOperation(table: string, data: any, op: QueuedOperation) {
     const { error } = await supabase.from(table).delete().eq('id', data.id);
 
-    if (error?.code === 'PGRST116') { // Not found
-      logger.warn('Delete operation failed - item not found, skipping', { id: data.id }, 'OfflineQueue');
+    if (error?.code === 'PGRST116') {
+      // Not found
+      logger.warn(
+        'Delete operation failed - item not found, skipping',
+        { id: data.id },
+        'OfflineQueue'
+      );
       return; // Item already deleted, consider it successful
     }
 
@@ -226,9 +235,11 @@ class OfflineQueue {
   }
 
   private isConflictError(error: any): boolean {
-    return error?.message?.includes('conflict') ||
-           error?.code === '23505' || // Unique constraint violation
-           error?.code === 'PGRST116'; // Not found (for updates)
+    return (
+      error?.message?.includes('conflict') ||
+      error?.code === '23505' || // Unique constraint violation
+      error?.code === 'PGRST116'
+    ); // Not found (for updates)
   }
 
   private hasConflict(serverData: any, localData: any, op: QueuedOperation): boolean {
@@ -246,9 +257,9 @@ class OfflineQueue {
       const originalValue = op.originalData?.[field];
 
       // If field was changed locally and differs from server (and we have original data)
-      return originalValue !== undefined &&
-             localValue !== originalValue &&
-             serverValue !== localValue;
+      return (
+        originalValue !== undefined && localValue !== originalValue && serverValue !== localValue
+      );
     });
   }
 
@@ -266,18 +277,26 @@ class OfflineQueue {
   }
 
   private async handleConflict(op: QueuedOperation, error: any) {
-    logger.warn('Conflict detected for operation', {
-      operationId: op.id,
-      type: op.type,
-      table: op.table,
-      error: error.message
-    }, 'OfflineQueue');
+    logger.warn(
+      'Conflict detected for operation',
+      {
+        operationId: op.id,
+        type: op.type,
+        table: op.table,
+        error: error.message,
+      },
+      'OfflineQueue'
+    );
   }
 
   private showConflictResolution(conflict: ConflictInfo) {
     // This would show a modal or navigate to a conflict resolution screen
     // For now, we'll just log it
-    logger.info('Conflict resolution requested', { operationId: conflict.operation.id }, 'OfflineQueue');
+    logger.info(
+      'Conflict resolution requested',
+      { operationId: conflict.operation.id },
+      'OfflineQueue'
+    );
   }
 
   private removeFromQueue(id: string) {
@@ -297,7 +316,9 @@ class OfflineQueue {
   }
 
   resolveConflict(conflictResolution: ConflictResolution) {
-    const conflictIndex = this.conflicts.findIndex(c => c.operation.id === conflictResolution.operationId);
+    const conflictIndex = this.conflicts.findIndex(
+      c => c.operation.id === conflictResolution.operationId
+    );
     if (conflictIndex === -1) return false;
 
     const conflict = this.conflicts[conflictIndex];
@@ -307,24 +328,30 @@ class OfflineQueue {
         // Re-queue the operation with overwrite strategy
         this.enqueue({
           ...conflict.operation,
-          conflictStrategy: 'overwrite'
+          conflictStrategy: 'overwrite',
         });
         break;
 
       case 'merge': {
         // Merge the data and re-queue
-        const mergedData = conflictResolution.resolvedData || this.mergeData(conflict.serverData, conflict.operation.data);
+        const mergedData =
+          conflictResolution.resolvedData ||
+          this.mergeData(conflict.serverData, conflict.operation.data);
         this.enqueue({
           ...conflict.operation,
           data: mergedData,
-          conflictStrategy: 'merge'
+          conflictStrategy: 'merge',
         });
         break;
       }
 
       case 'skip':
         // Just remove the conflict without re-queuing
-        logger.info('Conflict resolution: skipping operation', { operationId: conflict.operation.id }, 'OfflineQueue');
+        logger.info(
+          'Conflict resolution: skipping operation',
+          { operationId: conflict.operation.id },
+          'OfflineQueue'
+        );
         break;
 
       case 'manual':

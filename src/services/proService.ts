@@ -20,7 +20,9 @@ class ProService {
    */
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { isPro: false, status: null, currentPeriodEnd: null };
       }
@@ -54,7 +56,9 @@ class ProService {
   /**
    * Check if a feature requires Pro and if user has access
    */
-  async canAccessFeature(feature: 'caregiver_invites' | 'ai_features' | 'csv_export' | 'advanced_analytics'): Promise<boolean> {
+  async canAccessFeature(
+    feature: 'caregiver_invites' | 'ai_features' | 'csv_export' | 'advanced_analytics'
+  ): Promise<boolean> {
     // For now, all Pro features require subscription
     // In the future, we might have different tiers
     return await this.isPro();
@@ -62,5 +66,3 @@ class ProService {
 }
 
 export const proService = new ProService();
-
-

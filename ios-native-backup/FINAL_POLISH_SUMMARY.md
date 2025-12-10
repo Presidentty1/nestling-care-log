@@ -3,6 +3,7 @@
 ## Completed Phases ✅
 
 ### Phase A: Micro-interaction & Motion Polish ✅
+
 - Enhanced `Haptics` helper with Reduce Motion support
 - Created `MotionModifiers` for transitions
 - Added sheet detents to all forms
@@ -10,6 +11,7 @@
 - Updated `DESIGN_SYSTEM.md`
 
 ### Phase B: Accessibility Deep Pass ✅
+
 - Created `AccessibilityAudit.md`
 - Enhanced `TimelineRow` with `.accessibilityActions` and hints
 - Added VoiceOver announcements for toasts
@@ -18,18 +20,21 @@
 - Created `AccessibilityHelpers` for high contrast
 
 ### Phase C: Undo for Deletions + Safe Edits ✅
+
 - Created `UndoManager` service (7-second window)
 - Enhanced `ToastView` with undo button
 - Integrated undo in Home and History
 - Added `isSaving` flag to prevent double-submission
 
 ### Phase D: State Restoration & Resilience ✅
+
 - Active sleep restoration on app launch
 - Interruption handling for audio recording
 - Scene restoration support (Universal Links)
 - Created `ResilienceTests.swift`
 
 ### Phase E: Time/Locale & DST Tests ✅
+
 - Enhanced `DateUtils` with DST/timezone handling
 - Comprehensive DST tests (forward/backward transitions)
 - Timezone change tests
@@ -37,6 +42,7 @@
 - Updated `README.md` with "Time Edge Cases" section
 
 ### Phase F: Localization QA & Pseudo-Locale ✅
+
 - Created `psuedo.lproj/Localizable.strings` with bracketed + expanded strings
 - Added RTL preview toggle in Debug section
 - Pseudo-localization ready for UI testing
@@ -44,6 +50,7 @@
 ## Remaining Phases (Partially Implemented)
 
 ### Phase G-Q: To be completed
+
 - **Phase G**: Analytics taxonomy + coverage
 - **Phase H**: QA fixtures & scenario seeding
 - **Phase I**: Copywriting pass & microcopy
@@ -59,6 +66,7 @@
 ## Key Files Created/Modified
 
 ### New Files
+
 - `ios/Sources/Design/Components/MotionModifiers.swift`
 - `ios/Sources/Design/Components/AccessibilityHelpers.swift`
 - `ios/Sources/Services/UndoManager.swift`
@@ -70,6 +78,7 @@
 - `ios/psuedo.lproj/Localizable.strings`
 
 ### Modified Files
+
 - `ios/Sources/Design/Components/Haptics.swift`
 - `ios/Sources/Design/Components/ToastView.swift`
 - `ios/Sources/Design/Components/TimelineRow.swift`
@@ -90,8 +99,7 @@
 ## Next Steps
 
 The core UX improvements (motion, accessibility, undo, resilience, time handling) are complete. Remaining phases focus on:
+
 - Testing infrastructure (G, H, L, M, N)
 - Content and documentation (I, P, Q)
 - Feature enhancements (J, K, O)
-
-

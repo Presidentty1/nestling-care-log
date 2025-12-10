@@ -33,7 +33,10 @@ export default function History() {
   const [babyBirthDate, setBabyBirthDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [showDoctorShareModal, setShowDoctorShareModal] = useState(false);
-  const [editModalState, setEditModalState] = useState<{ open: boolean; event: EventRecord | null }>({
+  const [editModalState, setEditModalState] = useState<{
+    open: boolean;
+    event: EventRecord | null;
+  }>({
     open: false,
     event: null,
   });
@@ -51,20 +54,20 @@ export default function History() {
 
   const loadDayData = useCallback(async () => {
     if (!activeBabyId) return;
-    
+
     setLoading(true);
     try {
       const start = startOfDay(selectedDate);
       const end = endOfDay(selectedDate);
-      
+
       const dayEvents = await eventsService.getEventsByRange(
         activeBabyId,
         start.toISOString(),
         end.toISOString()
       );
-      
+
       setEvents(dayEvents);
-      
+
       const totals = eventsService.calculateSummary(dayEvents);
       setSummary(totals);
     } catch (error) {
@@ -131,7 +134,10 @@ export default function History() {
           onClick: async () => {
             try {
               await undoManager.undo();
-              analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+              analyticsService.trackEventDeleted(
+                eventId,
+                eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time'
+              );
               track('undo_action', { action_type: 'event_deleted' });
             } catch (error) {
               if (error instanceof Error && error.message.includes('expired')) {
@@ -147,7 +153,10 @@ export default function History() {
       });
 
       // Track analytics
-      analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+      analyticsService.trackEventDeleted(
+        eventId,
+        eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time'
+      );
       track('event_deleted', {
         event_type: eventToDelete.type,
         undo_available: true,
@@ -170,13 +179,13 @@ export default function History() {
 
   if (!activeBabyId) {
     return (
-      <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
-        <div className="max-w-2xl mx-auto p-4 w-full">
+      <div className='min-h-screen bg-background pb-20 overflow-x-hidden'>
+        <div className='max-w-2xl mx-auto p-4 w-full'>
           <EmptyState
             icon={CalendarDays}
-            title="No Baby Selected"
-            description="Select or add a baby to see their history"
-            action={{ label: 'Go to Home', onClick: () => window.location.href = '/home' }}
+            title='No Baby Selected'
+            description='Select or add a baby to see their history'
+            action={{ label: 'Go to Home', onClick: () => (window.location.href = '/home') }}
           />
         </div>
         <MobileNav />
@@ -185,30 +194,23 @@ export default function History() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
-      <div className="max-w-2xl mx-auto p-4 space-y-4 w-full">
+    <div className='min-h-screen bg-background pb-20 overflow-x-hidden'>
+      <div className='max-w-2xl mx-auto p-4 space-y-4 w-full'>
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="font-display text-left">History</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDoctorShareModal(true)}
-          >
-            <Share className="h-4 w-4 mr-2" />
+        <div className='flex items-center justify-between'>
+          <h1 className='font-display text-left'>History</h1>
+          <Button variant='outline' size='sm' onClick={() => setShowDoctorShareModal(true)}>
+            <Share className='h-4 w-4 mr-2' />
             Share with Doctor
           </Button>
         </div>
 
         {/* Day Strip */}
-        <DayStrip 
-          selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
-        />
+        <DayStrip selectedDate={selectedDate} onDateSelect={setSelectedDate} />
 
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center py-8">
+          <div className='flex justify-center py-8'>
             <LoadingSpinner />
           </div>
         )}
@@ -217,7 +219,7 @@ export default function History() {
         {!loading && events.length === 0 && (
           <EmptyState
             icon={CalendarDays}
-            title="Nothing logged this day"
+            title='Nothing logged this day'
             description="Babies have calm days too! 🌙 It's perfectly normal to have quiet stretches."
           />
         )}
@@ -231,14 +233,10 @@ export default function History() {
         {!loading && events.length > 0 && (
           <Card>
             <CardHeader>
-              <h2 className="text-title">Timeline</h2>
+              <h2 className='text-title'>Timeline</h2>
             </CardHeader>
             <CardContent>
-              <TimelineList
-                events={events}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <TimelineList events={events} onEdit={handleEdit} onDelete={handleDelete} />
             </CardContent>
           </Card>
         )}

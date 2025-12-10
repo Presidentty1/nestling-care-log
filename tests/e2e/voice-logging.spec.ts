@@ -7,7 +7,7 @@ test.describe('Voice Logging', () => {
       localStorage.clear();
       indexedDB.deleteDatabase('nestling');
     });
-    
+
     await page.goto('/onboarding-simple');
     await page.fill('input[name="name"]', 'Test Baby');
     await page.fill('input[name="date_of_birth"]', '2024-01-01');
@@ -17,11 +17,11 @@ test.describe('Voice Logging', () => {
 
   test('should show voice menu button on home', async ({ page }) => {
     await page.goto('/home');
-    
+
     // Look for voice button or FAB menu
-    const hasVoiceButton = await page.locator('button[aria-label*="voice"]').count() > 0;
-    const hasFAB = await page.locator('[data-testid="fab-menu"]').count() > 0;
-    
+    const hasVoiceButton = (await page.locator('button[aria-label*="voice"]').count()) > 0;
+    const hasFAB = (await page.locator('[data-testid="fab-menu"]').count()) > 0;
+
     expect(hasVoiceButton || hasFAB).toBeTruthy();
   });
 

@@ -7,25 +7,25 @@ export const colors = {
   // Primary brand
   primary: 'hsl(168, 46%, 34%)',
   primarySoft: 'hsl(168, 46%, 94%)',
-  
+
   // Event types
   eventFeed: 'hsl(199, 89%, 48%)',
   eventSleep: 'hsl(262, 52%, 47%)',
   eventDiaper: 'hsl(43, 96%, 56%)',
   eventGrowth: 'hsl(142, 71%, 45%)',
   eventHealth: 'hsl(0, 84%, 60%)',
-  
+
   // UI states
   success: 'hsl(142, 71%, 45%)',
   warning: 'hsl(43, 96%, 56%)',
   danger: 'hsl(0, 84%, 60%)',
-  
+
   // Neutrals
   background: 'hsl(0, 0%, 100%)',
   foreground: 'hsl(240, 10%, 3.9%)',
   muted: 'hsl(240, 4.8%, 95.9%)',
   mutedForeground: 'hsl(240, 3.8%, 46.1%)',
-  
+
   // Borders and accents
   border: 'hsl(240, 5.9%, 90%)',
   accent: 'hsl(168, 46%, 94%)',
@@ -43,9 +43,9 @@ export const spacing = {
 
 export const borderRadius = {
   sm: '0.375rem', // 6px
-  md: '0.5rem',   // 8px
-  lg: '0.75rem',  // 12px
-  xl: '1rem',     // 16px
+  md: '0.5rem', // 8px
+  lg: '0.75rem', // 12px
+  xl: '1rem', // 16px
   pill: '9999px',
 } as const;
 
@@ -77,7 +77,7 @@ export const transitions = {
  */
 export const ios = {
   minTouchTarget: '44px', // Apple Human Interface Guidelines
-  safeAreaTop: '44px',    // Standard iPhone notch
+  safeAreaTop: '44px', // Standard iPhone notch
   safeAreaBottom: '34px', // Home indicator area
-  tabBarHeight: '49px',   // Standard iOS tab bar
+  tabBarHeight: '49px', // Standard iOS tab bar
 } as const;

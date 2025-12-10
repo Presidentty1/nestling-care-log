@@ -1,6 +1,6 @@
 /**
  * Centralized unit conversion service
- * 
+ *
  * CRITICAL RULES:
  * - Database ALWAYS stores metric (ml, g, cm)
  * - Convert for display based on user preference
@@ -14,7 +14,7 @@ const CM_PER_INCH = 2.54;
 
 export const unitConversion = {
   // ============= Volume Conversions =============
-  
+
   mlToOz: (ml: number): number => {
     return Math.round((ml / ML_PER_OZ) * 10) / 10;
   },
@@ -24,7 +24,7 @@ export const unitConversion = {
   },
 
   // ============= Weight Conversions =============
-  
+
   gToLb: (g: number): number => {
     return Math.round((g / G_PER_LB) * 100) / 100;
   },
@@ -42,7 +42,7 @@ export const unitConversion = {
   },
 
   // ============= Length Conversions =============
-  
+
   cmToIn: (cm: number): number => {
     return Math.round((cm / CM_PER_INCH) * 10) / 10;
   },
@@ -52,7 +52,7 @@ export const unitConversion = {
   },
 
   // ============= Display Formatters =============
-  
+
   formatVolume: (amount: number, unit: 'ml' | 'oz'): string => {
     return `${amount}${unit}`;
   },
@@ -67,7 +67,7 @@ export const unitConversion = {
   },
 
   // ============= Storage Converters (to metric) =============
-  
+
   toStorageVolume: (amount: number, unit: 'ml' | 'oz'): number => {
     return unit === 'oz' ? unitConversion.ozToMl(amount) : amount;
   },
@@ -83,7 +83,7 @@ export const unitConversion = {
   },
 
   // ============= Display Converters (from metric) =============
-  
+
   fromStorageVolume: (ml: number, targetUnit: 'ml' | 'oz'): number => {
     return targetUnit === 'oz' ? unitConversion.mlToOz(ml) : ml;
   },

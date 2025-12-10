@@ -14,7 +14,7 @@ interface ReferralData {
 class ReferralService {
   async getReferralCode(userId: string): Promise<string> {
     let referralData = await referralStore.getItem<ReferralData>(`referral_${userId}`);
-    
+
     if (!referralData) {
       // Generate new code
       const code = this.generateCode();
@@ -25,7 +25,7 @@ class ReferralService {
       };
       await referralStore.setItem(`referral_${userId}`, referralData);
     }
-    
+
     return referralData.code;
   }
 
@@ -59,10 +59,10 @@ class ReferralService {
   }
 
   generateShareMessage(code: string, babyName?: string): string {
-    const message = babyName 
+    const message = babyName
       ? `I've been tracking ${babyName}'s sleep and feeds with Nestling - it's been so helpful! Join me: `
       : `I've been using Nestling to track my baby - check it out! `;
-    
+
     const url = `${window.location.origin}/invite/${code}`;
     return `${message}${url}`;
   }

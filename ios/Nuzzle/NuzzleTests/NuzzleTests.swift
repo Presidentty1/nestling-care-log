@@ -8,7 +8,7 @@
 import Testing
 @testable import Nuzzle
 
-struct NuzzleTests {
+struct LegacySampleNuzzleTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

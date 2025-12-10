@@ -15,12 +15,12 @@ export function SwipeableTimelineRow({ event, onEdit, onDelete }: SwipeableTimel
   const [dragX, setDragX] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const SWIPE_THRESHOLD = -80; // 80px swipe left to reveal delete
-  
+
   const bind = useDrag(
     ({ movement: [mx], last, velocity: [vx] }) => {
       // Only allow swipe left (negative x)
       const finalX = mx < 0 ? Math.max(mx, SWIPE_THRESHOLD * 1.5) : 0;
-      
+
       if (last) {
         // Swipe completed
         if (mx < SWIPE_THRESHOLD || (vx < -0.5 && mx < -20)) {
@@ -42,39 +42,39 @@ export function SwipeableTimelineRow({ event, onEdit, onDelete }: SwipeableTimel
       rubberband: true,
     }
   );
-  
+
   const handleDelete = () => {
     setIsDeleting(true);
     hapticFeedback.medium();
-    
+
     // Animate out then delete
     setDragX(-400);
     setTimeout(() => onDelete(), 300);
   };
-  
+
   return (
-    <div className="relative overflow-hidden">
+    <div className='relative overflow-hidden'>
       {/* Delete button background */}
-      <div className="absolute inset-y-0 right-0 flex items-center justify-end pr-4 bg-destructive">
+      <div className='absolute inset-y-0 right-0 flex items-center justify-end pr-4 bg-destructive'>
         <button
           onClick={handleDelete}
-          className="flex items-center gap-2 px-4 py-2 text-destructive-foreground font-medium"
+          className='flex items-center gap-2 px-4 py-2 text-destructive-foreground font-medium'
           disabled={isDeleting}
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className='h-5 w-5' />
           <span>Delete</span>
         </button>
       </div>
-      
+
       {/* Swipeable timeline row */}
       <div
         {...bind()}
-        style={{ 
+        style={{
           transform: `translateX(${dragX}px)`,
           transition: isDeleting ? 'transform 300ms ease-out' : 'none',
           touchAction: 'pan-y',
         }}
-        className="relative bg-background"
+        className='relative bg-background'
       >
         <TimelineRow event={event} onEdit={onEdit} onDelete={onDelete} />
       </div>

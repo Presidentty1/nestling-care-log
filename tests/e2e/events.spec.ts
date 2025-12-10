@@ -8,7 +8,7 @@ test.describe('Event Logging', () => {
       localStorage.clear();
       indexedDB.deleteDatabase('nestling');
     });
-    
+
     await page.goto('/onboarding-simple');
     await page.fill('input[name="name"]', 'Test Baby');
     await page.fill('input[name="date_of_birth"]', '2024-01-01');

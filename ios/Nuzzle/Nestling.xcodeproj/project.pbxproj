@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62EC8A7597F7E79AFDC7E2B3 /* CaregiverSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */; };
+		D12B7512CDED4D9E542F04CC /* TrialBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */; };
 		00DD022BB745243508B30128 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7AEE12597766D7CA40E492C /* Haptics.swift */; };
 		02A5F8302AABE4DF18A6E28A /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0206CEB3041C28184B563A98 /* CrashReportingService.swift */; };
 		02AD1970D365F5945B2E10BC /* TimelineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F82D9077D12DA207488E /* TimelineRow.swift */; };
@@ -37,10 +39,8 @@
 		193635778B98B33354F88CD2 /* DateUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECBF272B4710C3D86B453533 /* DateUtils.swift */; };
 		1BAF5638B31ADA1DBA067A04 /* OnboardingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E18C9BBBC59F3193697A320 /* OnboardingContainer.swift */; };
 		1BBEEEA8FD3E84FEEF918180 /* WidgetActionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3934A69DB6D4538A628C7173 /* WidgetActionService.swift */; };
-		1BC0BADD0F1A4F3B9D2C445E /* InviteCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */; };
 		1BC04731DF6A0FD911C6C9EB /* FilterChipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1D94FC8C3C3C34584C0A63 /* FilterChipsView.swift */; };
-		3E2D1C0B9A8F7E6D5C4B3A2F /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */; };
-		2A1B0C9D8E7F6A5B4C3D2E1F /* AcceptInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */; };
+		1BC0BADD0F1A4F3B9D2C445E /* InviteCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */; };
 		1E1D7DD4A802B5FE083C64B9 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F92EBC80E731548A57B991 /* UndoManager.swift */; };
 		1E247D78EEFD0B6A8F9F9DC4 /* FirstTasksChecklistCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2DDBBCCF21412D0D66AEE4 /* FirstTasksChecklistCard.swift */; };
 		207AA0548CBCEBA92ADEDB7E /* FirstLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C778EC93B0D1180566E12116 /* FirstLogView.swift */; };
@@ -53,6 +53,7 @@
 		29A8996A18F70042E11041B7 /* NuzzleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E9BAE9670D199FBE087FC /* NuzzleTests.swift */; };
 		29B652FF44EE0AA069F0E140 /* InviteCaregiverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E63A8BB8E25A73D80B44172 /* InviteCaregiverView.swift */; };
 		29C3636953217F1332FE9E6D /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A79B642C5BD32CE71EABD1E /* PrimaryButton.swift */; };
+		2A1B0C9D8E7F6A5B4C3D2E1F /* AcceptInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */; };
 		2B3FDD4C7742109818A0E3A2 /* PredictionCacheEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF60CD985ED4CAC861BCF53 /* PredictionCacheEntity+CoreDataProperties.swift */; };
 		2E0EA8186D76080E186FC9B0 /* MonthlyCalendarView.swift in Resources */ = {isa = PBXBuildFile; fileRef = 850C81CBA06C724C0ABD8BFB /* MonthlyCalendarView.swift */; };
 		2E13927D9F2C828A6B4A13F5 /* SleepFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEBDB59EBAD6EA8D228EF15 /* SleepFormView.swift */; };
@@ -71,6 +72,7 @@
 		3B22BD10CAE21773C6A56D38 /* OnboardingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E590AA1F86D72F5BE0410BF9 /* OnboardingService.swift */; };
 		3D1EABA1BF87DC8B880A59E4 /* PhotoStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342497279062995EFCEB2813 /* PhotoStorageService.swift */; };
 		3DB718AD9C0D9CD50E536E60 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D85E44510D7A18C6D65B21C /* AuthenticationManager.swift */; };
+		3E2D1C0B9A8F7E6D5C4B3A2F /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */; };
 		3EDD14C18F3ACE3EC94DE650 /* PredictionMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4A7823FE68CE1298B887E6 /* PredictionMO+CoreDataProperties.swift */; };
 		40A3B26DD6494D517A059A4D /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB71728B71321B7BABD02951 /* DeepLinkRouter.swift */; };
 		40BEE4B1D52BB254D10BAB93 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAF4F6C80FAB791B5AE7CBB /* AboutView.swift */; };
@@ -250,6 +252,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverSyncService.swift; sourceTree = "<group>"; };
+		4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrialBannerView.swift; sourceTree = "<group>"; };
 		001AD0E1A9B0C8DD3FE24A7A /* ReviewPromptManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewPromptManager.swift; sourceTree = "<group>"; };
 		0025C6434BC0FE04842531F4 /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		003AF7BCAB6C61C9DFF0424A /* ProSubscriptionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProSubscriptionView.swift; sourceTree = "<group>"; };
@@ -357,8 +361,6 @@
 		12295DC5659C9C0B9B6E1189 /* Event.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		124837645FB65C9BE217FD45 /* EventValidator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventValidator.swift; sourceTree = "<group>"; };
 		124FB94AEA88C23CA0D499EE /* BackupService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
-		5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AcceptInviteView.swift; sourceTree = "<group>"; };
-		6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeService.swift; sourceTree = "<group>"; };
 		127357D7B8DE83A06E5C5895 /* Prediction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Prediction.swift; sourceTree = "<group>"; };
 		128E3B4A38746C119A34D181 /* AIAssistantService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIAssistantService.swift; sourceTree = "<group>"; };
 		12ED6C6C29BF6802F18A6B92 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
@@ -756,6 +758,7 @@
 		5BAE21C1FE6C01F40720D0C5 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		5BF7585639110104C27C92F7 /* ToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		5C1E3959D827440F11AF6F77 /* UndoManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
+		5C4D3E2F1A0B9C8D7E6F5A4B /* AcceptInviteView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AcceptInviteView.swift; sourceTree = "<group>"; };
 		5C6138A2BA0B7699B1F057B1 /* CryRecorderViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CryRecorderViewModel.swift; sourceTree = "<group>"; };
 		5C65F06D9FF0B411591B3F24 /* NuzzleUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleUITests.swift; sourceTree = "<group>"; };
 		5CA3A494F884F30AA4BBCD0B /* RemoteDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDataStore.swift; sourceTree = "<group>"; };
@@ -868,6 +871,7 @@
 		6E3540214FC5B5345D4F8422 /* CaregiverModeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverModeView.swift; sourceTree = "<group>"; };
 		6E46FC9D574AB2B19086E2DC /* InitialStateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InitialStateView.swift; sourceTree = "<group>"; };
 		6E539061D1139A54BF7AFCF7 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
+		6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeService.swift; sourceTree = "<group>"; };
 		6E98E2ECB8D2D3E769BCCA7D /* OnboardingProgressDots.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingProgressDots.swift; sourceTree = "<group>"; };
 		6EDB5AA0A84D2878E762AAFF /* HomeContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeContentView.swift; sourceTree = "<group>"; };
 		6EF0C821BC9B2F2B4436BEF8 /* InfoBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InfoBanner.swift; sourceTree = "<group>"; };
@@ -1078,6 +1082,7 @@
 		9A4A623B39ED6DA94F032E8B /* Last7DaysTrendsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Last7DaysTrendsView.swift; sourceTree = "<group>"; };
 		9AD4E1501C9A92690D10C0E0 /* CoreDataDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataDataStore.swift; sourceTree = "<group>"; };
 		9AD93F00868DD5214E622EFC /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NightModeOverlay.swift; sourceTree = "<group>"; };
 		9B21A3EEE5FB2E82FA819B90 /* TodayPatternsCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayPatternsCard.swift; sourceTree = "<group>"; };
 		9B8235574CC353BDE756CE4A /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		9BB99CEB9C1E225D2F3F1DF0 /* Achievement.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
@@ -1532,7 +1537,6 @@
 		E99BE044B81B538B13FF9E46 /* NavigationCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NavigationCoordinator.swift; sourceTree = "<group>"; };
 		E9AF2B7AA2E1374F0B4E357C /* UndoManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		EA70692A37B44803D8D97BAA /* MotionModifiers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MotionModifiers.swift; sourceTree = "<group>"; };
-		9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NightModeOverlay.swift; sourceTree = "<group>"; };
 		EA73F2027DBD810792E4D87C /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		EABA0AA4E8E9884CF641CEB5 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		EABD3ED1921F6291B1F23C8A /* ScenarioSeeder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScenarioSeeder.swift; sourceTree = "<group>"; };
@@ -1759,6 +1763,7 @@
 				9FC274CF4F455FD227D6085F /* JSONBackedDataStore.swift */,
 				64C6292CAF8D0D2879619CA7 /* RemoteDataStore.swift */,
 				F30F71627AA087D26BD229FF /* RemoteDataStoreDTOs.swift */,
+
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -2317,6 +2322,8 @@
 				55498A3C66F2D99553CA7951 /* UpgradePromptBanner.swift */,
 				5A172A1E4692409A37CE3A3D /* UpgradePromptView.swift */,
 				C64F78832AFF7B63C3DC5775 /* VoiceInputView.swift */,
+				4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */,
+
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -2535,6 +2542,7 @@
 				07BE39356A83CDEED00CBB78 /* NotificationScheduler.swift */,
 				15A4B3C29D8E7F6A5B4C3D2E /* NotificationDelegate.swift */,
 				6E5F9D8A1234567890ABCDEF /* InviteCodeService.swift */,
+				29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */,
 				9C057847032325D137E50AC7 /* OnboardingService.swift */,
 				F4CDBFE413DBCBBA8F2BA35F /* PDFExportService.swift */,
 				FFF37D51FCA4BF9388FC8A91 /* PredictionsEngine.swift */,
@@ -3438,6 +3446,7 @@
 				0E499BB23AB4D773684D91FD /* FreeTierUsageCard.swift in Resources */,
 				C3EDE7E35FB1ACC751DF0E89 /* UpgradePromptBanner.swift in Resources */,
 				BF0D5970DB9A5705090382F0 /* FirstTasksChecklistCard.swift in Resources */,
+
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3506,6 +3515,7 @@
 				5527E0429EA7035592C0B093 /* TodaysInsightCard.swift in Sources */,
 				30AB790AB74706C58183FA52 /* UpgradePromptBanner.swift in Sources */,
 				0A325BC669E809EA674F7BE1 /* VoiceInputView.swift in Sources */,
+				D12B7512CDED4D9E542F04CC /* TrialBannerView.swift in Sources */,
 				17E6AAE06B0271706ECF85DD /* Achievement.swift in Sources */,
 				4ABE9E3631C4ACA4E3C70586 /* AppSettings.swift in Sources */,
 				E047E9EC6091ABE0927C44A4 /* Baby.swift in Sources */,
@@ -3634,6 +3644,7 @@
 				20B90F7A26241EAB8B6B9D4F /* NotificationScheduler.swift in Sources */,
 				3E2D1C0B9A8F7E6D5C4B3A2F /* NotificationDelegate.swift in Sources */,
 				1BC0BADD0F1A4F3B9D2C445E /* InviteCodeService.swift in Sources */,
+				62EC8A7597F7E79AFDC7E2B3 /* CaregiverSyncService.swift in Sources */,
 				3B22BD10CAE21773C6A56D38 /* OnboardingService.swift in Sources */,
 				8D191A6AEFDB97E53F98C57E /* PDFExportService.swift in Sources */,
 				CD3F6064C3FBEB32571791E3 /* PersonalizedRecommendationsService.swift in Sources */,
@@ -3717,6 +3728,7 @@
 				DEVELOPMENT_TEAM = 9BS3VKTM6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";
@@ -3765,7 +3777,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nuzzle.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Nestling";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nuzzle.app/Nuzzle";
 			};
 			name = Release;
 		};
@@ -3786,7 +3798,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nuzzle.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Nestling";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nuzzle.app/Nuzzle";
 			};
 			name = Debug;
 		};
@@ -3801,6 +3813,7 @@
 				DEVELOPMENT_TEAM = 9BS3VKTM6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";

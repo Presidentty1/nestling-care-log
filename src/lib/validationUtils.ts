@@ -153,11 +153,19 @@ export const validationUtils = {
       }
     }
 
-    if (event.type === 'feed' && event.amount !== undefined && !validationUtils.isValidAmount(event.amount)) {
+    if (
+      event.type === 'feed' &&
+      event.amount !== undefined &&
+      !validationUtils.isValidAmount(event.amount)
+    ) {
       errors.push('Feed amount must be between 0 and 1000 ml');
     }
 
-    if (event.type === 'diaper' && event.subtype && !validationUtils.isValidDiaperSubtype(event.subtype)) {
+    if (
+      event.type === 'diaper' &&
+      event.subtype &&
+      !validationUtils.isValidDiaperSubtype(event.subtype)
+    ) {
       errors.push('Invalid diaper subtype');
     }
 
@@ -167,7 +175,7 @@ export const validationUtils = {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   },
 
@@ -194,17 +202,16 @@ export const validationUtils = {
       errors.push('Invalid sex value');
     }
 
-    if (baby.primary_feeding_style && !validationUtils.isValidFeedingStyle(baby.primary_feeding_style)) {
+    if (
+      baby.primary_feeding_style &&
+      !validationUtils.isValidFeedingStyle(baby.primary_feeding_style)
+    ) {
       errors.push('Invalid feeding style');
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
-  }
+  },
 };
-
-
-
-

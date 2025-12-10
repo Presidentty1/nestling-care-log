@@ -17,7 +17,7 @@ import type {
   DbHealthRecordType,
   DbHealthRecord,
   DbMilestone,
-  DbNotificationSettings
+  DbNotificationSettings,
 } from '@/types/db';
 
 export type Profile = DbProfile;

@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
@@ -102,7 +108,7 @@ export function DoctorShareModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>Share with Doctor</DialogTitle>
           <DialogDescription>
@@ -110,30 +116,30 @@ export function DoctorShareModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {/* Date Range Selection */}
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Date Range</Label>
-            <div className="flex gap-2">
+            <div className='flex gap-2'>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant='outline'
                     className={cn(
                       'flex-1 justify-start text-left font-normal',
                       !startDate && 'text-muted-foreground'
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className='mr-2 h-4 w-4' />
                     {startDate ? format(startDate, 'PPP') : 'Start date'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className='w-auto p-0'>
                   <Calendar
-                    mode="single"
+                    mode='single'
                     selected={startDate}
-                    onSelect={(date) => date && setStartDate(date)}
-                    disabled={(date) => date > new Date()}
+                    onSelect={date => date && setStartDate(date)}
+                    disabled={date => date > new Date()}
                   />
                 </PopoverContent>
               </Popover>
@@ -141,22 +147,22 @@ export function DoctorShareModal({
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant='outline'
                     className={cn(
                       'flex-1 justify-start text-left font-normal',
                       !endDate && 'text-muted-foreground'
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className='mr-2 h-4 w-4' />
                     {endDate ? format(endDate, 'PPP') : 'End date'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className='w-auto p-0'>
                   <Calendar
-                    mode="single"
+                    mode='single'
                     selected={endDate}
-                    onSelect={(date) => date && setEndDate(date)}
-                    disabled={(date) => date > new Date() || date < startDate}
+                    onSelect={date => date && setEndDate(date)}
+                    disabled={date => date > new Date() || date < startDate}
                   />
                 </PopoverContent>
               </Popover>
@@ -164,10 +170,10 @@ export function DoctorShareModal({
           </div>
 
           {/* Quick Date Presets */}
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => {
                 setStartDate(subDays(new Date(), 7));
                 setEndDate(new Date());
@@ -176,8 +182,8 @@ export function DoctorShareModal({
               Last 7 days
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => {
                 setStartDate(subDays(new Date(), 30));
                 setEndDate(new Date());
@@ -188,40 +194,36 @@ export function DoctorShareModal({
           </div>
 
           {/* Export Options */}
-          <div className="space-y-2 pt-2">
+          <div className='space-y-2 pt-2'>
             <Label>Export Format</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className='grid grid-cols-2 gap-2'>
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={handleExportCSV}
                 disabled={isExporting}
-                className="flex flex-col h-auto py-4"
+                className='flex flex-col h-auto py-4'
               >
-                <FileText className="h-6 w-6 mb-2" />
-                <span className="text-sm font-medium">CSV</span>
-                <span className="text-xs text-muted-foreground">Spreadsheet</span>
+                <FileText className='h-6 w-6 mb-2' />
+                <span className='text-sm font-medium'>CSV</span>
+                <span className='text-xs text-muted-foreground'>Spreadsheet</span>
               </Button>
 
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={handleExportPDF}
                 disabled={isExporting}
-                className="flex flex-col h-auto py-4"
+                className='flex flex-col h-auto py-4'
               >
-                <Download className="h-6 w-6 mb-2" />
-                <span className="text-sm font-medium">PDF</span>
-                <span className="text-xs text-muted-foreground">Report</span>
+                <Download className='h-6 w-6 mb-2' />
+                <span className='text-sm font-medium'>PDF</span>
+                <span className='text-xs text-muted-foreground'>Report</span>
               </Button>
             </div>
           </div>
 
           {/* Share via Email */}
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={handleShareEmail}
-          >
-            <Mail className="mr-2 h-4 w-4" />
+          <Button variant='secondary' className='w-full' onClick={handleShareEmail}>
+            <Mail className='mr-2 h-4 w-4' />
             Open Email to Share
           </Button>
         </div>

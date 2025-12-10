@@ -126,7 +126,7 @@ class AuthViewModel: ObservableObject {
         do {
             let session = try await client.auth.session
             self.session = session
-            if session != nil {
+            if self.session != nil {
                 print("✅ Session restored successfully")
             }
         } catch {
@@ -142,7 +142,7 @@ class AuthViewModel: ObservableObject {
         // Set up auth state changes listener using AsyncStream
         Task {
             for await (event, session) in client.auth.authStateChanges {
-                await handleAuthStateChange(event: event, session: session)
+                handleAuthStateChange(event: event, session: session)
             }
         }
     }

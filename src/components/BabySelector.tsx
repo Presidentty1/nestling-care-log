@@ -35,11 +35,11 @@ export function BabySelector({ babies, selectedBabyId, onSelect }: BabySelectorP
 
   return (
     <Select value={selectedBabyId || ''} onValueChange={onSelect}>
-      <SelectTrigger className="w-[200px]">
-        <SelectValue placeholder="Select baby" />
+      <SelectTrigger className='w-[200px]'>
+        <SelectValue placeholder='Select baby' />
       </SelectTrigger>
       <SelectContent>
-        {babies.map((baby) => (
+        {babies.map(baby => (
           <SelectItem key={baby.id} value={baby.id}>
             👶 {baby.name} · {getAgeLabel(baby.date_of_birth)}
           </SelectItem>

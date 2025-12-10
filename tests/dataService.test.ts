@@ -26,12 +26,12 @@ describe('DataService', () => {
     it('should delete a baby', async () => {
       expect(true).toBe(true);
     });
-    
+
     it('should handle non-existent baby gracefully', async () => {
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Event queries', () => {
     it('should list events by day', async () => {
       expect(true).toBe(true);
@@ -40,11 +40,11 @@ describe('DataService', () => {
     it('should handle date range queries', async () => {
       expect(true).toBe(true);
     });
-    
+
     it('should filter events by type', async () => {
       expect(true).toBe(true);
     });
-    
+
     it('should sort events by timestamp', async () => {
       expect(true).toBe(true);
     });

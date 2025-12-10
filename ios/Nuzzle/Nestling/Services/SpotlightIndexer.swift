@@ -1,6 +1,6 @@
 import Foundation
-import CoreSpotlight
-import MobileCoreServices
+@preconcurrency import CoreSpotlight
+import UniformTypeIdentifiers
 
 /// Service for indexing app content in Core Spotlight
 @MainActor
@@ -46,7 +46,7 @@ class SpotlightIndexer {
     
     /// Create a searchable item for an event
     private func createSearchableItem(for event: Event, baby: Baby) -> CSSearchableItem {
-        let attributeSet = CSSearchableItemAttributeSet(itemContentType: kUTTypeText as String)
+        let attributeSet = CSSearchableItemAttributeSet(itemContentType: UTType.text.identifier)
         
         // Title
         attributeSet.title = eventTypeDisplayName(event.type)

@@ -16,22 +16,27 @@ A comprehensive design system for the Nestling baby tracking app, optimized for 
 ### Brand Colors
 
 #### Light Mode
+
 ```css
---primary: hsl(168, 46%, 34%)          /* #2E7D6A - Calming teal for actions */
---primary-foreground: hsl(0, 0%, 100%) /* White text on primary */
---primary-600: hsl(168, 50%, 29%)      /* #256E5E - Darker teal for pressed states */
---primary-100: hsl(168, 57%, 90%)      /* #D8EFE9 - Light teal for subtle backgrounds */
+--primary: hsl(168, 46%, 34%) /* #2E7D6A - Calming teal for actions */
+  --primary-foreground: hsl(0, 0%, 100%) /* White text on primary */
+  --primary-600: hsl(168, 50%, 29%)
+  /* #256E5E - Darker teal for pressed states */
+  --primary-100: hsl(168, 57%, 90%)
+  /* #D8EFE9 - Light teal for subtle backgrounds */;
 ```
 
 #### Dark Mode (iOS Implementation)
+
 ```css
---primary: hsl(168, 36%, 64%)          /* #2EC7A6 - Mint/teal for dark backgrounds */
---primary-foreground: hsl(0, 0%, 100%) /* White text on primary */
---primary-600: hsl(168, 35%, 58%)      /* #25A792 - Darker variant */
---primary-100: hsl(168, 26%, 21%)      /* #24413A - Dark teal background */
+--primary: hsl(168, 36%, 64%) /* #2EC7A6 - Mint/teal for dark backgrounds */
+  --primary-foreground: hsl(0, 0%, 100%) /* White text on primary */
+  --primary-600: hsl(168, 35%, 58%) /* #25A792 - Darker variant */
+  --primary-100: hsl(168, 26%, 21%) /* #24413A - Dark teal background */;
 ```
 
 #### iOS Light Mode Colors
+
 ```swift
 // Light Mode - iOS Implementation
 static let backgroundLight = Color(red: 248/255, green: 250/255, blue: 251/255) // #F8FAFB
@@ -44,21 +49,23 @@ static let textSecondaryLight = Color(red: 143/255, green: 161/255, blue: 168/25
 ### Semantic Colors
 
 #### Light Mode
+
 ```css
---success: hsl(168, 46%, 34%)          /* Matches primary - positive actions */
---warning: hsl(38, 96%, 55%)           /* #F5A623 - Caution/attention */
---destructive: hsl(0, 64%, 55%)        /* #D64545 - Errors/delete actions */
---secondary: hsl(235, 100%, 70%)       /* #6A7DFF - Links & highlights */
---info: hsl(207, 90%, 54%)             /* #2196F3 - Informational messages */
+--success: hsl(168, 46%, 34%) /* Matches primary - positive actions */
+  --warning: hsl(38, 96%, 55%) /* #F5A623 - Caution/attention */
+  --destructive: hsl(0, 64%, 55%) /* #D64545 - Errors/delete actions */
+  --secondary: hsl(235, 100%, 70%) /* #6A7DFF - Links & highlights */
+  --info: hsl(207, 90%, 54%) /* #2196F3 - Informational messages */;
 ```
 
 #### Dark Mode
+
 ```css
---success: hsl(168, 36%, 64%)          /* Matches primary */
---warning: hsl(39, 100%, 70%)          /* #FFC266 - Lighter for dark backgrounds */
---destructive: hsl(0, 100%, 75%)       /* #FF7D7D - Lighter for dark backgrounds */
---secondary: hsl(235, 100%, 81%)       /* #9AA6FF - Lighter indigo */
---info: hsl(207, 89%, 70%)             /* #64B5F6 - Lighter for dark backgrounds */
+--success: hsl(168, 36%, 64%) /* Matches primary */
+  --warning: hsl(39, 100%, 70%) /* #FFC266 - Lighter for dark backgrounds */
+  --destructive: hsl(0, 100%, 75%) /* #FF7D7D - Lighter for dark backgrounds */
+  --secondary: hsl(235, 100%, 81%) /* #9AA6FF - Lighter indigo */
+  --info: hsl(207, 89%, 70%) /* #64B5F6 - Lighter for dark backgrounds */;
 ```
 
 ### Event-Specific Colors
@@ -66,24 +73,27 @@ static let textSecondaryLight = Color(red: 143/255, green: 161/255, blue: 168/25
 Used for color-coding different types of baby tracking events to improve scannability and visual hierarchy.
 
 #### Light Mode
+
 ```css
---event-feed: hsl(199, 89%, 48%)       /* #0BA5EC - Soft blue (nurturing, milk) */
---event-sleep: hsl(250, 70%, 60%)      /* #8B5CF6 - Purple (rest, night) */
---event-diaper: hsl(25, 95%, 53%)      /* #FB923C - Warm orange (attention) */
---event-tummy: hsl(142, 71%, 45%)      /* #10B981 - Green (growth, activity) */
---event-medication: hsl(0, 84%, 60%)   /* #EF4444 - Red (medical attention) */
+--event-feed: hsl(199, 89%, 48%) /* #0BA5EC - Soft blue (nurturing, milk) */
+  --event-sleep: hsl(250, 70%, 60%) /* #8B5CF6 - Purple (rest, night) */
+  --event-diaper: hsl(25, 95%, 53%) /* #FB923C - Warm orange (attention) */
+  --event-tummy: hsl(142, 71%, 45%) /* #10B981 - Green (growth, activity) */
+  --event-medication: hsl(0, 84%, 60%) /* #EF4444 - Red (medical attention) */;
 ```
 
 #### Dark Mode
+
 ```css
---event-feed: hsl(199, 89%, 65%)       /* #52B5F5 - Lighter blue */
---event-sleep: hsl(250, 70%, 75%)      /* #A78BFA - Lighter purple */
---event-diaper: hsl(25, 95%, 65%)      /* #FDBA74 - Lighter orange */
---event-tummy: hsl(142, 71%, 60%)      /* #34D399 - Lighter green */
---event-medication: hsl(0, 84%, 75%)   /* #FCA5A5 - Lighter red */
+--event-feed: hsl(199, 89%, 65%) /* #52B5F5 - Lighter blue */
+  --event-sleep: hsl(250, 70%, 75%) /* #A78BFA - Lighter purple */
+  --event-diaper: hsl(25, 95%, 65%) /* #FDBA74 - Lighter orange */
+  --event-tummy: hsl(142, 71%, 60%) /* #34D399 - Lighter green */
+  --event-medication: hsl(0, 84%, 75%) /* #FCA5A5 - Lighter red */;
 ```
 
 #### Usage Guidelines
+
 - **Icons**: Use event colors for icons in timeline rows, quick actions, and summary chips
 - **Backgrounds**: Apply as subtle tints (`bg-event-{type}/5` or `/10`) for visual grouping
 - **Borders**: Use with 20% opacity (`border-event-{type}/20`) for card accents
@@ -91,6 +101,7 @@ Used for color-coding different types of baby tracking events to improve scannab
 - **Consistency**: Always pair color with icons/labels (never rely on color alone for meaning)
 
 #### iOS/SwiftUI Mapping
+
 ```swift
 extension Color {
     static let eventFeed = Color("EventFeed")           // Blue
@@ -104,20 +115,23 @@ extension Color {
 ### Background Layers
 
 #### Light Mode (Web)
+
 ```css
---background: hsl(210, 17%, 98%)       /* #F8FAFB - Main app background */
---surface: hsl(0, 0%, 100%)            /* #FFFFFF - Cards, sheets */
---elevated: hsl(0, 0%, 100%)           /* #FFFFFF - Elevated cards */
+--background: hsl(210, 17%, 98%) /* #F8FAFB - Main app background */
+  --surface: hsl(0, 0%, 100%) /* #FFFFFF - Cards, sheets */
+  --elevated: hsl(0, 0%, 100%) /* #FFFFFF - Elevated cards */;
 ```
 
 #### Dark Mode (Web)
+
 ```css
---background: hsl(210, 31%, 9%)        /* #0F1417 - Main app background */
---surface: hsl(204, 20%, 12%)          /* #141A1E - Cards, sheets */
---elevated: hsl(202, 17%, 14%)         /* #182127 - Elevated cards */
+--background: hsl(210, 31%, 9%) /* #0F1417 - Main app background */
+  --surface: hsl(204, 20%, 12%) /* #141A1E - Cards, sheets */
+  --elevated: hsl(202, 17%, 14%) /* #182127 - Elevated cards */;
 ```
 
 #### iOS Light Mode
+
 ```swift
 static let backgroundLight = Color(red: 248/255, green: 250/255, blue: 251/255) // #F8FAFB
 static let surfaceLight = Color.white                                        // #FFFFFF
@@ -125,6 +139,7 @@ static let elevatedLight = Color.white                                       // 
 ```
 
 #### iOS Dark Mode
+
 ```swift
 static let background = Color(red: 5/255, green: 10/255, blue: 16/255)     // #050A10
 static let surface = Color(red: 13/255, green: 21/255, blue: 31/255)       // #0D151F
@@ -134,25 +149,26 @@ static let elevated = Color(red: 24/255, green: 39/255, blue: 55/255)      // #1
 ### Text Hierarchy
 
 #### Light Mode
+
 ```css
---foreground: hsl(199, 62%, 8%)        /* #0D1B1E - Primary text */
---muted-foreground: hsl(199, 19%, 62%) /* #8FA1A8 - Secondary text */
---text-subtle: hsl(199, 17%, 28%)      /* #415058 - Tertiary text */
+--foreground: hsl(199, 62%, 8%) /* #0D1B1E - Primary text */
+  --muted-foreground: hsl(199, 19%, 62%) /* #8FA1A8 - Secondary text */
+  --text-subtle: hsl(199, 17%, 28%) /* #415058 - Tertiary text */;
 ```
 
 #### Dark Mode
+
 ```css
---foreground: hsl(190, 25%, 93%)       /* #EAF0F2 - Primary text */
---muted-foreground: hsl(197, 12%, 58%) /* #86969E - Secondary text */
---text-subtle: hsl(195, 15%, 75%)      /* #B8C5CB - Tertiary text */
+--foreground: hsl(190, 25%, 93%) /* #EAF0F2 - Primary text */
+  --muted-foreground: hsl(197, 12%, 58%) /* #86969E - Secondary text */
+  --text-subtle: hsl(195, 15%, 75%) /* #B8C5CB - Tertiary text */;
 ```
 
 ### UI Elements
 
 ```css
---border: Light: hsl(202, 25%, 91%) | Dark: hsl(204, 22%, 19%)
---input: Matches border color
---ring: Matches primary color (for focus states)
+--border: Light: hsl(202, 25%, 91%) | Dark: hsl(204, 22%, 19%) --input: Matches
+  border color --ring: Matches primary color (for focus states);
 ```
 
 ---
@@ -160,15 +176,15 @@ static let elevated = Color(red: 24/255, green: 39/255, blue: 55/255)      // #1
 ## Border Radius Scale
 
 ```css
---radius-xs: 0.5rem   /* 8px  - Small elements, icons */
---radius-sm: 0.75rem  /* 12px - Chips, pills, badges */
---radius: 0.875rem    /* 14px - Buttons (default) */
---radius-md: 1rem     /* 16px - Cards */
---radius-lg: 1.25rem  /* 20px - Sheets, drawers */
---radius-xl: 1.5rem   /* 24px - Modals */
+--radius-xs: 0.5rem /* 8px  - Small elements, icons */ --radius-sm: 0.75rem
+  /* 12px - Chips, pills, badges */ --radius: 0.875rem
+  /* 14px - Buttons (default) */ --radius-md: 1rem /* 16px - Cards */
+  --radius-lg: 1.25rem /* 20px - Sheets, drawers */ --radius-xl: 1.5rem
+  /* 24px - Modals */;
 ```
 
 ### Tailwind Classes
+
 - `rounded-xs` → 8px
 - `rounded-sm` → 12px
 - `rounded` → 14px (buttons)
@@ -181,15 +197,14 @@ static let elevated = Color(red: 24/255, green: 39/255, blue: 55/255)      // #1
 ## Spacing Scale
 
 ```css
---spacing-xs: 0.25rem  /* 4px  - Tight spacing */
---spacing-sm: 0.5rem   /* 8px  - Small gaps */
---spacing-md: 1rem     /* 16px - Default spacing */
---spacing-lg: 1.5rem   /* 24px - Large gaps */
---spacing-xl: 2rem     /* 32px - Section spacing */
---spacing-2xl: 3rem    /* 48px - Major sections */
+--spacing-xs: 0.25rem /* 4px  - Tight spacing */ --spacing-sm: 0.5rem
+  /* 8px  - Small gaps */ --spacing-md: 1rem /* 16px - Default spacing */
+  --spacing-lg: 1.5rem /* 24px - Large gaps */ --spacing-xl: 2rem
+  /* 32px - Section spacing */ --spacing-2xl: 3rem /* 48px - Major sections */;
 ```
 
 ### Tailwind Classes
+
 - `space-xs` / `gap-xs` / `p-xs` → 4px
 - `space-sm` / `gap-sm` / `p-sm` → 8px
 - `space-md` / `gap-md` / `p-md` → 16px
@@ -202,24 +217,25 @@ static let elevated = Color(red: 24/255, green: 39/255, blue: 55/255)      // #1
 ## Shadow Scale
 
 ### Light Mode
+
 ```css
---shadow-sm: 0 1px 2px rgba(13, 27, 30, 0.04)   /* Subtle depth */
---shadow-md: 0 4px 12px rgba(13, 27, 30, 0.08)  /* Floating elements */
---shadow-lg: 0 8px 24px rgba(13, 27, 30, 0.12)  /* Elevated cards */
---shadow-xl: 0 12px 32px rgba(13, 27, 30, 0.16) /* Modals, sheets */
---shadow-soft: 0 6px 24px rgba(13, 27, 30, 0.06) /* Gentle elevation */
+--shadow-sm: 0 1px 2px rgba(13, 27, 30, 0.04) /* Subtle depth */ --shadow-md: 0
+  4px 12px rgba(13, 27, 30, 0.08) /* Floating elements */ --shadow-lg: 0 8px
+  24px rgba(13, 27, 30, 0.12) /* Elevated cards */ --shadow-xl: 0 12px 32px
+  rgba(13, 27, 30, 0.16) /* Modals, sheets */ --shadow-soft: 0 6px 24px
+  rgba(13, 27, 30, 0.06) /* Gentle elevation */;
 ```
 
 ### Dark Mode
+
 ```css
---shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2)
---shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3)
---shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4)
---shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.5)
---shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35)
+--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2) --shadow-md: 0 4px 12px
+  rgba(0, 0, 0, 0.3) --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4) --shadow-xl: 0
+  12px 32px rgba(0, 0, 0, 0.5) --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 ```
 
 ### Tailwind Classes
+
 - `shadow-sm` → Subtle depth
 - `shadow-md` → Floating elements
 - `shadow-lg` → Elevated cards
@@ -241,6 +257,7 @@ fontSize: {
 ```
 
 ### Usage
+
 - `text-headline` → Page titles, main headings
 - `text-title` → Section headers, card titles
 - `text-body` → Default body text
@@ -301,6 +318,7 @@ fontSize: {
 ```
 
 **Usage Guidelines:**
+
 - Use `emphasis` for high-priority information (nap windows, predictions)
 - Use `success` for achievements, positive milestones
 - Use `warning` for reminders, upcoming deadlines
@@ -308,6 +326,7 @@ fontSize: {
 - Reserve semantic variants (success/warning/info) for meaningful context only
 
 **Key Features**:
+
 - Minimum 44pt tap target on mobile
 - Haptic feedback on interaction
 - Clear visual hierarchy
@@ -346,6 +365,7 @@ fontSize: {
 ```
 
 **Key Features**:
+
 - Rounded corners (16px)
 - Consistent padding
 - Support for header, content, footer sections
@@ -373,6 +393,7 @@ fontSize: {
 **Sizes**: `sm`, `md` (default), `lg`
 
 **Key Features**:
+
 - Rounded corners (12px)
 - Color-coded by variant
 - Optional remove button
@@ -389,6 +410,7 @@ fontSize: {
 ```
 
 **Key Features**:
+
 - Smaller than chips (for counts, status indicators)
 - Pill-shaped (fully rounded)
 - Color-coded by variant
@@ -413,6 +435,7 @@ Uses `Drawer` component from shadcn/ui:
 ```
 
 **Key Features**:
+
 - iOS-style bottom sheet on mobile
 - Modal overlay on desktop
 - Smooth slide-up animation
@@ -424,12 +447,15 @@ Uses `Drawer` component from shadcn/ui:
 ## iOS Adaptive Color System
 
 ### Theme Management
+
 The iOS app uses a `ThemeManager` class to handle theme preferences with three modes:
+
 - **Light**: Always use light mode
 - **Dark**: Always use dark mode
 - **System**: Follow system preference (default)
 
 ### Adaptive Color Methods
+
 All components use adaptive color methods that automatically respond to the current color scheme:
 
 ```swift
@@ -445,6 +471,7 @@ var body: some View {
 ```
 
 ### Available Adaptive Methods
+
 - `Color.adaptivePrimary(_:)` - Primary brand color
 - `Color.adaptiveBackground(_:)` - Main background
 - `Color.adaptiveSurface(_:)` - Card/sheet backgrounds
@@ -453,7 +480,9 @@ var body: some View {
 - `Color.adaptiveBorder(_:)` - Border colors
 
 ### Shadow System
+
 Adaptive shadows use different opacity levels for light and dark modes:
+
 - **Light Mode**: Subtle shadows with low opacity
 - **Dark Mode**: More prominent shadows with higher opacity
 
@@ -464,37 +493,41 @@ Adaptive shadows use different opacity levels for light and dark modes:
 ### Do's ✅
 
 1. **Always use semantic tokens**
+
    ```tsx
    // ✅ Good
    <div className="bg-primary text-primary-foreground">
-   
+
    // ❌ Bad
    <div className="bg-[#2E7D6A] text-white">
    ```
 
 2. **Use component variants**
+
    ```tsx
    // ✅ Good
    <Card variant="emphasis">
-   
+
    // ❌ Bad
    <Card className="border-2 border-primary/20 bg-primary/5">
    ```
 
 3. **Leverage spacing scale**
+
    ```tsx
    // ✅ Good
    <div className="space-y-lg">
-   
+
    // ❌ Bad
    <div className="space-y-6">
    ```
 
 4. **Use typography scale**
+
    ```tsx
    // ✅ Good
    <h2 className="text-title">Section Header</h2>
-   
+
    // ❌ Bad
    <h2 className="text-[17px] font-semibold">Section Header</h2>
    ```
@@ -511,11 +544,13 @@ Adaptive shadows use different opacity levels for light and dark modes:
 ## Motion & Animation Guidelines
 
 ### Principles
+
 - **Respect Reduce Motion**: All animations check `UIAccessibility.isReduceMotionEnabled` and fall back to instant state changes when enabled
 - **Subtle & Purposeful**: Animations should enhance understanding, not distract
 - **Consistent Timing**: Use standard durations (0.1s for micro-interactions, 0.2s for transitions, 0.3s for sheet presentations)
 
 ### Haptic Feedback
+
 - **Success**: Save, complete actions (`Haptics.success()`)
 - **Error**: Validation failures, network errors (`Haptics.error()`)
 - **Warning**: Confirmations, important notices (`Haptics.warning()`)
@@ -525,11 +560,13 @@ Adaptive shadows use different opacity levels for light and dark modes:
 - **Selection**: Picker changes, toggle switches (`Haptics.selection()`)
 
 ### Transitions
+
 - **Sheet Presentation**: Bottom slide-up with opacity (`AnyTransition.sheetSlide`)
 - **Quick Action Confirmation**: Subtle scale + opacity (`AnyTransition.quickAction`)
 - **Timeline Row Edit**: Opacity fade (`AnyTransition.opacity`)
 
 ### Implementation
+
 ```swift
 // Respect Reduce Motion
 if MotionModifiers.reduceMotion {
@@ -545,6 +582,7 @@ if MotionModifiers.reduceMotion {
 ```
 
 ### Sheet Detents
+
 - Use `.presentationDetents([.medium, .large])` for bottom sheets
 - Add `.presentationDragIndicator(.visible)` for better UX
 - Forms should default to `.medium`, expandable to `.large`
@@ -556,6 +594,7 @@ if MotionModifiers.reduceMotion {
 For future native iOS implementation:
 
 ### Colors
+
 ```swift
 extension Color {
     static let primary = Color("Primary")           // #2E7D6A
@@ -570,6 +609,7 @@ extension Color {
 ```
 
 ### Corner Radius
+
 ```swift
 extension CGFloat {
     static let radiusXS: CGFloat = 8
@@ -581,6 +621,7 @@ extension CGFloat {
 ```
 
 ### Spacing
+
 ```swift
 extension CGFloat {
     static let spacingXS: CGFloat = 4
@@ -593,6 +634,7 @@ extension CGFloat {
 ```
 
 ### Typography
+
 ```swift
 extension Font {
     static let headline = Font.system(size: 22, weight: .bold)
@@ -604,16 +646,17 @@ extension Font {
 ```
 
 ### Shadows
+
 ```swift
 extension View {
     func shadowSM() -> some View {
         self.shadow(color: Color.black.opacity(0.04), radius: 1, y: 1)
     }
-    
+
     func shadowMD() -> some View {
         self.shadow(color: Color.black.opacity(0.08), radius: 6, y: 4)
     }
-    
+
     func shadowLG() -> some View {
         self.shadow(color: Color.black.opacity(0.12), radius: 12, y: 8)
     }

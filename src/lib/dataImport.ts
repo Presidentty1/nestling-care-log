@@ -89,8 +89,8 @@ export async function importEventsToDataService(
 export async function parseImportFile(file: File): Promise<ImportData> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
+
+    reader.onload = e => {
       try {
         const data = JSON.parse(e.target?.result as string);
         resolve(data);
@@ -98,7 +98,7 @@ export async function parseImportFile(file: File): Promise<ImportData> {
         reject(new Error('Failed to parse JSON file'));
       }
     };
-    
+
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsText(file);
   });

@@ -38,6 +38,7 @@ DataStore Protocol
 Set your Supabase credentials as environment variables:
 
 **For Development:**
+
 ```bash
 # Add to your Xcode scheme environment variables
 SUPABASE_URL=https://your-project.supabase.co
@@ -95,12 +96,12 @@ struct AuthView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isSignUp = false
-    
+
     var body: some View {
         VStack {
             TextField("Email", text: $email)
             SecureField("Password", text: $password)
-            
+
             Button(isSignUp ? "Sign Up" : "Sign In") {
                 Task {
                     if isSignUp {
@@ -210,6 +211,7 @@ let response = try await supabaseClient.functions
 ### Option 3: Hybrid Store
 
 Create a `HybridDataStore` that:
+
 - Writes to both local and remote
 - Reads from local (faster)
 - Syncs in background
@@ -275,5 +277,3 @@ When user signs in:
 5. ⏳ Offline mode with local caching
 6. ⏳ Conflict resolution for multi-device sync
 7. ⏳ Migration from local to cloud storage
-
-

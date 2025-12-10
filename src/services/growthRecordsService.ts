@@ -15,11 +15,7 @@ class GrowthRecordsService {
   }
 
   async getGrowthRecord(id: string): Promise<GrowthRecord | null> {
-    const { data, error } = await supabase
-      .from('growth_records')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('growth_records').select('*').eq('id', id).single();
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
@@ -28,8 +24,12 @@ class GrowthRecordsService {
     return data as GrowthRecord;
   }
 
-  async createGrowthRecord(record: Omit<GrowthRecord, 'id' | 'created_at' | 'updated_at'>): Promise<GrowthRecord> {
-    const { data: { user } } = await authService.getUser();
+  async createGrowthRecord(
+    record: Omit<GrowthRecord, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<GrowthRecord> {
+    const {
+      data: { user },
+    } = await authService.getUser();
     if (!user) throw new Error('Not authenticated');
 
     const recordData = {
@@ -60,15 +60,11 @@ class GrowthRecordsService {
   }
 
   async deleteGrowthRecord(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('growth_records')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('growth_records').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const growthRecordsService = new GrowthRecordsService();
-
 

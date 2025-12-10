@@ -12,12 +12,12 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    set => ({
       activeBabyId: null,
       caregiverMode: false,
       guestMode: false,
-      setActiveBabyId: (id) => set({ activeBabyId: id }),
-      setCaregiverMode: (enabled) => {
+      setActiveBabyId: id => set({ activeBabyId: id }),
+      setCaregiverMode: enabled => {
         set({ caregiverMode: enabled });
         // Apply to body element (defer to avoid blocking)
         if (typeof document !== 'undefined') {
@@ -30,12 +30,12 @@ export const useAppStore = create<AppState>()(
           });
         }
       },
-      setGuestMode: (enabled) => set({ guestMode: enabled }),
+      setGuestMode: enabled => set({ guestMode: enabled }),
     }),
     {
       name: 'nestling-app-store',
       // Use async storage to avoid blocking
-      partialize: (state) => ({
+      partialize: state => ({
         activeBabyId: state.activeBabyId,
         caregiverMode: state.caregiverMode,
         guestMode: state.guestMode,

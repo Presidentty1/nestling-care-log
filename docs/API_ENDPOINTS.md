@@ -8,6 +8,7 @@ Complete reference for all Supabase Edge Functions and their contracts.
 **Functions Base URL:** `https://your-project-id.supabase.co/functions/v1`
 
 All requests require:
+
 ```typescript
 headers: {
   'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -20,12 +21,14 @@ headers: {
 ## Authentication & User Management
 
 ### bootstrap-user
+
 **File:** `supabase/functions/bootstrap-user/index.ts`
 **Method:** `POST`
 **Purpose:** Initialize new user with family and default baby
 **Triggered:** Automatically after signup via database trigger
 
 **Request Body:**
+
 ```typescript
 {
   userId: string;      // UUID of newly created user
@@ -35,6 +38,7 @@ headers: {
 ```
 
 **Response:**
+
 ```typescript
 {
   success: true,
@@ -45,6 +49,7 @@ headers: {
 ```
 
 **Error Response:**
+
 ```typescript
 {
   error: string,
@@ -57,12 +62,14 @@ headers: {
 ## AI Features
 
 ### ai-assistant
+
 **File:** `supabase/functions/ai-assistant/index.ts`
 **Method:** `POST`
 **Purpose:** AI Q&A for parenting questions
 **Requires:** AI data sharing consent enabled
 
 **Request Body:**
+
 ```typescript
 {
   conversationId?: string;  // Optional, for continuing conversation
@@ -76,6 +83,7 @@ headers: {
 ```
 
 **Response:**
+
 ```typescript
 {
   conversationId: string,
@@ -88,20 +96,24 @@ headers: {
 **AI Model Used:** `google/gemini-2.0-flash-exp` (Lovable AI)
 
 **Consent Check:**
+
 ```sql
 SELECT ai_data_sharing_enabled FROM profiles WHERE id = auth.uid()
 ```
+
 If false, returns 403 error.
 
 ---
 
 ### generate-predictions
+
 **File:** `supabase/functions/generate-predictions/index.ts`
 **Method:** `POST`
 **Purpose:** Generate smart predictions (nap windows, feeding patterns)
 **Requires:** AI data sharing consent enabled
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
@@ -111,6 +123,7 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   predictionId: string,
@@ -138,12 +151,14 @@ If false, returns 403 error.
 ---
 
 ### analyze-cry-pattern
+
 **File:** `supabase/functions/analyze-cry-pattern/index.ts`
 **Method:** `POST`
 **Purpose:** Analyze baby cry audio
 **Requires:** AI data sharing consent enabled
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
@@ -158,6 +173,7 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   sessionId: string,
@@ -173,12 +189,14 @@ If false, returns 403 error.
 ---
 
 ### calculate-nap-window
+
 **File:** `supabase/functions/calculate-nap-window/index.ts`
 **Method:** `POST`
 **Purpose:** Calculate next nap window based on wake windows
 **Does NOT require AI consent** (rule-based calculation)
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
@@ -187,6 +205,7 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   nextNapWindow: {
@@ -201,6 +220,7 @@ If false, returns 403 error.
 ```
 
 **Algorithm:**
+
 - Fetches baby's date of birth
 - Calculates age in months
 - Uses age-appropriate wake windows:
@@ -217,20 +237,23 @@ If false, returns 403 error.
 ## Analytics & Patterns
 
 ### analyze-sleep-patterns
+
 **File:** `supabase/functions/analyze-sleep-patterns/index.ts`
 **Method:** `POST`
 **Purpose:** Analyze sleep quality and patterns
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
-  startDate: string;        // ISO date (YYYY-MM-DD)
+  startDate: string; // ISO date (YYYY-MM-DD)
   endDate: string;
 }
 ```
 
 **Response:**
+
 ```typescript
 {
   totalSleepHours: number,
@@ -250,11 +273,13 @@ If false, returns 403 error.
 ---
 
 ### detect-anomalies
+
 **File:** `supabase/functions/detect-anomalies/index.ts`
 **Method:** `POST`
 **Purpose:** Detect unusual patterns in baby data
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
@@ -263,19 +288,21 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   anomalies: Array<{
-    type: string,
-    severity: 'low' | 'medium' | 'high',
-    description: string,
-    detectedAt: string,
-    suggestedActions: string[]
-  }>
+    type: string;
+    severity: 'low' | 'medium' | 'high';
+    description: string;
+    detectedAt: string;
+    suggestedActions: string[];
+  }>;
 }
 ```
 
 **Anomaly Detection Rules:**
+
 - Feeding: >6 hours between feeds (newborn)
 - Sleep: <10 total hours in 24h
 - Diaper: No wet diaper in 8+ hours
@@ -286,11 +313,13 @@ If false, returns 403 error.
 ## Reports & Summaries
 
 ### generate-handoff-report
+
 **File:** `supabase/functions/generate-handoff-report/index.ts`
 **Method:** `POST`
 **Purpose:** Generate caregiver handoff summary
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
@@ -301,6 +330,7 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   reportId: string,
@@ -320,19 +350,22 @@ If false, returns 403 error.
 ---
 
 ### generate-weekly-summary
+
 **File:** `supabase/functions/generate-weekly-summary/index.ts`
 **Method:** `POST`
 **Purpose:** Weekly recap email/notification
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
-  weekStartDate: string;    // ISO date (YYYY-MM-DD)
+  weekStartDate: string; // ISO date (YYYY-MM-DD)
 }
 ```
 
 **Response:**
+
 ```typescript
 {
   weekOf: string,
@@ -349,20 +382,23 @@ If false, returns 403 error.
 ---
 
 ### generate-monthly-recap
+
 **File:** `supabase/functions/generate-monthly-recap/index.ts`
 **Method:** `POST`
 **Purpose:** Monthly highlight video/report
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
-  month: number;            // 1-12
+  month: number; // 1-12
   year: number;
 }
 ```
 
 **Response:**
+
 ```typescript
 {
   recapId: string,
@@ -387,11 +423,13 @@ If false, returns 403 error.
 ## Collaboration
 
 ### invite-caregiver
+
 **File:** `supabase/functions/invite-caregiver/index.ts`
 **Method:** `POST`
 **Purpose:** Send caregiver invitation email
 
 **Request Body:**
+
 ```typescript
 {
   familyId: string;
@@ -402,6 +440,7 @@ If false, returns 403 error.
 ```
 
 **Response:**
+
 ```typescript
 {
   inviteId: string,
@@ -420,19 +459,22 @@ Uses Supabase Auth email templates with custom styling.
 ## Voice & Commands
 
 ### process-voice-command
+
 **File:** `supabase/functions/process-voice-command/index.ts`
 **Method:** `POST`
 **Purpose:** Parse voice input into structured log
 
 **Request Body:**
+
 ```typescript
 {
   babyId: string;
-  transcript: string;       // Voice-to-text result
+  transcript: string; // Voice-to-text result
 }
 ```
 
 **Response:**
+
 ```typescript
 {
   success: boolean,
@@ -453,6 +495,7 @@ Uses Supabase Auth email templates with custom styling.
 ```
 
 **Example Commands:**
+
 - "Log bottle feed 4 ounces"
 - "Diaper change wet"
 - "Start sleep timer"
@@ -475,20 +518,21 @@ All endpoints return errors in this format:
 
 ### Common Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `CONSENT_REQUIRED` | 403 | AI data sharing not enabled |
-| `UNAUTHORIZED` | 401 | Invalid/missing auth token |
-| `INVALID_INPUT` | 400 | Request validation failed |
-| `NOT_FOUND` | 404 | Resource not found |
-| `RATE_LIMITED` | 429 | Too many requests |
-| `SERVER_ERROR` | 500 | Internal server error |
+| Code               | HTTP Status | Description                 |
+| ------------------ | ----------- | --------------------------- |
+| `CONSENT_REQUIRED` | 403         | AI data sharing not enabled |
+| `UNAUTHORIZED`     | 401         | Invalid/missing auth token  |
+| `INVALID_INPUT`    | 400         | Request validation failed   |
+| `NOT_FOUND`        | 404         | Resource not found          |
+| `RATE_LIMITED`     | 429         | Too many requests           |
+| `SERVER_ERROR`     | 500         | Internal server error       |
 
 ---
 
 ## Rate Limiting
 
 AI endpoints are rate limited per user:
+
 - **ai-assistant:** 30 requests/hour
 - **generate-predictions:** 10 requests/hour
 - **analyze-cry-pattern:** 20 requests/hour
@@ -502,6 +546,7 @@ Non-AI endpoints have higher limits.
 Use these cURL examples for testing:
 
 ### Test AI Assistant
+
 ```bash
 curl -X POST \
   https://your-project-id.supabase.co/functions/v1/ai-assistant \
@@ -514,6 +559,7 @@ curl -X POST \
 ```
 
 ### Test Nap Prediction
+
 ```bash
 curl -X POST \
   https://your-project-id.supabase.co/functions/v1/calculate-nap-window \
@@ -536,7 +582,7 @@ import Foundation
 
 class APIService {
     let supabase = SupabaseClient.shared.client
-    
+
     func generatePrediction(babyId: UUID) async throws -> Prediction {
         let response = try await supabase.functions
             .invoke(
@@ -546,10 +592,10 @@ class APIService {
                     "predictionType": "nap_window"
                 ]
             )
-        
+
         return try JSONDecoder().decode(Prediction.self, from: response.data)
     }
-    
+
     func askAI(question: String, babyId: UUID) async throws -> AIResponse {
         let response = try await supabase.functions
             .invoke(
@@ -559,7 +605,7 @@ class APIService {
                     "message": question
                 ]
             )
-        
+
         return try JSONDecoder().decode(AIResponse.self, from: response.data)
     }
 }
@@ -578,19 +624,17 @@ const { data, error } = await supabase
   .select('*')
   .eq('baby_id', babyId)
   .order('start_time', { ascending: false })
-  .limit(50)
+  .limit(50);
 
 // Insert event
-const { data, error } = await supabase
-  .from('events')
-  .insert({
-    baby_id: babyId,
-    family_id: familyId,
-    type: 'feed',
-    start_time: new Date().toISOString(),
-    amount: 4,
-    unit: 'oz'
-  })
+const { data, error } = await supabase.from('events').insert({
+  baby_id: babyId,
+  family_id: familyId,
+  type: 'feed',
+  start_time: new Date().toISOString(),
+  amount: 4,
+  unit: 'oz',
+});
 ```
 
 See `DATA_MODEL.md` for complete schema reference.

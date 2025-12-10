@@ -11,6 +11,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ### New Files Created (~60 files)
 
 #### Design Components (15 files)
+
 - `ios/Sources/Design/Components/Haptics.swift`
 - `ios/Sources/Design/Components/PrimaryButton.swift`
 - `ios/Sources/Design/Components/SecondaryButton.swift`
@@ -29,6 +30,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - `ios/Sources/Design/Components/MedicalDisclaimer.swift`
 
 #### Event Forms (8 files)
+
 - `ios/Sources/Features/Forms/FeedFormView.swift`
 - `ios/Sources/Features/Forms/FeedFormViewModel.swift`
 - `ios/Sources/Features/Forms/SleepFormView.swift`
@@ -39,34 +41,41 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - `ios/Sources/Features/Forms/TummyTimeFormViewModel.swift`
 
 #### Utilities (3 files)
+
 - `ios/Sources/Utilities/AppConstants.swift`
 - `ios/Sources/Utilities/DateUtils.swift`
 - `ios/Sources/Utilities/IDGenerator.swift`
 
 #### Services (2 files)
+
 - `ios/Sources/Domain/Services/JSONBackedDataStore.swift`
 - `ios/Sources/Services/AnalyticsService.swift`
 
 #### Tests (2 files)
+
 - `ios/Tests/DataStoreTests.swift`
 - `ios/Tests/DateUtilsTests.swift`
 
 #### Localization (1 file)
+
 - `ios/en.lproj/Localizable.strings`
 
 ### Modified Files (~20 files)
 
 #### Core App
+
 - `ios/Sources/App/NestlingApp.swift` - Switched to JSONBackedDataStore
 - `ios/Sources/App/AppEnvironment.swift` - No changes needed
 
 #### Domain Layer
+
 - `ios/Sources/Domain/Services/DataStore.swift` - Added active sleep and last-used values methods
 - `ios/Sources/Domain/Services/InMemoryDataStore.swift` - Implemented new methods
 - `ios/Sources/Domain/Models/Event.swift` - Added `side` property
 - `ios/Sources/Domain/Models/AppSettings.swift` - Added `cryInsightsNotifyMe`
 
 #### Views
+
 - `ios/Sources/Features/Home/HomeView.swift` - Updated to use new components, forms, timeline
 - `ios/Sources/Features/Home/HomeViewModel.swift` - Updated quick actions with sleep timer flow
 - `ios/Sources/Features/History/HistoryView.swift` - Added forms, empty states, pull-to-refresh
@@ -78,6 +87,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - `ios/Sources/Features/Settings/AIDataSharingSettingsView.swift` - Minor updates
 
 #### Documentation
+
 - `ios/README.md` - Added QA checklist and reset instructions
 - `ios/IOS_ARCHITECTURE.md` - (Should be updated with new behaviors)
 
@@ -86,6 +96,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ## UX Improvements
 
 ### Design System
+
 - ✅ Consistent button styles (Primary, Secondary, Destructive)
 - ✅ Reusable card components with variants
 - ✅ Status pills and badges for visual hierarchy
@@ -93,6 +104,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - ✅ Unified TimelineRow component with swipe actions
 
 ### User Experience
+
 - ✅ Empty/loading/error states throughout
 - ✅ Toast notifications for success/error feedback
 - ✅ Long-press quick actions to open detailed forms
@@ -102,12 +114,14 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - ✅ Medical disclaimers on AI features
 
 ### Accessibility
+
 - ✅ Accessibility labels on all interactive elements
 - ✅ Dynamic Type support (no hardcoded sizes)
 - ✅ Dark Mode compatible colors
 - ✅ VoiceOver-friendly navigation
 
 ### State Management
+
 - ✅ JSON persistence across app launches
 - ✅ Last-used values remembered for quick actions
 - ✅ Active sleep state tracking
@@ -118,6 +132,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ## User-Facing Copy Changes
 
 ### New Messages
+
 - "No events logged today" → Empty state message
 - "Generating prediction..." → Loading state
 - "Enable AI Data Sharing in Settings to use predictions" → AI gating message
@@ -126,6 +141,7 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 - "Type DELETE to confirm" → Delete confirmation
 
 ### Button Labels
+
 - "Stop Sleep" → When sleep timer is active
 - "Predict Next Feed" / "Predict Next Nap" → Prediction buttons
 - "Export CSV" → Privacy settings
@@ -136,12 +152,14 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ## Remaining Edge Cases & P2 Deferrals
 
 ### Edge Cases to Test
+
 1. **Active Sleep Persistence**: If app is killed during active sleep, state may not persist (JSONBackedDataStore doesn't persist activeSleep yet)
 2. **CSV Export**: Large datasets (>1000 events) may be slow
 3. **Date Picker Edge Cases**: DST transitions, timezone changes
 4. **Form Validation**: Edge cases around min/max values
 
 ### P2 Deferrals (Conscious Decisions)
+
 1. **Real Push Notifications**: UI only, no scheduling (deferred to Phase 2)
 2. **Multi-Caregiver Features**: ManageCaregiversView remains placeholder (deferred)
 3. **Advanced Analytics**: Basic ConsoleAnalytics only (deferred)
@@ -155,24 +173,28 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ## Technical Notes
 
 ### JSONBackedDataStore
+
 - Persists to `Documents/nestling_data.json`
 - Versioned schema (version 1) for future migrations
 - Seeds mock data on first run
 - Thread-safe with concurrent queue
 
 ### Active Sleep Flow
+
 - First tap: Creates event with `endTime = nil`, stores in `activeSleep` dict
 - Second tap: Sets `endTime`, moves to events array
 - Home view shows "Stop Sleep" button when active
 - Timer continues running in SleepFormView
 
 ### Last Used Values
+
 - Stored per event type in DataStore
 - Used for quick action defaults
 - Persisted in JSONBackedDataStore
 - InMemoryDataStore uses in-memory dict
 
 ### CSV Export
+
 - Generates CSV with headers: Date, Time, Type, Subtype, Amount, Unit, Duration, Note
 - Saves to temp directory
 - Opens iOS share sheet
@@ -183,10 +205,12 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 ## Testing Coverage
 
 ### Unit Tests Added
+
 - `DataStoreTests`: Add/update/delete events, active sleep flow
 - `DateUtilsTests`: Relative time formatting, duration formatting, start of day
 
 ### Manual QA Checklist
+
 - Added comprehensive checklist in `README.md`
 - Covers all major user flows
 - Includes accessibility and persistence checks
@@ -209,5 +233,3 @@ Completed comprehensive polish and P1 feature implementation for Nestling iOS ap
 **Sprint Completed**: November 2025  
 **Total Files**: ~80 files created/modified  
 **Status**: ✅ Ready for MVP Demo
-
-

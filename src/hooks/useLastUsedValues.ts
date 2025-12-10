@@ -25,7 +25,7 @@ export function useLastUsedValues() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return getDefaults(type);
-      
+
       const parsed = JSON.parse(stored) as Partial<LastUsedValues>;
       return parsed[type] || getDefaults(type);
     } catch {
@@ -37,7 +37,7 @@ export function useLastUsedValues() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       const existing = stored ? JSON.parse(stored) : {};
-      
+
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({

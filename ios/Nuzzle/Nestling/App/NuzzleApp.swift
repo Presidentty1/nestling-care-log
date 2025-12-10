@@ -109,7 +109,7 @@ struct NuzzleApp: App {
                     showTrialCelebration = true
                     Task {
                         await environment.refreshBabies()
-                        await environment.refreshSettings()
+                        environment.refreshSettings()
                     }
                 }
             } else {

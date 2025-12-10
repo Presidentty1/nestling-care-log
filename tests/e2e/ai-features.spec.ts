@@ -7,7 +7,7 @@ test.describe('AI Features', () => {
       localStorage.clear();
       indexedDB.deleteDatabase('nestling');
     });
-    
+
     await page.goto('/onboarding-simple');
     await page.fill('input[name="name"]', 'Test Baby');
     await page.fill('input[name="date_of_birth"]', '2024-01-01');
@@ -17,10 +17,10 @@ test.describe('AI Features', () => {
 
   test('should show nap prediction on home page', async ({ page }) => {
     await page.goto('/home');
-    
+
     // Wait for page to load
     await page.waitForTimeout(2000);
-    
+
     // Nap window or prediction should be visible
     const napElement = page.locator('text=/Nap|Sleep|Window/i').first();
     await expect(napElement).toBeVisible({ timeout: 10000 });
@@ -28,7 +28,7 @@ test.describe('AI Features', () => {
 
   test('should navigate to AI Assistant', async ({ page }) => {
     await page.goto('/home');
-    
+
     // Navigate to AI Assistant
     await page.click('a[href="/ai-assistant"]');
     await expect(page).toHaveURL('/ai-assistant');
@@ -44,7 +44,9 @@ test.describe('AI Features', () => {
     // First add some events to provide context
     await page.evaluate(async () => {
       const supabase = window.supabase;
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const { data: family } = await supabase
         .from('family_members')
         .select('family_id')
@@ -60,7 +62,7 @@ test.describe('AI Features', () => {
         subtype: 'breast',
         start_time: twoHoursAgo.toISOString(),
         amount: 120,
-        unit: 'ml'
+        unit: 'ml',
       });
 
       // Add a sleep event from 3 hours ago
@@ -71,7 +73,7 @@ test.describe('AI Features', () => {
         family_id: family.family_id,
         type: 'sleep',
         start_time: threeHoursAgo.toISOString(),
-        end_time: threeHoursAgoEnd.toISOString()
+        end_time: threeHoursAgoEnd.toISOString(),
       });
     });
 

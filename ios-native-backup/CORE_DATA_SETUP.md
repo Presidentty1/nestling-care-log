@@ -25,71 +25,76 @@ This guide explains how to set up Core Data for persistent storage in the Nuzzle
 Create the following entities with these attributes:
 
 #### BabyMO Entity
-| Attribute | Type | Optional |
-|-----------|------|----------|
-| id | UUID | No |
-| name | String | No |
-| dateOfBirth | Date | No |
-| sex | String | Yes |
-| timezone | String | No |
-| primaryFeedingStyle | String | Yes |
-| createdAt | Date | No |
-| updatedAt | Date | No |
+
+| Attribute           | Type   | Optional |
+| ------------------- | ------ | -------- |
+| id                  | UUID   | No       |
+| name                | String | No       |
+| dateOfBirth         | Date   | No       |
+| sex                 | String | Yes      |
+| timezone            | String | No       |
+| primaryFeedingStyle | String | Yes      |
+| createdAt           | Date   | No       |
+| updatedAt           | Date   | No       |
 
 #### EventMO Entity
-| Attribute | Type | Optional |
-|-----------|------|----------|
-| id | UUID | No |
-| babyId | UUID | No |
-| type | String | No |
-| subtype | String | Yes |
-| startTime | Date | No |
-| endTime | Date | Yes |
-| amount | Double | Yes |
-| unit | String | Yes |
-| side | String | Yes |
-| note | String | Yes |
-| createdAt | Date | No |
-| updatedAt | Date | No |
+
+| Attribute | Type   | Optional |
+| --------- | ------ | -------- |
+| id        | UUID   | No       |
+| babyId    | UUID   | No       |
+| type      | String | No       |
+| subtype   | String | Yes      |
+| startTime | Date   | No       |
+| endTime   | Date   | Yes      |
+| amount    | Double | Yes      |
+| unit      | String | Yes      |
+| side      | String | Yes      |
+| note      | String | Yes      |
+| createdAt | Date   | No       |
+| updatedAt | Date   | No       |
 
 #### PredictionMO Entity
-| Attribute | Type | Optional |
-|-----------|------|----------|
-| id | UUID | No |
-| babyId | UUID | No |
-| type | String | No |
-| predictedTime | Date | No |
-| confidence | Double | No |
-| explanation | String | No |
-| createdAt | Date | No |
+
+| Attribute     | Type   | Optional |
+| ------------- | ------ | -------- |
+| id            | UUID   | No       |
+| babyId        | UUID   | No       |
+| type          | String | No       |
+| predictedTime | Date   | No       |
+| confidence    | Double | No       |
+| explanation   | String | No       |
+| createdAt     | Date   | No       |
 
 #### AppSettingsMO Entity
-| Attribute | Type | Optional |
-|-----------|------|----------|
-| aiDataSharingEnabled | Boolean | No |
-| feedReminderEnabled | Boolean | No |
-| feedReminderHours | Integer 32 | No |
-| napWindowAlertEnabled | Boolean | No |
-| diaperReminderEnabled | Boolean | No |
-| diaperReminderHours | Integer 32 | No |
-| quietHoursStart | Date | Yes |
-| quietHoursEnd | Date | Yes |
-| cryInsightsNotifyMe | Boolean | No |
-| onboardingCompleted | Boolean | No |
-| preferredUnit | String | No |
-| timeFormat24Hour | Boolean | No |
-| preferMediumSheet | Boolean | No |
-| spotlightIndexingEnabled | Boolean | No |
+
+| Attribute                | Type       | Optional |
+| ------------------------ | ---------- | -------- |
+| aiDataSharingEnabled     | Boolean    | No       |
+| feedReminderEnabled      | Boolean    | No       |
+| feedReminderHours        | Integer 32 | No       |
+| napWindowAlertEnabled    | Boolean    | No       |
+| diaperReminderEnabled    | Boolean    | No       |
+| diaperReminderHours      | Integer 32 | No       |
+| quietHoursStart          | Date       | Yes      |
+| quietHoursEnd            | Date       | Yes      |
+| cryInsightsNotifyMe      | Boolean    | No       |
+| onboardingCompleted      | Boolean    | No       |
+| preferredUnit            | String     | No       |
+| timeFormat24Hour         | Boolean    | No       |
+| preferMediumSheet        | Boolean    | No       |
+| spotlightIndexingEnabled | Boolean    | No       |
 
 #### LastUsedValuesMO Entity
-| Attribute | Type | Optional |
-|-----------|------|----------|
-| eventType | String | No |
-| amount | Double | Yes |
-| unit | String | Yes |
-| side | String | Yes |
-| subtype | String | Yes |
-| durationMinutes | Integer 32 | Yes |
+
+| Attribute       | Type       | Optional |
+| --------------- | ---------- | -------- |
+| eventType       | String     | No       |
+| amount          | Double     | Yes      |
+| unit            | String     | Yes      |
+| side            | String     | Yes      |
+| subtype         | String     | Yes      |
+| durationMinutes | Integer 32 | Yes      |
 
 ### 3. Generate NSManagedObject Subclasses
 
@@ -105,6 +110,7 @@ This will generate the NSManagedObject subclasses that match the files we create
 ### 4. Enable Code Generation
 
 For each entity:
+
 1. Select the entity in the data model editor
 2. In the Data Model Inspector (right panel):
    - **Codegen**: Set to **Manual/None**
@@ -262,4 +268,3 @@ Monitor these errors:
 - Migration errors
 - Fetch request failures
 - Background context deadlocks
-

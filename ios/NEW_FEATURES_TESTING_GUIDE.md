@@ -5,10 +5,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: Onboarding Improvements
 
 ### Setup
+
 1. Delete app and reinstall (or clear all data)
 2. Launch app
 
 ### Test Flow
+
 1. **Sign up/Sign in**
    - Should go directly to onboarding
 
@@ -35,6 +37,7 @@ Quick guide for testing the newly implemented UX improvements and premium featur
    - ⏱️ **Measure time:** Should complete in <60 seconds
 
 ### Analytics to Verify
+
 - Check for `onboarding_completed` event with `time_to_complete_seconds`
 - Check for `onboarding_goal_selected` event
 
@@ -43,10 +46,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: First Tasks Checklist
 
 ### Setup
+
 1. Complete onboarding (above)
 2. Land on Home screen for first time
 
 ### Test Flow
+
 1. **See Checklist**
    - ✅ Should see "Get Started" card
    - ✅ Shows "0 of 3 completed"
@@ -80,6 +85,7 @@ Quick guide for testing the newly implemented UX improvements and premium featur
    - ✅ Should not reappear on next app launch
 
 ### Analytics to Verify
+
 - `first_tasks_dismissed` event with completion count
 
 ---
@@ -87,10 +93,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: Celebration Animation
 
 ### Setup
+
 1. Fresh user who has never logged an event
 2. Log first event (any type)
 
 ### Test Flow
+
 1. **Log First Event**
    - ✅ Open any event form (feed/sleep/diaper)
    - ✅ Submit event
@@ -113,10 +121,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: Home Tutorial Overlay
 
 ### Setup
+
 1. Complete onboarding
 2. First visit to Home screen (with empty timeline)
 
 ### Test Flow
+
 1. **Tutorial Appears**
    - ✅ See dimmed background overlay
    - ✅ See tutorial card with step 1: "Quick Actions"
@@ -136,6 +146,7 @@ Quick guide for testing the newly implemented UX improvements and premium featur
    - ✅ Tutorial should NOT appear again
 
 ### Analytics to Verify
+
 - `home_tutorial_completed` event
 - `home_tutorial_skipped` event (if skipped)
 
@@ -144,10 +155,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: Monthly Calendar View
 
 ### Setup
+
 1. Have some events logged (across multiple days)
 2. Navigate to History tab
 
 ### Test Flow
+
 1. **See Calendar**
    - ✅ See full month grid (current month)
    - ✅ See month/year header (e.g., "December 2025")
@@ -177,12 +190,14 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: Calendar Heatmap (Premium)
 
 ### Setup
+
 1. **Free User Test:**
    - Use app without Premium subscription
 2. **Premium User Test:**
    - Use app with active Premium subscription
 
 ### Test Flow (Free User)
+
 1. **See Toggle**
    - ✅ See "Dots" and "Heatmap" toggle buttons
    - ✅ "Heatmap" has crown icon (👑)
@@ -197,6 +212,7 @@ Quick guide for testing the newly implemented UX improvements and premium featur
    - ✅ Tap upgrade → Navigate to subscription screen
 
 ### Test Flow (Premium User)
+
 1. **Toggle Views**
    - ✅ Tap "Heatmap" button
    - ✅ Calendar switches to heatmap view
@@ -213,10 +229,12 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## How to Test: PDF Doctor Reports
 
 ### Setup
+
 1. Have some events logged
 2. Navigate to Settings → Privacy & Data → Export Data
 
 ### Test Flow
+
 1. **Select PDF Format**
    - ✅ See format picker: CSV, PDF, JSON
    - ✅ Select "PDF"
@@ -241,6 +259,7 @@ Quick guide for testing the newly implemented UX improvements and premium featur
    - ✅ Professional formatting
 
 ### Premium Gating (Optional)
+
 - If PDF is Premium-only, free users should see upgrade prompt
 
 ---
@@ -248,12 +267,14 @@ Quick guide for testing the newly implemented UX improvements and premium featur
 ## Performance Benchmarks
 
 ### Expected Performance
+
 - **Onboarding completion:** <60 seconds
 - **Calendar load time:** <500ms (month view)
 - **PDF generation:** <2 seconds
 - **Tutorial animation:** Smooth 60fps
 
 ### How to Measure
+
 1. Use Xcode Instruments (Time Profiler)
 2. Test on oldest supported device (iPhone 8)
 3. Test with large datasets (1000+ events)
@@ -281,12 +302,14 @@ If any feature causes issues:
 ## Known Limitations
 
 ### Intentional Scope Limitations
+
 1. **No landing page improvements:** iOS apps don't have landing pages (App Store is the landing page)
 2. **Calendar heatmap:** Simple intensity calculation, not advanced ML patterns
 3. **Tutorial:** Basic spotlight, not animated masks
 4. **Celebration:** Shows once per user, not per event type
 
 ### Technical Limitations
+
 1. **Calendar queries:** Not cached (will optimize if performance issues)
 2. **PDF generation:** Synchronous on main thread (acceptable for small datasets)
 3. **Photo attachments:** Not implemented yet (requires Supabase storage)
@@ -296,6 +319,7 @@ If any feature causes issues:
 ## Success Criteria Recap
 
 ### 30-Day Targets
+
 - [ ] Onboarding completion: 80%
 - [ ] First log within 5 min: 60%
 - [ ] Day 1 retention: 65%
@@ -306,6 +330,7 @@ If any feature causes issues:
 - [ ] **MRR: $900-1,200** (3-4x growth)
 
 ### Quality Targets
+
 - [ ] Crash-free rate: 99.5%
 - [ ] Calendar load: <500ms
 - [ ] PDF generation: <2s
@@ -316,13 +341,13 @@ If any feature causes issues:
 ## Contact & Feedback
 
 For questions or issues with these implementations:
+
 - See: `UX_IMPROVEMENTS_SUMMARY.md` for detailed changes
 - See: `PRODUCT_REVIEW_IMPLEMENTATION_MAP.md` for plan mapping
 - See: Individual Swift files for code documentation
 
 ---
 
-*Last Updated: December 6, 2025*
-*Implementation Phase: Phase 1-3 Complete*
-*Next Phase: Premium Features Sprint (Photos, Growth, Notifications)*
-
+_Last Updated: December 6, 2025_
+_Implementation Phase: Phase 1-3 Complete_
+_Next Phase: Premium Features Sprint (Photos, Growth, Notifications)_

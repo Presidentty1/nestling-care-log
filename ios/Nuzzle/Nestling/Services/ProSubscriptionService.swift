@@ -173,9 +173,8 @@ class ProSubscriptionService: ObservableObject {
     }
 
     private func checkTrialStatus() async {
-        do {
-            // Check for active introductory offers (trials)
-            for await result in Transaction.currentEntitlements {
+        // Check for active introductory offers (trials)
+        for await result in Transaction.currentEntitlements {
                 if case .verified(let transaction) = result {
                     if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
                         // Check if this is an introductory offer (trial)
@@ -235,15 +234,9 @@ class ProSubscriptionService: ObservableObject {
                 }
             }
 
-            // No active trial found
-            await MainActor.run {
-                trialDaysRemaining = nil
-            }
-        } catch {
-            print("[Pro] Failed to check trial status: \(error)")
-            await MainActor.run {
-                trialDaysRemaining = nil
-            }
+        // No active trial found
+        await MainActor.run {
+            trialDaysRemaining = nil
         }
     }
     
@@ -308,7 +301,7 @@ class ProSubscriptionService: ObservableObject {
 
                 // Analytics: subscription cancelled
                 Task {
-                    await Analytics.shared.logSubscriptionCancelled(plan: plan, reason: nil)
+                    await Analytics.shared.logSubscriptionCancelled(plan: plan, reason: nil as String?)
                 }
             }
 
@@ -348,55 +341,45 @@ class ProSubscriptionService: ObservableObject {
     
     /// Check current subscription status
     func checkSubscriptionStatus() async {
-        do {
-            // Check for active subscriptions
-            for await result in Transaction.currentEntitlements {
-                if case .verified(let transaction) = result {
-                    if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
-                        // Check expiration
-                        if let expirationDate = transaction.expirationDate {
-                            if expirationDate < Date() {
-                                subscriptionStatus = .expired
-                                isProUser = false
-                            } else {
-                                subscriptionStatus = .subscribed
-                                isProUser = true
-
-                                // If within the introductory period, surface trial days remaining
-                                let purchaseDate = transaction.originalPurchaseDate
-                                let daysSincePurchase = Calendar.current.dateComponents([.day], from: purchaseDate, to: Date()).day ?? 0
-                                if daysSincePurchase <= trialDurationDays {
-                                    let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
-                                    trialDaysRemaining = max(0, daysRemaining)
-                                }
-                            }
+        // Check for active subscriptions
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result {
+                if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+                    // Check expiration
+                    if let expirationDate = transaction.expirationDate {
+                        if expirationDate < Date() {
+                            subscriptionStatus = .expired
+                            isProUser = false
                         } else {
-                            // No expiration date - assume active subscription
                             subscriptionStatus = .subscribed
                             isProUser = true
-                        }
 
-                        return
+                            // If within the introductory period, surface trial days remaining
+                            let purchaseDate = transaction.originalPurchaseDate
+                            let daysSincePurchase = Calendar.current.dateComponents([.day], from: purchaseDate, to: Date()).day ?? 0
+                            if daysSincePurchase <= trialDurationDays {
+                                let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
+                                trialDaysRemaining = max(0, daysRemaining)
+                            }
+                        }
+                    } else {
+                        // No expiration date - assume active subscription
+                        subscriptionStatus = .subscribed
+                        isProUser = true
                     }
+
+                    return
                 }
             }
+        }
 
-            // No active subscription - check time-based trial
-            updateTrialDaysRemaining()
+        // No active subscription - check time-based trial
+        updateTrialDaysRemaining()
 
-            // If trial expired and no subscription, user is not Pro
-            if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
-                subscriptionStatus = .notSubscribed
-                isProUser = false
-            }
-        } catch {
-            print("[Pro] Failed to check subscription: \(error)")
-            // Even if subscription check fails, honor the time-based trial
-            updateTrialDaysRemaining()
-            if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
-                subscriptionStatus = .notSubscribed
-                isProUser = false
-            }
+        // If trial expired and no subscription, user is not Pro
+        if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
+            subscriptionStatus = .notSubscribed
+            isProUser = false
         }
     }
     
@@ -432,8 +415,9 @@ class ProSubscriptionService: ObservableObject {
 
                     // Analytics: subscription purchased
                     Task {
+                        let plan = productID.contains("yearly") ? "yearly" : "monthly"
                         await Analytics.shared.logSubscriptionPurchased(
-                            productId: productID,
+                            plan: plan,
                             price: product.displayPrice
                         )
                     }
@@ -512,16 +496,12 @@ class ProSubscriptionService: ObservableObject {
     /// Get expiration date of current Pro subscription
     var proExpirationDate: Date? {
         get async {
-            do {
-                for await result in Transaction.currentEntitlements {
-                    if case .verified(let transaction) = result {
-                        if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
-                            return transaction.expirationDate
-                        }
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result {
+                    if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
+                        return transaction.expirationDate
                     }
                 }
-            } catch {
-                print("[Pro] Failed to get expiration date: \(error)")
             }
             return nil
         }

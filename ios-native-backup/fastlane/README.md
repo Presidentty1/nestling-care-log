@@ -5,11 +5,13 @@ This directory contains Fastlane configuration for automated iOS builds and depl
 ## Setup
 
 1. Install Fastlane:
+
    ```bash
    gem install fastlane
    ```
 
 2. Install dependencies:
+
    ```bash
    cd ios
    bundle install
@@ -23,13 +25,16 @@ This directory contains Fastlane configuration for automated iOS builds and depl
 ## Available Lanes
 
 ### Testing
+
 - `fastlane test` - Run unit tests and UI tests
 
 ### Building
+
 - `fastlane beta` - Build and upload to TestFlight
 - `fastlane release` - Build and submit to App Store
 
 ### Utilities
+
 - `fastlane certificates` - Set up code signing certificates
 - `fastlane screenshots` - Generate app screenshots
 

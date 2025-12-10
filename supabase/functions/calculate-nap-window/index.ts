@@ -1,13 +1,13 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import 'https://deno.land/x/xhr@0.1.0/mod.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -27,7 +27,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -87,10 +90,10 @@ serve(async (req) => {
       .single();
 
     if (!wakeWindow) {
-      return new Response(
-        JSON.stringify({ error: 'No wake window found for age' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'No wake window found for age' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const { data: lastSleep } = await supabase
@@ -104,7 +107,9 @@ serve(async (req) => {
       .single();
 
     const lastWakeTime = lastSleep?.end_time ? new Date(lastSleep.end_time) : new Date();
-    const napWindowStart = new Date(lastWakeTime.getTime() + wakeWindow.wake_window_min * 60 * 1000);
+    const napWindowStart = new Date(
+      lastWakeTime.getTime() + wakeWindow.wake_window_min * 60 * 1000
+    );
     const napWindowEnd = new Date(lastWakeTime.getTime() + wakeWindow.wake_window_max * 60 * 1000);
 
     const { count } = await supabase

@@ -14,11 +14,11 @@ interface DateInputProps {
   placeholder?: string;
 }
 
-export function DateInput({ 
-  value, 
-  onChange, 
+export function DateInput({
+  value,
+  onChange,
   maxDate = new Date(),
-  placeholder = 'MM/DD/YYYY'
+  placeholder = 'MM/DD/YYYY',
 }: DateInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -65,32 +65,32 @@ export function DateInput({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className='flex gap-2'>
       <Input
-        type="text"
+        type='text'
         value={inputValue}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className="flex-1"
+        className='flex-1'
       />
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="icon">
-            <CalendarIcon className="h-4 w-4" />
+          <Button variant='outline' size='icon'>
+            <CalendarIcon className='h-4 w-4' />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className='w-auto p-0' align='start'>
           <Calendar
-            mode="single"
+            mode='single'
             selected={value ? new Date(value) : undefined}
             onSelect={handleCalendarSelect}
-            disabled={(date) => date > maxDate}
+            disabled={date => date > maxDate}
             initialFocus
-            className={cn("p-3 pointer-events-auto")}
+            className={cn('p-3 pointer-events-auto')}
           />
         </PopoverContent>
       </Popover>
-      <Button variant="outline" size="sm" onClick={handleTodayClick}>
+      <Button variant='outline' size='sm' onClick={handleTodayClick}>
         Today
       </Button>
     </div>

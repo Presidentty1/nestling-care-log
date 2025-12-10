@@ -12,11 +12,13 @@
 ### Total Errors Fixed: 14
 
 #### Round 1 (Initial Syntax Errors):
+
 1. ✅ `ProSubscriptionService.swift:103` - Typo: `initializeTimeBased Trial()` → `initializeTimeBasedTrial()`
 2. ✅ `JSONBackedDataStore.swift:36` - Swift syntax: `_ =` → `let _ =`
 3. ✅ `HomeViewModel.swift:549` - Swift syntax: `_ =` → `let _ =`
 
 #### Round 2 (Optional Binding Errors):
+
 4. ✅ `ProSubscriptionService.swift:184` - `_ =` → `let expirationDate =` (needed to use value)
 5. ✅ `ProSubscriptionService.swift:248` - `_ =` → `let _ =`
 6. ✅ `PredictionsEngine.swift:53` - `_ = Calendar.current` → `let calendar =` (needed to use value)
@@ -24,19 +26,24 @@
 8. ✅ `PredictionsEngine.swift:169` - Same as #7
 
 #### Round 3 (Data Store Errors):
+
 9. ✅ `DataMigrationService.swift:46` - `_ =` → `let _ =`
 
 #### Round 4 (Remote Store Errors):
+
 10. ✅ `RemoteDataStore.swift:122,141,229,252` - `_ = getCurrentFamilyId()` → `let familyId =`
 11. ✅ `RemoteDataStore.swift:230,253` - `_ = getCurrentUserId()` → `let userId =`
 
 #### Round 5 (Compilation Order):
+
 12. ✅ `NuzzleApp.swift:130` - `TrialStartedCelebrationView` not in scope → Inlined view to avoid compilation order issues
 
 #### Round 6 (Optional Logic):
+
 13. ✅ `NowNextViewModel.swift:39` - `if try await ...` → `if let _ = try await ...` (Optional used as boolean)
 
 #### Round 7 (Latest Fixes):
+
 14. ✅ `HomeContentView.swift:77` - `TrialBannerView` missing → Inlined struct to bypass project file omission
 15. ✅ `HomeContentView.swift:83` - `.spacingMD` ambiguity → `CGFloat.spacingMD`
 
@@ -45,10 +52,12 @@
 ## ⚠️ Acceptable Warnings (Will Not Block Build)
 
 ### Concurrency Warnings (4):
+
 - `AnalyticsService.swift` - MainActor isolation (2 warnings)
 - `CoreDataDataStore.swift` - Sendable protocol (2 warnings)
 
 ### Code Quality Warnings (2):
+
 - `CoreDataDataStore.swift` - Unreachable catch block
 - `WidgetActionService.swift` - Redundant downcast
 
@@ -59,6 +68,7 @@
 ## 📊 Implementation Stats
 
 ### Files Modified: 29
+
 1. ProSubscriptionService.swift
 2. NotificationScheduler.swift
 3. AnalyticsService.swift
@@ -86,6 +96,7 @@
 25. NowNextViewModel.swift
 
 ### New Files: 7
+
 26. TrialBannerView.swift (NEW - also inlined in HomeContentView)
 27. MilestoneCelebrationView.swift (NEW)
 28. README-PAYMENTS.md (NEW)
@@ -99,6 +110,7 @@
 ## ✅ Key Improvements Delivered
 
 ### Monetization (MRR Focus):
+
 - ✅ 7-day trial system (auto-start, countdown, expiration)
 - ✅ Fixed "Unable to load subscription options" error
 - ✅ 10 paywall triggers with analytics tracking
@@ -108,6 +120,7 @@
 - ✅ "Save $32/year" callout on yearly plan
 
 ### Onboarding & First-Session Value:
+
 - ✅ Streamlined to 3 screens (≤60 seconds)
 - ✅ Skip button on every screen
 - ✅ Goal selection personalizes experience
@@ -115,6 +128,7 @@
 - ✅ First log card adapts to user goal
 
 ### Home Screen Enhancement:
+
 - ✅ Trial countdown banner with urgency messaging
 - ✅ Next Nap card: Larger fonts (+32pt time, +18pt countdown)
 - ✅ Pro badge shows for subscribers
@@ -123,6 +137,7 @@
 - ✅ Social proof: "Join 1,200+ parents"
 
 ### UX Polish:
+
 - ✅ Haptic feedback on tab bar
 - ✅ History search placeholder
 - ✅ Improved empty states
@@ -131,6 +146,7 @@
 - ✅ App version in Settings
 
 ### Analytics & Tracking:
+
 - ✅ Onboarding funnel (step views, skips)
 - ✅ Paywall source tracking (10 sources)
 - ✅ Trial started/ended events
@@ -141,6 +157,7 @@
 ## 🚀 Ready to Test
 
 ### Xcode Build:
+
 ```bash
 cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
 open ios/Nuzzle/Nestling.xcodeproj
@@ -150,6 +167,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ```
 
 ### Test Checklist:
+
 - [ ] Fresh install → Onboarding (3 screens)
 - [ ] Trial banner shows "7 days left"
 - [ ] Subscription loads (or shows friendly error)
@@ -177,6 +195,7 @@ All guides available in gnq worktree:
 ## Pre-Launch Checklist
 
 ### Required Before App Store:
+
 - [ ] Validate "Get 2 More Hours of Sleep" (user study or soften claim)
 - [ ] Validate "87% accurate nap predictions" (ML validation or remove %)
 - [ ] Update "4.8 • 1,200+ parents" with real App Store data
@@ -186,6 +205,7 @@ All guides available in gnq worktree:
 - [ ] TestFlight beta test with real parents
 
 ### Recommended:
+
 - [ ] Run on real device with StoreKit sandbox
 - [ ] Test 7-day trial flow (manually adjust date for Day 7)
 - [ ] Verify all 10 paywall triggers work
@@ -197,6 +217,7 @@ All guides available in gnq worktree:
 ## Success Metrics Enabled
 
 ### Conversion Funnel:
+
 ```
 onboarding_started → 100%
 onboarding_step_viewed (welcome) → ?%
@@ -208,7 +229,9 @@ subscription_purchased → ?%
 ```
 
 ### Paywall Optimization:
+
 Track conversion rate by source:
+
 - trial_ended (expect highest conversion)
 - trial_banner_home
 - todays_insight_card
@@ -222,6 +245,7 @@ Track conversion rate by source:
 ## What Changed (Summary for Parents/Nannies)
 
 ### Before:
+
 - ❌ Subscription error blocked Pro access
 - ❌ Unclear free tier (100 events?)
 - ❌ Pricing showed $4.99 (inconsistent)
@@ -230,6 +254,7 @@ Track conversion rate by source:
 - ❌ Next Nap was small, hard to see
 
 ### After:
+
 - ✅ Subscription works (or shows clear error + retry)
 - ✅ Clear 7-day trial with countdown
 - ✅ Consistent $5.99/mo pricing
@@ -244,11 +269,14 @@ Track conversion rate by source:
 ## Technical Notes
 
 ### Project Structure Handling:
+
 Because new files (like `TrialBannerView.swift`) created via script are not automatically added to `project.pbxproj` in an Xcode project, they were not being compiled.
 **Solution:** The code for `TrialBannerView` was appended to `HomeContentView.swift` to ensure it is compiled and available. The standalone file remains but is redundant until manually added to the project.
 
 ### Swift Pattern Learned:
+
 In Swift conditionals, use `let _ =` not just `_ =`:
+
 ```swift
 // ❌ Wrong
 if _ = someOptional { }
@@ -263,7 +291,9 @@ if let value = someOptional { }
 ```
 
 ### Async Optional Checks:
+
 Checking an async function that returns optional in an `if`:
+
 ```swift
 // ❌ Wrong (Swift treats Optional as non-boolean)
 if try await func() { }

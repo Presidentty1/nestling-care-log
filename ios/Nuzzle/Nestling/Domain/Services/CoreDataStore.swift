@@ -144,7 +144,7 @@ class CoreDataStore: DataStore {
     }
 
     func addBaby(_ baby: Baby) async throws {
-        try await backgroundContext.perform {
+        await backgroundContext.perform {
             let babyMO = BabyMO(context: self.backgroundContext)
             babyMO.configure(with: baby)
         }
@@ -205,7 +205,7 @@ class CoreDataStore: DataStore {
     }
 
     func addEvent(_ event: Event) async throws {
-        try await backgroundContext.perform {
+        await backgroundContext.perform {
             let eventMO = EventMO(context: self.backgroundContext)
             eventMO.configure(with: event)
         }
@@ -280,7 +280,7 @@ class CoreDataStore: DataStore {
         )
 
         // Save to Core Data
-        try await backgroundContext.perform {
+        await backgroundContext.perform {
             let predictionMO = PredictionMO(context: self.backgroundContext)
             predictionMO.configure(with: prediction)
         }

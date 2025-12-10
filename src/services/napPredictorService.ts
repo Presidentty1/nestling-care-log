@@ -11,7 +11,7 @@ export interface NapPrediction {
 class NapPredictorService {
   async calculateNapWindow(babyId: string): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('calculate-nap-window', {
-      body: { babyId }
+      body: { babyId },
     });
 
     if (error) throw error;

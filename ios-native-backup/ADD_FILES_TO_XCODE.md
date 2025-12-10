@@ -17,7 +17,6 @@ Follow these steps to add all your source files back to the regenerated Xcode pr
      - `Features`
      - `Services`
      - `Utilities`
-   
 4. **Important settings at the bottom of the dialog:**
    - ✅ Check **"Create groups"** (not "Create folder references")
    - ✅ Check **"Add to targets: Nestling"**
@@ -117,7 +116,7 @@ Follow these steps to add all your source files back to the regenerated Xcode pr
 ## Quick Checklist
 
 - [ ] All source folders added to Nestling target
-- [ ] Test files added to NestlingTests target  
+- [ ] Test files added to NestlingTests target
 - [ ] UI test files added to NestlingUITests target
 - [ ] Assets.xcassets added (if exists)
 - [ ] Project builds without errors (⌘B)
@@ -126,18 +125,22 @@ Follow these steps to add all your source files back to the regenerated Xcode pr
 ## Troubleshooting
 
 ### Files not showing in Project Navigator
+
 - Make sure you selected "Create groups" not "Create folder references"
 - Try closing and reopening Xcode
 
 ### Build errors about missing files
+
 - Verify files are added to the correct target
 - Check File Inspector → Target Membership
 
 ### "No such module" errors
+
 - Clean build folder: Product → Clean Build Folder (⇧⌘K)
 - Build again: ⌘B
 
 ### Files in wrong location
+
 - Drag files to correct folder in Project Navigator
 - Xcode will ask if you want to move them - say yes
 
@@ -154,4 +157,3 @@ You can also drag files directly from Finder:
    - Click "Finish"
 
 This method is faster if you're adding many files at once!
-

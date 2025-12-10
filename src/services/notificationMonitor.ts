@@ -12,7 +12,7 @@ export const notificationMonitor = {
     }
 
     currentBabyId = babyId;
-    
+
     // Check immediately
     await checkReminders();
 
@@ -37,7 +37,7 @@ async function checkReminders() {
     if (!settings) return;
 
     const now = new Date();
-    
+
     // Check quiet hours
     if (isQuietHours(now, settings)) return;
 
@@ -63,7 +63,7 @@ async function checkReminders() {
           const prediction = JSON.parse(napPrediction);
           const windowStart = new Date(prediction.nextWindowStartISO);
           const minutesUntilWindow = differenceInMinutes(windowStart, now);
-          
+
           // Alert 15 minutes before nap window
           if (minutesUntilWindow === 15) {
             notificationService.show('nap', 'Nap window starting in 15 minutes');

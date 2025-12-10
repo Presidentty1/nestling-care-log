@@ -58,6 +58,7 @@ This guide walks you through setting up subscriptions in App Store Connect for N
 ## Step 4: Configure Subscription Benefits
 
 For each subscription:
+
 1. Scroll to **Subscription Benefits**
 2. Add benefits:
    - Unlimited babies
@@ -98,6 +99,7 @@ Family Sharing allows one subscription to be shared across all family members (u
 3. Click **Save**
 
 **Benefits:**
+
 - One parent subscribes, both parents get access (perfect for co-parenting)
 - Increases perceived value ("Buy once, use for both parents")
 - Aligns with "The Co-Parenting Team" persona (see MRR Growth Plan)
@@ -123,6 +125,7 @@ Family Sharing allows one subscription to be shared across all family members (u
 Ensure `ProSubscriptionView.swift` uses `ProSubscriptionService.purchase()` which calls StoreKit 2's native `Product.purchase()` method. The native sheet is presented automatically.
 
 **Test Checklist:**
+
 - [ ] Purchase sheet appears with Apple Pay option (if configured)
 - [ ] Face ID/Touch ID prompts correctly
 - [ ] Saved cards appear in payment options
@@ -169,18 +172,21 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 ## Troubleshooting
 
 ### Products Not Loading
+
 - Verify product IDs match App Store Connect exactly
 - Ensure products are **Ready to Submit** or **Approved**
 - Check that subscriptions are in correct subscription group
 - Verify you're using sandbox account for testing
 
 ### Purchase Fails
+
 - Check device has valid payment method (sandbox)
 - Verify you're signed out of real App Store account
 - Check App Store Connect for any rejection messages
 - Ensure StoreKit Configuration file is set in Xcode scheme (for local testing)
 
 ### Apple Pay Not Appearing
+
 - **This is normal in Sandbox**: Apple Pay is typically NOT available in sandbox testing
 - Apple Pay appears automatically in production if user has:
   - Apple Pay configured in Wallet
@@ -188,18 +194,21 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 - Test with regular credit card in sandbox, Apple Pay will work in production
 
 ### Family Sharing Not Working
+
 - Ensure Family Sharing is enabled in App Store Connect **before** app submission
 - Verify subscription is in a subscription group (required for Family Sharing)
 - Test with actual family member accounts (not sandbox testers)
 - Check that both family members are signed into iCloud and part of same Family Sharing group
 
 ### Introductory Offers Not Showing
+
 - Verify offer is **Active** (not Draft) in App Store Connect
 - Check eligibility criteria (New Subscribers Only vs All Users)
 - Ensure offer duration is correct (7 days, 3 months, etc.)
 - Test with fresh sandbox account that hasn't subscribed before
 
 ### Restore Purchases Fails
+
 - Ensure transactions are completed in sandbox
 - Check that restore is called on same device/account
 - Verify receipt validation is working
@@ -231,6 +240,7 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 ## Next Steps
 
 After setup is complete:
+
 1. Test subscription flow end-to-end (sandbox)
 2. Verify Family Sharing (requires real family accounts)
 3. Test Introductory Offers with fresh accounts
@@ -238,7 +248,7 @@ After setup is complete:
 5. Submit app for review with subscriptions
 
 **Related Documentation:**
+
 - `nestling-strategic-review-mrr-growth-plan.plan.md` - MRR optimization strategy
 - `MVP_LAUNCH_CHECKLIST.md` - Complete launch checklist
 - `ios/Nestling/Nestling/Services/ProSubscriptionService.swift` - Implementation code
-

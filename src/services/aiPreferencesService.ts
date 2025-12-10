@@ -7,7 +7,7 @@ export interface AIPreferences {
 
 class AIPreferencesService {
   private static STORAGE_KEY = 'ai_preferences';
-  
+
   /**
    * Get AI preferences from localStorage and Supabase (merged)
    */
@@ -19,65 +19,67 @@ class AIPreferencesService {
         const parsed = JSON.parse(cached);
         return {
           aiDataSharingEnabled: parsed.aiDataSharingEnabled,
-          lastUpdated: new Date(parsed.lastUpdated)
+          lastUpdated: new Date(parsed.lastUpdated),
         };
       }
-      
+
       // Fetch from Supabase
       const { data, error } = await supabase
         .from('profiles')
         .select('ai_data_sharing_enabled, ai_preferences_updated_at')
         .eq('id', userId)
         .single();
-      
+
       if (error) throw error;
-      
+
       const preferences: AIPreferences = {
         aiDataSharingEnabled: data.ai_data_sharing_enabled ?? true,
-        lastUpdated: data.ai_preferences_updated_at ? new Date(data.ai_preferences_updated_at) : new Date()
+        lastUpdated: data.ai_preferences_updated_at
+          ? new Date(data.ai_preferences_updated_at)
+          : new Date(),
       };
-      
+
       // Cache in localStorage
       localStorage.setItem(AIPreferencesService.STORAGE_KEY, JSON.stringify(preferences));
-      
+
       return preferences;
     } catch (error) {
       console.error('Error fetching AI preferences:', error);
       // Default to enabled for backward compatibility
       return {
         aiDataSharingEnabled: true,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
     }
   }
-  
+
   /**
    * Save AI preferences to both localStorage and Supabase
    */
   async setPreferences(userId: string, enabled: boolean): Promise<void> {
     const preferences: AIPreferences = {
       aiDataSharingEnabled: enabled,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
-    
+
     // Save to localStorage
     localStorage.setItem(AIPreferencesService.STORAGE_KEY, JSON.stringify(preferences));
-    
+
     // Save to Supabase
     const { error } = await supabase
       .from('profiles')
       .update({
         ai_data_sharing_enabled: enabled,
-        ai_preferences_updated_at: new Date().toISOString()
+        ai_preferences_updated_at: new Date().toISOString(),
       })
       .eq('id', userId);
-    
+
     if (error) {
       console.error('Error saving AI preferences:', error);
       throw error;
     }
   }
-  
+
   /**
    * Check if user has consented to AI features
    */
@@ -85,7 +87,7 @@ class AIPreferencesService {
     const prefs = await this.getPreferences(userId);
     return prefs.aiDataSharingEnabled;
   }
-  
+
   /**
    * Clear cached preferences (useful for testing or logout)
    */

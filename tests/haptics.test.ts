@@ -24,16 +24,16 @@ describe('hapticFeedback', () => {
   describe('light', () => {
     it('triggers light haptic feedback', async () => {
       const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-      
+
       await hapticFeedback.light();
-      
+
       expect(Haptics.impact).toHaveBeenCalledWith({ style: ImpactStyle.Light });
     });
-    
+
     it('handles errors gracefully', async () => {
       const { Haptics } = await import('@capacitor/haptics');
       vi.mocked(Haptics.impact).mockRejectedValueOnce(new Error('Not available'));
-      
+
       // Should not throw
       await expect(hapticFeedback.light()).resolves.toBeUndefined();
     });
@@ -42,9 +42,9 @@ describe('hapticFeedback', () => {
   describe('medium', () => {
     it('triggers medium haptic feedback', async () => {
       const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-      
+
       await hapticFeedback.medium();
-      
+
       expect(Haptics.impact).toHaveBeenCalledWith({ style: ImpactStyle.Medium });
     });
   });
@@ -52,9 +52,9 @@ describe('hapticFeedback', () => {
   describe('heavy', () => {
     it('triggers heavy haptic feedback', async () => {
       const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-      
+
       await hapticFeedback.heavy();
-      
+
       expect(Haptics.impact).toHaveBeenCalledWith({ style: ImpactStyle.Heavy });
     });
   });
@@ -62,18 +62,18 @@ describe('hapticFeedback', () => {
   describe('selection', () => {
     it('triggers selection haptic sequence', async () => {
       const { Haptics } = await import('@capacitor/haptics');
-      
+
       await hapticFeedback.selection();
-      
+
       expect(Haptics.selectionStart).toHaveBeenCalled();
       expect(Haptics.selectionChanged).toHaveBeenCalled();
       expect(Haptics.selectionEnd).toHaveBeenCalled();
     });
-    
+
     it('handles errors in selection sequence gracefully', async () => {
       const { Haptics } = await import('@capacitor/haptics');
       vi.mocked(Haptics.selectionStart).mockRejectedValueOnce(new Error('Not available'));
-      
+
       // Should not throw
       await expect(hapticFeedback.selection()).resolves.toBeUndefined();
     });

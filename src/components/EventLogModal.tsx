@@ -112,7 +112,7 @@ export function EventLogModal({
       if (editingEvent) {
         // Update existing event
         const updates: any = { note: note || undefined };
-        
+
         if (activeTab === 'feed') {
           if (feedType === 'breast') {
             updates.subtype = `breast_${breastSide}`;
@@ -124,7 +124,7 @@ export function EventLogModal({
         } else if (activeTab === 'diaper') {
           updates.subtype = diaperType;
         }
-        
+
         await updateEvent(editingEvent.id, updates);
       } else {
         // Create new event
@@ -177,53 +177,53 @@ export function EventLogModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg">
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+      <DialogContent className='max-w-lg'>
         <DialogHeader>
           <DialogTitle>{editingEvent ? 'Edit Event' : 'Log Event'}</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as EventType)}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="feed">
-              <Milk className="h-4 w-4 mr-2" />
+        <Tabs value={activeTab} onValueChange={v => setActiveTab(v as EventType)}>
+          <TabsList className='grid w-full grid-cols-3'>
+            <TabsTrigger value='feed'>
+              <Milk className='h-4 w-4 mr-2' />
               Feed
             </TabsTrigger>
-            <TabsTrigger value="sleep">
-              <Moon className="h-4 w-4 mr-2" />
+            <TabsTrigger value='sleep'>
+              <Moon className='h-4 w-4 mr-2' />
               Sleep
             </TabsTrigger>
-            <TabsTrigger value="diaper">
-              <BabyIcon className="h-4 w-4 mr-2" />
+            <TabsTrigger value='diaper'>
+              <BabyIcon className='h-4 w-4 mr-2' />
               Diaper
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="feed" className="space-y-4">
+          <TabsContent value='feed' className='space-y-4'>
             <div>
               <Label>Feed Type</Label>
-              <div className="flex gap-2 mt-2">
+              <div className='flex gap-2 mt-2'>
                 <Button
-                  type="button"
+                  type='button'
                   variant={feedType === 'breast' ? 'default' : 'outline'}
                   onClick={() => setFeedType('breast')}
-                  className="flex-1"
+                  className='flex-1'
                 >
                   Breast
                 </Button>
                 <Button
-                  type="button"
+                  type='button'
                   variant={feedType === 'bottle' ? 'default' : 'outline'}
                   onClick={() => setFeedType('bottle')}
-                  className="flex-1"
+                  className='flex-1'
                 >
                   Bottle
                 </Button>
                 <Button
-                  type="button"
+                  type='button'
                   variant={feedType === 'pumping' ? 'default' : 'outline'}
                   onClick={() => setFeedType('pumping')}
-                  className="flex-1"
+                  className='flex-1'
                 >
                   Pumping
                 </Button>
@@ -234,14 +234,14 @@ export function EventLogModal({
               <>
                 <div>
                   <Label>Side</Label>
-                  <div className="flex gap-2 mt-2">
-                    {(['left', 'right', 'both'] as const).map((side) => (
+                  <div className='flex gap-2 mt-2'>
+                    {(['left', 'right', 'both'] as const).map(side => (
                       <Button
                         key={side}
-                        type="button"
+                        type='button'
                         variant={breastSide === side ? 'default' : 'outline'}
                         onClick={() => setBreastSide(side)}
-                        className="flex-1 capitalize"
+                        className='flex-1 capitalize'
                       >
                         {side}
                       </Button>
@@ -250,14 +250,14 @@ export function EventLogModal({
                 </div>
 
                 {activeEvent ? (
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-3xl font-mono">{formattedTime}</div>
-                    <Button onClick={handleStopTimer} className="mt-4" disabled={isLoading}>
+                  <div className='text-center p-4 bg-muted rounded-lg'>
+                    <div className='text-3xl font-mono'>{formattedTime}</div>
+                    <Button onClick={handleStopTimer} className='mt-4' disabled={isLoading}>
                       Stop
                     </Button>
                   </div>
                 ) : (
-                  <Button onClick={handleStartTimer} className="w-full" disabled={isLoading}>
+                  <Button onClick={handleStartTimer} className='w-full' disabled={isLoading}>
                     Start Timer
                   </Button>
                 )}
@@ -265,32 +265,32 @@ export function EventLogModal({
             )}
 
             {(feedType === 'bottle' || feedType === 'pumping') && (
-              <div className="flex gap-2">
-                <div className="flex-1">
+              <div className='flex gap-2'>
+                <div className='flex-1'>
                   <Label>Amount</Label>
                   <Input
-                    type="number"
+                    type='number'
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="120"
+                    onChange={e => setAmount(e.target.value)}
+                    placeholder='120'
                   />
                 </div>
                 <div>
                   <Label>Unit</Label>
-                  <div className="flex gap-1 mt-2">
+                  <div className='flex gap-1 mt-2'>
                     <Button
-                      type="button"
+                      type='button'
                       variant={unit === 'ml' ? 'default' : 'outline'}
                       onClick={() => setUnit('ml')}
-                      size="sm"
+                      size='sm'
                     >
                       ml
                     </Button>
                     <Button
-                      type="button"
+                      type='button'
                       variant={unit === 'oz' ? 'default' : 'outline'}
                       onClick={() => setUnit('oz')}
-                      size="sm"
+                      size='sm'
                     >
                       oz
                     </Button>
@@ -300,37 +300,37 @@ export function EventLogModal({
             )}
           </TabsContent>
 
-          <TabsContent value="sleep" className="space-y-4">
+          <TabsContent value='sleep' className='space-y-4'>
             {activeEvent && activeEvent.type === 'sleep' ? (
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-3xl font-mono">{formattedTime}</div>
-                <Button onClick={handleStopTimer} className="mt-4" disabled={isLoading}>
+              <div className='text-center p-4 bg-muted rounded-lg'>
+                <div className='text-3xl font-mono'>{formattedTime}</div>
+                <Button onClick={handleStopTimer} className='mt-4' disabled={isLoading}>
                   Wake Up
                 </Button>
               </div>
             ) : (
               <>
-                <div className="flex gap-2 mb-4">
+                <div className='flex gap-2 mb-4'>
                   <Button
-                    type="button"
+                    type='button'
                     variant={isTimerMode ? 'default' : 'outline'}
                     onClick={() => setIsTimerMode(true)}
-                    className="flex-1"
+                    className='flex-1'
                   >
                     Timer
                   </Button>
                   <Button
-                    type="button"
+                    type='button'
                     variant={!isTimerMode ? 'default' : 'outline'}
                     onClick={() => setIsTimerMode(false)}
-                    className="flex-1"
+                    className='flex-1'
                   >
                     Manual
                   </Button>
                 </div>
 
                 {isTimerMode ? (
-                  <Button onClick={handleStartTimer} className="w-full" disabled={isLoading}>
+                  <Button onClick={handleStartTimer} className='w-full' disabled={isLoading}>
                     Start Sleep Timer
                   </Button>
                 ) : (
@@ -338,17 +338,17 @@ export function EventLogModal({
                     <div>
                       <Label>Start Time</Label>
                       <Input
-                        type="datetime-local"
+                        type='datetime-local'
                         value={startTime}
-                        onChange={(e) => setStartTime(e.target.value)}
+                        onChange={e => setStartTime(e.target.value)}
                       />
                     </div>
                     <div>
                       <Label>End Time</Label>
                       <Input
-                        type="datetime-local"
+                        type='datetime-local'
                         value={endTime}
-                        onChange={(e) => setEndTime(e.target.value)}
+                        onChange={e => setEndTime(e.target.value)}
                       />
                     </div>
                   </>
@@ -357,17 +357,17 @@ export function EventLogModal({
             )}
           </TabsContent>
 
-          <TabsContent value="diaper" className="space-y-4">
+          <TabsContent value='diaper' className='space-y-4'>
             <div>
               <Label>Type</Label>
-              <div className="flex gap-2 mt-2">
-                {(['wet', 'dirty', 'both'] as const).map((type) => (
+              <div className='flex gap-2 mt-2'>
+                {(['wet', 'dirty', 'both'] as const).map(type => (
                   <Button
                     key={type}
-                    type="button"
+                    type='button'
                     variant={diaperType === type ? 'default' : 'outline'}
                     onClick={() => setDiaperType(type)}
-                    className="flex-1 capitalize"
+                    className='flex-1 capitalize'
                   >
                     {type}
                   </Button>
@@ -381,18 +381,18 @@ export function EventLogModal({
           <Label>Notes (optional)</Label>
           <Textarea
             value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Add any notes..."
+            onChange={e => setNote(e.target.value)}
+            placeholder='Add any notes...'
             rows={3}
           />
         </div>
 
         {!activeEvent && (
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+          <div className='flex gap-2'>
+            <Button variant='outline' onClick={onClose} className='flex-1'>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={isLoading} className="flex-1">
+            <Button onClick={handleSubmit} disabled={isLoading} className='flex-1'>
               {editingEvent ? 'Update' : 'Save'}
             </Button>
           </div>

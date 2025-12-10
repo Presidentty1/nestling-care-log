@@ -11,13 +11,12 @@ interface NapFeedbackButtonsProps {
   onFeedbackSubmitted?: () => void;
 }
 
-export function NapFeedbackButtons({ 
-  predictionStart, 
-  predictionEnd, 
+export function NapFeedbackButtons({
+  predictionStart,
+  predictionEnd,
   babyId,
-  onFeedbackSubmitted 
+  onFeedbackSubmitted,
 }: NapFeedbackButtonsProps) {
-  
   const handleFeedback = async (rating: 'too_early' | 'just_right' | 'too_late') => {
     try {
       // Store feedback as a special event type in dataService
@@ -44,34 +43,34 @@ export function NapFeedbackButtons({
   };
 
   return (
-    <div className="flex items-center gap-2 mt-3">
-      <span className="text-xs text-muted-foreground">Was this helpful?</span>
+    <div className='flex items-center gap-2 mt-3'>
+      <span className='text-xs text-muted-foreground'>Was this helpful?</span>
       <Button
-        variant="ghost"
-        size="sm"
+        variant='ghost'
+        size='sm'
         onClick={() => handleFeedback('too_early')}
-        className="h-7 px-2"
+        className='h-7 px-2'
       >
-        <Clock className="h-3 w-3 mr-1" />
-        <span className="text-xs">Too early</span>
+        <Clock className='h-3 w-3 mr-1' />
+        <span className='text-xs'>Too early</span>
       </Button>
       <Button
-        variant="ghost"
-        size="sm"
+        variant='ghost'
+        size='sm'
         onClick={() => handleFeedback('just_right')}
-        className="h-7 px-2"
+        className='h-7 px-2'
       >
-        <ThumbsUp className="h-3 w-3 mr-1" />
-        <span className="text-xs">Just right</span>
+        <ThumbsUp className='h-3 w-3 mr-1' />
+        <span className='text-xs'>Just right</span>
       </Button>
       <Button
-        variant="ghost"
-        size="sm"
+        variant='ghost'
+        size='sm'
         onClick={() => handleFeedback('too_late')}
-        className="h-7 px-2"
+        className='h-7 px-2'
       >
-        <ThumbsDown className="h-3 w-3 mr-1" />
-        <span className="text-xs">Too late</span>
+        <ThumbsDown className='h-3 w-3 mr-1' />
+        <span className='text-xs'>Too late</span>
       </Button>
     </div>
   );

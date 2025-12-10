@@ -17,7 +17,7 @@ export function ComponentErrorBoundary({
   children,
   componentName,
   fallback,
-  onRetry
+  onRetry,
 }: ComponentErrorBoundaryProps) {
   return (
     <ResilientErrorBoundary
@@ -37,25 +37,20 @@ export function ComponentErrorBoundary({
 export function SafeComponentBoundary({
   children,
   componentName,
-  fallback
+  fallback,
 }: {
   children: ReactNode;
   componentName: string;
   fallback?: ReactNode;
 }) {
   const defaultFallback = (
-    <div className="p-2 border border-destructive/20 rounded bg-destructive/5">
-      <p className="text-xs text-destructive">
-        Component "{componentName}" failed to load
-      </p>
+    <div className='p-2 border border-destructive/20 rounded bg-destructive/5'>
+      <p className='text-xs text-destructive'>Component "{componentName}" failed to load</p>
     </div>
   );
 
   return (
-    <ComponentErrorBoundary
-      componentName={componentName}
-      fallback={fallback || defaultFallback}
-    >
+    <ComponentErrorBoundary componentName={componentName} fallback={fallback || defaultFallback}>
       {children}
     </ComponentErrorBoundary>
   );
@@ -69,7 +64,7 @@ export function DataComponentBoundary({
   children,
   componentName,
   onRetry,
-  showPartialData = true
+  showPartialData = true,
 }: {
   children: ReactNode;
   componentName: string;
@@ -77,18 +72,13 @@ export function DataComponentBoundary({
   showPartialData?: boolean;
 }) {
   const fallback = (
-    <div className="p-4 border border-warning/20 rounded bg-warning/5">
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-warning rounded-full animate-pulse" />
-        <p className="text-sm text-warning">
-          Unable to load {componentName}
-        </p>
+    <div className='p-4 border border-warning/20 rounded bg-warning/5'>
+      <div className='flex items-center gap-2'>
+        <div className='w-2 h-2 bg-warning rounded-full animate-pulse' />
+        <p className='text-sm text-warning'>Unable to load {componentName}</p>
       </div>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="mt-2 text-xs text-primary hover:underline"
-        >
+        <button onClick={onRetry} className='mt-2 text-xs text-primary hover:underline'>
           Try again
         </button>
       )}
@@ -105,7 +95,3 @@ export function DataComponentBoundary({
     </ComponentErrorBoundary>
   );
 }
-
-
-
-

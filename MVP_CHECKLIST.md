@@ -7,12 +7,14 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Code & Technical Requirements
 
 ### ✅ Supabase Hardening
+
 - [x] Comprehensive RLS policies for all tables
 - [x] Seed scripts for development/testing
 - [x] Environment variables secured (no secrets in code)
 - [x] Database migrations tested and documented
 
 ### ✅ iOS Project Setup
+
 - [ ] Xcode project builds without errors
 - [ ] Target memberships configured correctly
 - [ ] Bundle identifiers set (`com.nestling.Nestling` preserved)
@@ -21,6 +23,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Privacy manifest added (`PrivacyInfo.xcprivacy`)
 
 ### ✅ CI/CD
+
 - [x] GitHub Actions workflows for web (lint, test, build)
 - [x] GitHub Actions workflows for iOS (build, test)
 - [x] Supabase CI/CD (migrations, edge functions)
@@ -29,18 +32,21 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Testing Requirements
 
 ### Unit Tests
+
 - [ ] All service functions tested (80%+ coverage)
 - [ ] Utility functions tested (90%+ coverage)
 - [ ] Custom hooks tested (70%+ coverage)
 - [ ] All tests passing
 
 ### E2E Tests
+
 - [ ] Critical path tests passing (sign up → log event → view history)
 - [ ] Event logging tests passing
 - [ ] Offline sync tests passing
 - [ ] Multi-device sync verified
 
 ### Manual Testing
+
 - [ ] Authentication flow tested
 - [ ] Onboarding flow tested
 - [ ] All event types can be logged
@@ -51,12 +57,14 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Error handling verified
 
 ### Performance
+
 - [ ] Lighthouse score >90 (Performance, Accessibility, Best Practices)
 - [ ] First Contentful Paint <1.5s
 - [ ] Time to Interactive <3.5s
 - [ ] No console errors in production build
 
 ### Accessibility
+
 - [ ] WCAG 2.1 AA compliance verified
 - [ ] Keyboard navigation works
 - [ ] Screen reader compatible
@@ -65,6 +73,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Documentation
 
 ### ✅ Technical Documentation
+
 - [x] `ARCHITECTURE_WEB.md` - Web architecture
 - [x] `TEST_PLAN_WEB.md` - Testing strategy
 - [x] `ANALYTICS_SPEC_WEB.md` - Analytics implementation
@@ -75,6 +84,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] `README.md` updated with all documentation links
 
 ### User Documentation
+
 - [ ] Privacy policy published and accessible
 - [ ] Terms of service published and accessible
 - [ ] Support documentation available
@@ -83,6 +93,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## App Store Requirements
 
 ### App Store Connect
+
 - [ ] App record created
 - [ ] Bundle ID configured (`com.nestling.Nestling`)
 - [ ] App name: "Nuzzle"
@@ -95,6 +106,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Support email configured
 
 ### App Store Assets
+
 - [ ] App icon (1024×1024 PNG)
 - [ ] Screenshots (minimum 6, 1290×2796 for iPhone)
   - [ ] Home screen
@@ -106,6 +118,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] App preview video (optional but recommended)
 
 ### Legal & Compliance
+
 - [ ] Privacy policy drafted and published
 - [ ] Terms of service drafted and published
 - [ ] Medical disclaimer included in app
@@ -116,6 +129,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Feature Completeness (P0 MVP)
 
 ### Authentication & Onboarding
+
 - [ ] Email/password sign up works
 - [ ] Email/password sign in works
 - [ ] Onboarding flow complete
@@ -123,6 +137,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Session persistence works
 
 ### Home Dashboard
+
 - [ ] Timeline displays today's events
 - [ ] Summary chips show correct counts
 - [ ] Nap prediction card displays
@@ -130,6 +145,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Baby selector works
 
 ### Event Logging
+
 - [ ] Feed logging (breast, bottle, pumping)
 - [ ] Diaper logging (wet, dirty, both)
 - [ ] Sleep logging (timer and manual)
@@ -138,18 +154,21 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Event deletion works
 
 ### History
+
 - [ ] Day-by-day navigation works
 - [ ] Date picker functional
 - [ ] Event filtering works
 - [ ] Past events display correctly
 
 ### AI Features
+
 - [ ] Nap predictor displays predictions
 - [ ] Nap feedback collection works
 - [ ] AI assistant responds to questions
 - [ ] Medical disclaimers visible
 
 ### Settings
+
 - [ ] Baby profile management works
 - [ ] Account settings accessible
 - [ ] Sign out works
@@ -158,6 +177,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Security & Privacy
 
 ### Security
+
 - [ ] All API keys in environment variables
 - [ ] No secrets in source code
 - [ ] RLS policies tested and verified
@@ -167,6 +187,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] CSRF protection enabled
 
 ### Privacy
+
 - [ ] Privacy policy accessible
 - [ ] Data collection disclosed
 - [ ] User consent for AI features
@@ -178,6 +199,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Performance & Quality
 
 ### Performance
+
 - [ ] Production build optimized
 - [ ] Code splitting implemented
 - [ ] Images optimized
@@ -186,6 +208,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] React Query caching working
 
 ### Quality
+
 - [ ] No TypeScript errors
 - [ ] No ESLint errors
 - [ ] No console errors in production
@@ -197,6 +220,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Pre-Launch Verification
 
 ### Final Checks
+
 - [ ] All tests passing
 - [ ] Production build successful
 - [ ] No known critical bugs
@@ -208,6 +232,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Support email configured
 
 ### Smoke Testing
+
 - [ ] Sign up new user
 - [ ] Complete onboarding
 - [ ] Log 3+ events
@@ -220,6 +245,7 @@ This checklist ensures all requirements are met before the public MVP release of
 ## Launch Readiness
 
 ### Before Submission
+
 - [ ] All checklist items complete
 - [ ] Team review completed
 - [ ] Stakeholder approval received
@@ -227,6 +253,7 @@ This checklist ensures all requirements are met before the public MVP release of
 - [ ] Release notes drafted
 
 ### Post-Launch
+
 - [ ] Monitor error tracking (Sentry)
 - [ ] Monitor analytics (Firebase)
 - [ ] Monitor user feedback

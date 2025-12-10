@@ -57,15 +57,17 @@ class Logger {
         console.error(formattedMessage, data || '');
         // Send to Sentry in production
         if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
-          import('@sentry/react').then(({ captureException, captureMessage }) => {
-            if (data instanceof Error) {
-              captureException(data);
-            } else {
-              captureMessage(message, 'error');
-            }
-          }).catch(() => {
-            // Sentry not available, continue with console logging
-          });
+          import('@sentry/react')
+            .then(({ captureException, captureMessage }) => {
+              if (data instanceof Error) {
+                captureException(data);
+              } else {
+                captureMessage(message, 'error');
+              }
+            })
+            .catch(() => {
+              // Sentry not available, continue with console logging
+            });
         }
         break;
     }
@@ -110,7 +112,3 @@ export const logger = new Logger();
 
 // Export for testing
 export { Logger };
-
-
-
-

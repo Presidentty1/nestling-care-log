@@ -1,6 +1,7 @@
 # Deployment Instructions - Nestling MVP
 
 ## Prerequisites
+
 - [ ] All tests passing
 - [ ] All checklist items completed
 - [ ] App Store assets ready
@@ -8,6 +9,7 @@
 ## Step 1: Deploy Web App
 
 ### Deploy to Lovable (Recommended)
+
 1. Click "Publish" button in Lovable editor (top right)
 2. Click "Update" to deploy latest changes
 3. Copy the published URL
@@ -15,11 +17,13 @@
 5. Check for console errors in production
 
 **Expected URL format:**
+
 ```
 https://[your-project].lovableproject.com
 ```
 
 ### Alternative: Deploy to Vercel
+
 ```bash
 # 1. Install Vercel CLI
 npm i -g vercel
@@ -37,6 +41,7 @@ vercel domains add your-domain.com
 ## Step 2: Configure Environment
 
 **Verify production environment variables are set:**
+
 - `VITE_SUPABASE_PROJECT_ID`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 - `VITE_SUPABASE_URL`
@@ -57,6 +62,7 @@ npx cap open ios
 ```
 
 **In Xcode:**
+
 1. Select target: Generic iOS Device
 2. Product → Archive
 3. Wait for archive to complete
@@ -78,6 +84,7 @@ npx cap open ios
 8. Submit for review
 
 **Expected timeline:**
+
 - Upload: Immediate
 - Processing: 30-60 minutes
 - Review: 1-3 days
@@ -86,12 +93,14 @@ npx cap open ios
 ## Step 5: Post-Launch Monitoring
 
 **First 24 hours:**
+
 - [ ] Monitor error logs
 - [ ] Check Lovable Cloud dashboard (usage, errors)
 - [ ] Test app on real devices
 - [ ] Respond to any crashes/bugs immediately
 
 **First week:**
+
 - [ ] Collect user feedback
 - [ ] Monitor app reviews
 - [ ] Track key metrics (DAU, retention)
@@ -114,6 +123,7 @@ npx cap open ios
 ## Support Setup
 
 **Set up these channels:**
+
 - [ ] Support email: support@nestling.app
 - [ ] Help documentation: /help page
 - [ ] Bug reporting: /feedback page
@@ -122,6 +132,7 @@ npx cap open ios
 ## Success Metrics
 
 **Track these KPIs:**
+
 - Downloads (App Store analytics)
 - Daily Active Users (DAU)
 - Events logged per user

@@ -359,5 +359,3 @@ All core MVP features are **fully implemented** and ready for Xcode project setu
 All core features are implemented and ready for Xcode project setup. The app is feature-complete for a local-first MVP and can be built and run once the Xcode project is created.
 
 **Next Step**: Follow `XCODE_SETUP.md` to create the Xcode project and build the app.
-
-

@@ -34,7 +34,7 @@ export function getDayTotals(events: EventRecord[]): DaySummary {
           summary.totalMl += event.amount;
         }
         break;
-      
+
       case 'sleep':
         summary.sleepCount++;
         if (event.durationMin) {
@@ -46,7 +46,7 @@ export function getDayTotals(events: EventRecord[]): DaySummary {
           summary.sleepMinutes += duration;
         }
         break;
-      
+
       case 'diaper':
         summary.diaperTotal++;
         if (event.subtype === 'wet') {
@@ -58,7 +58,7 @@ export function getDayTotals(events: EventRecord[]): DaySummary {
           summary.diaperDirty++;
         }
         break;
-      
+
       case 'tummy_time':
         if (event.durationMin) {
           summary.tummyTimeMinutes += event.durationMin;
@@ -73,14 +73,11 @@ export function getDayTotals(events: EventRecord[]): DaySummary {
 /**
  * Get the last event of a specific type
  */
-export function getLastEventByType(
-  events: EventRecord[],
-  type: EventType
-): EventRecord | null {
+export function getLastEventByType(events: EventRecord[], type: EventType): EventRecord | null {
   const filtered = events
     .filter(e => e.type === type)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-  
+
   return filtered[0] || null;
 }
 
@@ -108,7 +105,7 @@ export function getTodayEvents(events: EventRecord[]): EventRecord[] {
 export function getWeekEvents(events: EventRecord[]): EventRecord[] {
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  
+
   return events.filter(e => {
     const eventDate = new Date(e.startTime);
     return eventDate >= sevenDaysAgo && eventDate <= now;
@@ -123,9 +120,9 @@ export function getAverageFeedAmount(events: EventRecord[], count: number = 5): 
     .filter(e => e.type === 'feed' && e.amount)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
     .slice(0, count);
-  
+
   if (feeds.length === 0) return 0;
-  
+
   const total = feeds.reduce((sum, e) => sum + (e.amount || 0), 0);
   return Math.round(total / feeds.length);
 }
@@ -138,9 +135,9 @@ export function getAverageSleepDuration(events: EventRecord[], count: number = 5
     .filter(e => e.type === 'sleep' && e.durationMin)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
     .slice(0, count);
-  
+
   if (sleeps.length === 0) return 0;
-  
+
   const total = sleeps.reduce((sum, e) => sum + (e.durationMin || 0), 0);
   return Math.round(total / sleeps.length);
 }

@@ -109,7 +109,13 @@ export interface DbMedication {
   updated_at: string;
 }
 
-export type DbHealthRecordType = 'temperature' | 'doctor_visit' | 'vaccine' | 'allergy' | 'illness' | 'other';
+export type DbHealthRecordType =
+  | 'temperature'
+  | 'doctor_visit'
+  | 'vaccine'
+  | 'allergy'
+  | 'illness'
+  | 'other';
 
 export interface DbHealthRecord {
   id: string;
@@ -162,5 +168,4 @@ export interface DbNotificationSettings {
   created_at: string;
   updated_at: string;
 }
-
 

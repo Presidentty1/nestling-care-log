@@ -7,6 +7,7 @@ This repository is located in a single working directory. It's important to ensu
 ## Correct Workspace
 
 **Current Active Workspace:**
+
 ```
 /Users/tyhorton/Coding Projects/nestling-care-log
 ```
@@ -16,6 +17,7 @@ This repository is located in a single working directory. It's important to ensu
 ### 1. Check Current Directory
 
 Run this command to verify your location:
+
 ```bash
 pwd
 ```
@@ -25,6 +27,7 @@ You should see: `/Users/tyhorton/Coding Projects/nestling-care-log`
 ### 2. Check Verification File
 
 Verify the `.workspace-verification` file exists:
+
 ```bash
 ls -la .workspace-verification
 ```
@@ -34,11 +37,13 @@ This file contains the correct workspace path and should always be present.
 ### 3. Run Verification Script
 
 Use the automated verification script:
+
 ```bash
 ./scripts/verify-workspace.sh
 ```
 
 This script checks:
+
 - Current directory matches expected workspace
 - Git remote URL is correct
 - Verification file exists
@@ -46,6 +51,7 @@ This script checks:
 ### 4. Check Git Remote
 
 Verify the git remote URL:
+
 ```bash
 git remote get-url origin
 ```
@@ -62,6 +68,7 @@ The following files should **never** contain hardcoded absolute paths to worktre
 - Source code files
 
 Instead, use:
+
 - Relative paths (e.g., `ios/Nuzzle/` instead of `/Users/.../ios/Nuzzle/`)
 - Environment variables
 - Project root references
@@ -86,6 +93,7 @@ Before making any changes:
 ### Wrong Workspace Detected
 
 If you're in the wrong workspace:
+
 1. Navigate to the correct workspace: `cd "/Users/tyhorton/Coding Projects/nestling-care-log"`
 2. Verify with `./scripts/verify-workspace.sh`
 3. Check git status: `git status`
@@ -93,6 +101,7 @@ If you're in the wrong workspace:
 ### Verification File Missing
 
 If `.workspace-verification` is missing:
+
 1. This may indicate you're in the wrong location
 2. Check the git remote: `git remote -v`
 3. Navigate to the correct directory
@@ -100,6 +109,7 @@ If `.workspace-verification` is missing:
 ### Git Remote Mismatch
 
 If the git remote doesn't match:
+
 1. Check you're in the correct repository
 2. Verify with: `git remote -v`
 3. If incorrect, this may be a different repository
@@ -120,4 +130,3 @@ git remote get-url origin
 ## Last Updated
 
 2025-01-06
-

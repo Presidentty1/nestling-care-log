@@ -21,18 +21,18 @@ describe('NapService', () => {
       // TODO: Implement with actual napService
       expect(true).toBe(true);
     });
-    
+
     it('should calculate wake window for 8-12 months', () => {
       // Age band: 150-180 minutes
       expect(true).toBe(true);
     });
-    
+
     it('should return appropriate wake window for 12+ months', () => {
       // Age band: 180-300 minutes
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Confidence scoring', () => {
     it('should return low confidence for 0-2 sleep events', () => {
       expect(true).toBe(true);
@@ -51,16 +51,16 @@ describe('NapService', () => {
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Nap prediction', () => {
     it('should predict next nap time based on last wake', () => {
       expect(true).toBe(true);
     });
-    
+
     it('should adjust prediction based on time of day', () => {
       expect(true).toBe(true);
     });
-    
+
     it('should account for nap count in prediction', () => {
       expect(true).toBe(true);
     });

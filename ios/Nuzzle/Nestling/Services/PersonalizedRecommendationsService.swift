@@ -70,7 +70,7 @@ class PersonalizedRecommendationsService {
         }
 
         // Sleep schedule recommendations
-        if let sleepRecommendation = generateSleepRecommendation(recentEvents: recentEvents) {
+        if let sleepRecommendation = generateSleepRecommendation(recentEvents: recentEvents, baby: baby) {
             recommendations.append(sleepRecommendation)
         }
 
@@ -191,7 +191,7 @@ class PersonalizedRecommendationsService {
         return nil
     }
 
-    private func generateSleepRecommendation(recentEvents: [Event]) -> Recommendation? {
+    private func generateSleepRecommendation(recentEvents: [Event], baby: Baby) -> Recommendation? {
         let sleepEvents = recentEvents.filter { $0.type == .sleep }
 
         guard sleepEvents.count >= 3 else { return nil }
@@ -208,7 +208,8 @@ class PersonalizedRecommendationsService {
         }
 
         // Age-based sleep recommendations (rough guidelines)
-        let babyAgeMonths = 6 // TODO: Calculate from baby birth date
+        // TODO: Calculate from baby birth date instead of hardcoding
+        let babyAgeMonths = Calendar.current.dateComponents([.month], from: baby.dateOfBirth, to: Date()).month ?? 6
 
         let recommendedSleep: Double
         if babyAgeMonths < 3 {

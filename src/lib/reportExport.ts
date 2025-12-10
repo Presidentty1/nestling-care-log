@@ -20,7 +20,11 @@ export async function exportWeeklyReport(baby: Baby) {
   pdf.text(`Weekly Report: ${baby.name}`, 20, 20);
 
   pdf.setFontSize(12);
-  pdf.text(`Period: ${sevenDaysAgo.toLocaleDateString()} - ${new Date().toLocaleDateString()}`, 20, 30);
+  pdf.text(
+    `Period: ${sevenDaysAgo.toLocaleDateString()} - ${new Date().toLocaleDateString()}`,
+    20,
+    30
+  );
 
   let yPos = 45;
 
@@ -43,7 +47,8 @@ export async function exportWeeklyReport(baby: Baby) {
 
   // Sleep analysis
   const totalSleepHours = sleeps.reduce((acc, s) => {
-    const duration = (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
+    const duration =
+      (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
     return acc + duration;
   }, 0);
 
@@ -69,7 +74,11 @@ export async function exportWeeklyReport(baby: Baby) {
   pdf.text(`Average Feeds per Day: ${(feeds.length / 7).toFixed(1)}`, 30, yPos);
   yPos += 7;
   if (feedsWithAmount.length > 0) {
-    pdf.text(`Average Amount: ${(totalFeedAmount / feedsWithAmount.length).toFixed(0)} ml`, 30, yPos);
+    pdf.text(
+      `Average Amount: ${(totalFeedAmount / feedsWithAmount.length).toFixed(0)} ml`,
+      30,
+      yPos
+    );
     yPos += 7;
   }
 

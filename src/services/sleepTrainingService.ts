@@ -51,7 +51,9 @@ class SleepTrainingService {
     return data;
   }
 
-  async createSession(data: Omit<SleepTrainingSession, 'id' | 'created_at' | 'updated_at'>): Promise<SleepTrainingSession> {
+  async createSession(
+    data: Omit<SleepTrainingSession, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<SleepTrainingSession> {
     const { data: result, error } = await supabase
       .from('sleep_training_sessions')
       .insert(data)
@@ -62,7 +64,10 @@ class SleepTrainingService {
     return result;
   }
 
-  async updateSession(id: string, data: Partial<SleepTrainingSession>): Promise<SleepTrainingSession> {
+  async updateSession(
+    id: string,
+    data: Partial<SleepTrainingSession>
+  ): Promise<SleepTrainingSession> {
     const { data: result, error } = await supabase
       .from('sleep_training_sessions')
       .update(data)
@@ -87,5 +92,4 @@ class SleepTrainingService {
 }
 
 export const sleepTrainingService = new SleepTrainingService();
-
 

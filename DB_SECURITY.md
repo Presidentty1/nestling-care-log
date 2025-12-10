@@ -9,12 +9,14 @@ This document describes the security architecture, Row Level Security (RLS) poli
 ### Authentication
 
 **Supabase Auth:**
+
 - Email/password authentication
 - JWT tokens for API access
 - Session management via HTTP-only cookies
 - Password hashing (bcrypt)
 
 **User Identification:**
+
 - `auth.uid()` - Current authenticated user ID
 - Available in RLS policies and functions
 - Null for unauthenticated requests
@@ -22,11 +24,13 @@ This document describes the security architecture, Row Level Security (RLS) poli
 ### Authorization
 
 **Row Level Security (RLS):**
+
 - Database-level access control
 - Policies evaluated on every query
 - No application-level bypass possible
 
 **Role-Based Access:**
+
 - `admin` - Full family management
 - `member` - Can create/edit events
 - `viewer` - Read-only access
@@ -36,6 +40,7 @@ This document describes the security architecture, Row Level Security (RLS) poli
 ### Policy Structure
 
 **Standard Policy Pattern:**
+
 ```sql
 CREATE POLICY "policy_name" ON table_name
   FOR operation  -- SELECT, INSERT, UPDATE, DELETE, ALL
@@ -44,6 +49,7 @@ CREATE POLICY "policy_name" ON table_name
 ```
 
 **Helper Functions:**
+
 ```sql
 -- Check family membership
 CREATE FUNCTION is_family_member(_user_id UUID, _family_id UUID)
@@ -59,6 +65,7 @@ RETURNS BOOLEAN;
 #### Profiles
 
 **Policy: Users can only access their own profile**
+
 ```sql
 CREATE POLICY "Users can view their own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
@@ -73,6 +80,7 @@ CREATE POLICY "Users can insert their own profile" ON public.profiles
 #### Families
 
 **Policy: Users can see families they belong to**
+
 ```sql
 CREATE POLICY "Users can view families they belong to" ON public.families
   FOR SELECT USING (
@@ -85,6 +93,7 @@ CREATE POLICY "Users can view families they belong to" ON public.families
 ```
 
 **Policy: Admins can update families**
+
 ```sql
 CREATE POLICY "Admins can update their families" ON public.families
   FOR UPDATE USING (
@@ -100,6 +109,7 @@ CREATE POLICY "Admins can update their families" ON public.families
 #### Babies
 
 **Policy: Users can access babies in their families**
+
 ```sql
 CREATE POLICY "Users can view babies in their families" ON public.babies
   FOR SELECT USING (
@@ -112,6 +122,7 @@ CREATE POLICY "Users can view babies in their families" ON public.babies
 ```
 
 **Policy: Members can create/update babies**
+
 ```sql
 CREATE POLICY "Members can create babies in their families" ON public.babies
   FOR INSERT WITH CHECK (
@@ -127,6 +138,7 @@ CREATE POLICY "Members can create babies in their families" ON public.babies
 #### Events
 
 **Policy: Users can view events for babies in their families**
+
 ```sql
 CREATE POLICY "Users can view events for babies in their families" ON public.events
   FOR SELECT USING (
@@ -139,6 +151,7 @@ CREATE POLICY "Users can view events for babies in their families" ON public.eve
 ```
 
 **Policy: Members can create/update/delete events**
+
 ```sql
 CREATE POLICY "Members can create events in their families" ON public.events
   FOR INSERT WITH CHECK (
@@ -154,6 +167,7 @@ CREATE POLICY "Members can create events in their families" ON public.events
 ### Additional Tables
 
 **All tables follow similar patterns:**
+
 - SELECT: Family membership check
 - INSERT: Family membership + role check
 - UPDATE: Family membership + role check
@@ -164,9 +178,10 @@ CREATE POLICY "Members can create events in their families" ON public.events
 ### Helper Functions
 
 **is_family_member:**
+
 ```sql
 CREATE OR REPLACE FUNCTION public.is_family_member(
-  _user_id UUID, 
+  _user_id UUID,
   _family_id UUID
 )
 RETURNS BOOLEAN
@@ -184,9 +199,10 @@ $$;
 ```
 
 **can_access_baby:**
+
 ```sql
 CREATE OR REPLACE FUNCTION public.can_access_baby(
-  _user_id UUID, 
+  _user_id UUID,
   _baby_id UUID
 )
 RETURNS BOOLEAN
@@ -207,11 +223,13 @@ $$;
 ### Security Definer Functions
 
 **Purpose:**
+
 - Bypass RLS for internal checks
 - Prevent RLS recursion
 - Maintain security while allowing policy evaluation
 
 **Best Practices:**
+
 - Always use `SET search_path = public`
 - Mark as `STABLE` for query optimization
 - Document function purpose
@@ -221,11 +239,13 @@ $$;
 ### Family-Level Isolation
 
 **Principle:**
+
 - Users can only access data for families they belong to
 - No cross-family data access
 - Enforced at database level
 
 **Implementation:**
+
 - All tables include `family_id`
 - RLS policies check family membership
 - Helper functions verify access
@@ -233,6 +253,7 @@ $$;
 ### User-Level Isolation
 
 **User-Specific Data:**
+
 - `profiles` - Own profile only
 - `app_settings` - Own settings only
 - `user_feedback` - Own feedback only
@@ -243,29 +264,30 @@ $$;
 ### Service Role Usage
 
 **When to Use:**
+
 - Edge functions (server-side)
 - Background jobs
 - Admin operations
 - System operations
 
 **Security:**
+
 - Service role bypasses RLS
 - Use with extreme caution
 - Always validate input
 - Log all service role operations
 
 **Example:**
+
 ```typescript
 // Edge function
 const supabaseAdmin = createClient(
   SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY  // Service role key
+  SUPABASE_SERVICE_ROLE_KEY // Service role key
 );
 
 // Can access all data (bypasses RLS)
-const { data } = await supabaseAdmin
-  .from('events')
-  .select('*');
+const { data } = await supabaseAdmin.from('events').select('*');
 ```
 
 ## Security Best Practices
@@ -273,16 +295,19 @@ const { data } = await supabaseAdmin
 ### Policy Design
 
 **1. Principle of Least Privilege:**
+
 - Grant minimum necessary access
 - Separate SELECT, INSERT, UPDATE, DELETE policies
 - Role-based restrictions
 
 **2. Explicit Checks:**
+
 - Always check family membership
 - Verify user roles explicitly
 - Don't rely on implicit relationships
 
 **3. Performance:**
+
 - Use indexes on foreign keys
 - Keep policy conditions simple
 - Use helper functions for complex checks
@@ -290,16 +315,19 @@ const { data } = await supabaseAdmin
 ### Application Security
 
 **1. Never Trust Client:**
+
 - Always validate on server
 - RLS is final authority
 - Don't skip RLS checks
 
 **2. Input Validation:**
+
 - Validate all user input
 - Use parameterized queries
 - Sanitize data before display
 
 **3. Error Handling:**
+
 - Don't expose sensitive errors
 - Log security violations
 - Monitor for suspicious activity
@@ -309,6 +337,7 @@ const { data } = await supabaseAdmin
 ### Policy Verification
 
 **Check All Tables Have RLS:**
+
 ```sql
 SELECT tablename, rowsecurity
 FROM pg_tables
@@ -317,8 +346,9 @@ AND rowsecurity = false;
 ```
 
 **List All Policies:**
+
 ```sql
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
@@ -333,6 +363,7 @@ ORDER BY tablename, policyname;
 ### Testing Security
 
 **Test as Different Users:**
+
 ```sql
 -- Test as user
 SET ROLE authenticated;
@@ -344,6 +375,7 @@ RESET ROLE;
 ```
 
 **Test Service Role:**
+
 ```sql
 SET ROLE service_role;
 SELECT * FROM events;  -- Should see all data
@@ -355,22 +387,26 @@ RESET ROLE;
 ### Issue: RLS Recursion
 
 **Problem:**
+
 - Policy checks family_members table
 - family_members has RLS
 - Infinite recursion
 
 **Solution:**
+
 - Use SECURITY DEFINER functions
 - Functions bypass RLS for internal checks
 
 ### Issue: Missing Policies
 
 **Problem:**
+
 - Table has RLS enabled
 - No policies defined
 - All queries blocked
 
 **Solution:**
+
 - Always create policies when enabling RLS
 - Test policies thoroughly
 - Document policy purpose
@@ -378,10 +414,12 @@ RESET ROLE;
 ### Issue: Performance
 
 **Problem:**
+
 - RLS policies slow queries
 - Complex policy conditions
 
 **Solution:**
+
 - Use indexes on foreign keys
 - Simplify policy conditions
 - Use helper functions
@@ -391,11 +429,13 @@ RESET ROLE;
 ### GDPR Compliance
 
 **Data Access:**
+
 - Users can export their data
 - Users can delete their data
 - RLS ensures data isolation
 
 **Data Retention:**
+
 - Automatic cleanup policies
 - User-initiated deletion
 - Audit logs for compliance
@@ -403,6 +443,7 @@ RESET ROLE;
 ### HIPAA Considerations
 
 **Note:** Nuzzle is not HIPAA compliant by default. For HIPAA compliance:
+
 - Use Supabase HIPAA-compliant plan
 - Enable additional encryption
 - Implement audit logging

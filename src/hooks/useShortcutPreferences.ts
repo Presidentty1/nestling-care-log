@@ -15,7 +15,8 @@ export function useShortcutPreferences() {
     return {
       voiceEnabled: voiceStored !== null ? JSON.parse(voiceStored) : true,
       quickActionsEnabled: quickActionsStored !== null ? JSON.parse(quickActionsStored) : true,
-      floatingButtonEnabled: floatingButtonStored !== null ? JSON.parse(floatingButtonStored) : true,
+      floatingButtonEnabled:
+        floatingButtonStored !== null ? JSON.parse(floatingButtonStored) : true,
     };
   });
 
@@ -26,10 +27,16 @@ export function useShortcutPreferences() {
         setPreferences(prev => ({ ...prev, voiceEnabled: JSON.parse(e.newValue || 'true') }));
       }
       if (e.key === 'quick_actions_enabled') {
-        setPreferences(prev => ({ ...prev, quickActionsEnabled: JSON.parse(e.newValue || 'true') }));
+        setPreferences(prev => ({
+          ...prev,
+          quickActionsEnabled: JSON.parse(e.newValue || 'true'),
+        }));
       }
       if (e.key === 'floating_button_enabled') {
-        setPreferences(prev => ({ ...prev, floatingButtonEnabled: JSON.parse(e.newValue || 'true') }));
+        setPreferences(prev => ({
+          ...prev,
+          floatingButtonEnabled: JSON.parse(e.newValue || 'true'),
+        }));
       }
     };
 

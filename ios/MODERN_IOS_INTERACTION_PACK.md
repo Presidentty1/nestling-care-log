@@ -36,6 +36,7 @@ All new features are controlled via feature flags in `AppSettings`:
 All forms and editors now use `.presentationDetents([.medium, .large])` with `.presentationDragIndicator(.visible)` and `.interactiveDismissDisabled(isSaving)`.
 
 **Files Modified**:
+
 - `ios/Sources/Design/Components/SheetDetentWrapper.swift` (new)
 - `ios/Sources/Features/Home/HomeView.swift`
 - `ios/Sources/Features/History/HistoryView.swift`
@@ -51,12 +52,14 @@ All forms and editors now use `.presentationDetents([.medium, .large])` with `.p
 Both Home and History views now support `.searchable(text:, suggestions:)` with filter chips.
 
 **Files Modified**:
+
 - `ios/Sources/Features/Home/HomeViewModel.swift` (added `searchText`, `selectedFilter`, `filteredEvents`, `searchSuggestions`)
 - `ios/Sources/Features/History/HistoryViewModel.swift` (same)
 - `ios/Sources/Design/Components/FilterChipsView.swift` (new)
 - `ios/Sources/Domain/Models/EventTypeFilter.swift` (new)
 
 **Features**:
+
 - Search parses type keywords (feed, diaper, sleep, tummy)
 - Search matches note text
 - Search matches time tokens (e.g., "8:30", "pm")
@@ -70,11 +73,13 @@ Both Home and History views now support `.searchable(text:, suggestions:)` with 
 TimelineRow now supports long-press context menus with "Edit", "Duplicate", "Copy summary", "Delete" actions.
 
 **Files Modified**:
+
 - `ios/Sources/Design/Components/TimelineRow.swift` (added context menu, duplicate, copy summary)
 - `ios/Sources/Features/Home/HomeViewModel.swift` (added `duplicateEvent`)
 - `ios/Sources/Features/History/HistoryViewModel.swift` (added `duplicateEvent`)
 
 **Features**:
+
 - Long-press shows context menu
 - Duplicate creates new event with current time
 - Copy summary formats "Feed · 120 ml · 8:24 pm" to pasteboard
@@ -87,12 +92,14 @@ TimelineRow now supports long-press context menus with "Edit", "Duplicate", "Cop
 Widgets now support interactive buttons via AppIntents, including lock-screen variants.
 
 **Files Modified**:
+
 - `ios/NestlingWidgets/NextFeedWidget.swift` (added `accessoryCircular`, `accessoryInline`, interactive buttons)
 - `ios/NestlingWidgets/NextNapWidget.swift` (same)
 - `ios/NestlingIntents/LogFeedIntent.swift` (updated for widget actions)
 - `ios/NestlingIntents/LogSleepIntent.swift` (updated for widget actions)
 
 **Features**:
+
 - Lock-screen widgets: `accessoryCircular` and `accessoryInline`
 - Interactive buttons: "Log Feed 120 ml", "Start Sleep" / "Stop Sleep" toggle
 - Uses App Groups for shared container
@@ -106,12 +113,14 @@ Widgets now support interactive buttons via AppIntents, including lock-screen va
 Sleep timer now uses Live Activity with Dynamic Island support.
 
 **Files Modified**:
+
 - `ios/Sources/Services/LiveActivityManager.swift` (updated for Dynamic Island)
 - `ios/NestlingWidgets/SleepActivityWidget.swift` (new)
 - `ios/Sources/Features/Forms/SleepFormViewModel.swift` (integrated Live Activity)
 - `ios/Sources/Features/Home/HomeViewModel.swift` (integrated Live Activity)
 
 **Features**:
+
 - `SleepActivityAttributes` + content state
 - Start activity on sleep start
 - Update elapsed time every second
@@ -127,11 +136,13 @@ Sleep timer now uses Live Activity with Dynamic Island support.
 iPad and external keyboard users can use ⌘N, ⌘S, ⌘D, ⌘T for quick actions.
 
 **Files Modified**:
+
 - `ios/Sources/App/NestlingApp.swift` (added `.commands` modifier)
 - `ios/Sources/Features/Settings/KeyboardShortcutsView.swift` (new)
 - `ios/Sources/Features/Settings/SettingsRootView.swift` (added Shortcuts section)
 
 **Shortcuts**:
+
 - ⌘N: Quick Log Feed
 - ⌘S: Start/Stop Sleep
 - ⌘D: Log Diaper
@@ -146,6 +157,7 @@ iPad and external keyboard users can use ⌘N, ⌘S, ⌘D, ⌘T for quick action
 Latest ~500 events are indexed in CoreSpotlight for system-wide search.
 
 **Files Modified**:
+
 - `ios/Sources/Services/SpotlightIndexer.swift` (new)
 - `ios/Sources/App/NestlingApp.swift` (added Spotlight deep link handling)
 - `ios/Sources/Features/Navigation/NavigationCoordinator.swift` (added `navigateToEvent`)
@@ -154,6 +166,7 @@ Latest ~500 events are indexed in CoreSpotlight for system-wide search.
 - `ios/Sources/Domain/Models/AppSettings.swift` (added `spotlightIndexingEnabled`)
 
 **Features**:
+
 - Indexes latest 500 events (sorted by date, newest first)
 - Searchable by event type, baby name, note text
 - Tapping Spotlight result opens History on correct date
@@ -167,6 +180,7 @@ Latest ~500 events are indexed in CoreSpotlight for system-wide search.
 Subtle symbol effects added to buttons and icons, respecting Reduce Motion.
 
 **Files Modified**:
+
 - `ios/Sources/Design/Components/SymbolEffects.swift` (new)
 - `ios/Sources/Design/Components/PrimaryButton.swift` (added `.symbolPulse()`)
 - `ios/Sources/Design/Components/QuickActionButton.swift` (added `.symbolBounce()`)
@@ -176,6 +190,7 @@ Subtle symbol effects added to buttons and icons, respecting Reduce Motion.
 - `ios/Sources/Features/Forms/TummyTimeFormView.swift` (same)
 
 **Features**:
+
 - Pulse effect on PrimaryButton icons
 - Bounce effect on QuickActionButton icons (when active)
 - Bounce effect on Save button checkmarks (when saving)
@@ -186,15 +201,18 @@ Subtle symbol effects added to buttons and icons, respecting Reduce Motion.
 **Status**: ✅ Complete
 
 **Feature Flags**:
+
 - `preferMediumSheet` in `AppSettings`
 - `spotlightIndexingEnabled` in `AppSettings`
 
 **Documentation**:
+
 - This file (`MODERN_IOS_INTERACTION_PACK.md`)
 - Updated `ios/IOS_ARCHITECTURE.md` (see below)
 - Updated `ios/README.md` (see below)
 
 **Tests**:
+
 - Unit tests for `duplicateEvent` in `HomeViewModel` and `HistoryViewModel`
 - UI tests for context menu "Copy summary" action
 - UI tests for Spotlight deep link restoration (smoke test)
@@ -277,5 +295,3 @@ No Core Data migration required. New `AppSettingsEntity` attributes are optional
 - [Apple Developer - ActivityKit](https://developer.apple.com/documentation/activitykit)
 - [Apple Developer - CoreSpotlight](https://developer.apple.com/documentation/corespotlight)
 - [Apple Developer - SF Symbols](https://developer.apple.com/sf-symbols/)
-
-

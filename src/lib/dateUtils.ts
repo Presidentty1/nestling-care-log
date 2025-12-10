@@ -39,7 +39,10 @@ export const dateUtils = {
     const startDate = typeof start === 'string' ? new Date(start) : start;
     const endDate = typeof end === 'string' ? new Date(end) : end;
 
-    if (!dateUtils.isValidDate(startDate.toISOString()) || !dateUtils.isValidDate(endDate.toISOString())) {
+    if (
+      !dateUtils.isValidDate(startDate.toISOString()) ||
+      !dateUtils.isValidDate(endDate.toISOString())
+    ) {
       return 0;
     }
 
@@ -53,7 +56,10 @@ export const dateUtils = {
     const startDate = typeof start === 'string' ? new Date(start) : start;
     const endDate = typeof end === 'string' ? new Date(end) : end;
 
-    if (!dateUtils.isValidDate(startDate.toISOString()) || !dateUtils.isValidDate(endDate.toISOString())) {
+    if (
+      !dateUtils.isValidDate(startDate.toISOString()) ||
+      !dateUtils.isValidDate(endDate.toISOString())
+    ) {
       return 0;
     }
 
@@ -71,7 +77,7 @@ export const dateUtils = {
 
     return {
       start: startOfDay(dateObj).toISOString(),
-      end: endOfDay(dateObj).toISOString()
+      end: endOfDay(dateObj).toISOString(),
     };
   },
 
@@ -83,7 +89,7 @@ export const dateUtils = {
     const now = new Date();
     const toleranceMs = toleranceMinutes * 60 * 1000;
 
-    return dateObj.getTime() > (now.getTime() + toleranceMs);
+    return dateObj.getTime() > now.getTime() + toleranceMs;
   },
 
   /**
@@ -113,9 +119,5 @@ export const dateUtils = {
     if (durationMs > maxDurationMs) {
       throw new Error('Date range cannot exceed 90 days');
     }
-  }
+  },
 };
-
-
-
-

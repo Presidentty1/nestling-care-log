@@ -15,11 +15,13 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ⚠️ UNVERIFIED - Needs user study data
 
 **Current usage:**
+
 - AuthView.swift (line 41)
 - WelcomeView.swift (line 15)
 - Marketing materials
 
 **Recommended actions:**
+
 - **Option A:** Conduct user study with 100+ parents tracking for 30 days
   - Measure: Average sleep duration before/after using app
   - Target: ≥2 hour improvement for 50%+ of users
@@ -33,10 +35,12 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ⚠️ UNVERIFIED - Needs ML model validation
 
 **Current usage:**
+
 - AuthView.swift (line 65)
 - Marketing materials
 
 **Recommended actions:**
+
 - **Option A:** Run ML model validation:
   - Test set: 1,000+ nap predictions across 100+ babies
   - Calculate: Predictions within ±15 min of actual nap time
@@ -51,16 +55,19 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ⚠️ UNVERIFIED - Requires App Store data
 
 **Current usage:**
+
 - ProSubscriptionView.swift (line 199)
 - Social proof elements
 
 **Verification needed:**
+
 - **4.8 rating:** Must match actual App Store rating (update monthly)
 - **1,200+ parents:** Must match actual download/user count
   - Source: App Store Connect analytics
   - Update threshold: When user count changes significantly (e.g., 1,500, 2,000)
 
 **Recommended actions:**
+
 - If TestFlight only: Change to "Trusted by beta testers"
 - If post-launch: Pull actual metrics from App Store Connect weekly
 - Add date of measurement: "4.8 rating (as of Dec 2025)"
@@ -72,11 +79,12 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ✅ VERIFIABLE
 
 **How to verify:**
+
 1. Open app to Home screen
 2. Tap Quick Action button (Feed/Sleep/Diaper/Tummy)
 3. Sheet opens with defaults pre-filled
 4. Tap "Save"
-= **2 taps total ✓**
+   = **2 taps total ✓**
 
 **Evidence:** User flow analysis, can be demonstrated in screenshots
 
@@ -87,6 +95,7 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ✅ IMPLEMENTED
 
 **How it works:**
+
 - Free tier: Age-based predictions from `NapPredictorService.swift`
 - Pro tier: Pattern-based predictions using recent logs + wake windows
 - Algorithm: Combines age-appropriate wake windows with individual baby's patterns
@@ -100,6 +109,7 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ✅ IMPLEMENTED (via Supabase/CloudKit)
 
 **How it works:**
+
 - Real-time sync via Supabase realtime subscriptions
 - Multi-caregiver support in `BackupService.swift`
 - Invite caregivers via share sheet
@@ -113,12 +123,14 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ✅ IMPLEMENTED
 
 **How it works:**
+
 - IndexedDB/CoreData local-first architecture
 - All data stored locally first
 - Sync happens in background when online
 - AI data sharing is opt-in
 
 **Evidence:**
+
 - Code: `CoreDataStore.swift`, `BackupService.swift`
 - Privacy: `PrivacyInfo.xcprivacy`, `PrivacyManager.swift`
 
@@ -129,6 +141,7 @@ This document tracks all marketing claims made in the app and provides evidence/
 **Status:** ✅ VERIFIABLE
 
 **How to verify:**
+
 1. Fresh install → Welcome screen
 2. Tap "Let's Go!"
 3. Fill in baby name + DOB (10-15s)
@@ -174,4 +187,3 @@ Before app store submission:
 - **Annually:** Conduct user outcome survey
 
 Last updated: December 6, 2025
-

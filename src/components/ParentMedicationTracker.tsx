@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Pill, Plus, Trash2 } from 'lucide-react';
 import { parentWellnessService } from '@/services/parentWellnessService';
 import { toast } from 'sonner';
@@ -66,31 +72,24 @@ export function ParentMedicationTracker({ medications, onRefresh }: ParentMedica
   };
 
   return (
-    <div className="space-y-3">
+    <div className='space-y-3'>
       {medications.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground">
-          <Pill className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No medications tracked yet</p>
+        <div className='text-center py-6 text-muted-foreground'>
+          <Pill className='h-8 w-8 mx-auto mb-2 opacity-50' />
+          <p className='text-sm'>No medications tracked yet</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {medications.map((med) => (
-            <div
-              key={med.id}
-              className="flex items-center justify-between p-3 border rounded-lg"
-            >
-              <div className="flex-1">
-                <p className="font-medium">{med.medication_name}</p>
-                <p className="text-sm text-muted-foreground">
+        <div className='space-y-2'>
+          {medications.map(med => (
+            <div key={med.id} className='flex items-center justify-between p-3 border rounded-lg'>
+              <div className='flex-1'>
+                <p className='font-medium'>{med.medication_name}</p>
+                <p className='text-sm text-muted-foreground'>
                   {med.dosage} • {med.frequency}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDelete(med.id)}
-              >
-                <Trash2 className="h-4 w-4" />
+              <Button variant='ghost' size='sm' onClick={() => handleDelete(med.id)}>
+                <Trash2 className='h-4 w-4' />
               </Button>
             </div>
           ))}
@@ -99,8 +98,8 @@ export function ParentMedicationTracker({ medications, onRefresh }: ParentMedica
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant='outline' className='w-full'>
+            <Plus className='h-4 w-4 mr-2' />
             Add Medication/Supplement
           </Button>
         </DialogTrigger>
@@ -108,64 +107,54 @@ export function ParentMedicationTracker({ medications, onRefresh }: ParentMedica
           <DialogHeader>
             <DialogTitle>Add Medication/Supplement</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className='space-y-4'>
             <div>
-              <Label htmlFor="medication_name">Name *</Label>
+              <Label htmlFor='medication_name'>Name *</Label>
               <Input
-                id="medication_name"
+                id='medication_name'
                 value={formData.medication_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, medication_name: e.target.value })
-                }
-                placeholder="e.g., Prenatal vitamin"
+                onChange={e => setFormData({ ...formData, medication_name: e.target.value })}
+                placeholder='e.g., Prenatal vitamin'
                 required
               />
             </div>
             <div>
-              <Label htmlFor="dosage">Dosage</Label>
+              <Label htmlFor='dosage'>Dosage</Label>
               <Input
-                id="dosage"
+                id='dosage'
                 value={formData.dosage}
-                onChange={(e) =>
-                  setFormData({ ...formData, dosage: e.target.value })
-                }
-                placeholder="e.g., 1 tablet"
+                onChange={e => setFormData({ ...formData, dosage: e.target.value })}
+                placeholder='e.g., 1 tablet'
               />
             </div>
             <div>
-              <Label htmlFor="frequency">Frequency</Label>
+              <Label htmlFor='frequency'>Frequency</Label>
               <Input
-                id="frequency"
+                id='frequency'
                 value={formData.frequency}
-                onChange={(e) =>
-                  setFormData({ ...formData, frequency: e.target.value })
-                }
-                placeholder="e.g., Once daily"
+                onChange={e => setFormData({ ...formData, frequency: e.target.value })}
+                placeholder='e.g., Once daily'
               />
             </div>
             <div>
-              <Label htmlFor="start_date">Start Date</Label>
+              <Label htmlFor='start_date'>Start Date</Label>
               <Input
-                id="start_date"
-                type="date"
+                id='start_date'
+                type='date'
                 value={formData.start_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, start_date: e.target.value })
-                }
+                onChange={e => setFormData({ ...formData, start_date: e.target.value })}
               />
             </div>
             <div>
-              <Label htmlFor="note">Note</Label>
+              <Label htmlFor='note'>Note</Label>
               <Input
-                id="note"
+                id='note'
                 value={formData.note}
-                onChange={(e) =>
-                  setFormData({ ...formData, note: e.target.value })
-                }
-                placeholder="Any additional notes"
+                onChange={e => setFormData({ ...formData, note: e.target.value })}
+                placeholder='Any additional notes'
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type='submit' className='w-full'>
               Add Medication
             </Button>
           </form>

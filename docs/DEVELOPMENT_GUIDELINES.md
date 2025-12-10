@@ -3,15 +3,17 @@
 ## Import Organization
 
 ### Standard Import Order
+
 1. **React imports** (useState, useEffect, etc.)
 2. **External libraries** (date-fns, lucide-react, etc.)
-3. **Internal UI components** (@/components/ui/*)
-4. **Internal utilities** (@/lib/*)
-5. **Internal services** (@/services/*)
-6. **Internal types** (@/types/*)
-7. **Internal store/state** (@/store/*)
+3. **Internal UI components** (@/components/ui/\*)
+4. **Internal utilities** (@/lib/\*)
+5. **Internal services** (@/services/\*)
+6. **Internal types** (@/types/\*)
+7. **Internal store/state** (@/store/\*)
 
 ### Example
+
 ```typescript
 // React imports
 import { useState, useEffect } from 'react';
@@ -39,6 +41,7 @@ import { useAppStore } from '@/store/appStore';
 ```
 
 ### Type Imports
+
 Use `import type` for type-only imports to improve bundle size:
 
 ```typescript
@@ -53,33 +56,40 @@ import { EventRecord, eventsService } from '@/services/eventsService';
 ## File Naming Conventions
 
 ### Components
+
 - **PascalCase**: `Button.tsx`, `UserProfile.tsx`
 - **Directories**: lowercase with hyphens: `user-profile/`
 - **Index files**: Use `index.ts` for directory exports
 
 ### Services
+
 - **camelCase**: `eventsService.ts`, `userPreferencesService.ts`
 
 ### Utilities
+
 - **camelCase**: `dateUtils.ts`, `validationUtils.ts`
 
 ### Types
+
 - **PascalCase interfaces**: `UserProfile`, `EventRecord`
 - **camelCase files**: `events.ts`, `user.ts`
 
 ## Module Boundaries
 
 ### Service Layer
+
 - Services should only depend on utilities and external libraries
 - Services should not import React hooks or components
 - Services should be pure functions where possible
 
 ### Component Layer
+
 - Components should only import services, not implement business logic
 - Components should be focused on UI rendering and user interaction
 - Business logic should be in custom hooks or services
 
 ### Utility Layer
+
 - Utilities should be pure functions
 - No side effects or external dependencies
 - Easy to test in isolation
@@ -87,6 +97,7 @@ import { EventRecord, eventsService } from '@/services/eventsService';
 ## Error Handling
 
 ### User-Facing Errors
+
 ```typescript
 try {
   await someOperation();
@@ -97,6 +108,7 @@ try {
 ```
 
 ### Internal Errors
+
 ```typescript
 try {
   await someOperation();
@@ -109,36 +121,47 @@ try {
 ## State Management
 
 ### Local State
+
 Use React hooks for component-local state:
+
 ```typescript
 const [value, setValue] = useState(initialValue);
 ```
 
 ### Global State
+
 Use Zustand store for app-wide state:
+
 ```typescript
 const { user, setUser } = useAppStore();
 ```
 
 ### Server State
+
 Use React Query for server state:
+
 ```typescript
-const { data, isLoading } = useQuery(['events', babyId], () => eventsService.getTodayEvents(babyId));
+const { data, isLoading } = useQuery(['events', babyId], () =>
+  eventsService.getTodayEvents(babyId)
+);
 ```
 
 ## Testing
 
 ### Unit Tests
+
 - Test pure functions and utilities
 - Mock external dependencies
 - Focus on business logic
 
 ### Integration Tests
+
 - Test service interactions
 - Mock network requests
 - Verify data flow
 
 ### E2E Tests
+
 - Test complete user journeys
 - Minimal mocking
 - Focus on critical paths
@@ -146,6 +169,7 @@ const { data, isLoading } = useQuery(['events', babyId], () => eventsService.get
 ## Performance
 
 ### React Optimization
+
 ```typescript
 // Memoize expensive components
 export const ExpensiveComponent = memo(function ExpensiveComponent({ data }) {
@@ -162,6 +186,7 @@ const handleClick = useCallback(() => {
 ```
 
 ### Bundle Optimization
+
 - Use dynamic imports for code splitting
 - Lazy load routes and heavy components
 - Minimize bundle size with tree shaking
@@ -169,18 +194,21 @@ const handleClick = useCallback(() => {
 ## Code Style
 
 ### TypeScript
+
 - Use strict mode
 - Prefer interfaces over types for objects
 - Use branded types for domain-specific strings
 - Avoid `any` - use `unknown` if type is truly dynamic
 
 ### Naming
+
 - **Variables**: camelCase (`userName`, `isLoading`)
 - **Functions**: camelCase (`getUser`, `calculateTotal`)
 - **Components**: PascalCase (`UserCard`, `EventList`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_RETRY_ATTEMPTS`)
 
 ### Comments
+
 ```typescript
 // Single line comments for implementation details
 
@@ -196,6 +224,7 @@ const handleClick = useCallback(() => {
 ## Git Workflow
 
 ### Commit Messages
+
 ```
 feat: add user authentication
 fix: resolve login timeout issue
@@ -205,6 +234,7 @@ test: add unit tests for user service
 ```
 
 ### Branch Naming
+
 ```
 feature/user-authentication
 bugfix/login-timeout
@@ -214,11 +244,13 @@ hotfix/critical-security-issue
 ## Deployment
 
 ### Environment Variables
+
 - Use `.env.example` for required variables
 - Never commit secrets
 - Use environment-specific configs
 
 ### Build Process
+
 - Run tests before deployment
 - Lint and format code
 - Generate build artifacts
@@ -227,20 +259,19 @@ hotfix/critical-security-issue
 ## Security
 
 ### Input Validation
+
 - Validate all user inputs
 - Sanitize data before processing
 - Use parameterized queries
 
 ### Authentication
+
 - Store tokens securely
 - Implement token refresh
 - Handle session expiration
 
 ### Data Protection
+
 - Encrypt sensitive data
 - Implement proper access controls
 - Follow privacy regulations
-
-
-
-

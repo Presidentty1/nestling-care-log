@@ -3,40 +3,48 @@
 All product review improvements have been successfully copied from `syq` to `gnq` worktree.
 
 ## Location
+
 **Xcode Project:** `ios/Nuzzle/Nestling.xcodeproj`
 
 ## Files Added (7 New Swift Files)
 
 ### Home Screen
+
 - ✅ `Sources/Features/Home/FirstTasksChecklistView.swift`
 - ✅ `Sources/Features/Home/FirstLogCelebrationView.swift`
 - ✅ `Sources/Features/Home/HomeTutorialOverlay.swift`
 
 ### Calendar
+
 - ✅ `Sources/Features/History/MonthlyCalendarView.swift`
 - ✅ `Sources/Features/History/CalendarHeatmapView.swift`
 - ✅ `Sources/Features/History/CalendarViewToggle.swift`
 
 ### Premium Features
+
 - ✅ `Sources/Services/DoctorReportService.swift`
 - ✅ `Sources/Design/Components/UpgradePromptCard.swift`
 
 ## Files Modified (10 Existing Swift Files)
 
 ### Onboarding
+
 - ✅ `Sources/Features/Onboarding/BabySetupView.swift`
 - ✅ `Sources/Features/Onboarding/InitialStateView.swift`
 - ✅ `Sources/Features/Onboarding/OnboardingCoordinator.swift`
 
 ### Home
+
 - ✅ `Sources/Features/Home/HomeView.swift`
 - ✅ `Sources/Features/Home/HomeViewModel.swift`
 
 ### History
+
 - ✅ `Sources/Features/History/HistoryView.swift`
 - ✅ `Sources/Features/History/HistoryViewModel.swift`
 
 ### Core
+
 - ✅ `Sources/Domain/Models/AppSettings.swift`
 - ✅ `Sources/Features/Settings/ExportDataView.swift`
 - ✅ `Sources/Services/DataExportService.swift`
@@ -52,6 +60,7 @@ All product review improvements have been successfully copied from `syq` to `gnq
 ## Next Steps in Xcode
 
 ### 1. Add New Files to Xcode Project
+
 You need to add the 7 new Swift files to your Xcode project targets:
 
 1. Open: `ios/Nuzzle/Nestling.xcodeproj`
@@ -70,6 +79,7 @@ You need to add the 7 new Swift files to your Xcode project targets:
 6. Click "Add"
 
 ### 2. Build and Test
+
 ```bash
 cd ios/Nuzzle
 xcodebuild -project Nestling.xcodeproj -scheme Nestling -sdk iphonesimulator build
@@ -78,6 +88,7 @@ xcodebuild -project Nestling.xcodeproj -scheme Nestling -sdk iphonesimulator bui
 Or in Xcode: **⌘B** to build
 
 ### 3. Run in Simulator
+
 - Select iPhone simulator
 - Click Run (⌘R)
 - Test onboarding flow
@@ -87,16 +98,19 @@ Or in Xcode: **⌘B** to build
 ## What You Should See
 
 ### On Fresh Install
+
 1. **Onboarding:** 3 steps (not 4), no Sex field
 2. **Home Screen:** First Tasks Checklist appears
 3. **History Tab:** Full monthly calendar with colored dots
 
 ### After Logging Events
+
 1. **First Log:** Celebration animation with confetti
 2. **Tutorial:** Interactive overlay guides you through features
 3. **Calendar:** Events show as colored dots (blue/purple/green)
 
 ### Premium Features
+
 1. **Calendar Toggle:** Free users see "Dots", Premium badge on "Heatmap"
 2. **Export:** PDF option available in Settings
 3. **Upgrade Prompts:** Appear when trying Premium features
@@ -117,13 +131,13 @@ Or in Xcode: **⌘B** to build
 ## Support Files
 
 For detailed information, see:
+
 - Testing: `NEW_FEATURES_TESTING_GUIDE.md`
 - Implementation details: `UX_IMPROVEMENTS_SUMMARY.md`
 - Next steps: `QUICK_WINS_NEXT_ITERATION.md`
 
 ---
 
-*Applied: December 6, 2025*  
-*Source: Previous changes merged into main*  
-*Status: ✅ Ready for Xcode integration*
-
+_Applied: December 6, 2025_  
+_Source: Previous changes merged into main_  
+_Status: ✅ Ready for Xcode integration_

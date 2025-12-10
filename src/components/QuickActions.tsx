@@ -18,16 +18,44 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const actions = [
-    { type: 'feed' as EventType, label: 'Feed', icon: Milk, color: 'text-event-feed', borderColor: 'border-event-feed/20', bgColor: 'bg-event-feed/5' },
-    { type: 'sleep' as EventType, label: 'Sleep', icon: Moon, color: 'text-event-sleep', borderColor: 'border-event-sleep/20', bgColor: 'bg-event-sleep/5' },
-    { type: 'diaper' as EventType, label: 'Diaper', icon: Baby, color: 'text-event-diaper', borderColor: 'border-event-diaper/20', bgColor: 'bg-event-diaper/5' },
-    { type: 'tummy_time' as EventType, label: 'Tummy', icon: Clock, color: 'text-event-tummy', borderColor: 'border-event-tummy/20', bgColor: 'bg-event-tummy/5' },
+    {
+      type: 'feed' as EventType,
+      label: 'Feed',
+      icon: Milk,
+      color: 'text-event-feed',
+      borderColor: 'border-event-feed/20',
+      bgColor: 'bg-event-feed/5',
+    },
+    {
+      type: 'sleep' as EventType,
+      label: 'Sleep',
+      icon: Moon,
+      color: 'text-event-sleep',
+      borderColor: 'border-event-sleep/20',
+      bgColor: 'bg-event-sleep/5',
+    },
+    {
+      type: 'diaper' as EventType,
+      label: 'Diaper',
+      icon: Baby,
+      color: 'text-event-diaper',
+      borderColor: 'border-event-diaper/20',
+      bgColor: 'bg-event-diaper/5',
+    },
+    {
+      type: 'tummy_time' as EventType,
+      label: 'Tummy',
+      icon: Clock,
+      color: 'text-event-tummy',
+      borderColor: 'border-event-tummy/20',
+      bgColor: 'bg-event-tummy/5',
+    },
   ];
 
   const getTimeSince = (type: EventType): string => {
     const lastEvent = recentEvents.find(e => e.type === type);
     if (!lastEvent) return '—';
-    
+
     const eventTime = lastEvent.end_time || lastEvent.start_time;
     return formatDistanceToNow(new Date(eventTime), { addSuffix: true });
   };
@@ -37,9 +65,9 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
       // Track analytics
       track('quick_action_used', {
         action_type: type,
-        method: onQuickLog ? 'quick_log' : 'open_form'
+        method: onQuickLog ? 'quick_log' : 'open_form',
       });
-      
+
       if (onQuickLog) {
         onQuickLog(type);
       } else {
@@ -80,25 +108,25 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
   }, []);
 
   return (
-    <div className="space-y-2">
+    <div className='space-y-2'>
       {onQuickLog && (
-        <p className="text-xs text-muted-foreground text-center">
+        <p className='text-xs text-muted-foreground text-center'>
           Tap to quick log • Hold for details
         </p>
       )}
-      <div className="grid grid-cols-2 gap-4">
-        {actions.map((action) => (
+      <div className='grid grid-cols-2 gap-4'>
+        {actions.map(action => (
           <Button
             key={action.type}
             onClick={() => handleClick(action.type)}
             onTouchStart={() => handleTouchStart(action.type)}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
-            onContextMenu={(e) => {
+            onContextMenu={e => {
               e.preventDefault();
               handleLongPress(action.type);
             }}
-            variant="outline"
+            variant='outline'
             className={`
               h-[112px] flex flex-col items-center justify-center gap-2 rounded-md border-2 
               ${action.borderColor} ${action.bgColor} 
@@ -110,8 +138,8 @@ export function QuickActions({ onActionSelect, onQuickLog, recentEvents = [] }: 
             style={{ minHeight: '44px', minWidth: '44px' }}
           >
             <action.icon className={`h-8 w-8 ${action.color}`} strokeWidth={2} />
-            <span className="text-[15px] leading-[20px] font-medium">{action.label}</span>
-            <span className="text-xs text-muted-foreground">{getTimeSince(action.type)}</span>
+            <span className='text-[15px] leading-[20px] font-medium'>{action.label}</span>
+            <span className='text-xs text-muted-foreground'>{getTimeSince(action.type)}</span>
           </Button>
         ))}
       </div>

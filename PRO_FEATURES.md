@@ -18,7 +18,7 @@ This document outlines which features are locked behind Nestling Pro subscriptio
    - AI Nap Predictions with wake window analysis
    - AI Cry Analysis
    - AI Assistant chat
-   - **Files to update**: 
+   - **Files to update**:
      - `src/pages/Predictions.tsx`
      - `src/pages/CryInsights.tsx`
      - `src/pages/AIAssistant.tsx`
@@ -26,7 +26,7 @@ This document outlines which features are locked behind Nestling Pro subscriptio
 
 3. **CSV Export**
    - Export events to CSV for sharing with pediatrician
-   - **Files to update**: 
+   - **Files to update**:
      - `src/pages/Settings/PrivacyData.tsx`
      - `src/services/dataService.ts` (export functions)
 
@@ -34,7 +34,7 @@ This document outlines which features are locked behind Nestling Pro subscriptio
    - Weekly insights reports
    - Growth tracking
    - Advanced charts and trends
-   - **Files to update**: 
+   - **Files to update**:
      - `src/pages/Analytics.tsx` (if exists)
      - Any analytics components
 
@@ -53,11 +53,13 @@ These features remain free for all users:
 ## Implementation Status
 
 ### Pro Service & Hook
+
 - ✅ `src/services/proService.ts` - Service to check Pro status
 - ✅ `src/hooks/usePro.ts` - React hook for Pro status
 - ✅ Checks `subscriptions` table for active/trialing status
 
 ### Pro Gating
+
 - ✅ Multi-caregiver invites - Fully gated
 - ⏳ AI features - Not yet gated
 - ⏳ CSV export - Not yet gated
@@ -70,11 +72,11 @@ import { usePro } from '@/hooks/usePro';
 
 function MyComponent() {
   const { isPro, loading } = usePro();
-  
+
   if (!isPro) {
     return <UpgradePrompt />;
   }
-  
+
   return <ProFeature />;
 }
 ```
@@ -86,5 +88,3 @@ function MyComponent() {
 3. Add Pro badges to locked features in UI
 4. Update Settings page to show Pro status
 5. Add upgrade CTAs throughout the app
-
-

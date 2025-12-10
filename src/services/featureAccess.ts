@@ -1,6 +1,11 @@
 import { subscriptionService } from './subscriptionService';
 
-export type FeatureType = 'aiPredictions' | 'cryAnalysis' | 'aiAssistant' | 'advancedAnalytics' | 'weeklySummaries';
+export type FeatureType =
+  | 'aiPredictions'
+  | 'cryAnalysis'
+  | 'aiAssistant'
+  | 'advancedAnalytics'
+  | 'weeklySummaries';
 
 class FeatureAccessService {
   /**
@@ -36,7 +41,10 @@ class FeatureAccessService {
   /**
    * Get feature access status with usage info
    */
-  async getFeatureStatus(feature: FeatureType, userId: string): Promise<{
+  async getFeatureStatus(
+    feature: FeatureType,
+    userId: string
+  ): Promise<{
     canAccess: boolean;
     isPremium: boolean;
     usage?: { current: number; limit: number };
@@ -50,7 +58,10 @@ class FeatureAccessService {
       const limits = await subscriptionService.getLimits(userId);
       if (limits[feature as keyof typeof limits] > 0) {
         // This feature has usage limits, get current usage
-        const currentUsage = await subscriptionService['getFeatureUsage'](feature as keyof typeof limits, userId);
+        const currentUsage = await subscriptionService['getFeatureUsage'](
+          feature as keyof typeof limits,
+          userId
+        );
         usage = {
           current: currentUsage,
           limit: limits[feature as keyof typeof limits],

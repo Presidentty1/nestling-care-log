@@ -47,7 +47,7 @@ export function SmartPredictionsCard() {
         return {
           isEnabled,
           learningProgress: 0,
-          daysOfData: 0
+          daysOfData: 0,
         };
       }
 
@@ -62,9 +62,8 @@ export function SmartPredictionsCard() {
       );
 
       // Calculate learning progress (need at least 3 days of data)
-      const uniqueDays = new Set(
-        events.map(event => new Date(event.start_time).toDateString())
-      ).size;
+      const uniqueDays = new Set(events.map(event => new Date(event.start_time).toDateString()))
+        .size;
 
       const learningProgress = Math.min(uniqueDays / 5, 1); // Need 5 days for full learning
 
@@ -75,14 +74,18 @@ export function SmartPredictionsCard() {
         isEnabled,
         learningProgress,
         daysOfData: uniqueDays,
-        nextNapPrediction: predictions?.nextNap ? {
-          time: predictions.nextNap.predictedTime,
-          confidence: predictions.nextNap.confidence
-        } : undefined,
-        nextFeedPrediction: predictions?.nextFeed ? {
-          time: predictions.nextFeed.predictedTime,
-          confidence: predictions.nextFeed.confidence
-        } : undefined
+        nextNapPrediction: predictions?.nextNap
+          ? {
+              time: predictions.nextNap.predictedTime,
+              confidence: predictions.nextNap.confidence,
+            }
+          : undefined,
+        nextFeedPrediction: predictions?.nextFeed
+          ? {
+              time: predictions.nextFeed.predictedTime,
+              confidence: predictions.nextFeed.confidence,
+            }
+          : undefined,
       };
     },
     enabled: !!activeBabyId,
@@ -106,7 +109,7 @@ export function SmartPredictionsCard() {
     },
     onError: () => {
       toast.error('Failed to update Smart Predictions setting');
-    }
+    },
   });
 
   const handleToggle = (enabled: boolean) => {
@@ -115,16 +118,14 @@ export function SmartPredictionsCard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="smart-predictions" className="font-medium">
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <Label htmlFor='smart-predictions' className='font-medium'>
             Enable Smart Predictions
           </Label>
-          <div className="h-6 w-11 bg-muted rounded-full animate-pulse" />
+          <div className='h-6 w-11 bg-muted rounded-full animate-pulse' />
         </div>
-        <div className="text-sm text-muted-foreground">
-          Loading prediction status...
-        </div>
+        <div className='text-sm text-muted-foreground'>Loading prediction status...</div>
       </div>
     );
   }
@@ -132,17 +133,17 @@ export function SmartPredictionsCard() {
   const currentStatus = status || {
     isEnabled,
     learningProgress: 0,
-    daysOfData: 0
+    daysOfData: 0,
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="smart-predictions" className="font-medium">
+    <div className='space-y-4'>
+      <div className='flex items-center justify-between'>
+        <Label htmlFor='smart-predictions' className='font-medium'>
           Enable Smart Predictions
         </Label>
         <Switch
-          id="smart-predictions"
+          id='smart-predictions'
           checked={currentStatus.isEnabled}
           onCheckedChange={handleToggle}
           disabled={toggleMutation.isPending}
@@ -150,66 +151,69 @@ export function SmartPredictionsCard() {
       </div>
 
       {!currentStatus.isEnabled ? (
-        <div className="bg-muted/50 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Smart Predictions are disabled</p>
-              <p className="text-sm text-muted-foreground">
-                Enable to see personalized nap and feed time predictions based on your baby's patterns.
+        <div className='bg-muted/50 rounded-lg p-4'>
+          <div className='flex items-start gap-3'>
+            <AlertCircle className='h-5 w-5 text-muted-foreground mt-0.5' />
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Smart Predictions are disabled</p>
+              <p className='text-sm text-muted-foreground'>
+                Enable to see personalized nap and feed time predictions based on your baby's
+                patterns.
               </p>
             </div>
           </div>
         </div>
       ) : currentStatus.learningProgress < 1 ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Learning your baby's patterns...</span>
+        <div className='space-y-3'>
+          <div className='flex items-center gap-2'>
+            <Brain className='h-4 w-4 text-primary' />
+            <span className='text-sm font-medium'>Learning your baby's patterns...</span>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm'>
               <span>Progress</span>
               <span>{Math.round(currentStatus.learningProgress * 100)}%</span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2">
+            <div className='w-full bg-muted rounded-full h-2'>
               <div
-                className="bg-primary h-2 rounded-full transition-all duration-500"
+                className='bg-primary h-2 rounded-full transition-all duration-500'
                 style={{ width: `${currentStatus.learningProgress * 100}%` }}
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {currentStatus.daysOfData} day{currentStatus.daysOfData !== 1 ? 's' : ''} of data logged.
-              Need 5+ days for accurate predictions.
+            <p className='text-xs text-muted-foreground'>
+              {currentStatus.daysOfData} day{currentStatus.daysOfData !== 1 ? 's' : ''} of data
+              logged. Need 5+ days for accurate predictions.
             </p>
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-success" />
-            <span className="text-sm font-medium text-success">Active - Learning from your data</span>
+        <div className='space-y-4'>
+          <div className='flex items-center gap-2'>
+            <TrendingUp className='h-4 w-4 text-success' />
+            <span className='text-sm font-medium text-success'>
+              Active - Learning from your data
+            </span>
           </div>
 
           {(currentStatus.nextNapPrediction || currentStatus.nextFeedPrediction) && (
-            <div className="space-y-3">
+            <div className='space-y-3'>
               {currentStatus.nextNapPrediction && (
-                <Card className="border-primary/20">
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">Next Nap</span>
+                <Card className='border-primary/20'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-2'>
+                        <Clock className='h-4 w-4 text-primary' />
+                        <span className='text-sm font-medium'>Next Nap</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant='outline' className='text-xs'>
                         {Math.round(currentStatus.nextNapPrediction.confidence * 100)}% confident
                       </Badge>
                     </div>
-                    <p className="text-lg font-bold mt-1">
+                    <p className='text-lg font-bold mt-1'>
                       {currentStatus.nextNapPrediction.time.toLocaleTimeString([], {
                         hour: 'numeric',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </p>
                   </CardContent>
@@ -217,21 +221,21 @@ export function SmartPredictionsCard() {
               )}
 
               {currentStatus.nextFeedPrediction && (
-                <Card className="border-primary/20">
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">Next Feed</span>
+                <Card className='border-primary/20'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-2'>
+                        <Clock className='h-4 w-4 text-primary' />
+                        <span className='text-sm font-medium'>Next Feed</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant='outline' className='text-xs'>
                         {Math.round(currentStatus.nextFeedPrediction.confidence * 100)}% confident
                       </Badge>
                     </div>
-                    <p className="text-lg font-bold mt-1">
+                    <p className='text-lg font-bold mt-1'>
                       {currentStatus.nextFeedPrediction.time.toLocaleTimeString([], {
                         hour: 'numeric',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </p>
                   </CardContent>
@@ -240,13 +244,12 @@ export function SmartPredictionsCard() {
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground">
-            Based on {currentStatus.daysOfData} days of your baby's data.
-            Predictions update automatically as you log more events.
+          <div className='text-xs text-muted-foreground'>
+            Based on {currentStatus.daysOfData} days of your baby's data. Predictions update
+            automatically as you log more events.
           </div>
         </div>
       )}
     </div>
   );
 }
-

@@ -10,7 +10,12 @@ interface InstantAhaModalProps {
   eventType: string;
 }
 
-export function InstantAhaModal({ isOpen, onClose, babyAgeInWeeks, eventType }: InstantAhaModalProps) {
+export function InstantAhaModal({
+  isOpen,
+  onClose,
+  babyAgeInWeeks,
+  eventType,
+}: InstantAhaModalProps) {
   // Rule-based predictions to show immediate value
   const getPrediction = () => {
     if (eventType === 'feed') {
@@ -60,7 +65,7 @@ export function InstantAhaModal({ isOpen, onClose, babyAgeInWeeks, eventType }: 
         };
       }
     }
-    
+
     return {
       title: 'Pattern tracking started',
       prediction: 'Log a few more events',
@@ -73,78 +78,73 @@ export function InstantAhaModal({ isOpen, onClose, babyAgeInWeeks, eventType }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <div className="text-center py-6 animate-fade-in">
+      <DialogContent className='max-w-md'>
+        <div className='text-center py-6 animate-fade-in'>
           {/* AI Icon */}
-          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 animate-scale-in relative">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-              <Brain className="h-10 w-10 text-primary-foreground" />
+          <div className='w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 animate-scale-in relative'>
+            <div className='w-16 h-16 rounded-full bg-primary flex items-center justify-center'>
+              <Brain className='h-10 w-10 text-primary-foreground' />
             </div>
-            <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-secondary-foreground" />
+            <div className='absolute -top-1 -right-1 w-8 h-8 rounded-full bg-secondary flex items-center justify-center'>
+              <Sparkles className='h-5 w-5 text-secondary-foreground' />
             </div>
           </div>
-          
+
           {/* Title */}
-          <h2 className="text-2xl font-bold mb-3">
-            AI is already working for you! 🎉
-          </h2>
-          
+          <h2 className='text-2xl font-bold mb-3'>AI is already working for you! 🎉</h2>
+
           {/* Subtitle */}
-          <p className="text-base text-muted-foreground mb-6">
+          <p className='text-base text-muted-foreground mb-6'>
             Based on your baby's age, here's what we predict:
           </p>
-          
+
           {/* Prediction Card */}
-          <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-                  <Moon className="h-6 w-6 text-primary" />
+          <Card className='border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 mb-6'>
+            <CardContent className='p-6'>
+              <div className='flex items-start gap-4'>
+                <div className='w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0'>
+                  <Moon className='h-6 w-6 text-primary' />
                 </div>
-                <div className="flex-1 text-left">
-                  <h3 className="font-semibold text-lg mb-2">{prediction.title}</h3>
-                  <p className="text-2xl font-bold text-primary mb-2">{prediction.prediction}</p>
-                  <p className="text-sm text-muted-foreground mb-1">{prediction.explanation}</p>
-                  <p className="text-xs text-muted-foreground italic">{prediction.confidence}</p>
+                <div className='flex-1 text-left'>
+                  <h3 className='font-semibold text-lg mb-2'>{prediction.title}</h3>
+                  <p className='text-2xl font-bold text-primary mb-2'>{prediction.prediction}</p>
+                  <p className='text-sm text-muted-foreground mb-1'>{prediction.explanation}</p>
+                  <p className='text-xs text-muted-foreground italic'>{prediction.confidence}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Value Proposition */}
-          <div className="bg-secondary/5 rounded-xl p-4 mb-6 text-left space-y-3">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+          <div className='bg-secondary/5 rounded-xl p-4 mb-6 text-left space-y-3'>
+            <div className='flex items-start gap-3'>
+              <TrendingUp className='h-5 w-5 text-secondary shrink-0 mt-0.5' />
               <div>
-                <p className="text-sm font-medium mb-1">Getting smarter with every log</p>
-                <p className="text-xs text-muted-foreground">
-                  After 3-5 logs, we'll learn your baby's unique patterns and give personalized predictions.
+                <p className='text-sm font-medium mb-1'>Getting smarter with every log</p>
+                <p className='text-xs text-muted-foreground'>
+                  After 3-5 logs, we'll learn your baby's unique patterns and give personalized
+                  predictions.
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className='flex items-start gap-3'>
+              <Sparkles className='h-5 w-5 text-primary shrink-0 mt-0.5' />
               <div>
-                <p className="text-sm font-medium mb-1">No more guessing</p>
-                <p className="text-xs text-muted-foreground">
+                <p className='text-sm font-medium mb-1'>No more guessing</p>
+                <p className='text-xs text-muted-foreground'>
                   Plan your day around naps, feeds, and sleep with confidence.
                 </p>
               </div>
             </div>
           </div>
-          
+
           {/* CTA */}
-          <Button
-            size="lg"
-            onClick={onClose}
-            className="w-full group"
-          >
+          <Button size='lg' onClick={onClose} className='w-full group'>
             Continue Tracking
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className='ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform' />
           </Button>
-          
-          <p className="text-xs text-muted-foreground mt-4">
+
+          <p className='text-xs text-muted-foreground mt-4'>
             Keep logging to unlock more accurate predictions
           </p>
         </div>
@@ -152,4 +152,3 @@ export function InstantAhaModal({ isOpen, onClose, babyAgeInWeeks, eventType }: 
     </Dialog>
   );
 }
-

@@ -11,7 +11,9 @@ export interface NapFeedback {
 }
 
 class NapFeedbackService {
-  async createFeedback(data: Omit<NapFeedback, 'id' | 'created_at' | 'updated_at'>): Promise<NapFeedback> {
+  async createFeedback(
+    data: Omit<NapFeedback, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<NapFeedback> {
     const { data: result, error } = await supabase
       .from('nap_feedback')
       .insert(data)
@@ -36,5 +38,4 @@ class NapFeedbackService {
 }
 
 export const napFeedbackService = new NapFeedbackService();
-
 

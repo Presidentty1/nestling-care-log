@@ -37,7 +37,9 @@ class ParentWellnessService {
     return data;
   }
 
-  async upsertLog(data: Omit<ParentWellnessLog, 'id' | 'created_at' | 'updated_at'>): Promise<ParentWellnessLog> {
+  async upsertLog(
+    data: Omit<ParentWellnessLog, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<ParentWellnessLog> {
     const { data: result, error } = await supabase
       .from('parent_wellness_logs')
       .upsert(data, {
@@ -62,7 +64,9 @@ class ParentWellnessService {
     return data || [];
   }
 
-  async createMedication(data: Omit<ParentMedication, 'id' | 'created_at' | 'updated_at'>): Promise<ParentMedication> {
+  async createMedication(
+    data: Omit<ParentMedication, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<ParentMedication> {
     const { data: result, error } = await supabase
       .from('parent_medications')
       .insert(data)
@@ -87,5 +91,4 @@ class ParentWellnessService {
 }
 
 export const parentWellnessService = new ParentWellnessService();
-
 

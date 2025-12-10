@@ -39,7 +39,7 @@ export default function Analytics() {
 
   const handleExport = async () => {
     if (!selectedBaby) return;
-    
+
     try {
       await exportWeeklyReport(selectedBaby);
       toast({
@@ -57,43 +57,43 @@ export default function Analytics() {
 
   if (!babies || babies.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <Button onClick={() => navigate(-1)} variant="ghost" className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+      <div className='min-h-screen bg-background p-4'>
+        <Button onClick={() => navigate(-1)} variant='ghost' className='mb-4'>
+          <ArrowLeft className='mr-2 h-4 w-4' />
           Back
         </Button>
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No babies yet. Add one to see insights!</p>
+        <Card className='p-8 text-center'>
+          <p className='text-muted-foreground'>No babies yet. Add one to see insights!</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4" />
+    <div className='min-h-screen bg-background pb-20'>
+      <div className='sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b'>
+        <div className='container mx-auto p-4'>
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center gap-4'>
+              <Button onClick={() => navigate(-1)} variant='ghost' size='sm'>
+                <ArrowLeft className='h-4 w-4' />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">Analytics</h1>
-                <p className="text-sm text-muted-foreground">Insights and trends</p>
+                <h1 className='text-2xl font-bold'>Analytics</h1>
+                <p className='text-sm text-muted-foreground'>Insights and trends</p>
               </div>
             </div>
-            <Button onClick={handleExport} variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
+            <Button onClick={handleExport} variant='outline' size='sm'>
+              <Download className='mr-2 h-4 w-4' />
               Export
             </Button>
           </div>
           {babies.length > 1 && (
             <Button
               onClick={() => setIsSwitcherOpen(true)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
+              variant='outline'
+              size='sm'
+              className='gap-2'
             >
               {selectedBaby?.name}
             </Button>
@@ -101,51 +101,53 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4">
-        <div className="flex gap-2 mb-4">
+      <div className='container mx-auto p-4'>
+        <div className='flex gap-2 mb-4'>
           <Button
             variant={dateRange === 'week' ? 'default' : 'outline'}
-            size="sm"
+            size='sm'
             onClick={() => setDateRange('week')}
           >
             Last Week
           </Button>
           <Button
             variant={dateRange === 'month' ? 'default' : 'outline'}
-            size="sm"
+            size='sm'
             onClick={() => setDateRange('month')}
           >
             Last Month
           </Button>
           <Button
             variant={dateRange === 'all' ? 'default' : 'outline'}
-            size="sm"
+            size='sm'
             onClick={() => setDateRange('all')}
           >
             All Time
           </Button>
         </div>
 
-        <Tabs defaultValue="sleep" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="sleep">Sleep</TabsTrigger>
-            <TabsTrigger value="feeding">Feeding</TabsTrigger>
-            <TabsTrigger value="patterns">
-              <TrendingUp className="mr-2 h-4 w-4" />
+        <Tabs defaultValue='sleep' className='space-y-4'>
+          <TabsList className='grid w-full grid-cols-3'>
+            <TabsTrigger value='sleep'>Sleep</TabsTrigger>
+            <TabsTrigger value='feeding'>Feeding</TabsTrigger>
+            <TabsTrigger value='patterns'>
+              <TrendingUp className='mr-2 h-4 w-4' />
               Patterns
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sleep" className="space-y-4">
+          <TabsContent value='sleep' className='space-y-4'>
             {selectedBabyId && <SleepAnalysis babyId={selectedBabyId} dateRange={dateRange} />}
           </TabsContent>
 
-          <TabsContent value="feeding" className="space-y-4">
+          <TabsContent value='feeding' className='space-y-4'>
             {selectedBabyId && <FeedingAnalysis babyId={selectedBabyId} dateRange={dateRange} />}
           </TabsContent>
 
-          <TabsContent value="patterns" className="space-y-4">
-            {selectedBabyId && <PatternVisualization babyId={selectedBabyId} dateRange={dateRange} />}
+          <TabsContent value='patterns' className='space-y-4'>
+            {selectedBabyId && (
+              <PatternVisualization babyId={selectedBabyId} dateRange={dateRange} />
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -155,7 +157,7 @@ export default function Analytics() {
         selectedBabyId={selectedBabyId || ''}
         isOpen={isSwitcherOpen}
         onClose={() => setIsSwitcherOpen(false)}
-        onSelect={(babyId) => {
+        onSelect={babyId => {
           setSelectedBabyId(babyId);
           localStorage.setItem('selected_baby_id', babyId);
         }}

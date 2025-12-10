@@ -5,6 +5,7 @@ This document describes how to set up database replication for Nestling's Supaba
 ## Overview
 
 Database replication provides:
+
 - **High Availability**: Automatic failover if primary database fails
 - **Read Scalability**: Distribute read queries across replicas
 - **Disaster Recovery**: Backup database in different region
@@ -77,12 +78,14 @@ SELECT * FROM pg_replication_slots;
 **Use Case**: Scale read queries
 
 **Configuration**:
+
 - Multiple read replicas allowed
 - Asynchronous replication
 - Small replication lag acceptable
 - No automatic failover
 
 **Best For**:
+
 - Analytics queries
 - Reporting
 - Read-heavy workloads
@@ -92,12 +95,14 @@ SELECT * FROM pg_replication_slots;
 **Use Case**: High availability
 
 **Configuration**:
+
 - Single standby replica
 - Synchronous or asynchronous replication
 - Automatic failover
 - Same region or different region
 
 **Best For**:
+
 - Production databases
 - Critical applications
 - Zero-downtime requirements
@@ -129,6 +134,7 @@ const { data } = await readClient.from('events').select('*');
 ### Automatic Failover
 
 If using standby replica with automatic failover:
+
 - Supabase handles failover automatically
 - DNS updates point to new primary
 - Application reconnects automatically
@@ -224,5 +230,3 @@ SELECT * FROM events WHERE id = ...;
 - [Supabase Replication Docs](https://supabase.com/docs/guides/database/replication)
 - [PostgreSQL Replication](https://www.postgresql.org/docs/current/high-availability.html)
 - [Supabase Status Page](https://status.supabase.com/)
-
-

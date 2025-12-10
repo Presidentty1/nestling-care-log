@@ -45,8 +45,8 @@ export function useOfflineQueue() {
             onClick: () => {
               // Could navigate to conflict resolution screen
               console.log('Navigate to conflict resolution');
-            }
-          }
+            },
+          },
         });
       }
 

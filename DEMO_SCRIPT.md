@@ -28,9 +28,11 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 1. Introduction (2 minutes)
 
 **Opening:**
+
 > "Nuzzle is a baby care tracking app designed for sleep-deprived parents. It helps you log feeds, sleep, diapers, and more with one-tap quick actions and AI-powered insights."
 
 **Key Value Props:**
+
 - ⚡ **Fast**: One-tap logging
 - 🧠 **Smart**: AI nap predictions
 - 📱 **Offline**: Works without internet
@@ -39,12 +41,14 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 2. Authentication & Onboarding (3 minutes)
 
 **Sign Up Flow:**
+
 1. Navigate to `/auth`
 2. Show sign up form
 3. Create account: `demo@nuzzle.app`
 4. **Highlight**: Auto-redirect to onboarding
 
 **Onboarding:**
+
 1. Welcome screen
 2. Create baby profile:
    - Name: "Demo Baby"
@@ -55,6 +59,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 3. Home Dashboard (4 minutes)
 
 **Overview:**
+
 > "This is the main dashboard. Everything you need is here."
 
 **Key Features to Show:**
@@ -85,6 +90,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 4. Event Logging (3 minutes)
 
 **Quick Action:**
+
 1. Tap "Log Feed" quick action
 2. Form opens with smart defaults
 3. Fill amount: 120ml
@@ -92,6 +98,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 5. **Highlight**: Event appears instantly in timeline
 
 **Manual Entry:**
+
 1. Tap FAB (floating action button)
 2. Show event type selector
 3. Select "Diaper"
@@ -100,6 +107,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 6. **Highlight**: Flexible logging options
 
 **Edit Event:**
+
 1. Tap event in timeline
 2. Show edit form
 3. Update amount
@@ -109,12 +117,14 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 5. History View (2 minutes)
 
 **Navigation:**
+
 1. Go to History tab
 2. Show date picker
 3. Select yesterday
 4. **Highlight**: Day-by-day navigation
 
 **Features:**
+
 - Filter by event type
 - Export data (CSV/PDF)
 - **Highlight**: Doctor visit reports
@@ -122,12 +132,14 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 6. AI Features (3 minutes)
 
 **Nap Predictor:**
+
 1. Navigate to Nap Predictor
 2. Show prediction details
 3. Explain age-based calculations
 4. **Highlight**: Personalized predictions
 
 **AI Assistant** (if time):
+
 1. Navigate to AI Assistant
 2. Ask: "When should my baby nap next?"
 3. Show contextual response
@@ -136,6 +148,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 7. Settings & Multi-Caregiver (2 minutes)
 
 **Settings Overview:**
+
 1. Navigate to Settings
 2. Show key options:
    - Baby management
@@ -144,6 +157,7 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
    - Privacy controls
 
 **Family Sharing:**
+
 1. Show caregiver management
 2. Explain invite flow
 3. **Highlight**: Multi-device sync
@@ -151,12 +165,13 @@ This script provides a structured walkthrough for demonstrating Nuzzle to stakeh
 ### 8. Offline Demo (1 minute)
 
 **Offline Capability:**
+
 1. Disable network (dev tools)
 2. Log an event
 3. Show it queues
-3. Re-enable network
-4. Show automatic sync
-5. **Highlight**: Works offline, syncs when online
+4. Re-enable network
+5. Show automatic sync
+6. **Highlight**: Works offline, syncs when online
 
 ## Key Talking Points
 
@@ -200,6 +215,7 @@ A: "Free tier includes basic logging. Pro ($5.99/month) adds AI predictions, unl
 ### Do's
 
 ✅ **Do:**
+
 - Keep it conversational
 - Focus on user benefits, not features
 - Show real scenarios ("Imagine it's 3 AM...")
@@ -209,6 +225,7 @@ A: "Free tier includes basic logging. Pro ($5.99/month) adds AI predictions, unl
 ### Don'ts
 
 ❌ **Don't:**
+
 - Get too technical
 - Show bugs or errors
 - Rush through features
@@ -237,18 +254,21 @@ A: "Free tier includes basic logging. Pro ($5.99/month) adds AI predictions, unl
 ## Demo Variations
 
 ### Short Demo (5 minutes)
+
 - Authentication
 - Home dashboard
 - Quick action logging
 - Nap prediction
 
 ### Technical Demo (30 minutes)
+
 - Full feature walkthrough
 - Architecture overview
 - Security deep-dive
 - Q&A session
 
 ### Investor Pitch (10 minutes)
+
 - Problem/solution
 - Market opportunity
 - Key features
@@ -274,6 +294,7 @@ A: "Free tier includes basic logging. Pro ($5.99/month) adds AI predictions, unl
 ## Success Metrics
 
 **Good Demo Signs:**
+
 - ✅ Questions about pricing
 - ✅ Requests for beta access
 - ✅ Interest in specific features

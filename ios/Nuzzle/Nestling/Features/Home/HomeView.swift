@@ -76,12 +76,16 @@ struct HomeView: View {
                         .rotationEffect(.degrees(showFabMenu ? 45 : 0))
                         .scaleEffect(showFabMenu ? 1.05 : 1.0)
                 }
+                .accessibilityLabel("Add log")
+                .accessibilityHint("Opens quick actions for feed, sleep, diaper, or tummy time")
+                .accessibilityAddTraits(.isButton)
             }
             .padding(.spacingLG)
             
             // Offline Indicator (Epic 4)
             VStack {
                 OfflineIndicatorView()
+                SyncStatusView()
                 Spacer()
             }
             .padding(.top, 40) // Safe area padding
@@ -624,5 +628,73 @@ struct TimelineSection: View {
 #Preview {
     HomeView()
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
+}
+
+// MARK: - Sync Status Pill
+
+struct SyncStatusView: View {
+    @StateObject private var syncService = CloudKitSyncService.shared
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            if syncService.isSyncing {
+                pill(
+                    text: "Syncing…",
+                    systemImage: "arrow.triangle.2.circlepath",
+                    color: .primary
+                )
+            } else if let error = syncService.syncError {
+                pill(
+                    text: "Sync issue: \(error.localizedDescription)",
+                    systemImage: "exclamationmark.triangle.fill",
+                    color: .warning
+                )
+            } else if let last = syncService.lastSyncTime {
+                pill(
+                    text: "Synced \(relative(last))",
+                    systemImage: "checkmark.circle.fill",
+                    color: .green
+                )
+            }
+        }
+        .animation(.easeInOut, value: syncService.isSyncing)
+        .animation(.easeInOut, value: syncService.syncError != nil)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(syncAccessibilityLabel)
+    }
+    
+    private func pill(text: String, systemImage: String, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.caption)
+            Text(text)
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(color.opacity(0.9))
+        .cornerRadius(16)
+    }
+    
+    private func relative(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+    
+    private var syncAccessibilityLabel: String {
+        if syncService.isSyncing {
+            return "Cloud sync in progress"
+        }
+        if syncService.syncError != nil {
+            return "Cloud sync issue. Please retry."
+        }
+        if let last = syncService.lastSyncTime {
+            return "Cloud synced \(relative(last))"
+        }
+        return "Cloud sync status unavailable"
+    }
 }
 

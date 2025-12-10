@@ -130,17 +130,20 @@ Xcode creates some files we already have:
 ### Step 10: Update Build Settings
 
 For **Nestling** target:
+
 - **Swift Language Version**: Swift 5.9
 - **iOS Deployment Target**: 17.0
 - **Swift Compiler - Language**: Swift
 - **Enable Modules**: Yes
 
 For **NestlingWidgets** target:
+
 - **Swift Language Version**: Swift 5.9
 - **iOS Deployment Target**: 17.0
 - **App Groups**: `group.com.nestling.app`
 
 For **NestlingIntents** target:
+
 - **Swift Language Version**: Swift 5.9
 - **iOS Deployment Target**: 17.0
 - **App Groups**: `group.com.nestling.app`
@@ -210,14 +213,17 @@ Nestling.xcodeproj/
 ## Troubleshooting
 
 ### Import Errors
+
 - Ensure all source files are added to correct targets
 - Check that `@testable import Nestling` is used in test files
 
 ### Missing Files
+
 - Verify file paths in Project Navigator match actual file locations
 - Use "Show in Finder" to verify file exists
 
 ### Build Errors
+
 - Clean build folder (⇧⌘K)
 - Delete DerivedData: `~/Library/Developer/Xcode/DerivedData`
 - Restart Xcode
@@ -236,6 +242,7 @@ After setup, verify:
 ## Next Steps
 
 After project setup is complete:
+
 1. ✅ Verify all targets build successfully
 2. ✅ Run unit tests (⌘U)
 3. ✅ Test core flows (see `TEST_PLAN.md`)
@@ -244,21 +251,24 @@ After project setup is complete:
 ## Troubleshooting
 
 ### "Cannot find type 'X' in scope"
+
 - **Solution**: File not added to target
 - **Fix**: Select file → File Inspector → Target Membership → Nestling ✅
 
 ### Core Data model not found
+
 - **Solution**: Ensure `Nestling.xcdatamodeld` is added to Nestling target
 - **Fix**: Select model file → File Inspector → Target Membership → Nestling ✅
 - **Note**: App will fall back to JSON storage if Core Data unavailable
 
 ### Test compilation errors
+
 - **Solution**: Ensure test target links to Nestling
 - **Fix**: NestlingTests target → Build Phases → Link Binary With Libraries → Add Nestling framework
 - **Alternative**: Use `@testable import Nestling` in test files
 
 ### Missing App Groups
+
 - **Solution**: Widgets/extensions require App Groups
 - **Fix**: Target → Signing & Capabilities → + Capability → App Groups → `group.com.nestling.app`
 - **Note**: Optional for MVP, required for widgets
-

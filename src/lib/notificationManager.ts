@@ -79,7 +79,9 @@ class NotificationManager {
     if (!settings?.enabled || !settings.diaper_reminders_enabled) return;
 
     const nextReminderTime = new Date(lastDiaperTime);
-    nextReminderTime.setHours(nextReminderTime.getHours() + settings.diaper_reminder_interval_hours);
+    nextReminderTime.setHours(
+      nextReminderTime.getHours() + settings.diaper_reminder_interval_hours
+    );
 
     if (this.isQuietHours(nextReminderTime, settings)) {
       return;

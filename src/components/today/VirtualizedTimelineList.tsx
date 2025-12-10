@@ -57,10 +57,10 @@ export function VirtualizedTimelineList({
 
     const visibleStart = Math.floor(scrollTop / itemHeight);
     const visibleEnd = Math.ceil((scrollTop + containerHeight) / itemHeight);
-    
+
     const startIndex = Math.max(0, visibleStart - overscan);
     const endIndex = Math.min(sortedEvents.length, visibleEnd + overscan);
-    
+
     const totalHeight = sortedEvents.length * itemHeight;
 
     return { startIndex, endIndex, totalHeight };
@@ -93,7 +93,7 @@ export function VirtualizedTimelineList({
     const container = containerRef.current;
     if (!container) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         setContainerHeight(entry.contentRect.height);
       }
@@ -118,12 +118,16 @@ export function VirtualizedTimelineList({
     return (
       <EmptyState
         icon={Calendar}
-        title="Your day is off to a quiet start ✨"
+        title='Your day is off to a quiet start ✨'
         description="Some days you'll log everything, some days just one feed. Both are okay."
-        action={onQuickAction ? {
-          label: "Log a Feed",
-          onClick: () => onQuickAction('feed')
-        } : undefined}
+        action={
+          onQuickAction
+            ? {
+                label: 'Log a Feed',
+                onClick: () => onQuickAction('feed'),
+              }
+            : undefined
+        }
       />
     );
   }
@@ -131,8 +135,8 @@ export function VirtualizedTimelineList({
   // For small lists (< 20 items), use regular rendering
   if (sortedEvents.length < 20) {
     return (
-      <div className="space-y-2">
-        {sortedEvents.map((event) => (
+      <div className='space-y-2'>
+        {sortedEvents.map(event => (
           <SwipeableTimelineRow
             key={event.id}
             event={event}
@@ -148,7 +152,7 @@ export function VirtualizedTimelineList({
   return (
     <div
       ref={containerRef}
-      className="h-full overflow-y-auto"
+      className='h-full overflow-y-auto'
       onScroll={handleScroll}
       style={{ scrollBehavior: 'smooth' }}
     >
@@ -162,8 +166,8 @@ export function VirtualizedTimelineList({
             right: 0,
           }}
         >
-          <div className="space-y-2">
-            {visibleItems.map((event) => (
+          <div className='space-y-2'>
+            {visibleItems.map(event => (
               <div key={event.id} style={{ height: itemHeight }}>
                 <SwipeableTimelineRow
                   event={event}
@@ -178,5 +182,3 @@ export function VirtualizedTimelineList({
     </div>
   );
 }
-
-

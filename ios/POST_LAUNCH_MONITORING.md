@@ -9,17 +9,20 @@ Comprehensive guide for monitoring Nestling after App Store launch.
 **Target**: > 99% crash-free sessions
 
 **Tools**:
+
 - Sentry Crash Reports
 - Firebase Crashlytics
 - Xcode Organizer
 
 **Metrics to Track**:
+
 - Total sessions
 - Crashed sessions
 - Crash-free rate
 - Top crash reasons
 
 **Action Thresholds**:
+
 - If crash-free rate < 99% → Investigate immediately
 - If crash-free rate < 95% → Hotfix release within 24 hours
 - Critical crashes → Fix and release immediately
@@ -27,23 +30,27 @@ Comprehensive guide for monitoring Nestling after App Store launch.
 ### Key User Metrics
 
 **Sign-Up Conversion**:
+
 - Sessions → Sign-ups
 - Sign-ups → Babies created
 - Target: > 50% sign-up rate
 
 **Engagement**:
+
 - Babies created per user
 - Events logged per user per day
 - Daily Active Users (DAU)
 - Target: > 70% DAU retention
 
 **Subscription Metrics**:
+
 - Paywall views
 - Purchase conversion rate
 - Monthly vs Yearly preference
 - Target: > 5% conversion rate
 
 **Sync Performance**:
+
 - Sync success rate
 - Sync latency (average)
 - Sync failures by error type
@@ -54,16 +61,19 @@ Comprehensive guide for monitoring Nestling after App Store launch.
 ### User Retention
 
 **Metrics**:
+
 - D1 (Day 1) Retention: % of users who return next day
 - D7 (Day 7) Retention: % of users active after 7 days
 - D30 (Day 30) Retention: % of users active after 30 days
 
 **Targets**:
+
 - D1: > 60%
 - D7: > 40%
 - D30: > 25%
 
 **Actions**:
+
 - If D1 < 50% → Investigate onboarding flow
 - If D7 < 30% → Review core feature discoverability
 - If D30 < 20% → Consider re-engagement campaigns
@@ -71,17 +81,20 @@ Comprehensive guide for monitoring Nestling after App Store launch.
 ### Monetization Metrics
 
 **MRR (Monthly Recurring Revenue)**:
+
 ```
 MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ```
 
 **Track**:
+
 - New subscriptions per week
 - Cancellations per week
 - Churn rate (cancellations / active subscriptions)
 - Lifetime Value (LTV)
 
 **Targets**:
+
 - Churn rate: < 5% monthly
 - LTV: > $50 (10+ months average)
 - MRR growth: > 10% monthly
@@ -89,6 +102,7 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ### Feature Usage
 
 **Track Usage For**:
+
 - Quick actions (Feed, Sleep, Diaper, Tummy)
 - Event logging forms
 - Predictions feature
@@ -97,6 +111,7 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 - Settings pages
 
 **Identify**:
+
 - Most-used features (double down)
 - Least-used features (improve or remove)
 - Feature requests (prioritize)
@@ -104,6 +119,7 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ### Technical Performance
 
 **Metrics**:
+
 - Average app launch time
 - Average event log time
 - Average timeline load time
@@ -111,6 +127,7 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 - Memory usage (p95, p99)
 
 **Alerts**:
+
 - If launch time > 3s → Optimize
 - If event log > 1s → Optimize
 - If memory > 100MB → Investigate leaks
@@ -120,12 +137,14 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ### Business Metrics
 
 **Revenue**:
+
 - MRR trend
 - ARR (Annual Recurring Revenue) projection
 - Conversion funnel analysis
 - Churn analysis by cohort
 
 **User Growth**:
+
 - New user acquisition
 - Organic vs paid (if applicable)
 - Referral rate (if implemented)
@@ -133,11 +152,13 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ### Product Metrics
 
 **Feature Adoption**:
+
 - % of users using each feature
 - Feature discovery rate
 - Feature retention rate
 
 **Quality Metrics**:
+
 - App Store rating (target: > 4.5)
 - Review sentiment analysis
 - Support ticket volume
@@ -146,6 +167,7 @@ MRR = (Monthly Subscriptions × $4.99) + (Yearly Subscriptions × $39.99/12)
 ### Competitive Analysis
 
 **Track**:
+
 - App Store ranking in Health & Fitness
 - Keyword rankings
 - Competitor feature launches
@@ -166,6 +188,7 @@ SentrySDK.start { options in
 ```
 
 **Track**:
+
 - Crashes
 - Performance issues
 - User actions (breadcrumbs)
@@ -173,6 +196,7 @@ SentrySDK.start { options in
 ### Analytics Setup
 
 **Recommended Events**:
+
 ```swift
 // User Actions
 Analytics.log("app_launched")
@@ -193,6 +217,7 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ### App Store Connect Metrics
 
 **Monitor Weekly**:
+
 - Impressions
 - Product page views
 - Conversion rate
@@ -243,12 +268,14 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ### Review Response
 
 **For All Reviews**:
+
 - Respond within 24 hours
 - Thank user for feedback
 - Address concerns if valid
 - Offer support if needed
 
 **For Negative Reviews**:
+
 - Respond professionally
 - Apologize for issues
 - Offer to help via support email
@@ -257,6 +284,7 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ### Feature Request Response
 
 **Common Requests to Watch For**:
+
 - Export to PDF
 - Multi-baby support (Pro feature)
 - Widget improvements
@@ -264,6 +292,7 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 - Growth tracking
 
 **Process**:
+
 1. Track frequency of requests
 2. Prioritize by impact and effort
 3. Add to roadmap
@@ -272,17 +301,20 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ## Success Criteria (First Month)
 
 ### User Metrics
+
 - ✅ > 1000 downloads
 - ✅ > 500 sign-ups
 - ✅ > 300 active users (D7)
 - ✅ > 4.0 App Store rating
 
 ### Business Metrics
+
 - ✅ > 50 subscriptions
 - ✅ < 10% churn rate
 - ✅ > $200 MRR
 
 ### Technical Metrics
+
 - ✅ > 99% crash-free rate
 - ✅ < 3s average sync latency
 - ✅ < 2s average launch time
@@ -290,16 +322,19 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ## Iteration Plan
 
 ### Week 1-2: Stability
+
 - Fix critical bugs
 - Improve crash-free rate
 - Optimize performance
 
 ### Week 3-4: Engagement
+
 - Address feature requests
 - Improve onboarding
 - Add missing features
 
 ### Month 2+: Growth
+
 - Add requested features
 - Optimize conversion funnel
 - Marketing initiatives
@@ -308,17 +343,20 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ## Reporting
 
 ### Daily Standup (First Week)
+
 - Crash-free rate
 - Critical issues
 - User feedback highlights
 
 ### Weekly Review
+
 - Key metrics vs targets
 - Top feature requests
 - Technical performance
 - Business metrics
 
 ### Monthly Review
+
 - MRR and growth trends
 - Retention analysis
 - Roadmap updates
@@ -327,6 +365,7 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 ## Tools & Dashboards
 
 **Recommended Setup**:
+
 - **Crash Reporting**: Sentry or Firebase Crashlytics
 - **Analytics**: Firebase Analytics, Mixpanel, or Amplitude
 - **Performance**: Xcode Instruments, Firebase Performance
@@ -334,9 +373,9 @@ Analytics.log("sync_failed", parameters: ["error": error.localizedDescription])
 - **Revenue**: App Store Connect → Payments and Financial Reports
 
 **Dashboard Priorities**:
+
 1. Real-time crash monitoring
 2. Daily active users
 3. Conversion funnel
 4. Revenue metrics
 5. Performance metrics
-

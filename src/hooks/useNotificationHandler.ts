@@ -11,34 +11,34 @@ export function useNotificationHandler() {
     const setupListener = async () => {
       listenerHandle = await LocalNotifications.addListener(
         'localNotificationActionPerformed',
-        (notification) => {
+        notification => {
           const { actionId, notification: notif } = notification;
           const { extra } = notif;
 
           // Handle quick log actions from action buttons
           if (actionId === 'log-feed') {
-            navigate('/', { 
-              state: { 
+            navigate('/', {
+              state: {
                 openSheet: 'feed',
                 babyId: extra?.babyId,
-                prefillData: {}
-              }
+                prefillData: {},
+              },
             });
           } else if (actionId === 'log-nap') {
-            navigate('/', { 
-              state: { 
+            navigate('/', {
+              state: {
                 openSheet: 'sleep',
                 babyId: extra?.babyId,
-                prefillData: { subtype: 'nap' }
-              }
+                prefillData: { subtype: 'nap' },
+              },
             });
           } else if (actionId === 'log-diaper') {
-            navigate('/', { 
-              state: { 
+            navigate('/', {
+              state: {
                 openSheet: 'diaper',
                 babyId: extra?.babyId,
-                prefillData: {}
-              }
+                prefillData: {},
+              },
             });
           } else if (actionId === 'dismiss') {
             // User dismissed, do nothing

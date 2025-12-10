@@ -47,7 +47,7 @@ test.describe('Onboarding Flow', () => {
     await page.goto('/onboarding-simple');
 
     await page.fill('input[name="name"]', 'Test Baby');
-    
+
     // Try future date
     const futureDate = new Date();
     futureDate.setFullYear(futureDate.getFullYear() + 1);

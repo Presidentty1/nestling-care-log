@@ -45,29 +45,29 @@ export default function Milestones() {
   const getUpcomingMilestones = () => {
     if (!selectedBaby) return [];
     const achievedTitles = new Set(milestones.map(m => m.title));
-    
+
     return milestoneCategories
-      .flatMap(cat => 
-        cat.milestones.map(m => ({ ...m, category: cat }))
-      )
-      .filter(m => 
-        !achievedTitles.has(m.title) &&
-        babyAgeMonths >= m.ageRangeMonths[0] - 1 &&
-        babyAgeMonths <= m.ageRangeMonths[1] + 2
+      .flatMap(cat => cat.milestones.map(m => ({ ...m, category: cat })))
+      .filter(
+        m =>
+          !achievedTitles.has(m.title) &&
+          babyAgeMonths >= m.ageRangeMonths[0] - 1 &&
+          babyAgeMonths <= m.ageRangeMonths[1] + 2
       )
       .sort((a, b) => a.typicalAgeMonths - b.typicalAgeMonths);
   };
 
-  const filteredMilestones = activeCategory === 'all'
-    ? milestones
-    : milestones.filter(m => m.milestone_type === activeCategory);
+  const filteredMilestones =
+    activeCategory === 'all'
+      ? milestones
+      : milestones.filter(m => m.milestone_type === activeCategory);
 
   const upcomingMilestones = getUpcomingMilestones();
 
   if (!selectedBaby) {
     return (
-      <div className="container max-w-4xl mx-auto p-4">
-        <p className="text-muted-foreground text-center py-8">
+      <div className='container max-w-4xl mx-auto p-4'>
+        <p className='text-muted-foreground text-center py-8'>
           No babies found. Add a baby to start tracking milestones.
         </p>
       </div>
@@ -75,17 +75,17 @@ export default function Milestones() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 pb-20">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Milestones</h1>
-        <p className="text-muted-foreground">
+    <div className='container max-w-4xl mx-auto p-4 pb-20'>
+      <div className='mb-6'>
+        <h1 className='text-3xl font-bold mb-2'>Milestones</h1>
+        <p className='text-muted-foreground'>
           {selectedBaby.name} • {babyAgeMonths} months old
         </p>
       </div>
 
-      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="all">All</TabsTrigger>
+      <Tabs value={activeCategory} onValueChange={setActiveCategory} className='mb-6'>
+        <TabsList className='grid w-full grid-cols-6'>
+          <TabsTrigger value='all'>All</TabsTrigger>
           {milestoneCategories.slice(0, 5).map(cat => (
             <TabsTrigger key={cat.type} value={cat.type}>
               {cat.icon}
@@ -95,30 +95,29 @@ export default function Milestones() {
       </Tabs>
 
       {upcomingMilestones.length > 0 && (
-        <Card className="mb-6">
+        <Card className='mb-6'>
           <CardHeader>
-            <CardTitle className="text-lg">Upcoming Milestones</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Based on {selectedBaby.name}'s age
-            </p>
+            <CardTitle className='text-lg'>Upcoming Milestones</CardTitle>
+            <p className='text-sm text-muted-foreground'>Based on {selectedBaby.name}'s age</p>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className='space-y-3'>
             {upcomingMilestones.slice(0, 3).map((milestone, idx) => (
-              <div key={idx} className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{milestone.category.icon}</span>
-                    <h4 className="font-medium">{milestone.title}</h4>
+              <div
+                key={idx}
+                className='flex items-start justify-between p-3 bg-muted/50 rounded-lg'
+              >
+                <div className='flex-1'>
+                  <div className='flex items-center gap-2 mb-1'>
+                    <span className='text-lg'>{milestone.category.icon}</span>
+                    <h4 className='font-medium'>{milestone.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {milestone.description}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className='text-sm text-muted-foreground mb-1'>{milestone.description}</p>
+                  <p className='text-xs text-muted-foreground'>
                     Typical: {milestone.typicalAgeMonths} months
                   </p>
                 </div>
                 <Button
-                  size="sm"
+                  size='sm'
                   onClick={() => {
                     setEditingMilestone({
                       id: '',
@@ -141,57 +140,57 @@ export default function Milestones() {
         </Card>
       )}
 
-      <Card className="mb-6">
+      <Card className='mb-6'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Recently Achieved ✨</CardTitle>
-            <Button onClick={() => {
-              setEditingMilestone(null);
-              setIsModalOpen(true);
-            }}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button
+              onClick={() => {
+                setEditingMilestone(null);
+                setIsModalOpen(true);
+              }}
+            >
+              <Plus className='h-4 w-4 mr-2' />
               Add Custom
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {filteredMilestones.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
+            <p className='text-muted-foreground text-center py-8'>
               No milestones recorded yet. Start tracking your baby's achievements!
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {filteredMilestones.map(milestone => {
                 const category = milestoneCategories.find(c => c.type === milestone.milestone_type);
                 return (
                   <div
                     key={milestone.id}
-                    className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                    className='flex items-start gap-4 p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted transition-colors'
                     onClick={() => {
                       setEditingMilestone(milestone);
                       setIsModalOpen(true);
                     }}
                   >
-                    <div className="text-2xl">{category?.icon || '⭐'}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{milestone.title}</h4>
-                        <Badge variant="secondary">
-                          <Calendar className="h-3 w-3 mr-1" />
+                    <div className='text-2xl'>{category?.icon || '⭐'}</div>
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <h4 className='font-medium'>{milestone.title}</h4>
+                        <Badge variant='secondary'>
+                          <Calendar className='h-3 w-3 mr-1' />
                           {format(new Date(milestone.achieved_date), 'MMM d, yyyy')}
                         </Badge>
                       </div>
                       {milestone.description && (
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <p className='text-sm text-muted-foreground mb-2'>
                           {milestone.description}
                         </p>
                       )}
-                      {milestone.note && (
-                        <p className="text-sm italic">"{milestone.note}"</p>
-                      )}
+                      {milestone.note && <p className='text-sm italic'>"{milestone.note}"</p>}
                       {milestone.photo_url && (
-                        <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                          <Camera className="h-3 w-3" />
+                        <div className='mt-2 flex items-center gap-1 text-xs text-muted-foreground'>
+                          <Camera className='h-3 w-3' />
                           Photo attached
                         </div>
                       )}

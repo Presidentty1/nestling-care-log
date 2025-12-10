@@ -13,7 +13,9 @@ export interface AppSettings {
 
 class AppSettingsService {
   async getAppSettings(userId?: string): Promise<AppSettings | null> {
-    const { data: { user } } = await authService.getUser();
+    const {
+      data: { user },
+    } = await authService.getUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) return null;
 
@@ -31,7 +33,9 @@ class AppSettingsService {
   }
 
   async createOrUpdateAppSettings(settings: Partial<AppSettings>): Promise<AppSettings> {
-    const { data: { user } } = await authService.getUser();
+    const {
+      data: { user },
+    } = await authService.getUser();
     if (!user) throw new Error('Not authenticated');
 
     // Try to get existing settings
@@ -66,5 +70,4 @@ class AppSettingsService {
 }
 
 export const appSettingsService = new AppSettingsService();
-
 

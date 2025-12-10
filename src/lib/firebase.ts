@@ -80,4 +80,3 @@ export function getFirebaseAnalytics(): Analytics | null {
 
 // For backward compatibility, export lazy-initialized values
 export { app, analytics };
-

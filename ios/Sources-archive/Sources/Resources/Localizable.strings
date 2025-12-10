@@ -1,0 +1,153 @@
+/* App Name and Branding */
+"app.name" = "Nuzzle";
+"app.tagline" = "Know what happened last and what's coming next";
+
+/* Onboarding */
+"onboarding.welcome.title" = "Welcome to Nuzzle";
+"onboarding.welcome.subtitle" = "Know what happened last and what's coming next. Track feeds, sleep, diapers, and more with just a tap.";
+"onboarding.welcome.primary_button" = "Get Started";
+"onboarding.welcome.secondary_button" = "Skip for now";
+
+"onboarding.baby.title" = "Tell us about your baby";
+"onboarding.baby.subtitle" = "We'll use this to personalize your experience. You can edit this later in Settings.";
+"onboarding.baby.name_placeholder" = "Baby's name";
+"onboarding.baby.dob_label" = "Date of birth";
+"onboarding.baby.sex_label" = "Sex (Optional)";
+"onboarding.baby.sex.not_specified" = "Not specified";
+"onboarding.baby.continue_button" = "Continue";
+"onboarding.baby.skip_button" = "Skip for now";
+
+"onboarding.preferences.title" = "Your preferences";
+"onboarding.preferences.subtitle" = "You can change these anytime in Settings.";
+"onboarding.preferences.feed_units" = "Feeding units";
+"onboarding.preferences.time_format" = "Time format";
+"onboarding.preferences.time_12hour" = "12-hour (3:00 PM)";
+"onboarding.preferences.time_24hour" = "24-hour (15:00)";
+
+/* Home Screen */
+"home.title" = "Today";
+"home.now_next.title" = "Now & next";
+"home.quick_actions.feed" = "Feed";
+"home.quick_actions.sleep" = "Sleep";
+"home.quick_actions.diaper" = "Diaper";
+"home.quick_actions.tummy" = "Tummy Time";
+"home.no_events_today" = "No events logged today";
+"home.start_logging_message" = "Start logging events to see them here";
+"home.no_matching_events" = "No matching events";
+"home.adjust_search_message" = "Try adjusting your search or filter";
+
+/* History */
+"history.title" = "History";
+"history.no_events" = "No events logged";
+"history.nothing_logged_today" = "Nothing logged on this day";
+
+/* Labs */
+"labs.title" = "Labs";
+"labs.experimental_features" = "Experimental Features";
+"labs.smart_predictions.title" = "Smart Predictions";
+"labs.smart_predictions.description" = "AI-powered predictions for next feed and nap times";
+"labs.smart_predictions.disclaimer" = "These features are for general guidance only and are not medical advice. If you're worried about your baby's health, contact a pediatric professional.";
+"labs.cry_insights.title" = "Cry Insights (Beta)";
+"labs.cry_insights.description" = "Record a cry and we'll try to label it as hungry, tired, discomfort, or pain";
+
+/* Settings */
+"settings.title" = "Settings";
+"settings.notifications.title" = "Notification Settings";
+"settings.privacy.title" = "Export & Delete Data";
+"settings.privacy.description" = "Your Data, Your Control";
+"settings.privacy.subtitle" = "Your baby's data is stored securely and never sold to third parties. You have full control to export, import, or delete your data at any time.";
+"settings.privacy.policy" = "Privacy Policy";
+"settings.privacy.terms" = "Terms of Use";
+"settings.privacy.support" = "Support";
+"settings.ai_data_sharing.title" = "AI & Data Sharing Settings";
+"settings.manage_babies.title" = "Manage Babies";
+"settings.manage_caregivers.title" = "Manage Caregivers";
+"settings.shortcuts.title" = "Keyboard Shortcuts";
+"settings.about.title" = "About";
+"settings.achievements.title" = "Achievements";
+"settings.subscription.title" = "Nestling Pro";
+"settings.account.title" = "Account";
+"settings.upgrade_cloudkit" = "Upgrade to CloudKit Sync";
+"settings.upgrade_cloudkit.hint" = "Migrate your data to iCloud for syncing across devices";
+"settings.delete_account" = "Delete Account & Data";
+"settings.delete_account.hint" = "Permanently delete your account and all data";
+"settings.legal.title" = "Legal";
+"settings.demo.load_sample_data" = "Load Sample Data";
+"settings.demo.load_sample_data.hint" = "Create a sample baby with realistic activity data for demo purposes";
+"settings.demo.clear_sample_data" = "Clear Sample Data";
+"settings.demo.clear_sample_data.hint" = "Remove sample baby and data, keeping only your real data";
+
+/* Auth */
+"auth.sign_in" = "Sign In";
+"auth.sign_up" = "Sign Up";
+"auth.name_placeholder" = "Name";
+"auth.email_placeholder" = "Email";
+"auth.password_placeholder" = "Password";
+"auth.forgot_password" = "Forgot password?";
+"auth.continue_without_account" = "Continue without account";
+"auth.continue_without_account.hint" = "You can create an account later to sync with caregivers.";
+
+/* Forms */
+"forms.feed.title" = "Log Feed";
+"forms.feed.edit_title" = "Edit Feed";
+"forms.sleep.title" = "Log Sleep";
+"forms.sleep.edit_title" = "Edit Sleep";
+"forms.diaper.title" = "Log Diaper";
+"forms.diaper.edit_title" = "Edit Diaper";
+"forms.tummy.title" = "Log Tummy Time";
+"forms.tummy.edit_title" = "Edit Tummy Time";
+"forms.save" = "Save";
+"forms.cancel" = "Cancel";
+"forms.delete" = "Delete";
+
+/* Errors */
+"errors.something_went_wrong" = "Something went wrong";
+"errors.try_again" = "Try Again";
+"errors.no_internet" = "No internet connection. Changes will be saved locally and synced when you're back online.";
+"errors.request_timeout" = "Request timed out. Please check your connection and try again.";
+"errors.connection_lost" = "Connection lost. Your data is safe and will sync automatically.";
+"errors.server_error" = "Server error. Please try again later.";
+"errors.generic" = "Something went wrong. Please try again.";
+
+/* Accessibility */
+"accessibility.feed_action" = "Log a feed";
+"accessibility.sleep_action" = "Log sleep";
+"accessibility.diaper_action" = "Log a diaper";
+"accessibility.tummy_action" = "Log tummy time";
+"accessibility.edit_event" = "Edit";
+"accessibility.delete_event" = "Delete";
+"accessibility.more_options" = "More options for %1$@";
+"accessibility.send_feedback" = "Send feedback";
+"accessibility.support_website" = "Open support website";
+"accessibility.privacy_policy" = "Privacy policy";
+"accessibility.terms_of_use" = "Terms of use";
+
+/* Time & Date */
+"time.just_now" = "Just now";
+"time.minutes_ago" = "%d minutes ago";
+"time.hours_ago" = "%d hours ago";
+"time.days_ago" = "%d days ago";
+"time.duration_hours_minutes" = "%dh %dm";
+"time.duration_minutes" = "%dm";
+
+/* Event Types */
+"event.feed" = "Feed";
+"event.sleep" = "Sleep";
+"event.diaper" = "Diaper";
+"event.tummy_time" = "Tummy Time";
+
+/* Pro Features */
+"pro.upgrade_required" = "Upgrade to Pro";
+"pro.feature_unavailable" = "This feature requires a Pro subscription";
+
+/* Analytics Events */
+"analytics.app_open" = "App opened";
+"analytics.onboarding_completed" = "Onboarding completed";
+"analytics.quick_action_tapped" = "Quick action tapped";
+"analytics.event_logged" = "Event logged";
+"analytics.prediction_viewed" = "Prediction viewed";
+"analytics.cry_analysis_started" = "Cry analysis started";
+
+
+
+

@@ -13,25 +13,23 @@ export function useAuth() {
 
   useEffect(() => {
     // Set up auth state listener
-    const subscription = authService.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // Track auth events and identify user
-        if (session?.user) {
-          identify(session.user.id, {
-            email: session.user.email,
-            created_at: session.user.created_at
-          });
-          
-          if (event === 'SIGNED_IN') {
-            track('user_signed_in', { method: 'email' });
-          }
+    const subscription = authService.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      // Track auth events and identify user
+      if (session?.user) {
+        identify(session.user.id, {
+          email: session.user.email,
+          created_at: session.user.created_at,
+        });
+
+        if (event === 'SIGNED_IN') {
+          track('user_signed_in', { method: 'email' });
         }
       }
-    );
+    });
 
     // Check for existing session
     authService.getSession().then(({ session }) => {
@@ -55,13 +53,11 @@ export function useAuth() {
       // Create profile
       // Note: keeping direct supabase call here for now as profile service doesn't exist yet
       // Ideally this should move to profileService.createProfile(user.id, email, name)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          email: data.user.email,
-          name: name || null,
-        });
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: data.user.id,
+        email: data.user.email,
+        name: name || null,
+      });
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
@@ -69,7 +65,7 @@ export function useAuth() {
         // Track signup
         track('user_signed_up', {
           method: 'email',
-          has_baby: false // Will be updated if baby created during onboarding
+          has_baby: false, // Will be updated if baby created during onboarding
         });
       }
     }

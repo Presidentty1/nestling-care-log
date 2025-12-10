@@ -12,14 +12,17 @@
 ## Common Issues to Check:
 
 ### 1. JavaScript Errors
+
 - Look for red error messages in the console
 - Common: "Failed to load resource", "Module not found", etc.
 
 ### 2. Network Errors
+
 - Check if assets are loading: Look for 404 errors
 - Assets should load from `capacitor://localhost/assets/...`
 
 ### 3. Capacitor Bridge Issues
+
 - Look for "Capacitor" related errors
 - Should see "Capacitor initialized" message
 
@@ -35,6 +38,7 @@
 ## Quick Check Commands
 
 In Xcode console, you can also type:
+
 - Look for any red error messages
 - Check if you see "Capacitor initialized"
 - Check for any 404 or network errors

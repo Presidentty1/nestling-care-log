@@ -38,13 +38,13 @@ describe('BabySwitcher', () => {
     const { container } = render(
       <BabySwitcher
         babies={[mockBabies[0]]}
-        selectedBabyId="1"
+        selectedBabyId='1'
         onSelect={vi.fn()}
         isOpen={true}
         onClose={vi.fn()}
       />
     );
-    
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -52,13 +52,13 @@ describe('BabySwitcher', () => {
     render(
       <BabySwitcher
         babies={mockBabies}
-        selectedBabyId="1"
+        selectedBabyId='1'
         onSelect={vi.fn()}
         isOpen={true}
         onClose={vi.fn()}
       />
     );
-    
+
     expect(screen.getByText('Baby One')).toBeInTheDocument();
     expect(screen.getByText('Baby Two')).toBeInTheDocument();
   });
@@ -66,19 +66,19 @@ describe('BabySwitcher', () => {
   it('calls onSelect when baby is clicked', () => {
     const onSelect = vi.fn();
     const onClose = vi.fn();
-    
+
     render(
       <BabySwitcher
         babies={mockBabies}
-        selectedBabyId="1"
+        selectedBabyId='1'
         onSelect={onSelect}
         isOpen={true}
         onClose={onClose}
       />
     );
-    
+
     fireEvent.click(screen.getByText('Baby Two'));
-    
+
     expect(onSelect).toHaveBeenCalledWith('2');
     expect(onClose).toHaveBeenCalled();
   });
@@ -87,15 +87,13 @@ describe('BabySwitcher', () => {
     render(
       <BabySwitcher
         babies={mockBabies}
-        selectedBabyId="1"
+        selectedBabyId='1'
         onSelect={vi.fn()}
         isOpen={true}
         onClose={vi.fn()}
       />
     );
-    
+
     expect(screen.getByText('Add Baby')).toBeInTheDocument();
   });
 });
-
-

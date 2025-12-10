@@ -62,6 +62,15 @@ struct SettingsRootView: View {
                     }
                 }
 
+                Section("Sync") {
+                    SyncStatusView()
+                    Button("Sync Now") {
+                        Task { await CloudKitSyncService.shared.syncAll() }
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundColor(.primary)
+                }
+
                 Section("Notifications & Reminders") {
                     NavigationLink("Notification Settings") {
                         NotificationSettingsView()
@@ -390,7 +399,7 @@ struct SettingsRootView: View {
                     showAuth = false
                     Task {
                         await environment.refreshBabies()
-                        await environment.refreshSettings()
+                        environment.refreshSettings()
                     }
                 }
             }

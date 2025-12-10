@@ -25,7 +25,7 @@ export async function compressImage(
       ctx?.drawImage(img, 0, 0, width, height);
 
       canvas.toBlob(
-        (blob) => {
+        blob => {
           if (blob) {
             resolve(blob);
           } else {
@@ -42,11 +42,7 @@ export async function compressImage(
   });
 }
 
-export async function uploadPhoto(
-  babyId: string,
-  category: string,
-  file: File
-): Promise<string> {
+export async function uploadPhoto(babyId: string, category: string, file: File): Promise<string> {
   // Compress image
   const compressed = await compressImage(file);
 
@@ -56,19 +52,15 @@ export async function uploadPhoto(
   const filePath = `${babyId}/${category}/${fileName}`;
 
   // Upload to Supabase Storage
-  const { error } = await supabase.storage
-    .from('baby-photos')
-    .upload(filePath, compressed, {
-      contentType: 'image/jpeg',
-      upsert: false,
-    });
+  const { error } = await supabase.storage.from('baby-photos').upload(filePath, compressed, {
+    contentType: 'image/jpeg',
+    upsert: false,
+  });
 
   if (error) throw error;
 
   // Get public URL
-  const { data } = supabase.storage
-    .from('baby-photos')
-    .getPublicUrl(filePath);
+  const { data } = supabase.storage.from('baby-photos').getPublicUrl(filePath);
 
   return data.publicUrl;
 }
@@ -80,17 +72,13 @@ export async function deletePhoto(url: string): Promise<void> {
 
   const path = urlParts[1];
 
-  const { error } = await supabase.storage
-    .from('baby-photos')
-    .remove([path]);
+  const { error } = await supabase.storage.from('baby-photos').remove([path]);
 
   if (error) throw error;
 }
 
 export function getPhotoUrl(path: string): string {
-  const { data } = supabase.storage
-    .from('baby-photos')
-    .getPublicUrl(path);
+  const { data } = supabase.storage.from('baby-photos').getPublicUrl(path);
 
   return data.publicUrl;
 }

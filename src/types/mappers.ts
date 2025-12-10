@@ -1,6 +1,6 @@
-import type { DbBaby, DbEvent} from './db';
+import type { DbBaby, DbEvent } from './db';
 import { DbProfile, DbFamily, DbFamilyMember } from './db';
-import type { Baby, EventRecord} from './domain';
+import type { Baby, EventRecord } from './domain';
 import { Profile, Family, FamilyMember } from './domain';
 
 export const toDomainBaby = (db: DbBaby): Baby => ({
@@ -63,5 +63,4 @@ export const toDbEvent = (domain: Partial<EventRecord>): Partial<DbEvent> => {
   if (domain.note) db.note = domain.note;
   return db;
 };
-
 

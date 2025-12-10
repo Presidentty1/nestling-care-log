@@ -1,6 +1,7 @@
 # 🚀 Deployment Guide
 
 ## Architecture Overview
+
 - **Frontend:** React SPA (Vite build)
 - **Backend:** Supabase (Lovable Cloud)
 - **Edge Functions:** Deno runtime on Supabase
@@ -8,6 +9,7 @@
 - **Storage:** Supabase Storage (for future features)
 
 ## Current Deployment (Lovable Platform)
+
 1. Push to GitHub (auto-deploys)
 2. Click "Publish" in Lovable editor
 3. Access at: `https://lovable.app/your-subdomain`
@@ -15,6 +17,7 @@
 ## Deploying Outside Lovable
 
 ### Option 1: Vercel (Recommended for Web)
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -29,11 +32,13 @@ VITE_SUPABASE_PROJECT_ID=...
 ```
 
 **Vercel Configuration:**
+
 - Build command: `npm run build`
 - Output directory: `dist`
 - Node version: 18+
 
 ### Option 2: Netlify
+
 ```bash
 # Install Netlify CLI
 npm i -g netlify-cli
@@ -47,6 +52,7 @@ netlify deploy --prod
 ```
 
 ### Option 3: iOS App Store
+
 ```bash
 # 1. Build production bundle
 npm run build
@@ -65,6 +71,7 @@ npx cap open ios
 ```
 
 **iOS Requirements:**
+
 - Apple Developer account ($99/year)
 - Valid signing certificate
 - App icons (1024x1024 PNG)
@@ -72,8 +79,10 @@ npx cap open ios
 - App Store screenshots
 
 ### Edge Functions Deployment
+
 Edge functions are automatically deployed by Lovable.  
 For manual deployment:
+
 ```bash
 # Install Supabase CLI
 brew install supabase/tap/supabase
@@ -94,6 +103,7 @@ supabase functions deploy ai-assistant
 ## Environment Variables
 
 ### Required for All Deployments
+
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
@@ -101,6 +111,7 @@ VITE_SUPABASE_PROJECT_ID=your-project-id
 ```
 
 ### Edge Function Secrets (Production)
+
 ```bash
 # Set via Supabase CLI
 supabase secrets set LOVABLE_API_KEY=your_key
@@ -111,6 +122,7 @@ supabase secrets set OPENAI_API_KEY=sk-...
 ## CI/CD Setup (GitHub Actions)
 
 Create `.github/workflows/deploy.yml`:
+
 ```yaml
 name: Deploy
 on:
@@ -131,6 +143,7 @@ jobs:
 ```
 
 ## Monitoring & Analytics
+
 - **Error Tracking:** Sentry.io
 - **Performance:** Vercel Analytics or Google Analytics
 - **Uptime:** UptimeRobot or Better Uptime
@@ -138,11 +151,13 @@ jobs:
 ## Cost Estimates (Monthly)
 
 ### Free Tier (Hobby)
+
 - Frontend: Vercel/Netlify free tier
 - Backend: Supabase free (50k MAU)
 - Total: $0
 
 ### Production (Paid)
+
 - Frontend: $20 (Vercel Pro)
 - Backend: $25 (Supabase Pro)
 - AI APIs: $10-50 (usage-based)

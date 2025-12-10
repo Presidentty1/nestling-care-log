@@ -120,18 +120,18 @@ protocol DataStore {
     func addBaby(_ baby: Baby) async throws
     func updateBaby(_ baby: Baby) async throws
     func deleteBaby(_ baby: Baby) async throws
-    
+
     // Events
     func fetchEvents(for baby: Baby, on date: Date) async throws -> [Event]
     func fetchEvents(for baby: Baby, from startDate: Date, to endDate: Date) async throws -> [Event]
     func addEvent(_ event: Event) async throws
     func updateEvent(_ event: Event) async throws
     func deleteEvent(_ event: Event) async throws
-    
+
     // Predictions
     func fetchPredictions(for baby: Baby, type: PredictionType) async throws -> Prediction?
     func generatePrediction(for baby: Baby, type: PredictionType) async throws -> Prediction
-    
+
     // Settings
     func fetchAppSettings() async throws -> AppSettings
     func saveAppSettings(_ settings: AppSettings) async throws
@@ -148,10 +148,13 @@ protocol DataStore {
    - Background contexts for performance
 
 ### DataStoreSelector
+
 Automatically chooses implementation:
+
 - Core Data (if available) → JSON → InMemory (fallback)
 
 ### Data Validation
+
 - `EventValidator`: Domain-level validation before save
 - Prevents invalid data (negative durations, end < start, zero amounts)
 - Integrated into DataStore `addEvent`/`updateEvent` methods
@@ -170,6 +173,7 @@ Automatically chooses implementation:
 ### Core Models
 
 #### Baby
+
 ```swift
 struct Baby: Identifiable, Codable {
     let id: UUID
@@ -180,12 +184,13 @@ struct Baby: Identifiable, Codable {
     let primaryFeedingStyle: FeedingStyle? // 'breast', 'bottle', 'both'
     let createdAt: Date
     let updatedAt: Date
-    
+
     static func mock() -> Baby { ... }
 }
 ```
 
 #### Event
+
 ```swift
 struct Event: Identifiable, Codable {
     let id: UUID
@@ -199,7 +204,7 @@ struct Event: Identifiable, Codable {
     let note: String?
     let createdAt: Date
     let updatedAt: Date
-    
+
     static func mockFeed() -> Event { ... }
     static func mockSleep() -> Event { ... }
     static func mockDiaper() -> Event { ... }
@@ -207,6 +212,7 @@ struct Event: Identifiable, Codable {
 ```
 
 #### Prediction
+
 ```swift
 struct Prediction: Identifiable, Codable {
     let id: UUID
@@ -220,6 +226,7 @@ struct Prediction: Identifiable, Codable {
 ```
 
 #### AppSettings
+
 ```swift
 struct AppSettings: Codable {
     var aiDataSharingEnabled: Bool
@@ -230,7 +237,7 @@ struct AppSettings: Codable {
     var diaperReminderHours: Int
     var quietHoursStart: Date?
     var quietHoursEnd: Date?
-    
+
     static func `default`() -> AppSettings { ... }
 }
 ```
@@ -269,29 +276,29 @@ enum FeedingStyle: String, Codable {
 
 ### P0 MVP Features (First Release)
 
-| Web Route | Web Component | iOS View | iOS ViewModel | Status |
-|-----------|--------------|----------|--------------|--------|
-| `/home` | `Home.tsx` | `HomeView` | `HomeViewModel` | ✅ P0 |
-| `/history` | `History.tsx` | `HistoryView` | `HistoryViewModel` | ✅ P0 |
-| `/labs` | `Labs.tsx` | `LabsView` | `LabsViewModel` | ✅ P0 |
-| `/predictions` | `Predictions.tsx` | `PredictionsView` | `PredictionsViewModel` | ✅ P0 |
-| `/settings` | `Settings.tsx` | `SettingsRootView` | `SettingsViewModel` | ✅ P0 |
-| `/settings/ai-data-sharing` | `AIDataSharing.tsx` | `AIDataSharingSettingsView` | `AIDataSharingViewModel` | ✅ P0 |
-| `/settings/privacy-data` | `PrivacyData.tsx` | `PrivacyDataView` | `PrivacyDataViewModel` | ✅ P0 |
-| `/settings/babies` | `ManageBabies.tsx` | `ManageBabiesView` | `ManageBabiesViewModel` | ⚠️ P0 (Simple) |
-| `/settings/caregivers` | `ManageCaregivers.tsx` | `ManageCaregiversView` | `ManageCaregiversViewModel` | ⚠️ P0 (Simple) |
+| Web Route                   | Web Component          | iOS View                    | iOS ViewModel               | Status         |
+| --------------------------- | ---------------------- | --------------------------- | --------------------------- | -------------- |
+| `/home`                     | `Home.tsx`             | `HomeView`                  | `HomeViewModel`             | ✅ P0          |
+| `/history`                  | `History.tsx`          | `HistoryView`               | `HistoryViewModel`          | ✅ P0          |
+| `/labs`                     | `Labs.tsx`             | `LabsView`                  | `LabsViewModel`             | ✅ P0          |
+| `/predictions`              | `Predictions.tsx`      | `PredictionsView`           | `PredictionsViewModel`      | ✅ P0          |
+| `/settings`                 | `Settings.tsx`         | `SettingsRootView`          | `SettingsViewModel`         | ✅ P0          |
+| `/settings/ai-data-sharing` | `AIDataSharing.tsx`    | `AIDataSharingSettingsView` | `AIDataSharingViewModel`    | ✅ P0          |
+| `/settings/privacy-data`    | `PrivacyData.tsx`      | `PrivacyDataView`           | `PrivacyDataViewModel`      | ✅ P0          |
+| `/settings/babies`          | `ManageBabies.tsx`     | `ManageBabiesView`          | `ManageBabiesViewModel`     | ⚠️ P0 (Simple) |
+| `/settings/caregivers`      | `ManageCaregivers.tsx` | `ManageCaregiversView`      | `ManageCaregiversViewModel` | ⚠️ P0 (Simple) |
 
 ### P1 Features (Future Releases)
 
-| Web Route | Web Component | iOS View | Priority |
-|-----------|--------------|----------|----------|
-| `/onboarding` | `Onboarding.tsx` | `OnboardingView` | P1 |
-| `/analytics` | `Analytics.tsx` | `AnalyticsView` | P1 |
-| `/growth` | `GrowthTracker.tsx` | `GrowthTrackerView` | P1 |
-| `/health` | `HealthRecords.tsx` | `HealthRecordsView` | P1 |
-| `/milestones` | `Milestones.tsx` | `MilestonesView` | P1 |
-| `/ai-assistant` | `AIAssistant.tsx` | `AIAssistantView` | P1 |
-| `/cry-insights` | `CryInsights.tsx` | `CryInsightsView` | P2 (Beta) |
+| Web Route       | Web Component       | iOS View            | Priority  |
+| --------------- | ------------------- | ------------------- | --------- |
+| `/onboarding`   | `Onboarding.tsx`    | `OnboardingView`    | P1        |
+| `/analytics`    | `Analytics.tsx`     | `AnalyticsView`     | P1        |
+| `/growth`       | `GrowthTracker.tsx` | `GrowthTrackerView` | P1        |
+| `/health`       | `HealthRecords.tsx` | `HealthRecordsView` | P1        |
+| `/milestones`   | `Milestones.tsx`    | `MilestonesView`    | P1        |
+| `/ai-assistant` | `AIAssistant.tsx`   | `AIAssistantView`   | P1        |
+| `/cry-insights` | `CryInsights.tsx`   | `CryInsightsView`   | P2 (Beta) |
 
 ---
 
@@ -306,7 +313,7 @@ class AppEnvironment: ObservableObject {
     let dataStore: DataStore
     let appSettings: AppSettingsViewModel
     let currentBaby: CurrentBabyViewModel
-    
+
     init(dataStore: DataStore) {
         self.dataStore = dataStore
         self.appSettings = AppSettingsViewModel(dataStore: dataStore)
@@ -321,7 +328,7 @@ class AppEnvironment: ObservableObject {
 struct HomeView: View {
     @EnvironmentObject var environment: AppEnvironment
     @StateObject private var viewModel: HomeViewModel
-    
+
     init() {
         _viewModel = StateObject(wrappedValue: HomeViewModel(dataStore: environment.dataStore))
     }
@@ -341,22 +348,22 @@ extension Color {
     // Brand
     static let primary = Color("Primary") // #2E7D6A
     static let primaryForeground = Color.white
-    
+
     // Semantic
     static let success = Color("Success")
     static let warning = Color("Warning") // #F5A623
     static let destructive = Color("Destructive") // #D64545
-    
+
     // Event Colors
     static let eventFeed = Color("EventFeed") // Blue
     static let eventSleep = Color("EventSleep") // Purple
     static let eventDiaper = Color("EventDiaper") // Orange
     static let eventTummy = Color("EventTummy") // Green
-    
+
     // Backgrounds
     static let background = Color("Background") // #F8FAFB
     static let surface = Color("Surface") // #FFFFFF
-    
+
     // Text
     static let foreground = Color("Foreground") // #0D1B1E
     static let mutedForeground = Color("MutedForeground") // #8FA1A8
@@ -414,22 +421,26 @@ extension CGFloat {
 Mirroring `MVP_SCOPE.md` requirements:
 
 ### Feed Quick Actions
+
 - **Minimum**: 10ml (0.33oz)
 - **Default**: Use last used amount/unit, or 120ml (4oz) if none
 - **Side**: Use last used side for breast feeds
 - **Never create**: 0ml feeds
 
 ### Sleep Quick Actions
+
 - **Default Duration**: 10 minutes
 - **Note**: Add "Quick log nap (10 min)" note
 - **Start Time**: Calculated backwards from current time
 - **Never create**: 0-second sleep events
 
 ### Diaper Quick Actions
+
 - **Default**: Wet
 - **No amount needed**: Can quick log immediately
 
 ### Tummy Time Quick Actions
+
 - **Default Duration**: 5 minutes
 - **Use last used**: If available
 
@@ -483,6 +494,7 @@ ios/
 ### Development Workflow
 
 1. **Preview Development**: Use SwiftUI previews for rapid iteration
+
    ```swift
    #Preview {
        HomeView()
@@ -557,17 +569,20 @@ ios/
 ## Future Enhancements
 
 ### Phase 1: Networking
+
 - Implement `RemoteDataStore` with Supabase Swift SDK
 - Add authentication flow
 - Real-time event synchronization
 
 ### Phase 2: Advanced Features
+
 - Real-time widget updates
 - HealthKit integration
 - Apple Watch companion app
 - Advanced analytics/insights
 
 ### Phase 3: Multi-Caregiver
+
 - Family sharing
 - Caregiver invites
 - Activity feed
@@ -589,35 +604,41 @@ ios/
 The app includes a Modern iOS Interaction Pack (iOS 17+) with the following features:
 
 ### Bottom-Sheet Detents
+
 - All forms use `.presentationDetents([.medium, .large])`
 - User preference for default detent (Settings → AI & Smart Features)
 - `.interactiveDismissDisabled(isSaving)` prevents accidental dismissal
 
 ### Searchable Timelines
+
 - `.searchable(text:, suggestions:)` on Home and History views
 - Filter chips: All, Feeds, Diapers, Sleep, Tummy
 - Search matches type keywords, note text, and time tokens
 - Suggestions include recent note terms
 
 ### Context Menus
+
 - Long-press on TimelineRow shows context menu
 - Actions: Edit, Duplicate, Copy Summary, Delete
 - Duplicate creates new event with current time
 - Copy Summary formats event details to pasteboard
 
 ### Interactive Widgets
+
 - Lock-screen widgets: `accessoryCircular` and `accessoryInline`
 - Interactive buttons via AppIntents
 - Actions forward to DataStore
 - Widgets reload after actions
 
 ### Dynamic Island + Live Activity
+
 - Sleep timer uses Live Activity with Dynamic Island support
 - Compact/expanded Dynamic Island UI
 - Fallback UI for devices without Dynamic Island
 - Updates elapsed time every second
 
 ### Keyboard Shortcuts
+
 - ⌘N: Quick Log Feed
 - ⌘S: Start/Stop Sleep
 - ⌘D: Log Diaper
@@ -625,12 +646,14 @@ The app includes a Modern iOS Interaction Pack (iOS 17+) with the following feat
 - Available on iPad and with external keyboards
 
 ### Core Spotlight Indexing
+
 - Indexes latest ~500 events for system-wide search
 - Searchable by event type, baby name, note text
 - Tapping Spotlight result opens History on correct date
 - Settings toggle: "Index Events in Spotlight"
 
 ### SF Symbols Effects
+
 - Pulse effect on PrimaryButton icons
 - Bounce effect on QuickActionButton icons (when active)
 - Bounce effect on Save button checkmarks (when saving)
@@ -642,4 +665,3 @@ See `MODERN_IOS_INTERACTION_PACK.md` for detailed documentation.
 
 **Version**: 1.1  
 **Last Updated**: December 2024
-

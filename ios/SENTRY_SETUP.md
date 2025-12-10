@@ -5,12 +5,14 @@
 Since the automated script has issues, follow these manual steps to add Sentry to the Xcode project:
 
 ### 1. Open Xcode Project
+
 ```bash
 cd ios/Nuzzle
 open Nuzzle.xcodeproj
 ```
 
 ### 2. Add Package Dependencies
+
 1. In Xcode, go to **File → Add Package Dependencies...**
 2. Enter the Sentry package URL: `https://github.com/getsentry/sentry-cocoa.git`
 3. Set dependency rule to **Up to Next Major Version** and version **8.0.0**
@@ -19,6 +21,7 @@ open Nuzzle.xcodeproj
    - **SentrySwiftUI** (optional, for SwiftUI integration)
 
 ### 3. Configure Environment Variables
+
 Add these to your Xcode scheme (or create a `.xcconfig` file):
 
 ```bash
@@ -28,6 +31,7 @@ ENVIRONMENT=development  # or production
 ```
 
 ### 4. Build and Test
+
 ```bash
 # Build the project
 xcodebuild -project Nuzzle.xcodeproj -scheme Nuzzle -sdk iphonesimulator build
@@ -49,11 +53,13 @@ The app is already configured to use Sentry through the `CrashReportingService`.
 ## Testing Sentry Integration
 
 1. **Trigger a test error:**
+
    ```swift
    CrashReportingService.shared.logError(NSError(domain: "test", code: 1, userInfo: ["test": "data"]))
    ```
 
 2. **Add a breadcrumb:**
+
    ```swift
    CrashReportingService.shared.logBreadcrumb("User tapped settings", category: "navigation")
    ```
@@ -71,4 +77,3 @@ SENTRY_DSN=https://your-ios-sentry-dsn@sentry.io/project-id
 ENVIRONMENT=production
 VITE_APP_VERSION=1.0.0
 ```
-

@@ -163,12 +163,13 @@ struct NotificationSettingsView: View {
         case .denied: return "Denied"
         case .notDetermined: return "Not Determined"
         case .provisional: return "Provisional"
+        case .ephemeral: return "Ephemeral"
         @unknown default: return "Unknown"
         }
     }
     
     private func checkPermissionStatus() async {
-        await ReminderService.shared.checkAuthorizationStatus()
+        ReminderService.shared.checkAuthorizationStatus()
         await MainActor.run {
             permissionStatus = ReminderService.shared.authorizationStatus
         }
@@ -229,7 +230,7 @@ struct NotificationSettingsView: View {
             }
             
             // Schedule notifications via ReminderService
-            if permissionStatus == .authorized, let baby = environment.currentBaby {
+            if permissionStatus == .authorized, environment.currentBaby != nil {
                 // Feed and diaper reminders will be scheduled when events are logged (check time since)
                 // Nap window reminders will be scheduled when nap window is predicted
                 // For now, just save settings - reminders will be checked/scheduled when events change

@@ -53,7 +53,7 @@ class CrashReportingService {
         event.message = SentryMessage(formatted: error.localizedDescription)
 
         // Add context information
-        var tags: [String: String] = [:]
+        let tags: [String: String] = [:]
         var extra: [String: Any] = [
             "file": URL(fileURLWithPath: file).lastPathComponent,
             "function": function,

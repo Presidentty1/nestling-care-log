@@ -1,19 +1,19 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { babyId, year, month } = await req.json();
-    
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -49,10 +49,11 @@ serve(async (req) => {
       .gte('start_time', startDate.toISOString())
       .lte('start_time', endDate.toISOString());
 
-    const eventsSummary = events?.reduce((acc: any, event) => {
-      acc[event.type] = (acc[event.type] || 0) + 1;
-      return acc;
-    }, {}) || {};
+    const eventsSummary =
+      events?.reduce((acc: any, event) => {
+        acc[event.type] = (acc[event.type] || 0) + 1;
+        return acc;
+      }, {}) || {};
 
     // Get journal entries
     const { data: journalEntries } = await supabaseClient
@@ -74,7 +75,7 @@ serve(async (req) => {
       eventsSummary,
       funnyMoments,
       firsts,
-      totalJournalEntries: journalEntries?.length || 0
+      totalJournalEntries: journalEntries?.length || 0,
     };
 
     // Check if recap already exists
@@ -92,33 +93,37 @@ serve(async (req) => {
         .from('monthly_recaps')
         .update({
           highlights,
-          generated_at: new Date().toISOString()
+          generated_at: new Date().toISOString(),
         })
         .eq('id', existingRecap.id);
     } else {
       // Create new
-      await supabaseClient
-        .from('monthly_recaps')
-        .insert({
-          baby_id: babyId,
-          year,
-          month,
-          highlights,
-          generated_at: new Date().toISOString()
-        });
+      await supabaseClient.from('monthly_recaps').insert({
+        baby_id: babyId,
+        year,
+        month,
+        highlights,
+        generated_at: new Date().toISOString(),
+      });
     }
 
-    return new Response(JSON.stringify({
-      highlights,
-      message: 'Monthly recap generated successfully'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        highlights,
+        message: 'Monthly recap generated successfully',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("Error in generate-monthly-recap:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in generate-monthly-recap:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

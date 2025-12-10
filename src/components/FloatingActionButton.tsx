@@ -16,18 +16,15 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
       <div className={cn('fixed bottom-24 right-6 z-50', className)}>
         <Button
           onClick={() => setShowVoiceModal(true)}
-          size="lg"
-          className="rounded-full w-14 h-14 shadow-lg hover:scale-110 transition-transform"
-          aria-label="Voice logging"
+          size='lg'
+          className='rounded-full w-14 h-14 shadow-lg hover:scale-110 transition-transform'
+          aria-label='Voice logging'
         >
-          <Mic className="h-5 w-5" />
+          <Mic className='h-5 w-5' />
         </Button>
       </div>
-      
-      <VoiceLogModal 
-        open={showVoiceModal}
-        onOpenChange={setShowVoiceModal}
-      />
+
+      <VoiceLogModal open={showVoiceModal} onOpenChange={setShowVoiceModal} />
     </>
   );
 }

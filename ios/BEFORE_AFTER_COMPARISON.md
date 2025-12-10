@@ -7,6 +7,7 @@
 ## 🎬 Onboarding Flow
 
 ### BEFORE (9 Steps, ~3 minutes)
+
 ```
 1. Welcome
 2. Baby Setup (name)
@@ -24,20 +25,21 @@
 ```
 
 ### AFTER (3 Steps, <60 seconds)
+
 ```
 1. Welcome
    "Get 2 More Hours of Sleep"
    "Free forever • Premium from $4.99/mo"
-   
+
 2. Baby Essentials
    Name + DOB + Sex (all in one screen)
-   
+
 3. Goal Selection
    😴 Better Sleep
    🍼 Track Feeding
    📊 Health Logs
    🆘 Just Surviving
-   
+
 4. Ready to Go!
    Celebration + "Start Tracking" CTA
 
@@ -51,6 +53,7 @@
 ## 📅 History Page
 
 ### BEFORE
+
 ```
 ┌─────────────────────┐
 │ [◀ Day Strip ▶]    │  ← Only 7 days visible
@@ -67,6 +70,7 @@
 ```
 
 ### AFTER
+
 ```
 ┌─────────────────────┐
 │ [List] [Calendar]   │  ← Toggle view
@@ -95,6 +99,7 @@
 ## 🏠 Home Dashboard
 
 ### BEFORE
+
 ```
 ┌─────────────────────┐
 │ Baby Name      [⚙️] │
@@ -119,6 +124,7 @@
 ```
 
 ### AFTER (Personalized by Goal)
+
 ```
 ┌─────────────────────┐
 │ 👶 Baby Name   [⚙️] │
@@ -154,6 +160,7 @@
 ## 💳 Monetization
 
 ### BEFORE
+
 ```
 Free Tier:
 - Everything unlocked
@@ -171,6 +178,7 @@ Premium:
 ```
 
 ### AFTER
+
 ```
 Free Tier:
 - Unlimited logging
@@ -203,6 +211,7 @@ Upgrade Prompts:
 ## ⚡ Performance
 
 ### BEFORE
+
 ```
 Timeline Load: 800ms
 Calendar Load: 2000ms
@@ -214,6 +223,7 @@ Active Sleep Check: 300ms
 ```
 
 ### AFTER
+
 ```
 Timeline Load: 200ms  (-75%)
 Calendar Load: 400ms  (-80%)
@@ -228,21 +238,21 @@ Active Sleep Check: 50ms  (-83%)
 
 ## 📊 Metrics Comparison
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| **Onboarding** |
-| Steps | 9 | 3 | -67% |
-| Time | 3 min | <60 sec | -67% |
-| Completion | 70% | 85% | +21% |
-| **Activation** |
-| First log (5 min) | 40% | 60% | +50% |
-| Day 1 retention | 50% | 65% | +30% |
-| **Monetization** |
-| Paid conversion | 5% | 12% | +140% |
-| MRR | $300 | $1,350 | +350% |
-| **Performance** |
-| Timeline load | 800ms | 200ms | -75% |
-| Calendar load | 2s | 400ms | -80% |
+| Metric            | Before | After   | Change |
+| ----------------- | ------ | ------- | ------ |
+| **Onboarding**    |
+| Steps             | 9      | 3       | -67%   |
+| Time              | 3 min  | <60 sec | -67%   |
+| Completion        | 70%    | 85%     | +21%   |
+| **Activation**    |
+| First log (5 min) | 40%    | 60%     | +50%   |
+| Day 1 retention   | 50%    | 65%     | +30%   |
+| **Monetization**  |
+| Paid conversion   | 5%     | 12%     | +140%  |
+| MRR               | $300   | $1,350  | +350%  |
+| **Performance**   |
+| Timeline load     | 800ms  | 200ms   | -75%   |
+| Calendar load     | 2s     | 400ms   | -80%   |
 
 ---
 
@@ -250,21 +260,21 @@ Active Sleep Check: 50ms  (-83%)
 
 ### Copy Changes
 
-| Location | Before | After |
-|----------|--------|-------|
-| Welcome | "Welcome to Nuzzle" | "Get 2 More Hours of Sleep" |
-| Auth | "Sign Up" | "Get Started Free" |
-| Pricing | Hidden | "Free forever • Premium from $4.99/mo" |
-| Benefits | "AI-Powered Insights" | "87% accurate nap predictions" |
+| Location | Before                | After                                  |
+| -------- | --------------------- | -------------------------------------- |
+| Welcome  | "Welcome to Nuzzle"   | "Get 2 More Hours of Sleep"            |
+| Auth     | "Sign Up"             | "Get Started Free"                     |
+| Pricing  | Hidden                | "Free forever • Premium from $4.99/mo" |
+| Benefits | "AI-Powered Insights" | "87% accurate nap predictions"         |
 
 ### Visual Hierarchy
 
-| Element | Before | After |
-|---------|--------|-------|
-| Nap prediction | Small card, buried | HERO card, prominent |
-| Timeline | Full list, dominates | Collapsed, "View all" |
-| Quick actions | FAB menu | Always visible buttons |
-| Premium features | Hidden | Visible with locks |
+| Element          | Before               | After                  |
+| ---------------- | -------------------- | ---------------------- |
+| Nap prediction   | Small card, buried   | HERO card, prominent   |
+| Timeline         | Full list, dominates | Collapsed, "View all"  |
+| Quick actions    | FAB menu             | Always visible buttons |
+| Premium features | Hidden               | Visible with locks     |
 
 ---
 
@@ -273,6 +283,7 @@ Active Sleep Check: 50ms  (-83%)
 ### Goal-Based Layouts
 
 **"Better Sleep" Goal:**
+
 ```
 1. Next Nap (HERO)
 2. Sleep insights
@@ -281,6 +292,7 @@ Active Sleep Check: 50ms  (-83%)
 ```
 
 **"Track Feeding" Goal:**
+
 ```
 1. Feeding insights
 2. Quick actions
@@ -289,6 +301,7 @@ Active Sleep Check: 50ms  (-83%)
 ```
 
 **"Just Surviving" Goal:**
+
 ```
 1. Quick actions (BIG)
 2. Minimal info
@@ -301,16 +314,19 @@ Active Sleep Check: 50ms  (-83%)
 ## 🎯 Next Features to Build
 
 ### Priority 1 (Week 3-4)
+
 1. Push notifications
 2. Growth tracking
 3. PDF doctor reports
 
 ### Priority 2 (Month 2)
+
 4. Photo attachments
 5. Family sharing
 6. Advanced analytics
 
 ### Priority 3 (Month 3)
+
 7. Professional caregiver mode ($9.99/mo)
 8. Apple Watch app
 9. Shift handoff reports
@@ -320,6 +336,7 @@ Active Sleep Check: 50ms  (-83%)
 ## 🔧 How to Test
 
 ### Quick Test (5 minutes)
+
 ```bash
 1. Delete app from simulator
 2. Reinstall and launch
@@ -331,6 +348,7 @@ Active Sleep Check: 50ms  (-83%)
 ```
 
 ### Full Test (30 minutes)
+
 ```bash
 1. Complete onboarding with each goal option
 2. Verify home screen layout changes
@@ -346,12 +364,14 @@ Active Sleep Check: 50ms  (-83%)
 ## 📝 Files to Review
 
 ### Must Review (Core Changes)
+
 1. `OnboardingCoordinator.swift` - Flow logic
 2. `MonthlyCalendarView.swift` - Calendar UI
 3. `UpgradePromptView.swift` - Monetization
 4. `20251206000000_performance_indexes.sql` - Database
 
 ### Nice to Review (Supporting)
+
 5. `WelcomeView.swift` - Copy updates
 6. `AppSettings.swift` - Data model
 7. `BabyEssentialsView.swift` - Form UI
@@ -367,12 +387,14 @@ None identified yet. Pending testing.
 ## 🎉 Success Criteria
 
 ### Before TestFlight:
+
 - [ ] Onboarding completes in <60 seconds
 - [ ] Calendar loads all months correctly
 - [ ] No crashes on fresh install
 - [ ] Upgrade prompts display properly
 
 ### Before App Store:
+
 - [ ] 4.7+ star rating
 - [ ] <1% crash rate
 - [ ] 80%+ onboarding completion
@@ -383,4 +405,3 @@ None identified yet. Pending testing.
 **Last Updated:** December 6, 2025  
 **Status:** ✅ Implementation Complete  
 **Next Step:** Deploy to TestFlight
-

@@ -38,6 +38,7 @@ The iOS app requires the following environment variables:
 1. **Create xcconfig files** for each environment:
 
    `Development.xcconfig`:
+
    ```
    SUPABASE_URL = https://your-project.supabase.co
    SUPABASE_ANON_KEY = your-anon-key-here
@@ -46,6 +47,7 @@ The iOS app requires the following environment variables:
    ```
 
    `Production.xcconfig`:
+
    ```
    SUPABASE_URL = https://your-project.supabase.co
    SUPABASE_ANON_KEY = your-anon-key-here
@@ -61,6 +63,7 @@ The iOS app requires the following environment variables:
 While not standard for iOS, you can create a simple environment loader:
 
 1. **Create a `.env` file** in the project root (add to .gitignore):
+
    ```
    SUPABASE_URL=https://your-project.supabase.co
    SUPABASE_ANON_KEY=your-anon-key-here
@@ -69,6 +72,7 @@ While not standard for iOS, you can create a simple environment loader:
    ```
 
 2. **Create an environment loader** (add to your AppDelegate or main app file):
+
    ```swift
    import Foundation
 
@@ -153,6 +157,7 @@ Note: This approach exposes credentials in build logs, so it's less secure than 
 For automated builds, set environment variables in your CI/CD system:
 
 ### GitHub Actions Example:
+
 ```yaml
 - name: Build iOS App
   env:
@@ -163,6 +168,7 @@ For automated builds, set environment variables in your CI/CD system:
 ```
 
 ### Fastlane Example:
+
 ```ruby
 lane :build do
   ENV["SUPABASE_URL"] = ENV["SUPABASE_URL"]
@@ -175,7 +181,3 @@ lane :build do
   )
 end
 ```
-
-
-
-

@@ -20,12 +20,12 @@ export function useEventSync(babyId: string) {
   const [lastSyncTime, setLastSyncTime] = useState<string | undefined>();
   const [failedCount, setFailedCount] = useState(0);
   const [syncHistory, setSyncHistory] = useState<SyncHistoryItem[]>([]);
-  
+
   useEffect(() => {
     loadSyncHistory();
     updatePendingCount();
   }, [babyId]);
-  
+
   useEffect(() => {
     if (isOnline && pendingCount > 0 && !isSyncing) {
       syncToSupabase();
@@ -52,7 +52,7 @@ export function useEventSync(babyId: string) {
       setLastSyncTime(newItem.timestamp);
     }
   };
-  
+
   const updatePendingCount = async () => {
     const events = await dataService.listEventsRange(
       babyId,
@@ -69,20 +69,20 @@ export function useEventSync(babyId: string) {
     });
     setPendingByType(byType);
   };
-  
+
   const syncToSupabase = async () => {
     setIsSyncing(true);
     let failed = 0;
-    
+
     try {
       const localEvents = await dataService.listEventsRange(
         babyId,
         new Date(0).toISOString(),
         new Date().toISOString()
       );
-      
+
       const unsyncedEvents = localEvents.filter(e => e.source === 'local' && !e.syncedAt);
-      
+
       for (const event of unsyncedEvents) {
         const { error } = await supabase.from('events').insert({
           id: event.id,
@@ -96,7 +96,7 @@ export function useEventSync(babyId: string) {
           unit: event.unit,
           note: event.notes,
         });
-        
+
         if (!error) {
           await dataService.updateEvent(event.id, {
             source: 'sync',
@@ -106,10 +106,10 @@ export function useEventSync(babyId: string) {
           failed++;
         }
       }
-      
+
       setFailedCount(failed);
       addToSyncHistory(unsyncedEvents.length - failed, failed === 0);
-      
+
       if (unsyncedEvents.length > 0) {
         toast.success(`Synced ${unsyncedEvents.length - failed} events`);
       }
@@ -129,10 +129,10 @@ export function useEventSync(babyId: string) {
     }
     await syncToSupabase();
   };
-  
-  return { 
-    isSyncing, 
-    pendingCount, 
+
+  return {
+    isSyncing,
+    pendingCount,
     pendingByType,
     lastSyncTime,
     failedCount,

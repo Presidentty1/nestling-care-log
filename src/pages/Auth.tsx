@@ -22,15 +22,15 @@ export default function Auth() {
   // Show spinner while auth is initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className='min-h-screen bg-background flex items-center justify-center'>
+        <Loader2 className='h-8 w-8 animate-spin text-primary' />
       </div>
     );
   }
 
   // Redirect if already logged in
   if (user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to='/home' replace />;
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -79,23 +79,23 @@ export default function Auth() {
 
   const handleSkipLogin = async () => {
     setLoading(true);
-    
+
     // Create/sign in with dev account
     const devEmail = 'dev@nestling.app';
     const devPassword = 'devpass123';
-    
+
     try {
       // Try signing in first
       let { error } = await signIn(devEmail, devPassword);
-      
+
       // If account doesn't exist, create it
       if (error?.message?.includes('Invalid login credentials')) {
         const signUpResult = await signUp(devEmail, devPassword, 'Dev User');
         error = signUpResult.error;
       }
-      
+
       if (error) {
-        toast.error(`Skip login failed: ${  error.message}`);
+        toast.error(`Skip login failed: ${error.message}`);
       } else {
         // Clear any stale baby selection so Home can route correctly
         setActiveBabyId(null);
@@ -107,7 +107,7 @@ export default function Auth() {
       console.error('Skip login error:', err);
       toast.error('Failed to skip login');
     }
-    
+
     setLoading(false);
   };
 
@@ -118,91 +118,93 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-soft">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-soft">
-            <Baby className="h-8 w-8 text-primary-foreground" />
+    <div className='min-h-screen flex items-center justify-center bg-background p-4'>
+      <Card className='w-full max-w-md shadow-soft'>
+        <CardHeader className='text-center space-y-4'>
+          <div className='mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-soft'>
+            <Baby className='h-8 w-8 text-primary-foreground' />
           </div>
           <div>
-            <CardTitle className="text-[28px] leading-[34px]">Nestling</CardTitle>
-            <CardDescription className="text-base">The fastest way to track baby care</CardDescription>
+            <CardTitle className='text-[28px] leading-[34px]'>Nestling</CardTitle>
+            <CardDescription className='text-base'>
+              The fastest way to track baby care
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <Tabs defaultValue='signin' className='w-full'>
+            <TabsList className='grid w-full grid-cols-2 mb-6'>
+              <TabsTrigger value='signin'>Sign In</TabsTrigger>
+              <TabsTrigger value='signup'>Sign Up</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+            <TabsContent value='signin'>
+              <form onSubmit={handleSignIn} className='space-y-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='signin-email'>Email</Label>
                   <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="you@example.com"
+                    id='signin-email'
+                    type='email'
+                    placeholder='you@example.com'
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={e => setEmail(e.target.value)}
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='signin-password'>Password</Label>
                   <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••••"
+                    id='signin-password'
+                    type='password'
+                    placeholder='••••••••'
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type='submit' className='w-full' disabled={loading}>
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Name</Label>
+            <TabsContent value='signup'>
+              <form onSubmit={handleSignUp} className='space-y-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='signup-name'>Name</Label>
                   <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Your name"
+                    id='signup-name'
+                    type='text'
+                    placeholder='Your name'
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value)}
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='signup-email'>Email</Label>
                   <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
+                    id='signup-email'
+                    type='email'
+                    placeholder='you@example.com'
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={e => setEmail(e.target.value)}
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                <div className='space-y-2'>
+                  <Label htmlFor='signup-password'>Password</Label>
                   <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
+                    id='signup-password'
+                    type='password'
+                    placeholder='••••••••'
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     required
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type='submit' className='w-full' disabled={loading}>
                   {loading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
@@ -211,10 +213,10 @@ export default function Auth() {
 
           {/* Development skip button - only shown in dev mode */}
           {import.meta.env.DEV && (
-            <div className="mt-4 pt-4 border-t">
-              <Button 
-                variant="ghost" 
-                className="w-full text-muted-foreground hover:text-foreground"
+            <div className='mt-4 pt-4 border-t'>
+              <Button
+                variant='ghost'
+                className='w-full text-muted-foreground hover:text-foreground'
                 onClick={handleSkipLogin}
                 disabled={loading}
               >
@@ -224,14 +226,14 @@ export default function Auth() {
           )}
 
           {/* Value highlights */}
-          <div className="mt-6 pt-6 border-t">
-            <div className="grid grid-cols-3 gap-4">
-              {features.map((feature) => (
-                <div key={feature.label} className="flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-surface border-2 border-border flex items-center justify-center">
+          <div className='mt-6 pt-6 border-t'>
+            <div className='grid grid-cols-3 gap-4'>
+              {features.map(feature => (
+                <div key={feature.label} className='flex flex-col items-center gap-2'>
+                  <div className='w-10 h-10 rounded-lg bg-surface border-2 border-border flex items-center justify-center'>
                     <feature.icon className={`h-5 w-5 ${feature.color}`} />
                   </div>
-                  <span className="text-xs text-center text-muted-foreground leading-tight">
+                  <span className='text-xs text-center text-muted-foreground leading-tight'>
                     {feature.label}
                   </span>
                 </div>
@@ -240,9 +242,9 @@ export default function Auth() {
           </div>
 
           {/* Privacy message */}
-          <div className="mt-4 flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
-            <Shield className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground">
+          <div className='mt-4 flex items-start gap-2 p-3 bg-primary/5 rounded-lg'>
+            <Shield className='h-4 w-4 text-primary mt-0.5 shrink-0' />
+            <p className='text-xs text-muted-foreground'>
               Your data stays private. No ads, no tracking.
             </p>
           </div>

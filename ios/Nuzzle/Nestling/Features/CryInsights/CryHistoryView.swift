@@ -311,3 +311,4 @@ struct CryLog: Identifiable, Codable {
             .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
     }
 }
+

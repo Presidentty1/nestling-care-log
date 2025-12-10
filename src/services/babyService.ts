@@ -9,7 +9,10 @@ export type Baby = DbBaby;
 class BabyService {
   async getUserBabies(): Promise<Baby[]> {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
       if (authError) {
         logger.error('Authentication error in getUserBabies', authError, 'BabyService');
@@ -49,11 +52,12 @@ class BabyService {
 
       // Get babies from those families with timeout and retry logic
       const { data: babies, error: babyError } = await this.withRetry(
-        () => supabase
-          .from('babies')
-          .select('*')
-          .in('family_id', familyIds)
-          .order('created_at', { ascending: true }),
+        () =>
+          supabase
+            .from('babies')
+            .select('*')
+            .in('family_id', familyIds)
+            .order('created_at', { ascending: true }),
         'getUserBabies'
       );
 
@@ -67,10 +71,14 @@ class BabyService {
         .filter(baby => this.isValidBaby(baby))
         .map(baby => this.sanitizeBaby(baby));
 
-      logger.debug('Babies retrieved successfully', {
-        userId: user.id,
-        babyCount: validBabies.length
-      }, 'BabyService');
+      logger.debug(
+        'Babies retrieved successfully',
+        {
+          userId: user.id,
+          babyCount: validBabies.length,
+        },
+        'BabyService'
+      );
 
       return validBabies as Baby[];
     } catch (error) {
@@ -122,7 +130,11 @@ class BabyService {
         }
 
         const delay = Math.pow(2, attempt - 1) * 1000;
-        logger.debug(`Retrying ${operationName} after ${delay}ms due to exception`, { attempt }, 'BabyService');
+        logger.debug(
+          `Retrying ${operationName} after ${delay}ms due to exception`,
+          { attempt },
+          'BabyService'
+        );
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -167,16 +179,12 @@ class BabyService {
     return {
       ...baby,
       name: sanitizeBabyName(baby.name || ''),
-      timezone: sanitizeTimeZone(baby.timezone || 'UTC')
+      timezone: sanitizeTimeZone(baby.timezone || 'UTC'),
     };
   }
 
   async getBaby(id: string): Promise<Baby | null> {
-    const { data, error } = await supabase
-      .from('babies')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('babies').select('*').eq('id', id).single();
 
     if (error) return null;
     return data as Baby;
@@ -236,8 +244,11 @@ class BabyService {
       }
 
       // Validate feeding style if provided
-      if (baby.primary_feeding_style !== undefined && baby.primary_feeding_style !== null &&
-          !['breast', 'bottle', 'both'].includes(baby.primary_feeding_style)) {
+      if (
+        baby.primary_feeding_style !== undefined &&
+        baby.primary_feeding_style !== null &&
+        !['breast', 'bottle', 'both'].includes(baby.primary_feeding_style)
+      ) {
         throw new Error('Invalid feeding style');
       }
 
@@ -247,15 +258,16 @@ class BabyService {
       await this.validateBabyCreationPermissions(baby.family_id);
 
       const { data, error } = await this.withRetry(
-        () => supabase
-          .from('babies')
-          .insert({
-            ...baby,
-            name: sanitizedName,
-            timezone,
-          })
-          .select('*')
-          .single(),
+        () =>
+          supabase
+            .from('babies')
+            .insert({
+              ...baby,
+              name: sanitizedName,
+              timezone,
+            })
+            .select('*')
+            .single(),
         'createBaby'
       );
 
@@ -270,11 +282,15 @@ class BabyService {
 
       const createdBaby = this.sanitizeBaby(data);
 
-      logger.debug('Baby created successfully', {
-        babyId: createdBaby.id,
-        name: createdBaby.name,
-        familyId: createdBaby.family_id
-      }, 'BabyService');
+      logger.debug(
+        'Baby created successfully',
+        {
+          babyId: createdBaby.id,
+          name: createdBaby.name,
+          familyId: createdBaby.family_id,
+        },
+        'BabyService'
+      );
 
       return createdBaby as Baby;
     } catch (error) {
@@ -295,7 +311,9 @@ class BabyService {
 
   private async validateBabyCreationPermissions(familyId: string): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Authentication required');
       }
@@ -327,7 +345,11 @@ class BabyService {
         throw new Error('Family has reached the maximum number of babies (10)');
       }
     } catch (error) {
-      logger.error('Failed to validate baby creation permissions', { familyId, error }, 'BabyService');
+      logger.error(
+        'Failed to validate baby creation permissions',
+        { familyId, error },
+        'BabyService'
+      );
       throw error;
     }
   }
@@ -345,10 +367,7 @@ class BabyService {
   }
 
   async deleteBaby(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('babies')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('babies').delete().eq('id', id);
 
     if (error) throw error;
   }

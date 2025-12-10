@@ -16,7 +16,7 @@ export default function Labs() {
   const { user } = useAuth();
   const { isPro } = usePro();
   const navigate = useNavigate();
-  
+
   const { data: aiEnabled } = useQuery({
     queryKey: ['ai-preferences', user?.id],
     queryFn: async () => {
@@ -37,32 +37,32 @@ export default function Labs() {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+    <div className='min-h-screen bg-surface pb-20'>
+      <div className='max-w-2xl mx-auto p-4 space-y-4'>
         <div>
-          <h1 className="font-display text-left">Labs</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className='font-display text-left'>Labs</h1>
+          <p className='text-sm text-muted-foreground mt-1'>
             Experimental features to help understand your baby
           </p>
         </div>
 
         <Alert>
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className='h-4 w-4' />
           <AlertDescription>
-            Features in Labs are experimental and for guidance only. 
-            They are NOT medical advice. If you're worried about your baby's health, 
-            contact your pediatrician or local emergency services.
+            Features in Labs are experimental and for guidance only. They are NOT medical advice. If
+            you're worried about your baby's health, contact your pediatrician or local emergency
+            services.
           </AlertDescription>
         </Alert>
 
         {!aiEnabled && (
           <Alert>
-            <Settings className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
+            <Settings className='h-4 w-4' />
+            <AlertDescription className='flex items-center justify-between'>
               <span>AI features are disabled. Enable them in Settings to use Cry Insights.</span>
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={() => navigate('/settings/ai-data-sharing')}
               >
                 Enable
@@ -73,15 +73,15 @@ export default function Labs() {
 
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1'>
+                <div className='flex items-center gap-2'>
                   <CardTitle>Patterns</CardTitle>
                   {isPro ? (
-                    <Badge variant="secondary">Pro</Badge>
+                    <Badge variant='secondary'>Pro</Badge>
                   ) : (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Lock className="h-3 w-3" />
+                    <Badge variant='outline' className='flex items-center gap-1'>
+                      <Lock className='h-3 w-3' />
                       Pro
                     </Badge>
                   )}
@@ -92,10 +92,10 @@ export default function Labs() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-surface rounded-lg p-4 space-y-2">
-              <h4 className="font-medium text-sm">What you'll see</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
+          <CardContent className='space-y-4'>
+            <div className='bg-surface rounded-lg p-4 space-y-2'>
+              <h4 className='font-medium text-sm'>What you'll see</h4>
+              <ul className='text-sm text-muted-foreground space-y-1'>
                 <li>• Average sleep duration and nap timing</li>
                 <li>• Feeding volume and spacing trends</li>
                 <li>• Diaper count patterns</li>
@@ -105,22 +105,25 @@ export default function Labs() {
 
             <Button
               onClick={() => navigate('/patterns')}
-              className="w-full"
-              variant={isPro ? "default" : "outline"}
+              className='w-full'
+              variant={isPro ? 'default' : 'outline'}
             >
-              <TrendingUp className="mr-2 h-4 w-4" />
+              <TrendingUp className='mr-2 h-4 w-4' />
               {isPro ? 'View Patterns' : 'Upgrade to View Patterns'}
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate('/predictions')}>
+        <Card
+          className='cursor-pointer hover:bg-accent/50 transition-colors'
+          onClick={() => navigate('/predictions')}
+        >
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1'>
+                <div className='flex items-center gap-2'>
                   <CardTitle>Smart Predictions</CardTitle>
-                  <Badge variant="secondary">AI</Badge>
+                  <Badge variant='secondary'>AI</Badge>
                 </div>
                 <CardDescription>
                   AI learns your baby's patterns to predict nap and feed times
@@ -128,12 +131,12 @@ export default function Labs() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             <SmartPredictionsCard />
             <Button
-              variant="outline"
-              className="w-full"
-              onClick={(e) => {
+              variant='outline'
+              className='w-full'
+              onClick={e => {
                 e.stopPropagation();
                 navigate('/predictions');
               }}
@@ -145,42 +148,40 @@ export default function Labs() {
 
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1'>
+                <div className='flex items-center gap-2'>
                   <CardTitle>Cry Insights</CardTitle>
-                  <Badge variant="secondary">Beta</Badge>
+                  <Badge variant='secondary'>Beta</Badge>
                 </div>
-                <CardDescription>
-                  Record your baby's cry for AI-powered insights
-                </CardDescription>
+                <CardDescription>Record your baby's cry for AI-powered insights</CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-surface rounded-lg p-4 space-y-2">
-              <h4 className="font-medium text-sm">How it works</h4>
-              <p className="text-sm text-muted-foreground">
-                When your baby cries, tap the button below to record for 10-20 seconds. 
-                Our AI will analyze the cry pattern and suggest possible reasons 
-                (tired, hungry, uncomfortable, etc.).
+          <CardContent className='space-y-4'>
+            <div className='bg-surface rounded-lg p-4 space-y-2'>
+              <h4 className='font-medium text-sm'>How it works</h4>
+              <p className='text-sm text-muted-foreground'>
+                When your baby cries, tap the button below to record for 10-20 seconds. Our AI will
+                analyze the cry pattern and suggest possible reasons (tired, hungry, uncomfortable,
+                etc.).
               </p>
             </div>
 
-            <Button 
+            <Button
               onClick={handleRecordCry}
-              className="w-full h-16"
-              variant="secondary"
+              className='w-full h-16'
+              variant='secondary'
               disabled={!aiEnabled}
             >
-              <Mic className="mr-2 h-5 w-5" />
+              <Mic className='mr-2 h-5 w-5' />
               Record Cry (10-20 sec) {!aiEnabled && '(Disabled)'}
             </Button>
 
             <Alert>
-              <AlertDescription className="text-xs">
-                <strong>Privacy:</strong> Audio is processed locally and not stored. 
-                Only metadata is saved for your reference.
+              <AlertDescription className='text-xs'>
+                <strong>Privacy:</strong> Audio is processed locally and not stored. Only metadata
+                is saved for your reference.
               </AlertDescription>
             </Alert>
           </CardContent>

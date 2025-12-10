@@ -5,6 +5,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 🔧 Setup & Configuration
 
 ### Supabase Integration
+
 - [ ] Add Supabase Swift SDK via Xcode (File → Add Package Dependencies)
 - [ ] Package URL: `https://github.com/supabase/supabase-swift`
 - [ ] Uncomment `import Supabase` in `SupabaseClient.swift`
@@ -17,6 +18,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Test data sync
 
 ### Project Configuration
+
 - [ ] Verify Bundle ID: `com.nestling.Nestling`
 - [ ] Verify Version: 1.0.0
 - [ ] Verify Build: 1
@@ -27,6 +29,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 💰 Monetization Setup
 
 ### App Store Connect
+
 - [ ] Create app record in App Store Connect
 - [ ] Create subscription group: "Nestling Pro"
 - [ ] Create product: `com.nestling.pro.monthly` ($4.99/month)
@@ -35,6 +38,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Test subscription flow in sandbox
 
 ### StoreKit Testing
+
 - [ ] Open `Nestling.storekit` in Xcode
 - [ ] Configure in Edit Scheme → Run → Options
 - [ ] Test purchase flow locally
@@ -42,6 +46,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Test subscription expiration
 
 ### Feature Gating
+
 - [ ] Test adding 2nd baby (should show paywall)
 - [ ] Test history beyond 7 days (should show paywall)
 - [ ] Verify Pro features are gated
@@ -50,24 +55,28 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 🎨 UI/UX Verification
 
 ### Dark Mode
+
 - [ ] Test app launch in dark mode (no white flash)
 - [ ] All screens look good in dark mode
 - [ ] Text is readable in dark mode
 - [ ] Event colors visible in dark mode
 
 ### One-Handed Use
+
 - [ ] Quick actions reachable one-handed
 - [ ] Timer buttons reachable one-handed
 - [ ] All buttons meet 44x44pt minimum
 - [ ] Bottom sheets easy to dismiss
 
 ### Accessibility
+
 - [ ] VoiceOver tested and working
 - [ ] Dynamic Type tested (largest size)
 - [ ] Reduce Motion respected
 - [ ] All buttons have accessibility labels
 
 ### Empty States
+
 - [ ] Empty history shows helpful message
 - [ ] Empty baby list shows "Add Baby" prominently
 - [ ] Empty search shows suggestions
@@ -75,6 +84,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 🧪 Testing
 
 ### Functional Testing
+
 - [ ] Sign up → Onboarding → Home flow works
 - [ ] Log all event types (Feed, Sleep, Diaper, Tummy)
 - [ ] Events appear in timeline immediately
@@ -85,6 +95,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Data migration works (local → cloud)
 
 ### Subscription Testing
+
 - [ ] Purchase monthly subscription (sandbox)
 - [ ] Purchase yearly subscription (sandbox)
 - [ ] Restore purchases works
@@ -92,6 +103,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Subscription status updates correctly
 
 ### Performance Testing
+
 - [ ] App launches in < 2 seconds
 - [ ] Event logging takes < 500ms
 - [ ] Timeline loads in < 1 second (100 events)
@@ -101,6 +113,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Test on iPhone Pro Max (largest screen)
 
 ### Edge Cases
+
 - [ ] App launch with no internet
 - [ ] Launch with corrupted Core Data
 - [ ] Delete all babies
@@ -112,6 +125,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 📱 App Store Submission
 
 ### Assets
+
 - [ ] App icon (1024x1024 PNG, no alpha)
 - [ ] Screenshots for all required sizes
   - [ ] iPhone 6.5" (light mode)
@@ -121,6 +135,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] App preview video (optional)
 
 ### Metadata
+
 - [ ] App name: "Nestling Baby Tracker"
 - [ ] Subtitle: "AI-powered feed & sleep log"
 - [ ] Description (4000 chars max)
@@ -132,6 +147,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Terms of Service URL: `https://nestling.app/terms`
 
 ### Legal & Compliance
+
 - [ ] Privacy Policy hosted and accessible
 - [ ] Terms of Service hosted and accessible
 - [ ] App Privacy questionnaire completed
@@ -139,6 +155,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Review notes prepared with test account
 
 ### Build & Upload
+
 - [ ] Build for Release configuration
 - [ ] Archive build in Xcode
 - [ ] Upload to App Store Connect
@@ -150,11 +167,13 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 📊 Post-Submission
 
 ### First 24 Hours
+
 - [ ] Monitor App Store Connect for review status
 - [ ] Respond to review team questions within 24 hours
 - [ ] Fix any critical issues if needed
 
 ### First Week
+
 - [ ] Monitor crash reports daily
 - [ ] Track user sign-ups
 - [ ] Track subscription conversions
@@ -162,6 +181,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Monitor support emails
 
 ### Ongoing
+
 - [ ] Weekly metrics review
 - [ ] Monthly business review
 - [ ] Feature request prioritization
@@ -171,12 +191,14 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 🎯 Launch Day
 
 ### Pre-Launch (Day Before)
+
 - [ ] Final build tested
 - [ ] All metadata finalized
 - [ ] Marketing materials ready
 - [ ] Support team briefed
 
 ### Launch Day
+
 - [ ] App approved in App Store
 - [ ] Set release to "Automatically" or "Manually"
 - [ ] Announce on social media (if applicable)
@@ -185,6 +207,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 - [ ] Monitor reviews
 
 ### First 48 Hours
+
 - [ ] Respond to all reviews
 - [ ] Monitor crash-free rate
 - [ ] Track key metrics
@@ -194,6 +217,7 @@ Master checklist for launching Nestling to the App Store. Check off items as you
 ## 📋 Documentation Reference
 
 All implementation details are documented in:
+
 - `IMPLEMENTATION_SUMMARY.md` - Complete implementation overview
 - `SUPABASE_SETUP.md` - Supabase SDK integration
 - `APP_STORE_CONNECT_SETUP.md` - Subscription setup
@@ -205,12 +229,14 @@ All implementation details are documented in:
 ## ✅ Implementation Status
 
 **Code Implementation**: ~95% Complete
+
 - All infrastructure in place
 - All UI components created
 - All services structured
 - Ready for SDK integration and testing
 
 **Next Critical Steps**:
+
 1. Add Supabase Swift SDK
 2. Configure Secrets.swift
 3. Test end-to-end
@@ -218,4 +244,3 @@ All implementation details are documented in:
 5. Submit for review
 
 Good luck with your launch! 🚀
-

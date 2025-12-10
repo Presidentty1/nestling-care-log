@@ -4,10 +4,7 @@ import { dataService } from '@/services/dataService';
 
 export async function exportToJSON(familyId: string, startDate: Date, endDate: Date) {
   // Get babies from Supabase
-  const { data: babies } = await supabase
-    .from('babies')
-    .select('*')
-    .eq('family_id', familyId);
+  const { data: babies } = await supabase.from('babies').select('*').eq('family_id', familyId);
 
   // Get events from IndexedDB for each baby
   const allEvents = [];
@@ -24,7 +21,7 @@ export async function exportToJSON(familyId: string, startDate: Date, endDate: D
 
   // Get nap predictions from localStorage
   const napPredictions = localStorage.getItem('nap_predictions');
-  
+
   const exportData = {
     exported_at: new Date().toISOString(),
     app_version: '1.0.0',
@@ -38,13 +35,13 @@ export async function exportToJSON(familyId: string, startDate: Date, endDate: D
     metadata: {
       total_events: allEvents.length,
       total_babies: babies?.length || 0,
-    }
+    },
   };
 
   const blob = new Blob([JSON.stringify(exportData, null, 2)], {
     type: 'application/json',
   });
-  
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -55,10 +52,7 @@ export async function exportToJSON(familyId: string, startDate: Date, endDate: D
 
 export async function exportToCSV(familyId: string, startDate: Date, endDate: Date) {
   // Get babies from Supabase
-  const { data: babies } = await supabase
-    .from('babies')
-    .select('*')
-    .eq('family_id', familyId);
+  const { data: babies } = await supabase.from('babies').select('*').eq('family_id', familyId);
 
   if (!babies) return;
 
@@ -75,10 +69,12 @@ export async function exportToCSV(familyId: string, startDate: Date, endDate: Da
 
   const headers = ['Date', 'Time', 'Baby', 'Type', 'Subtype', 'Duration/Amount', 'Unit', 'Notes'];
   const rows = allEvents.map((event: any) => {
-    const duration = event.endTime 
-      ? Math.round((new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000)
+    const duration = event.endTime
+      ? Math.round(
+          (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000
+        )
       : event.amount || '';
-    
+
     return [
       format(new Date(event.startTime), 'yyyy-MM-dd'),
       format(new Date(event.startTime), 'HH:mm'),
@@ -91,9 +87,7 @@ export async function exportToCSV(familyId: string, startDate: Date, endDate: Da
     ];
   });
 
-  const csv = [headers, ...rows]
-    .map(row => row.map(cell => `"${cell}"`).join(','))
-    .join('\n');
+  const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
 
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
@@ -104,12 +98,12 @@ export async function exportToCSV(familyId: string, startDate: Date, endDate: Da
   URL.revokeObjectURL(url);
 }
 
-export async function generateDoctorSummary(babyId: string, startDate: Date, endDate: Date): Promise<string> {
-  const { data: baby } = await supabase
-    .from('babies')
-    .select('*')
-    .eq('id', babyId)
-    .single();
+export async function generateDoctorSummary(
+  babyId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<string> {
+  const { data: baby } = await supabase.from('babies').select('*').eq('id', babyId).single();
 
   const { data: events } = await supabase
     .from('events')
@@ -126,7 +120,7 @@ export async function generateDoctorSummary(babyId: string, startDate: Date, end
 
   const dayCount = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const avgFeedsPerDay = (feeds.length / dayCount).toFixed(1);
-  
+
   const totalSleepMinutes = sleeps.reduce((acc, s) => {
     if (s.end_time) {
       return acc + (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / 60000;
@@ -157,8 +151,15 @@ DIAPER SUMMARY
 - Average per day: ${(diapers.length / dayCount).toFixed(1)}
 
 NOTES
-${events.filter(e => e.note && (e.note.toLowerCase().includes('doctor') || e.note.toLowerCase().includes('concern')))
-  .map(e => `- ${format(new Date(e.start_time), 'MMM dd')}: ${e.note}`)
-  .join('\n') || '- No flagged notes'}
+${
+  events
+    .filter(
+      e =>
+        e.note &&
+        (e.note.toLowerCase().includes('doctor') || e.note.toLowerCase().includes('concern'))
+    )
+    .map(e => `- ${format(new Date(e.start_time), 'MMM dd')}: ${e.note}`)
+    .join('\n') || '- No flagged notes'
+}
 `;
 }

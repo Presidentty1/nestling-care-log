@@ -53,15 +53,15 @@ cyclomatic_complexity:
 custom_rules:
   # Discourage force unwrapping
   force_unwrapping:
-    name: "Force Unwrapping"
+    name: 'Force Unwrapping'
     regex: "\\w+!"
-    message: "Avoid force unwrapping. Use optional binding or guard statements instead."
+    message: 'Avoid force unwrapping. Use optional binding or guard statements instead.'
     severity: warning
 
   # Prefer type imports for better performance
   type_import:
-    name: "Type Import"
-    regex: "^import (?!type)"
+    name: 'Type Import'
+    regex: '^import (?!type)'
     message: "Consider using 'import type' for type-only imports to improve bundle size."
     severity: warning
     included: ".*\\.swift"
@@ -77,10 +77,10 @@ excluded:
   - node_modules/
   - ios/Nuzzle/.swiftpm/
   - ios/backup*/
-  - "**/*.generated.swift"
-  - "**/Generated/"
-  - "**/*+CoreDataProperties.swift"
-  - "**/*+CoreDataClass.swift"
+  - '**/*.generated.swift'
+  - '**/Generated/'
+  - '**/*+CoreDataProperties.swift'
+  - '**/*+CoreDataClass.swift'
 
 # Included file types
 included:
@@ -90,8 +90,5 @@ included:
   - ios/Sources
 
 # Reporter configuration
-reporter: "xcode" # Xcode-compatible output
-
-
-
+reporter: 'xcode' # Xcode-compatible output
 

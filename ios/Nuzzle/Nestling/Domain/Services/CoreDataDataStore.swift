@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import Foundation
 import CoreData
 
 /// Core Data implementation of DataStore protocol.
@@ -174,12 +174,7 @@ class CoreDataDataStore: DataStore {
                     
                     let events = entities.compactMap { entity -> Event? in
                         // Use compactMap to filter out any invalid entities
-                        do {
-                            return entity.toEvent()
-                        } catch {
-                            print("Warning: Failed to convert EventEntity to Event: \(error)")
-                            return nil
-                        }
+                        return entity.toEvent()
                     }
                     
                     let elapsed = Date().timeIntervalSince(startTime)

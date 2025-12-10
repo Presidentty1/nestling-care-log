@@ -6,7 +6,7 @@ import { track } from '@/analytics/analytics';
 import { sanitizeEventNote, sanitizeAmount, sanitizeDuration } from '@/lib/sanitization';
 import { logger } from '@/lib/logger';
 import { dateUtils, validationUtils } from '@/lib/sharedUtils';
-import type { DbEvent} from '@/types/db';
+import type { DbEvent } from '@/types/db';
 import { DbEventType } from '@/types/db';
 
 export interface CreateEventData {
@@ -47,7 +47,10 @@ class EventsService {
     this.listeners.forEach(listener => listener(action, data));
   }
 
-  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number = this.REQUEST_TIMEOUT): Promise<T> {
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number = this.REQUEST_TIMEOUT
+  ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
     });
@@ -67,7 +70,9 @@ class EventsService {
         const now = Date.now();
         const timeSinceLastRequest = now - this.lastRequestTime;
         if (timeSinceLastRequest < this.RATE_LIMIT_DELAY) {
-          await new Promise(resolve => setTimeout(resolve, this.RATE_LIMIT_DELAY - timeSinceLastRequest));
+          await new Promise(resolve =>
+            setTimeout(resolve, this.RATE_LIMIT_DELAY - timeSinceLastRequest)
+          );
         }
         this.lastRequestTime = Date.now();
 
@@ -94,7 +99,11 @@ class EventsService {
 
   private isNonRetryableError(error: unknown): boolean {
     // Authentication errors
-    if (error?.message?.includes('JWT') || error?.message?.includes('auth') || error?.status === 401) {
+    if (
+      error?.message?.includes('JWT') ||
+      error?.message?.includes('auth') ||
+      error?.status === 401
+    ) {
       return true;
     }
 
@@ -123,7 +132,10 @@ class EventsService {
 
   private async ensureAuthenticated(): Promise<void> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
       if (error) {
         logger.error('Authentication check failed', error, 'EventsService');
@@ -188,7 +200,9 @@ class EventsService {
         }
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Authentication lost during operation');
 
       const payload = {
@@ -229,18 +243,22 @@ class EventsService {
           unit: data.unit,
           has_note: !!data.note,
           baby_id: data.baby_id,
-          source: 'form'
+          source: 'form',
         });
       } catch (analyticsError) {
         // Don't fail the operation for analytics errors
         logger.warn('Analytics tracking failed', analyticsError, 'EventsService');
       }
 
-      logger.debug('Event created successfully', {
-        eventId: event.id,
-        type: event.type,
-        babyId: event.baby_id
-      }, 'EventsService');
+      logger.debug(
+        'Event created successfully',
+        {
+          eventId: event.id,
+          type: event.type,
+          babyId: event.baby_id,
+        },
+        'EventsService'
+      );
 
       this.emit('add', event);
       return event as EventRecord;
@@ -278,7 +296,8 @@ class EventsService {
       await this.ensureAuthenticated();
 
       // Validate ID format (UUID)
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(id)) {
         throw new Error('Invalid event ID format');
       }
@@ -350,7 +369,7 @@ class EventsService {
         ...sanitizedUpdates,
         duration_min,
         duration_sec,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       const event = await this.withRetry(async () => {
@@ -385,18 +404,22 @@ class EventsService {
         track('event_edited', {
           event_type: event.type,
           event_id: id,
-          changes: changedFields
+          changes: changedFields,
         });
       } catch (analyticsError) {
         // Don't fail the operation for analytics errors
         logger.warn('Analytics tracking failed', analyticsError, 'EventsService');
       }
 
-      logger.debug('Event updated successfully', {
-        eventId: id,
-        type: event.type,
-        changes: Object.keys(updates)
-      }, 'EventsService');
+      logger.debug(
+        'Event updated successfully',
+        {
+          eventId: id,
+          type: event.type,
+          changes: Object.keys(updates),
+        },
+        'EventsService'
+      );
 
       this.emit('update', event);
       return event as EventRecord;
@@ -427,7 +450,8 @@ class EventsService {
       }
 
       // Validate ID format (UUID)
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(id)) {
         throw new Error('Invalid event ID format');
       }
@@ -444,10 +468,7 @@ class EventsService {
       }
 
       await this.withRetry(async () => {
-        const { error } = await supabase
-          .from('events')
-          .delete()
-          .eq('id', id);
+        const { error } = await supabase.from('events').delete().eq('id', id);
 
         if (error) {
           logger.error('Supabase delete error', error, 'EventsService');
@@ -459,17 +480,21 @@ class EventsService {
       try {
         track('event_deleted', {
           event_type: existingEvent.type,
-          event_id: id
+          event_id: id,
         });
       } catch (analyticsError) {
         // Don't fail the operation for analytics errors
         logger.warn('Analytics tracking failed', analyticsError, 'EventsService');
       }
 
-      logger.debug('Event deleted successfully', {
-        eventId: id,
-        type: existingEvent.type
-      }, 'EventsService');
+      logger.debug(
+        'Event deleted successfully',
+        {
+          eventId: id,
+          type: existingEvent.type,
+        },
+        'EventsService'
+      );
 
       this.emit('delete', { id });
     } catch (error) {
@@ -495,11 +520,7 @@ class EventsService {
       }
 
       const event = await this.withRetry(async () => {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('id', id)
-          .single();
+        const { data, error } = await supabase.from('events').select('*').eq('id', id).single();
 
         if (error) {
           if (error.code === 'PGRST116') {
@@ -530,7 +551,11 @@ class EventsService {
 
       // For read operations, don't throw errors - return null instead
       if (error.message?.includes('network') || error.message?.includes('timeout')) {
-        logger.warn('Network error during getEvent, returning null', { eventId: id }, 'EventsService');
+        logger.warn(
+          'Network error during getEvent, returning null',
+          { eventId: id },
+          'EventsService'
+        );
         return null;
       }
 
@@ -606,19 +631,27 @@ class EventsService {
       const validEvents = events.filter(event => this.isValidEventRecord(event));
 
       if (validEvents.length !== events.length) {
-        logger.warn('Filtered out invalid events', {
-          babyId,
-          date: date.toISOString(),
-          totalEvents: events.length,
-          validEvents: validEvents.length
-        }, 'EventsService');
+        logger.warn(
+          'Filtered out invalid events',
+          {
+            babyId,
+            date: date.toISOString(),
+            totalEvents: events.length,
+            validEvents: validEvents.length,
+          },
+          'EventsService'
+        );
       }
 
-      logger.debug('Events retrieved successfully', {
-        babyId,
-        date: date.toISOString(),
-        eventCount: validEvents.length
-      }, 'EventsService');
+      logger.debug(
+        'Events retrieved successfully',
+        {
+          babyId,
+          date: date.toISOString(),
+          eventCount: validEvents.length,
+        },
+        'EventsService'
+      );
 
       return validEvents as EventRecord[];
     } catch (error) {
@@ -626,7 +659,11 @@ class EventsService {
 
       // For read operations, return empty array instead of throwing
       if (error.message?.includes('network') || error.message?.includes('timeout')) {
-        logger.warn('Network error during getEventsByDate, returning empty array', { babyId, date }, 'EventsService');
+        logger.warn(
+          'Network error during getEventsByDate, returning empty array',
+          { babyId, date },
+          'EventsService'
+        );
         return [];
       }
 
@@ -691,29 +728,45 @@ class EventsService {
       const validEvents = events.filter(event => this.isValidEventRecord(event));
 
       if (validEvents.length !== events.length) {
-        logger.warn('Filtered out invalid events', {
+        logger.warn(
+          'Filtered out invalid events',
+          {
+            babyId,
+            fromISO,
+            toISO,
+            totalEvents: events.length,
+            validEvents: validEvents.length,
+          },
+          'EventsService'
+        );
+      }
+
+      logger.debug(
+        'Events retrieved successfully',
+        {
           babyId,
           fromISO,
           toISO,
-          totalEvents: events.length,
-          validEvents: validEvents.length
-        }, 'EventsService');
-      }
-
-      logger.debug('Events retrieved successfully', {
-        babyId,
-        fromISO,
-        toISO,
-        eventCount: validEvents.length
-      }, 'EventsService');
+          eventCount: validEvents.length,
+        },
+        'EventsService'
+      );
 
       return validEvents as EventRecord[];
     } catch (error) {
-      logger.error('Failed to get events by range', { babyId, fromISO, toISO, error }, 'EventsService');
+      logger.error(
+        'Failed to get events by range',
+        { babyId, fromISO, toISO, error },
+        'EventsService'
+      );
 
       // For read operations, return empty array instead of throwing
       if (error.message?.includes('network') || error.message?.includes('timeout')) {
-        logger.warn('Network error during getEventsByRange, returning empty array', { babyId, fromISO, toISO }, 'EventsService');
+        logger.warn(
+          'Network error during getEventsByRange, returning empty array',
+          { babyId, fromISO, toISO },
+          'EventsService'
+        );
         return [];
       }
 
@@ -766,11 +819,15 @@ class EventsService {
         return null;
       }
 
-      logger.debug('Last event retrieved successfully', {
-        babyId,
-        type,
-        eventId: event.id
-      }, 'EventsService');
+      logger.debug(
+        'Last event retrieved successfully',
+        {
+          babyId,
+          type,
+          eventId: event.id,
+        },
+        'EventsService'
+      );
 
       return event as EventRecord;
     } catch (error) {
@@ -778,7 +835,11 @@ class EventsService {
 
       // For read operations, return null instead of throwing
       if (error.message?.includes('network') || error.message?.includes('timeout')) {
-        logger.warn('Network error during getLastEventByType, returning null', { babyId, type }, 'EventsService');
+        logger.warn(
+          'Network error during getLastEventByType, returning null',
+          { babyId, type },
+          'EventsService'
+        );
         return null;
       }
 
@@ -790,7 +851,11 @@ class EventsService {
   calculateSummary(events: EventRecord[]): DailySummary {
     try {
       if (!Array.isArray(events)) {
-        logger.warn('Invalid events array provided to calculateSummary', { events }, 'EventsService');
+        logger.warn(
+          'Invalid events array provided to calculateSummary',
+          { events },
+          'EventsService'
+        );
         return {
           feedCount: 0,
           totalMl: 0,
@@ -822,17 +887,14 @@ class EventsService {
       }, 0);
 
       const totalSleepMin = sleeps.reduce((sum, e) => {
-        const duration = typeof e.duration_min === 'number' && e.duration_min >= 0 ? e.duration_min : 0;
+        const duration =
+          typeof e.duration_min === 'number' && e.duration_min >= 0 ? e.duration_min : 0;
         return sum + duration;
       }, 0);
 
-      const wetCount = diapers.filter(d =>
-        d.subtype === 'wet' || d.subtype === 'both'
-      ).length;
+      const wetCount = diapers.filter(d => d.subtype === 'wet' || d.subtype === 'both').length;
 
-      const dirtyCount = diapers.filter(d =>
-        d.subtype === 'dirty' || d.subtype === 'both'
-      ).length;
+      const dirtyCount = diapers.filter(d => d.subtype === 'dirty' || d.subtype === 'both').length;
 
       const summary = {
         feedCount: feeds.length,
@@ -845,19 +907,25 @@ class EventsService {
       };
 
       // Validate summary totals are reasonable
-      if (summary.totalMl > 10000) { // More than 10L seems unreasonable
+      if (summary.totalMl > 10000) {
+        // More than 10L seems unreasonable
         logger.warn('Unusually high feed total detected', { summary }, 'EventsService');
       }
 
-      if (summary.sleepMinutes > 1440) { // More than 24 hours
+      if (summary.sleepMinutes > 1440) {
+        // More than 24 hours
         logger.warn('Unusually high sleep total detected', { summary }, 'EventsService');
       }
 
-      logger.debug('Summary calculated successfully', {
-        eventCount: validEvents.length,
-        feedCount: summary.feedCount,
-        sleepMinutes: summary.sleepMinutes
-      }, 'EventsService');
+      logger.debug(
+        'Summary calculated successfully',
+        {
+          eventCount: validEvents.length,
+          feedCount: summary.feedCount,
+          sleepMinutes: summary.sleepMinutes,
+        },
+        'EventsService'
+      );
 
       return summary;
     } catch (error) {

@@ -24,7 +24,9 @@ export function usePro() {
     }
   };
 
-  const canAccessFeature = async (feature: 'caregiver_invites' | 'ai_features' | 'csv_export' | 'advanced_analytics') => {
+  const canAccessFeature = async (
+    feature: 'caregiver_invites' | 'ai_features' | 'csv_export' | 'advanced_analytics'
+  ) => {
     return await proService.canAccessFeature(feature);
   };
 
@@ -36,5 +38,3 @@ export function usePro() {
     refresh: loadProStatus,
   };
 }
-
-

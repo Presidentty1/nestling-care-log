@@ -9,18 +9,22 @@
 ## Build Errors Fixed (Round 2)
 
 ### ProSubscriptionService.swift - Line 184 & 248
+
 **Error:** `Use of '=' in a boolean context, did you mean '=='?`
+
 ```swift
 if _ = transaction.expirationDate {  // ❌ Wrong
 ```
 
 **Fix:** Changed to proper optional binding:
+
 ```swift
 if let expirationDate = transaction.expirationDate {  // ✅ Correct (line 184)
 if let _ = transaction.expirationDate {               // ✅ Correct (line 248)
 ```
 
 ### ProSubscriptionService.swift - Line 185
+
 **Error:** `Cannot find 'expirationDate' in scope`
 
 **Root Cause:** Used `_ =` to discard value, then tried to reference it
@@ -28,30 +32,36 @@ if let _ = transaction.expirationDate {               // ✅ Correct (line 248)
 **Fix:** Properly bound the value on line 184 (see above)
 
 ### PredictionsEngine.swift - Line 56
+
 **Error:** `Cannot find 'calendar' in scope`
 
-**Root Cause:** 
+**Root Cause:**
+
 ```swift
 _ = Calendar.current  // ❌ Discarded the value
 return calendar.component(.hour, from: endTime)  // ❌ Tried to use it
 ```
 
 **Fix:**
+
 ```swift
 let calendar = Calendar.current  // ✅ Properly assign
 return calendar.component(.hour, from: endTime)  // ✅ Can now use it
 ```
 
 ### PredictionsEngine.swift - Line 175
+
 **Error:** `Cannot find 'timeSinceLastFeed' in scope`
 
 **Root Cause:**
+
 ```swift
 _ = Date().timeIntervalSince(lastFeed.startTime) / 3600.0  // ❌ Discarded
 explanation = "Based on last feed \(timeSinceLastFeed)..."  // ❌ Tried to use
 ```
 
 **Fix:**
+
 ```swift
 let timeSinceLastFeed = Date().timeIntervalSince(lastFeed.startTime) / 3600.0  // ✅
 explanation = "Based on last feed \(timeSinceLastFeed)..."  // ✅
@@ -71,6 +81,7 @@ explanation = "Based on last feed \(timeSinceLastFeed)..."  // ✅
 ## Changes Summary
 
 ### Total Implementation:
+
 - **28 files** modified/created
 - **3 build error rounds** (all fixed)
 - **75+ acceptance criteria** implemented
@@ -79,6 +90,7 @@ explanation = "Based on last feed \(timeSinceLastFeed)..."  // ✅
 - **$5.99/mo pricing** consistent everywhere
 
 ### Key Deliverables:
+
 1. ✅ Fixed subscription loading ("Unable to load" error)
 2. ✅ Implemented time-based 7-day trial
 3. ✅ Fixed all pricing inconsistencies
@@ -98,6 +110,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ```
 
 Then in Xcode:
+
 1. Product → Clean Build Folder (⇧⌘K)
 2. Product → Build (⌘B)
 3. **Should build successfully! ✅**
@@ -107,12 +120,14 @@ Then in Xcode:
 ## Testing Priorities
 
 ### 1. Critical Path (5 minutes):
+
 - [ ] Fresh install → Onboarding → Home
 - [ ] Verify trial banner shows
 - [ ] Tap banner → Verify paywall loads
 - [ ] Verify pricing: $5.99/mo, $39.99/yr
 
 ### 2. Trial System (10 minutes):
+
 - [ ] Verify trial starts on first launch
 - [ ] Check UserDefaults for `trial_start_date`
 - [ ] Verify countdown decrements daily
@@ -120,6 +135,7 @@ Then in Xcode:
 - [ ] Test auto-paywall on Day 7
 
 ### 3. Personalization (5 minutes):
+
 - [ ] Select different goals in onboarding
 - [ ] Verify First Log card changes
 - [ ] Verify Home layout adjusts
@@ -163,11 +179,10 @@ Read these for details:
 ✅ Pricing consistent  
 ✅ Onboarding streamlined  
 ✅ Home screen enhanced  
-✅ Paywall optimized  
+✅ Paywall optimized
 
 ---
 
 **Status: READY FOR XCODE BUILD & TESTING** 🚀
 
 The native iOS app is now production-ready with all requested improvements implemented in the gnq worktree.
-

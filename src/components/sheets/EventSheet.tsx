@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { EventType } from '@/types/events';
@@ -35,33 +41,33 @@ export function EventSheet({
   const [isValid, setIsValid] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
-  
+
   const titles: Partial<Record<EventType, string>> = {
     feed: editingEventId ? 'Edit Feed' : 'Log Feed',
     sleep: editingEventId ? 'Edit Sleep' : 'Log Sleep',
     diaper: editingEventId ? 'Edit Diaper' : 'Log Diaper',
     tummy_time: editingEventId ? 'Edit Tummy Time' : 'Log Tummy Time',
   };
-  
+
   const title = titles[eventType] || 'Log Event';
-  
+
   // Escape key
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
-  
+
   const handleSave = async (data: Partial<CreateEventData>) => {
     setIsSaving(true);
-    
+
     try {
       const eventData: CreateEventData = {
         baby_id: babyId,
@@ -79,16 +85,16 @@ export function EventSheet({
         toast.success('Event saved');
         hapticFeedback.medium(); // Gentle haptic on successful save
       }
-      
+
       onClose();
     } catch (error) {
       console.error('Failed to save event:', error);
-      toast.error('We couldn\'t save this entry. Check your connection and try again?');
+      toast.error("We couldn't save this entry. Check your connection and try again?");
     } finally {
       setIsSaving(false);
     }
   };
-  
+
   const renderForm = () => {
     switch (eventType) {
       case 'feed':
@@ -135,35 +141,33 @@ export function EventSheet({
         return null;
     }
   };
-  
+
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent ref={sheetRef}>
         <FocusTrap active={isOpen}>
           <div>
             {/* Drag handle */}
-            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mt-2 mb-4" />
-            
-            <DrawerHeader className="flex items-center justify-between">
-              <DrawerTitle className="text-title">{title}</DrawerTitle>
+            <div className='w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mt-2 mb-4' />
+
+            <DrawerHeader className='flex items-center justify-between'>
+              <DrawerTitle className='text-title'>{title}</DrawerTitle>
               <Button
-                variant="ghost"
-                size="icon"
+                variant='ghost'
+                size='icon'
                 onClick={() => {
                   hapticFeedback.light();
                   onClose();
                 }}
-                aria-label="Close"
+                aria-label='Close'
               >
-                <X className="h-4 w-4" />
+                <X className='h-4 w-4' />
               </Button>
             </DrawerHeader>
-            
-            <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
-              {renderForm()}
-            </div>
-            
-            <DrawerFooter className="sticky bottom-0 bg-background border-t pb-[max(1rem,env(safe-area-inset-bottom))]">
+
+            <div className='px-4 pb-4 overflow-y-auto max-h-[70vh]'>{renderForm()}</div>
+
+            <DrawerFooter className='sticky bottom-0 bg-background border-t pb-[max(1rem,env(safe-area-inset-bottom))]'>
               <Button
                 onClick={() => {
                   hapticFeedback.medium();
@@ -171,7 +175,7 @@ export function EventSheet({
                   form?.requestSubmit();
                 }}
                 disabled={!isValid || isSaving}
-                className="w-full"
+                className='w-full'
               >
                 {isSaving ? 'Saving...' : 'Save'}
               </Button>

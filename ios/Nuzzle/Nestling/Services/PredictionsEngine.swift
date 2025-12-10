@@ -153,7 +153,7 @@ class PredictionsEngine {
             } else {
                 predictedTime = lastFeed.startTime.addingTimeInterval(avgInterval * 3600)
                 confidence = 0.75
-                let timeSinceLastFeed = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
+                let _ = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
                 let hoursUntilNextFeed = (predictedTime.timeIntervalSinceNow) / 3600.0
                 if hoursUntilNextFeed <= 0 {
                     explanation = "Based on \(baby.name)'s typical \(String(format: "%.1f", avgInterval))-hour feeding pattern, feed is due now."

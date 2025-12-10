@@ -10,7 +10,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-serve(async (req) => {
+serve(async req => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
@@ -48,22 +48,16 @@ serve(async (req) => {
       },
     });
 
-    return new Response(
-      JSON.stringify({ url: session.url }),
-      {
-        headers: { 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    );
+    return new Response(JSON.stringify({ url: session.url }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    });
   } catch (error) {
     console.error('Checkout session creation error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 500,
+    });
   }
 });
 
@@ -100,15 +94,16 @@ async function getOrCreateCustomer(userId: string): Promise<string> {
   });
 
   // Store customer ID in subscriptions table
-  await supabase
-    .from('subscriptions')
-    .upsert({
+  await supabase.from('subscriptions').upsert(
+    {
       user_id: userId,
       stripe_customer_id: customer.id,
       status: 'incomplete',
-    }, {
-      onConflict: 'user_id'
-    });
+    },
+    {
+      onConflict: 'user_id',
+    }
+  );
 
   return customer.id;
 }

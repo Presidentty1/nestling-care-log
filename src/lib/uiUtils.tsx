@@ -14,15 +14,23 @@ export const uiUtils = {
   /**
    * Standard loading spinner component
    */
-  LoadingSpinner: ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg'; className?: string }): JSX.Element => {
+  LoadingSpinner: ({
+    size = 'md',
+    className = '',
+  }: {
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+  }): JSX.Element => {
     const sizeClasses = {
       sm: 'h-4 w-4',
       md: 'h-6 w-6',
-      lg: 'h-8 w-8'
+      lg: 'h-8 w-8',
     };
 
     return (
-      <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-primary ${sizeClasses[size]} ${className || ''}`} />
+      <div
+        className={`animate-spin rounded-full border-2 border-gray-300 border-t-primary ${sizeClasses[size]} ${className || ''}`}
+      />
     );
   },
 
@@ -33,19 +41,17 @@ export const uiUtils = {
     icon,
     title,
     description,
-    action
+    action,
   }: {
     icon?: ReactNode;
     title: string;
     description?: string;
     action?: ReactNode;
   }) => (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      {icon && <div className="mb-4 text-muted-foreground">{icon}</div>}
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      {description && (
-        <p className="text-sm text-muted-foreground mb-6 max-w-md">{description}</p>
-      )}
+    <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+      {icon && <div className='mb-4 text-muted-foreground'>{icon}</div>}
+      <h3 className='text-lg font-semibold text-foreground mb-2'>{title}</h3>
+      {description && <p className='text-sm text-muted-foreground mb-6 max-w-md'>{description}</p>}
       {action && <div>{action}</div>}
     </div>
   ),
@@ -57,26 +63,31 @@ export const uiUtils = {
     title = 'Something went wrong',
     message,
     onRetry,
-    retrying = false
+    retrying = false,
   }: {
     title?: string;
     message: string;
     onRetry?: () => void;
     retrying?: boolean;
   }) => (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <div className="mb-4 text-destructive">
-        <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+    <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+      <div className='mb-4 text-destructive'>
+        <svg className='h-12 w-12' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z'
+          />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-md">{message}</p>
+      <h3 className='text-lg font-semibold text-foreground mb-2'>{title}</h3>
+      <p className='text-sm text-muted-foreground mb-6 max-w-md'>{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
           disabled={retrying}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
+          className='px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50'
         >
           {retrying ? 'Retrying...' : 'Try Again'}
         </button>
@@ -91,19 +102,17 @@ export const uiUtils = {
     icon,
     title,
     message,
-    action
+    action,
   }: {
     icon?: ReactNode;
     title: string;
     message?: string;
     action?: ReactNode;
   }) => (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      {icon && <div className="mb-4 text-green-500">{icon}</div>}
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      {message && (
-        <p className="text-sm text-muted-foreground mb-6 max-w-md">{message}</p>
-      )}
+    <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+      {icon && <div className='mb-4 text-green-500'>{icon}</div>}
+      <h3 className='text-lg font-semibold text-foreground mb-2'>{title}</h3>
+      {message && <p className='text-sm text-muted-foreground mb-6 max-w-md'>{message}</p>}
       {action && <div>{action}</div>}
     </div>
   ),
@@ -117,7 +126,7 @@ export const uiUtils = {
     outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
     ghost: 'hover:bg-accent hover:text-accent-foreground',
     link: 'text-primary underline-offset-4 hover:underline',
-    destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+    destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
   },
 
   /**
@@ -125,7 +134,7 @@ export const uiUtils = {
    */
   inputStyles: {
     base: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-    error: 'border-destructive focus-visible:ring-destructive'
+    error: 'border-destructive focus-visible:ring-destructive',
   },
 
   /**
@@ -164,7 +173,7 @@ export const uiUtils = {
       feed: 'bg-blue-100 text-blue-800 border-blue-200',
       sleep: 'bg-purple-100 text-purple-800 border-purple-200',
       diaper: 'bg-green-100 text-green-800 border-green-200',
-      tummy_time: 'bg-orange-100 text-orange-800 border-orange-200'
+      tummy_time: 'bg-orange-100 text-orange-800 border-orange-200',
     };
     return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
   },
@@ -174,10 +183,6 @@ export const uiUtils = {
    */
   truncate: (text: string, maxLength: number): string => {
     if (text.length <= maxLength) return text;
-    return `${text.substring(0, maxLength - 3)  }...`;
-  }
+    return `${text.substring(0, maxLength - 3)}...`;
+  },
 };
-
-
-
-

@@ -165,3 +165,4 @@ struct DailySummaryView: View {
         .padding()
         .background(Color.background)
 }
+

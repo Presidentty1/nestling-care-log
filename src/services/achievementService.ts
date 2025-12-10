@@ -60,7 +60,7 @@ class AchievementService {
   async getUnlockedAchievements(babyId: string): Promise<Achievement[]> {
     const unlocked = await achievementStore.getItem<string[]>(`unlocked_${babyId}`);
     if (!unlocked) return [];
-    
+
     return ACHIEVEMENTS.filter(a => unlocked.includes(a.id)).map(a => ({
       ...a,
       unlockedAt: unlocked.includes(a.id) ? new Date().toISOString() : undefined,
@@ -68,8 +68,8 @@ class AchievementService {
   }
 
   async unlockAchievement(babyId: string, achievementId: string): Promise<boolean> {
-    const unlocked = await achievementStore.getItem<string[]>(`unlocked_${babyId}`) || [];
-    
+    const unlocked = (await achievementStore.getItem<string[]>(`unlocked_${babyId}`)) || [];
+
     if (unlocked.includes(achievementId)) {
       return false; // Already unlocked
     }
@@ -79,12 +79,15 @@ class AchievementService {
     return true;
   }
 
-  async checkAndUnlockAchievements(babyId: string, context: {
-    streakDays?: number;
-    eventType?: string;
-    eventTime?: Date;
-    milestoneCount?: number;
-  }): Promise<Achievement[]> {
+  async checkAndUnlockAchievements(
+    babyId: string,
+    context: {
+      streakDays?: number;
+      eventType?: string;
+      eventTime?: Date;
+      milestoneCount?: number;
+    }
+  ): Promise<Achievement[]> {
     const newlyUnlocked: Achievement[] = [];
 
     // Check streak-based achievements

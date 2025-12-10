@@ -14,7 +14,7 @@ Add these scripts to the `scripts` section in `package.json`:
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    
+
     // ADD THESE NEW SCRIPTS:
     "cap:sync": "npm run build && npx cap sync",
     "cap:ios": "npm run cap:sync && npx cap open ios",
@@ -167,12 +167,14 @@ Follow the complete `TESTING_CHECKLIST.md` to verify all features work.
 For faster iOS development, you can enable hot-reload:
 
 1. Find your local IP address:
+
    ```bash
    ifconfig | grep "inet " | grep -v 127.0.0.1
    # Example output: 192.168.1.10
    ```
 
 2. Edit `capacitor.config.ts` and uncomment these lines:
+
    ```typescript
    server: {
      url: 'http://192.168.1.10:5173', // Your IP here
@@ -187,12 +189,15 @@ For faster iOS development, you can enable hot-reload:
 ## Troubleshooting
 
 ### "Command not found: cap"
+
 Install Capacitor CLI globally:
+
 ```bash
 npm install -g @capacitor/cli
 ```
 
 ### iOS build fails
+
 ```bash
 cd ios/App
 pod install
@@ -201,12 +206,14 @@ npx cap sync ios
 ```
 
 ### Permission denied errors
+
 ```bash
 sudo xcode-select --reset
 sudo xcodebuild -license accept
 ```
 
 ### Type errors in Cursor
+
 ```bash
 npx supabase gen types typescript --project-id your-project-id > src/integrations/supabase/types.ts
 ```
@@ -214,6 +221,7 @@ npx supabase gen types typescript --project-id your-project-id > src/integration
 ## Next Steps
 
 After completing these manual steps:
+
 1. Read `DEVELOPMENT.md` for development workflow
 2. Read `DEPLOYMENT.md` for deployment instructions
 3. Follow `MIGRATION_CHECKLIST.md` for complete migration

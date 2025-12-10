@@ -68,84 +68,84 @@ export function DoctorReport({ baby, className }: DoctorReportProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className={className}>
-          <FileText className="mr-2 h-4 w-4" />
+        <Button variant='outline' className={className}>
+          <FileText className='mr-2 h-4 w-4' />
           Share Report
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+          <DialogTitle className='flex items-center gap-2'>
+            <FileText className='h-5 w-5' />
             Doctor Report
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="text-center space-y-2">
-            <h3 className="font-semibold text-lg">{baby.name}</h3>
-            <p className="text-sm text-muted-foreground">
+        <div className='space-y-4'>
+          <div className='text-center space-y-2'>
+            <h3 className='font-semibold text-lg'>{baby.name}</h3>
+            <p className='text-sm text-muted-foreground'>
               {babyAge} month{babyAge !== 1 ? 's' : ''} old
             </p>
-            <Badge variant="secondary">{reportPeriod}</Badge>
+            <Badge variant='secondary'>{reportPeriod}</Badge>
           </div>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Report Includes:</CardTitle>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-base'>Report Includes:</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
+            <CardContent className='space-y-2 text-sm'>
+              <div className='flex items-center gap-2'>
+                <div className='w-2 h-2 bg-primary rounded-full' />
                 <span>Daily feeding counts and volumes</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
+              <div className='flex items-center gap-2'>
+                <div className='w-2 h-2 bg-primary rounded-full' />
                 <span>Sleep duration and nap patterns</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
+              <div className='flex items-center gap-2'>
+                <div className='w-2 h-2 bg-primary rounded-full' />
                 <span>Diaper change frequency</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
+              <div className='flex items-center gap-2'>
+                <div className='w-2 h-2 bg-primary rounded-full' />
                 <span>Weekly averages and trends</span>
               </div>
             </CardContent>
           </Card>
 
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground text-center">
+          <div className='space-y-3'>
+            <p className='text-sm text-muted-foreground text-center'>
               Share with pediatricians, nannies, or family members
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className='grid grid-cols-2 gap-3'>
               <Button
                 onClick={handleShare}
                 disabled={isGenerating}
-                className="flex items-center gap-2"
+                className='flex items-center gap-2'
               >
-                <Share className="h-4 w-4" />
+                <Share className='h-4 w-4' />
                 Share
               </Button>
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={handleGenerateReport}
                 disabled={isGenerating}
-                className="flex items-center gap-2"
+                className='flex items-center gap-2'
               >
-                <Download className="h-4 w-4" />
+                <Download className='h-4 w-4' />
                 Download
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <MessageCircle className="h-3 w-3" />
+            <div className='flex items-center justify-center gap-4 text-xs text-muted-foreground'>
+              <div className='flex items-center gap-1'>
+                <MessageCircle className='h-3 w-3' />
                 <span>Messages</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Mail className="h-3 w-3" />
+              <div className='flex items-center gap-1'>
+                <Mail className='h-3 w-3' />
                 <span>Email</span>
               </div>
             </div>

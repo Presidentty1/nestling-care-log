@@ -32,6 +32,7 @@ bash scripts/aggressive_xcode_fix.sh
 4. Check the error messages - they will tell you exactly what's wrong
 
 Common error patterns:
+
 - **"PBXFileSystemSynchronizedRootGroup"** → Issue with modern project format
 - **"Cannot read file"** → Corrupted or missing source file
 - **"Memory"** → System resource issue
@@ -67,10 +68,12 @@ This requires manually editing the project file - not recommended unless you're 
 ## Step 7: Check Xcode Version Compatibility
 
 Your project requires:
+
 - **Xcode 15.0+** (for objectVersion 77)
 - **macOS Sonoma+** (for iOS 17 SDK)
 
 Check your Xcode version:
+
 ```bash
 xcodebuild -version
 ```
@@ -121,4 +124,3 @@ cd ios && bash scripts/diagnose_xcode_crash.sh
 # Standard cleanup
 cd ios && bash scripts/fix_xcode_crashes.sh
 ```
-

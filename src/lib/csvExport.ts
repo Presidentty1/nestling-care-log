@@ -58,7 +58,15 @@ export async function exportEventsCSV(
   const summaryRows: string[][] = [
     [],
     ['DAILY SUMMARIES'],
-    ['Date', 'Total Feeds', 'Total Milk (ml)', 'Total Sleep (hrs)', 'Total Diapers', 'Wet Diapers', 'Dirty Diapers'],
+    [
+      'Date',
+      'Total Feeds',
+      'Total Milk (ml)',
+      'Total Sleep (hrs)',
+      'Total Diapers',
+      'Wet Diapers',
+      'Dirty Diapers',
+    ],
   ];
 
   Object.entries(dailySummaries).forEach(([date, summary]) => {
@@ -74,13 +82,8 @@ export async function exportEventsCSV(
   });
 
   // Create CSV content with event details and summaries
-  const csv = [
-    ['EVENT LOG'],
-    headers,
-    ...rows,
-    ...summaryRows,
-  ]
-    .map((row) => row.map((cell) => `"${cell}"`).join(','))
+  const csv = [['EVENT LOG'], headers, ...rows, ...summaryRows]
+    .map(row => row.map(cell => `"${cell}"`).join(','))
     .join('\n');
 
   // Create and download file
@@ -96,9 +99,9 @@ export async function exportEventsCSV(
 function calculateDailySummaries(events: EventRecord[]): Record<string, any> {
   const summaries: Record<string, any> = {};
 
-  events.forEach((event) => {
+  events.forEach(event => {
     const date = format(new Date(event.startTime), 'yyyy-MM-dd');
-    
+
     if (!summaries[date]) {
       summaries[date] = {
         feedCount: 0,
@@ -118,7 +121,8 @@ function calculateDailySummaries(events: EventRecord[]): Record<string, any> {
     }
 
     if (event.type === 'sleep' && event.endTime) {
-      const duration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000;
+      const duration =
+        (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / 60000;
       summaries[date].sleepMinutes += duration;
     }
 

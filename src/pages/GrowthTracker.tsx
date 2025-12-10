@@ -7,11 +7,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Plus, TrendingUp, Ruler, Weight, Circle, Download } from 'lucide-react';
-import { calculateWeightPercentile, calculateLengthPercentile, calculateHeadPercentile } from '@/lib/whoPercentiles';
+import {
+  calculateWeightPercentile,
+  calculateLengthPercentile,
+  calculateHeadPercentile,
+} from '@/lib/whoPercentiles';
 import { generateDoctorReport, downloadDoctorReport } from '@/lib/doctorReportPDF';
 import { validateGrowthRecord } from '@/services/validation';
 import { babyService } from '@/services/babyService';
@@ -44,7 +54,10 @@ export default function GrowthTracker() {
 
   const loadBabyAndRecords = async () => {
     try {
-      const babyId = activeBabyId || localStorage.getItem('selectedBabyId') || localStorage.getItem('activeBabyId');
+      const babyId =
+        activeBabyId ||
+        localStorage.getItem('selectedBabyId') ||
+        localStorage.getItem('activeBabyId');
       if (!babyId) {
         navigate('/home');
         return;
@@ -75,7 +88,9 @@ export default function GrowthTracker() {
 
       const birthDate = new Date(baby.date_of_birth);
       const recordDate = new Date(formData.recorded_at);
-      const ageInDays = Math.floor((recordDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24));
+      const ageInDays = Math.floor(
+        (recordDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       const recordData: any = {
         baby_id: baby.id,
@@ -124,23 +139,23 @@ export default function GrowthTracker() {
 
   const handleExportPDF = async () => {
     if (!baby) return;
-    
+
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
-      
+
       const { data: recentEvents } = await supabase
         .from('events')
         .select('*')
         .eq('baby_id', baby.id)
         .gte('start_time', startDate.toISOString());
-      
+
       const { data: healthRecords } = await supabase
         .from('health_records')
         .select('*')
         .eq('baby_id', baby.id)
         .order('recorded_at', { ascending: false });
-      
+
       const doc = await generateDoctorReport(
         baby,
         records,
@@ -148,7 +163,7 @@ export default function GrowthTracker() {
         healthRecords || [],
         [startDate, new Date()]
       );
-      
+
       downloadDoctorReport(doc, baby.name);
       toast.success('Report exported successfully!');
     } catch (error) {
@@ -160,94 +175,94 @@ export default function GrowthTracker() {
   const latestRecord = records[0];
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return <div className='flex items-center justify-center min-h-screen'>Loading...</div>;
   }
 
   if (!baby) return null;
 
   return (
-    <div className="container mx-auto p-4 pb-20 max-w-2xl">
-      <div className="mb-6 flex items-center justify-between">
+    <div className='container mx-auto p-4 pb-20 max-w-2xl'>
+      <div className='mb-6 flex items-center justify-between'>
         <div>
-          <h1 className="text-3xl font-bold">Growth Tracker</h1>
-          <p className="text-muted-foreground">{baby.name}</p>
+          <h1 className='text-3xl font-bold'>Growth Tracker</h1>
+          <p className='text-muted-foreground'>{baby.name}</p>
         </div>
-        <Button onClick={handleExportPDF} variant="outline" size="sm">
-          <Download className="mr-2 h-4 w-4" />
+        <Button onClick={handleExportPDF} variant='outline' size='sm'>
+          <Download className='mr-2 h-4 w-4' />
           Export PDF
         </Button>
       </div>
 
-      <Card className="mb-6">
+      <Card className='mb-6'>
         <CardHeader>
           <CardTitle>Latest Measurements</CardTitle>
         </CardHeader>
         <CardContent>
           {latestRecord ? (
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {latestRecord.weight && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Weight className="w-5 h-5 text-primary" />
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <Weight className='w-5 h-5 text-primary' />
                     <div>
-                      <p className="font-medium">Weight</p>
-                      <p className="text-2xl">{latestRecord.weight} kg</p>
+                      <p className='font-medium'>Weight</p>
+                      <p className='text-2xl'>{latestRecord.weight} kg</p>
                     </div>
                   </div>
                   {latestRecord.percentile_weight && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className='text-sm text-muted-foreground'>
                       {latestRecord.percentile_weight}th percentile
                     </span>
                   )}
                 </div>
               )}
-              
+
               {latestRecord.length && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Ruler className="w-5 h-5 text-primary" />
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <Ruler className='w-5 h-5 text-primary' />
                     <div>
-                      <p className="font-medium">Length</p>
-                      <p className="text-2xl">{latestRecord.length} cm</p>
+                      <p className='font-medium'>Length</p>
+                      <p className='text-2xl'>{latestRecord.length} cm</p>
                     </div>
                   </div>
                   {latestRecord.percentile_length && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className='text-sm text-muted-foreground'>
                       {latestRecord.percentile_length}th percentile
                     </span>
                   )}
                 </div>
               )}
-              
+
               {latestRecord.head_circumference && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Circle className="w-5 h-5 text-primary" />
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <Circle className='w-5 h-5 text-primary' />
                     <div>
-                      <p className="font-medium">Head Circumference</p>
-                      <p className="text-2xl">{latestRecord.head_circumference} cm</p>
+                      <p className='font-medium'>Head Circumference</p>
+                      <p className='text-2xl'>{latestRecord.head_circumference} cm</p>
                     </div>
                   </div>
                   {latestRecord.percentile_head && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className='text-sm text-muted-foreground'>
                       {latestRecord.percentile_head}th percentile
                     </span>
                   )}
                 </div>
               )}
 
-              <p className="text-sm text-muted-foreground">
+              <p className='text-sm text-muted-foreground'>
                 Last measured: {format(new Date(latestRecord.recorded_at), 'MMM dd, yyyy')}
               </p>
             </div>
           ) : (
-            <p className="text-muted-foreground">No measurements yet</p>
+            <p className='text-muted-foreground'>No measurements yet</p>
           )}
 
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button className="w-full mt-4">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className='w-full mt-4'>
+                <Plus className='w-4 h-4 mr-2' />
                 Log New Measurement
               </Button>
             </DialogTrigger>
@@ -255,65 +270,67 @@ export default function GrowthTracker() {
               <DialogHeader>
                 <DialogTitle>New Growth Measurement</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className='space-y-4'>
                 <div>
-                  <Label htmlFor="recorded_at">Date</Label>
+                  <Label htmlFor='recorded_at'>Date</Label>
                   <Input
-                    id="recorded_at"
-                    type="date"
+                    id='recorded_at'
+                    type='date'
                     value={formData.recorded_at}
-                    onChange={(e) => setFormData({ ...formData, recorded_at: e.target.value })}
+                    onChange={e => setFormData({ ...formData, recorded_at: e.target.value })}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor='weight'>Weight (kg)</Label>
                   <Input
-                    id="weight"
-                    type="number"
-                    step="0.01"
-                    placeholder="5.2"
+                    id='weight'
+                    type='number'
+                    step='0.01'
+                    placeholder='5.2'
                     value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    onChange={e => setFormData({ ...formData, weight: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="length">Length (cm)</Label>
+                  <Label htmlFor='length'>Length (cm)</Label>
                   <Input
-                    id="length"
-                    type="number"
-                    step="0.1"
-                    placeholder="58.5"
+                    id='length'
+                    type='number'
+                    step='0.1'
+                    placeholder='58.5'
                     value={formData.length}
-                    onChange={(e) => setFormData({ ...formData, length: e.target.value })}
+                    onChange={e => setFormData({ ...formData, length: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="head">Head Circumference (cm)</Label>
+                  <Label htmlFor='head'>Head Circumference (cm)</Label>
                   <Input
-                    id="head"
-                    type="number"
-                    step="0.1"
-                    placeholder="39.0"
+                    id='head'
+                    type='number'
+                    step='0.1'
+                    placeholder='39.0'
                     value={formData.head_circumference}
-                    onChange={(e) => setFormData({ ...formData, head_circumference: e.target.value })}
+                    onChange={e => setFormData({ ...formData, head_circumference: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="note">Notes (optional)</Label>
+                  <Label htmlFor='note'>Notes (optional)</Label>
                   <Textarea
-                    id="note"
-                    placeholder="Any observations..."
+                    id='note'
+                    placeholder='Any observations...'
                     value={formData.note}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                    onChange={e => setFormData({ ...formData, note: e.target.value })}
                   />
                 </div>
 
-                <Button type="submit" className="w-full">Save Measurement</Button>
+                <Button type='submit' className='w-full'>
+                  Save Measurement
+                </Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -326,21 +343,23 @@ export default function GrowthTracker() {
         </CardHeader>
         <CardContent>
           {records.length > 0 ? (
-            <div className="space-y-4">
-              {records.map((record) => (
-                <div key={record.id} className="border-b pb-4 last:border-0">
-                  <p className="font-medium">{format(new Date(record.recorded_at), 'MMM dd, yyyy')}</p>
-                  <div className="mt-2 text-sm space-y-1">
+            <div className='space-y-4'>
+              {records.map(record => (
+                <div key={record.id} className='border-b pb-4 last:border-0'>
+                  <p className='font-medium'>
+                    {format(new Date(record.recorded_at), 'MMM dd, yyyy')}
+                  </p>
+                  <div className='mt-2 text-sm space-y-1'>
                     {record.weight && <p>Weight: {record.weight} kg</p>}
                     {record.length && <p>Length: {record.length} cm</p>}
                     {record.head_circumference && <p>Head: {record.head_circumference} cm</p>}
-                    {record.note && <p className="text-muted-foreground mt-2">{record.note}</p>}
+                    {record.note && <p className='text-muted-foreground mt-2'>{record.note}</p>}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No measurement history</p>
+            <p className='text-muted-foreground text-center py-4'>No measurement history</p>
           )}
         </CardContent>
       </Card>

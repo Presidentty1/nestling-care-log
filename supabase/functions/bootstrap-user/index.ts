@@ -1,13 +1,13 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { format, subDays } from "https://esm.sh/date-fns@3.6.0";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { format, subDays } from 'https://esm.sh/date-fns@3.6.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -24,8 +24,11 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
     if (authError || !user) {
       throw new Error('Unauthorized');
     }
@@ -52,7 +55,7 @@ serve(async (req) => {
     if (hasMembership) {
       const familyId = memberships![0].family_id;
       console.log('User already has family:', familyId);
-      
+
       // Get the first baby in this family
       const { data: babies } = await supabase
         .from('babies')
@@ -62,10 +65,10 @@ serve(async (req) => {
 
       if (babies && babies.length > 0) {
         return new Response(
-          JSON.stringify({ 
-            familyId, 
+          JSON.stringify({
+            familyId,
             babyId: babies[0].id,
-            existed: true 
+            existed: true,
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -79,23 +82,23 @@ serve(async (req) => {
           family_id: familyId,
           name: babyName,
           date_of_birth: dateOfBirth,
-          timezone
+          timezone,
         })
         .select()
         .single();
 
       if (babyError) {
         console.error('Baby creation error:', babyError);
-        throw new Error(`Failed to create baby: ${  babyError.message}`);
+        throw new Error(`Failed to create baby: ${babyError.message}`);
       }
 
       console.log('Created baby:', baby.id);
 
       return new Response(
-        JSON.stringify({ 
-          familyId, 
+        JSON.stringify({
+          familyId,
           babyId: baby.id,
-          existed: false
+          existed: false,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -112,39 +115,38 @@ serve(async (req) => {
 
     if (familyError) {
       console.error('Family creation error:', familyError);
-      throw new Error(`Failed to create family: ${  familyError.message}`);
+      throw new Error(`Failed to create family: ${familyError.message}`);
     }
 
     console.log('Created family:', family.id);
 
     // 2. Create family member
-    const { error: memberError } = await supabase
-      .from('family_members')
-      .insert({
-        family_id: family.id,
-        user_id: user.id,
-        role: 'admin'
-      });
+    const { error: memberError } = await supabase.from('family_members').insert({
+      family_id: family.id,
+      user_id: user.id,
+      role: 'admin',
+    });
 
     if (memberError) {
       console.error('Family member creation error:', memberError);
-      throw new Error(`Failed to create family member: ${  memberError.message}`);
+      throw new Error(`Failed to create family member: ${memberError.message}`);
     }
 
     console.log('Created family member');
 
     // 3. Ensure user role (idempotent)
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .upsert({
+    const { error: roleError } = await supabase.from('user_roles').upsert(
+      {
         user_id: user.id,
         family_id: family.id,
-        role: 'admin'
-      }, { onConflict: 'user_id,family_id' });
+        role: 'admin',
+      },
+      { onConflict: 'user_id,family_id' }
+    );
 
     if (roleError) {
       console.error('User role upsert error:', roleError);
-      throw new Error(`Failed to upsert user role: ${  roleError.message}`);
+      throw new Error(`Failed to upsert user role: ${roleError.message}`);
     }
 
     console.log('Created user role');
@@ -156,35 +158,31 @@ serve(async (req) => {
         family_id: family.id,
         name: babyName,
         date_of_birth: dateOfBirth,
-        timezone
+        timezone,
       })
       .select()
       .single();
 
     if (babyError) {
       console.error('Baby creation error:', babyError);
-      throw new Error(`Failed to create baby: ${  babyError.message}`);
+      throw new Error(`Failed to create baby: ${babyError.message}`);
     }
 
     console.log('Created baby:', baby.id);
 
     return new Response(
-      JSON.stringify({ 
-        familyId: family.id, 
+      JSON.stringify({
+        familyId: family.id,
         babyId: baby.id,
-        existed: false
+        existed: false,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error: any) {
     console.error('Bootstrap error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Unknown error occurred' }),
-      { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Unknown error occurred' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

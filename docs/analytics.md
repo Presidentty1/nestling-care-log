@@ -23,41 +23,41 @@ actor Analytics {
 
 ### Subscription Events
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `subscription_trial_started` | `plan`, `source` | Trial initiated |
-| `subscription_activated` | `plan`, `price` | Subscription activated |
-| `subscription_renewed` | `plan` | Subscription auto-renewed |
-| `subscription_cancelled` | `plan`, `reason?` | Subscription cancelled |
-| `subscription_purchased` | `product_id`, `price` | Initial purchase |
+| Event                        | Parameters            | Description               |
+| ---------------------------- | --------------------- | ------------------------- |
+| `subscription_trial_started` | `plan`, `source`      | Trial initiated           |
+| `subscription_activated`     | `plan`, `price`       | Subscription activated    |
+| `subscription_renewed`       | `plan`                | Subscription auto-renewed |
+| `subscription_cancelled`     | `plan`, `reason?`     | Subscription cancelled    |
+| `subscription_purchased`     | `product_id`, `price` | Initial purchase          |
 
 ### Core Product Usage
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `log_feed` | `baby_id`, `quantity?`, `type?` | Feed event logged |
-| `log_diaper` | `baby_id`, `type` | Diaper event logged |
-| `log_sleep_start` | `baby_id` | Sleep session started |
-| `log_sleep_stop` | `baby_id`, `duration_minutes` | Sleep session ended |
+| Event             | Parameters                      | Description           |
+| ----------------- | ------------------------------- | --------------------- |
+| `log_feed`        | `baby_id`, `quantity?`, `type?` | Feed event logged     |
+| `log_diaper`      | `baby_id`, `type`               | Diaper event logged   |
+| `log_sleep_start` | `baby_id`                       | Sleep session started |
+| `log_sleep_stop`  | `baby_id`, `duration_minutes`   | Sleep session ended   |
 
 ### AI Feature Usage
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `ai_nap_prediction_requested` | `baby_id`, `is_pro` | Nap prediction viewed |
-| `ai_cry_analysis_requested` | `baby_id`, `is_pro` | Cry analysis performed |
-| `ai_assistant_opened` | `baby_id`, `is_pro` | AI assistant accessed |
+| Event                         | Parameters          | Description            |
+| ----------------------------- | ------------------- | ---------------------- |
+| `ai_nap_prediction_requested` | `baby_id`, `is_pro` | Nap prediction viewed  |
+| `ai_cry_analysis_requested`   | `baby_id`, `is_pro` | Cry analysis performed |
+| `ai_assistant_opened`         | `baby_id`, `is_pro` | AI assistant accessed  |
 
 ### User Journey Events
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `onboarding_completed` | `baby_id` | User completed onboarding |
-| `first_log_created` | `event_type`, `baby_id` | First event logged |
-| `paywall_viewed` | `source` | Upgrade paywall shown |
-| `prediction_shown` | `type`, `is_pro`, `baby_id` | Prediction displayed |
-| `caregiver_invite_sent` | `method` | Caregiver invitation sent |
-| `caregiver_invite_accepted` | - | Caregiver invitation accepted |
+| Event                       | Parameters                  | Description                   |
+| --------------------------- | --------------------------- | ----------------------------- |
+| `onboarding_completed`      | `baby_id`                   | User completed onboarding     |
+| `first_log_created`         | `event_type`, `baby_id`     | First event logged            |
+| `paywall_viewed`            | `source`                    | Upgrade paywall shown         |
+| `prediction_shown`          | `type`, `is_pro`, `baby_id` | Prediction displayed          |
+| `caregiver_invite_sent`     | `method`                    | Caregiver invitation sent     |
+| `caregiver_invite_accepted` | -                           | Caregiver invitation accepted |
 
 ## Implementation Details
 
@@ -80,6 +80,7 @@ Events are automatically converted to Firebase-friendly format:
 ### User Properties
 
 Set automatically:
+
 - `subscription_status`: "free", "trial", "pro"
 - `baby_age_months`: Age in months (if baby exists)
 
@@ -92,13 +93,13 @@ Set automatically:
 
 ## Parameter Standards
 
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `baby_id` | String | Anonymized baby identifier | "abc123" |
-| `plan` | String | Subscription plan | "monthly", "yearly" |
-| `is_pro` | Bool | Whether user has Pro access | true |
-| `source` | String | Where event originated | "settings", "paywall" |
-| `price` | String | Formatted price | "$5.99" |
+| Parameter | Type   | Description                 | Example               |
+| --------- | ------ | --------------------------- | --------------------- |
+| `baby_id` | String | Anonymized baby identifier  | "abc123"              |
+| `plan`    | String | Subscription plan           | "monthly", "yearly"   |
+| `is_pro`  | Bool   | Whether user has Pro access | true                  |
+| `source`  | String | Where event originated      | "settings", "paywall" |
+| `price`   | String | Formatted price             | "$5.99"               |
 
 ## Testing & Debugging
 
@@ -124,6 +125,7 @@ In debug builds, events are logged to console:
 ### Firebase Console
 
 Monitor events in Firebase Analytics dashboard:
+
 - **Events**: View event counts and parameters
 - **Audiences**: Segment by subscription status
 - **Funnels**: Track conversion from trial to paid
@@ -141,6 +143,7 @@ Monitor events in Firebase Analytics dashboard:
 ### A/B Testing
 
 Future: Use Firebase Remote Config for:
+
 - Paywall copy variations
 - Feature gating experiments
 - Onboarding flow optimization
@@ -148,6 +151,7 @@ Future: Use Firebase Remote Config for:
 ### Performance Monitoring
 
 Track:
+
 - App launch time
 - Feature load times
 - Error rates by feature
@@ -173,4 +177,3 @@ Track:
 - **COPPA**: No tracking of children under 13
 - **App Tracking Transparency**: Respects ATT permissions
 - **Data minimization**: Only essential events tracked
-

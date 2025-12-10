@@ -63,7 +63,7 @@ class ReminderService {
     // Feed reminder
     if (this.settings.feedReminderEnabled && this.lastFeedEvent) {
       const hoursSinceLastFeed = differenceInHours(now, new Date(this.lastFeedEvent.start_time));
-      
+
       if (hoursSinceLastFeed >= this.settings.feedReminderHours) {
         toast('🍼 Time for a feeding', {
           description: `It's been ${hoursSinceLastFeed} hours since the last feed`,
@@ -77,7 +77,7 @@ class ReminderService {
     // Nap reminder
     if (this.settings.napReminderEnabled && this.nextNapWindow) {
       const minutesUntilNap = differenceInMinutes(this.nextNapWindow.start, now);
-      
+
       if (minutesUntilNap <= this.settings.napReminderMinutes && minutesUntilNap > 0) {
         toast('😴 Nap time approaching', {
           description: `Nap window starts in ${minutesUntilNap} minutes`,

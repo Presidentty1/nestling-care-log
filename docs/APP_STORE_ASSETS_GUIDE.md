@@ -5,12 +5,14 @@
 ### 1. App Icon
 
 **Specifications:**
+
 - **Size**: 1024×1024 pixels
 - **Format**: PNG (no alpha channel, no transparency)
 - **Color Space**: RGB
 - **File Name**: `AppIcon-1024.png`
 
 **Requirements:**
+
 - Must be sharp at all sizes
 - No rounded corners (iOS adds them automatically)
 - No text or UI elements
@@ -18,6 +20,7 @@
 - Professional, polished design
 
 **Design Tips:**
+
 - Use simple, recognizable icon
 - Test at small sizes (appears at 60×60 on home screen)
 - Ensure good contrast
@@ -28,6 +31,7 @@
 **Required Sizes:**
 
 #### iPhone 6.5" Display (iPhone 14 Pro Max / 15 Pro Max)
+
 - **Size**: 1290×2796 pixels
 - **Required**: Minimum 5 screenshots
 - **Recommended Order**:
@@ -39,16 +43,19 @@
   6. Settings (optional)
 
 #### iPhone 5.5" Display (iPhone 8 Plus)
+
 - **Size**: 1242×2208 pixels
 - **Required**: Minimum 5 screenshots
 - **Same order as above**
 
 #### iPad Pro 12.9" (if iPad supported)
+
 - **Size**: 2048×2732 pixels
 - **Required**: Minimum 5 screenshots
 - **Same order as above**
 
 **Screenshot Guidelines:**
+
 - Show real app content (not mockups)
 - Use actual user data (anonymized)
 - Highlight key features
@@ -57,6 +64,7 @@
 - No device frames needed (iOS adds them)
 
 **Content to Show:**
+
 1. **Home Screen**: Timeline with events, quick actions, nap prediction
 2. **Event Logging**: Feed form with amount, timer, notes
 3. **History**: Date picker, filtered events, summary
@@ -67,12 +75,14 @@
 ### 3. App Preview Video (Optional but Recommended)
 
 **Specifications:**
+
 - **Duration**: 15-30 seconds
 - **Format**: MP4 or MOV
 - **Resolution**: Match screenshot sizes
 - **Content**: Show key features in action
 
 **Recommended Flow:**
+
 1. Open app → Home screen (2s)
 2. Tap quick action → Log feed (3s)
 3. View timeline → Event appears (2s)
@@ -85,6 +95,7 @@
 ### Screenshot Capture
 
 **Using iOS Simulator:**
+
 1. Open app in simulator
 2. Navigate to screen
 3. Device → Screenshot (Cmd+S)
@@ -92,6 +103,7 @@
 5. Edit in image editor if needed
 
 **Using Physical Device:**
+
 1. Use QuickTime Player (Mac)
 2. File → New Movie Recording
 3. Select device
@@ -99,6 +111,7 @@
 5. Export frames as screenshots
 
 **Using Xcode:**
+
 1. Run app on simulator
 2. Debug → View Debugging → Screenshot
 3. Save screenshot
@@ -106,12 +119,14 @@
 ### Image Editing
 
 **Tools:**
+
 - **Figma**: Design screenshots with overlays
 - **Sketch**: Professional design tool
 - **Photoshop**: Advanced editing
 - **Preview (Mac)**: Basic editing
 
 **Tips:**
+
 - Add text overlays to highlight features
 - Ensure consistent styling
 - Use app's color scheme
@@ -147,6 +162,7 @@
 ## Checklist
 
 ### Before Upload
+
 - [ ] App icon created (1024×1024)
 - [ ] Screenshots captured for all required sizes
 - [ ] Screenshots show real app content
@@ -155,6 +171,7 @@
 - [ ] All assets match "Nuzzle" branding
 
 ### App Store Connect
+
 - [ ] App icon uploaded
 - [ ] Screenshots uploaded for iPhone 6.5"
 - [ ] Screenshots uploaded for iPhone 5.5"
@@ -170,21 +187,11 @@
 
 ## Quick Reference
 
-| Asset | Size | Format | Required |
-|-------|------|--------|----------|
-| App Icon | 1024×1024 | PNG | Yes |
-| iPhone 6.5" Screenshots | 1290×2796 | PNG/JPG | 5+ |
-| iPhone 5.5" Screenshots | 1242×2208 | PNG/JPG | 5+ |
-| iPad Screenshots | 2048×2732 | PNG/JPG | 5+ (if supported) |
-| App Preview Video | Match screenshot | MP4/MOV | Optional |
-
-
-
-
-
-
-
-
-
-
+| Asset                   | Size             | Format  | Required          |
+| ----------------------- | ---------------- | ------- | ----------------- |
+| App Icon                | 1024×1024        | PNG     | Yes               |
+| iPhone 6.5" Screenshots | 1290×2796        | PNG/JPG | 5+                |
+| iPhone 5.5" Screenshots | 1242×2208        | PNG/JPG | 5+                |
+| iPad Screenshots        | 2048×2732        | PNG/JPG | 5+ (if supported) |
+| App Preview Video       | Match screenshot | MP4/MOV | Optional          |
 

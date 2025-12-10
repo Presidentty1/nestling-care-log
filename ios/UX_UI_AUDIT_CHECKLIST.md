@@ -174,4 +174,3 @@ If time is limited, prioritize:
 4. **P1**: Empty states with helpful CTAs
 5. **P2**: Animation smoothness
 6. **P2**: Keyboard handling
-

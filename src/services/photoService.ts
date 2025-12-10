@@ -11,7 +11,10 @@ export interface PhotoItem {
 }
 
 class PhotoService {
-  async getPhotos(babyId: string, category?: 'milestone' | 'health' | 'event' | 'all'): Promise<PhotoItem[]> {
+  async getPhotos(
+    babyId: string,
+    category?: 'milestone' | 'health' | 'event' | 'all'
+  ): Promise<PhotoItem[]> {
     const allPhotos: PhotoItem[] = [];
 
     // Get milestone photos
@@ -35,10 +38,10 @@ class PhotoService {
       const healthRecords = await healthRecordsService.getHealthRecords(babyId);
       healthRecords.forEach(record => {
         if (record.attachments && typeof record.attachments === 'object') {
-          const attachments = Array.isArray(record.attachments) 
-            ? record.attachments 
+          const attachments = Array.isArray(record.attachments)
+            ? record.attachments
             : Object.values(record.attachments);
-          
+
           attachments.forEach((url: any) => {
             if (typeof url === 'string') {
               allPhotos.push({
@@ -61,7 +64,7 @@ class PhotoService {
         .select('id, start_time, note')
         .eq('baby_id', babyId)
         .not('note', 'is', null);
-      
+
       if (events) {
         events.forEach(event => {
           // Parse note for photo URLs (if stored in note field)
@@ -81,12 +84,9 @@ class PhotoService {
     }
 
     // Sort by date descending
-    return allPhotos.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return allPhotos.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 }
 
 export const photoService = new PhotoService();
-
 

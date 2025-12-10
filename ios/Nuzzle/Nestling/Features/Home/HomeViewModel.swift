@@ -808,7 +808,7 @@ extension HomeViewModel {
         let reminderService = ReminderService.shared
         
         // Check authorization
-        await reminderService.checkAuthorizationStatus()
+        reminderService.checkAuthorizationStatus()
         guard reminderService.authorizationStatus == .authorized else { return }
         
         // Feed reminders

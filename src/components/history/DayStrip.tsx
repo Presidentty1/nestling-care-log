@@ -16,15 +16,17 @@ export function DayStrip({ selectedDate, onDateSelect }: DayStripProps) {
   });
 
   return (
-    <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-      <div className="flex gap-2.5 flex-nowrap">
-        {days.map((day) => {
+    <div className='flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide'>
+      <div className='flex gap-2.5 flex-nowrap'>
+        {days.map(day => {
           const isSelected = isSameDay(day, selectedDate);
           const isDisabled = isFuture(day);
           const isTodayDate = isToday(day);
-          
+
           // Show month abbreviation if it's the first day or if month changes
-          const showMonth = day.getDate() === 1 || (days.indexOf(day) > 0 && day.getMonth() !== days[days.indexOf(day) - 1]?.getMonth());
+          const showMonth =
+            day.getDate() === 1 ||
+            (days.indexOf(day) > 0 && day.getMonth() !== days[days.indexOf(day) - 1]?.getMonth());
 
           return (
             <button
@@ -40,28 +42,31 @@ export function DayStrip({ selectedDate, onDateSelect }: DayStripProps) {
                 isTodayDate && !isSelected && 'border-primary/30 bg-primary/5'
               )}
             >
-              <span className={cn(
-                'text-xs font-semibold mb-0.5',
-                isSelected ? 'text-primary' : 'text-muted-foreground'
-              )}>
+              <span
+                className={cn(
+                  'text-xs font-semibold mb-0.5',
+                  isSelected ? 'text-primary' : 'text-muted-foreground'
+                )}
+              >
                 {format(day, 'EEE')}
               </span>
-              <span className={cn(
-                'text-xl font-bold',
-                isSelected ? 'text-primary' : 'text-foreground'
-              )}>
+              <span
+                className={cn('text-xl font-bold', isSelected ? 'text-primary' : 'text-foreground')}
+              >
                 {format(day, 'd')}
               </span>
               {showMonth && (
-                <span className={cn(
-                  'text-[9px] font-medium mt-0.5',
-                  isSelected ? 'text-primary' : 'text-muted-foreground'
-                )}>
+                <span
+                  className={cn(
+                    'text-[9px] font-medium mt-0.5',
+                    isSelected ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                >
                   {format(day, 'MMM')}
                 </span>
               )}
               {isTodayDate && !showMonth && (
-                <span className="text-[9px] font-semibold text-primary mt-0.5">Today</span>
+                <span className='text-[9px] font-semibold text-primary mt-0.5'>Today</span>
               )}
             </button>
           );

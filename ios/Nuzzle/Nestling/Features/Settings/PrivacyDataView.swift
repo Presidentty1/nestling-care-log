@@ -9,13 +9,6 @@ struct PrivacyDataView: View {
     @State private var csvURL: URL?
     @State private var showImportPicker = false
     @State private var analyticsEnabled = UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
-    @EnvironmentObject var environment: AppEnvironment
-    @Environment(\.dismiss) var dismiss
-    @State private var showDeleteConfirmation = false
-    @State private var deleteConfirmationText = ""
-    @State private var showShareSheet = false
-    @State private var csvURL: URL?
-    @State private var showImportPicker = false
     
     var body: some View {
         NavigationStack {
@@ -356,7 +349,7 @@ struct PrivacyDataView: View {
                 
                 // Refresh app state
                 await environment.refreshBabies()
-                await environment.refreshSettings()
+                environment.refreshSettings()
                 
                 Haptics.error()
                 

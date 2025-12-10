@@ -54,7 +54,9 @@ export default function AcceptInvite() {
 
     setAccepting(true);
     try {
-      const { data: { user } } = await authService.getUser();
+      const {
+        data: { user },
+      } = await authService.getUser();
 
       if (!user) {
         // Redirect to auth with return URL
@@ -90,7 +92,7 @@ export default function AcceptInvite() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
+      <div className='min-h-screen bg-surface flex items-center justify-center'>
         <p>Loading invite...</p>
       </div>
     );
@@ -98,60 +100,56 @@ export default function AcceptInvite() {
 
   if (!invite) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
+      <div className='min-h-screen bg-surface flex items-center justify-center'>
         <p>Invite not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <Card className="max-w-md w-full">
+    <div className='min-h-screen bg-surface flex items-center justify-center p-4'>
+      <Card className='max-w-md w-full'>
         <CardHeader>
-          <CardTitle className="text-center">You've been invited!</CardTitle>
+          <CardTitle className='text-center'>You've been invited!</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <p className="text-4xl mb-4">👪</p>
-            <p className="text-lg font-medium mb-2">
-              Join {invite.families?.name || 'the family'}
-            </p>
-            <p className="text-muted-foreground">
+        <CardContent className='space-y-6'>
+          <div className='text-center'>
+            <p className='text-4xl mb-4'>👪</p>
+            <p className='text-lg font-medium mb-2'>Join {invite.families?.name || 'the family'}</p>
+            <p className='text-muted-foreground'>
               You've been invited to help care for the baby as a{' '}
-              <span className="font-medium">{invite.role}</span>.
+              <span className='font-medium'>{invite.role}</span>.
             </p>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-sm">
-              <span className="text-muted-foreground">Role: </span>
-              <span className="font-medium capitalize">{invite.role}</span>
+          <div className='space-y-2'>
+            <div className='text-sm'>
+              <span className='text-muted-foreground'>Role: </span>
+              <span className='font-medium capitalize'>{invite.role}</span>
             </div>
             {invite.role === 'admin' && (
-              <p className="text-xs text-muted-foreground">
+              <p className='text-xs text-muted-foreground'>
                 Full access - Can log activities, invite others, and manage settings
               </p>
             )}
             {invite.role === 'member' && (
-              <p className="text-xs text-muted-foreground">
-                Can log and view all activities
-              </p>
+              <p className='text-xs text-muted-foreground'>Can log and view all activities</p>
             )}
             {invite.role === 'viewer' && (
-              <p className="text-xs text-muted-foreground">Read-only access to view activities</p>
+              <p className='text-xs text-muted-foreground'>Read-only access to view activities</p>
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <Button
-              variant="outline"
-              className="flex-1"
+              variant='outline'
+              className='flex-1'
               onClick={declineInvite}
               disabled={accepting}
             >
               Decline
             </Button>
-            <Button className="flex-1" onClick={acceptInvite} disabled={accepting}>
+            <Button className='flex-1' onClick={acceptInvite} disabled={accepting}>
               {accepting ? 'Accepting...' : 'Accept Invite'}
             </Button>
           </div>

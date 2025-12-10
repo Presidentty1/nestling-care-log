@@ -16,7 +16,7 @@ class AnalyticsService {
       message: event,
       category: 'user_action',
       level: 'info',
-      data: data || {}
+      data: data || {},
     });
 
     // Track with Firebase Analytics
@@ -36,10 +36,10 @@ class AnalyticsService {
   }
 
   trackOnboardingComplete(babyId: string, durationSeconds?: number, stepsCompleted?: number) {
-    this.log('onboarding_completed', { 
+    this.log('onboarding_completed', {
       babyId,
       ...(durationSeconds !== undefined && { duration_seconds: durationSeconds }),
-      ...(stepsCompleted !== undefined && { steps_completed: stepsCompleted })
+      ...(stepsCompleted !== undefined && { steps_completed: stepsCompleted }),
     });
   }
 

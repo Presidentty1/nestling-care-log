@@ -18,10 +18,10 @@ export function useOnboarding() {
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     // Check if guest mode
     checkGuestMode();
-    
+
     if (!user) {
       // Allow guest mode - go to home
       navigate('/home');
@@ -57,13 +57,15 @@ export function useOnboarding() {
     try {
       // Check if user has any families
       const families = await familyService.getUserFamilies();
-      
+
       if (families.length === 0) {
         // First time user - call backend to bootstrap
         const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        
-        const { data: { session } } = await supabase.auth.getSession();
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session) {
           toast.error('Authentication session not found');
           setChecking(false);
@@ -74,11 +76,11 @@ export function useOnboarding() {
           body: {
             babyName: 'Demo Baby',
             dateOfBirth: demoBirthdate,
-            timezone
+            timezone,
           },
           headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
+            Authorization: `Bearer ${session.access_token}`,
+          },
         });
 
         if (response.error) {
@@ -96,10 +98,12 @@ export function useOnboarding() {
       } else {
         // Has families - check for babies
         const babies = await babyService.getUserBabies();
-        
+
         if (babies.length === 0) {
           // Has family but no babies - auto-provision a demo baby via backend
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
           if (!session) {
             toast.error('Authentication session not found');
             setChecking(false);
@@ -113,11 +117,11 @@ export function useOnboarding() {
             body: {
               babyName: 'Demo Baby',
               dateOfBirth: demoBirthdate,
-              timezone
+              timezone,
             },
             headers: {
-              Authorization: `Bearer ${session.access_token}`
-            }
+              Authorization: `Bearer ${session.access_token}`,
+            },
           });
 
           if (response.error) {

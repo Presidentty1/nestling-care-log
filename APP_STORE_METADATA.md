@@ -3,29 +3,34 @@
 ## Basic Information
 
 **App Name** (30 characters max):
+
 ```
 Nuzzle Baby Tracker
 ```
 
 **Subtitle** (30 characters max):
+
 ```
 AI-powered feed & sleep log
 ```
 
 **Bundle ID:**
+
 ```
 app.lovable.3be850d6430e4062887da465d2abf643
 ```
 
 ## Promotional Text
-*Editable after app is live, 170 characters*
+
+_Editable after app is live, 170 characters_
 
 ```
 Track feeding, sleep & diapers in 2 taps. Get AI nap predictions. Sync with partner. Perfect for sleep-deprived parents. 🍼✨
 ```
 
 ## Description
-*4000 characters max*
+
+_4000 characters max_
 
 ```
 NUZZLE — THE SMART BABY TRACKER FOR MODERN PARENTS
@@ -89,7 +94,8 @@ Nuzzle is not a medical device and does not provide medical advice. Always consu
 ```
 
 ## Keywords
-*100 characters max, comma-separated*
+
+_100 characters max, comma-separated_
 
 ```
 baby tracker,newborn log,feeding timer,sleep tracker,diaper log,breastfeeding,bottle feed,infant care
@@ -98,60 +104,71 @@ baby tracker,newborn log,feeding timer,sleep tracker,diaper log,breastfeeding,bo
 ## Category
 
 **Primary Category:**
+
 ```
 Health & Fitness
 ```
 
 **Secondary Category:**
+
 ```
 Lifestyle
 ```
 
 **Age Rating:**
+
 ```
 4+ (No Objectionable Content)
 ```
 
 ## Privacy Labels
-*Required by App Store Connect*
+
+_Required by App Store Connect_
 
 ### Data Types Collected:
 
 **Contact Info:**
+
 - ☑ Email Address
 - Purpose: Account functionality
 - Linked to user: Yes
 - Used for tracking: No
 
 **Health & Fitness:**
+
 - ☑ Health data (baby care logs)
 - Purpose: App functionality
 - Linked to user: Yes
 - Used for tracking: No
 
 **Identifiers:**
+
 - ☑ User ID
 - Purpose: App functionality, account linking
 - Linked to user: Yes
 - Used for tracking: No
 
 **User Content:**
+
 - ☑ Photos (optional, for baby profile)
 - Purpose: App functionality
 - Linked to user: Yes
 - Used for tracking: No
 
 **Does this app collect data from users?**
+
 ```
 Yes
 ```
 
 **Is data used for tracking?**
+
 ```
 No
 ```
 
 **Is data linked to user identity?**
+
 ```
 Yes (for multi-device sync)
 ```
@@ -159,21 +176,25 @@ Yes (for multi-device sync)
 ## Support Information
 
 **Support URL:**
+
 ```
 https://lovableproject.com/support
 ```
 
 **Marketing URL:**
+
 ```
 https://lovableproject.com
 ```
 
 **Privacy Policy URL:**
+
 ```
 https://lovableproject.com/privacy-policy
 ```
 
 **Support Email:**
+
 ```
 support@nuzzle.app
 ```
@@ -206,11 +227,13 @@ Thank you for choosing Nuzzle. We'd love your feedback!
 ## Pricing
 
 **App Price:**
+
 ```
 Free
 ```
 
 **In-App Purchases:**
+
 ```
 None (MVP is completely free)
 ```

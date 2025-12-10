@@ -38,11 +38,11 @@ public class AppSettingsEntity: NSManagedObject {
             onboardingCompleted: onboardingCompleted,
             preferredUnit: preferredUnit ?? "ml",
             timeFormat24Hour: timeFormat24Hour,
-            preferMediumSheet: (try? value(forKey: "preferMediumSheet") as? Bool) ?? true, // Default to true if missing (for migration)
-            spotlightIndexingEnabled: (try? value(forKey: "spotlightIndexingEnabled") as? Bool) ?? true,
+            preferMediumSheet: (value(forKey: "preferMediumSheet") as? Bool) ?? true, // Default to true if missing (for migration)
+            spotlightIndexingEnabled: (value(forKey: "spotlightIndexingEnabled") as? Bool) ?? true,
             cryInsightsWeeklyCount: Int(cryInsightsWeeklyCount),
             cryInsightsWeekStart: cryInsightsWeekStart,
-            remindersPaused: (try? value(forKey: "remindersPaused") as? Bool) ?? false
+            remindersPaused: (value(forKey: "remindersPaused") as? Bool) ?? false
         )
     }
 }

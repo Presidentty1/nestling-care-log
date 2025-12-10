@@ -11,23 +11,27 @@ All configuration issues have been fixed in the gnq worktree:
 
 ### 1. ✅ App Crash (Critical) - FIXED
 
-**Error**: 
+**Error**:
+
 ```
-This app has crashed because it attempted to access privacy-sensitive data 
-without a usage description. The app's Info.plist must contain an 
+This app has crashed because it attempted to access privacy-sensitive data
+without a usage description. The app's Info.plist must contain an
 NSSpeechRecognitionUsageDescription key
 ```
 
-**Root Cause**: 
+**Root Cause**:
+
 - No Info.plist file existed in the app bundle
 - Speech recognition service was requesting permissions on initialization
 
 **Fix Applied**:
+
 1. ✅ Created `ios/Nuzzle/Nestling/Info.plist` with all privacy descriptions
 2. ✅ Modified `SpeechRecognitionService.swift` to use lazy initialization
 3. ✅ Permissions now requested only when user actually uses voice input
 
 **Files Changed**:
+
 - Created: `ios/Nuzzle/Nestling/Info.plist`
 - Modified: `ios/Nuzzle/Nestling/Services/SpeechRecognitionService.swift`
 
@@ -35,18 +39,21 @@ NSSpeechRecognitionUsageDescription key
 
 ### 2. ✅ Supabase Configuration - DOCUMENTED
 
-**Warning**: 
+**Warning**:
+
 ```
-⚠️ Supabase not configured - environment variables SUPABASE_URL and 
+⚠️ Supabase not configured - environment variables SUPABASE_URL and
 SUPABASE_ANON_KEY are required
 ```
 
-**Solution**: 
+**Solution**:
+
 - ✅ Created `Environment.xcconfig` template
 - ✅ Created `CONFIGURATION_SETUP.md` with instructions
 - ✅ App works in guest mode without Supabase (data stored locally)
 
 **Action Required** (Optional for full backend):
+
 - Fill in Supabase credentials in `Secrets.swift` OR `Environment.xcconfig`
 
 ---
@@ -54,16 +61,19 @@ SUPABASE_ANON_KEY are required
 ### 3. ✅ Firebase Configuration - DOCUMENTED
 
 **Warning**:
+
 ```
 ⚠️ GoogleService-Info.plist not found - Firebase features will be disabled
 ```
 
 **Solution**:
+
 - ✅ Firebase is optional - app works without it
 - ✅ Analytics fallback to console logging
 - ✅ Instructions provided in `CONFIGURATION_SETUP.md`
 
 **Action Required** (Optional):
+
 - Download GoogleService-Info.plist from Firebase Console
 - Add to Xcode project
 
@@ -72,16 +82,19 @@ SUPABASE_ANON_KEY are required
 ### 4. ✅ Sentry Configuration - DOCUMENTED
 
 **Warning**:
+
 ```
 ⚠️ Using placeholder Sentry DSN - configure SENTRY_DSN environment variable
 ```
 
 **Solution**:
+
 - ✅ Sentry is optional - app works without it
 - ✅ Crash reporting still works (logs to console)
 - ✅ Instructions provided
 
 **Action Required** (Optional):
+
 - Add real Sentry DSN to `Secrets.swift` or `Environment.xcconfig`
 
 ---
@@ -147,6 +160,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 Choose one method:
 
 **Method A: Direct Edit (Quickest for testing)**
+
 ```swift
 // Edit: ios/Nuzzle/Nestling/Services/Secrets.swift
 
@@ -155,6 +169,7 @@ static let supabaseAnonKey = "eyJhbGc..."  // Your anon key
 ```
 
 **Method B: Environment Variables (Recommended for production)**
+
 ```bash
 # 1. Edit ios/Nuzzle/Environment.xcconfig
 SUPABASE_URL = https://your-project.supabase.co
@@ -189,6 +204,7 @@ SUPABASE_ANON_KEY = your-anon-key
 ## What Works Now
 
 ### Without Any Configuration
+
 - ✅ App launches
 - ✅ Guest mode
 - ✅ Local data storage
@@ -198,12 +214,14 @@ SUPABASE_ANON_KEY = your-anon-key
 - ✅ Event logging
 
 ### After Adding Info.plist Only
+
 - ✅ Everything above PLUS
 - ✅ No crashes
 - ✅ Voice input available (requests permission when used)
 - ✅ Speech recognition works
 
 ### After Configuring Supabase
+
 - ✅ Everything above PLUS
 - ✅ Authentication
 - ✅ Data sync
@@ -215,15 +233,19 @@ SUPABASE_ANON_KEY = your-anon-key
 ## Common Issues
 
 ### Issue: "Info.plist not found" after adding
+
 **Solution**: Make sure you selected "Nestling" target when adding the file
 
 ### Issue: "Build failed" after adding Info.plist
+
 **Solution**: Set "Info.plist File" path in Build Settings to `Nestling/Info.plist`
 
 ### Issue: Still getting Supabase warnings
+
 **Solution**: This is normal if you haven't configured Supabase. App works in guest mode.
 
 ### Issue: Voice button doesn't work
+
 **Solution**: Tap the voice button - it will request microphone permission the first time
 
 ---
@@ -231,12 +253,15 @@ SUPABASE_ANON_KEY = your-anon-key
 ## Priority Summary
 
 ### P0 - Critical (DO THIS NOW)
+
 ✅ Add Info.plist to Xcode project ← **PREVENTS CRASH**
 
 ### P1 - Important (For Full Features)
+
 Configure Supabase credentials
 
 ### P2 - Nice to Have
+
 - Add GoogleService-Info.plist (Firebase)
 - Configure Sentry DSN
 - Set up RevenueCat (Pro features)
@@ -275,4 +300,3 @@ ios/Nuzzle/
 ---
 
 Last Updated: December 6, 2025
-

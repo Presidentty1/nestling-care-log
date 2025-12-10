@@ -25,23 +25,19 @@ class SupabaseClientProvider {
             return
         }
 
-        do {
-            // Create Supabase client with simplified configuration
-            guard let supabaseURL = URL(string: url) else {
-                print("❌ Invalid Supabase URL")
-                return
-            }
-            
-            client = SupabaseClient(
-                supabaseURL: supabaseURL,
-                supabaseKey: key
-            )
-            isConfigured = true
-
-            print("✅ Supabase client configured successfully")
-        } catch {
-            print("❌ Failed to configure Supabase client: \(error.localizedDescription)")
+        // Create Supabase client with simplified configuration
+        guard let supabaseURL = URL(string: url) else {
+            print("❌ Invalid Supabase URL")
+            return
         }
+        
+        client = SupabaseClient(
+            supabaseURL: supabaseURL,
+            supabaseKey: key
+        )
+        isConfigured = true
+
+        print("✅ Supabase client configured successfully")
     }
 
     /// Get the configured Supabase client

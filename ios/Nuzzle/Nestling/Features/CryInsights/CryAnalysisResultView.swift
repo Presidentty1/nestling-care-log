@@ -208,3 +208,4 @@ struct CryAnalysisResultView: View {
         )
     }
 }
+

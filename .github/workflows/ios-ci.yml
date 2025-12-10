@@ -16,16 +16,16 @@ jobs:
   build:
     name: Build iOS App
     runs-on: macos-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Select Xcode version
         run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-      
+
       - name: Check Xcode version
         run: xcodebuild -version
-      
+
       - name: Check if Xcode project exists
         id: check_project
         run: |
@@ -40,11 +40,11 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: List available simulators
         if: steps.check_project.outputs.exists == 'true'
         run: xcrun simctl list devices available
-      
+
       - name: Build iOS project
         if: steps.check_project.outputs.exists == 'true'
         run: |
@@ -56,7 +56,7 @@ jobs:
             clean build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
-      
+
       - name: Build for device (archive)
         if: steps.check_project.outputs.exists == 'true' && github.event_name == 'push'
         run: |
@@ -68,7 +68,7 @@ jobs:
             -archivePath ./build/Nuzzle.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO || echo "Archive skipped (signing required)"
-      
+
       - name: Upload build artifacts
         if: steps.check_project.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
@@ -81,13 +81,13 @@ jobs:
   test:
     name: Run iOS Tests
     runs-on: macos-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Select Xcode version
         run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-      
+
       - name: Check if Xcode project exists
         id: check_project
         run: |
@@ -102,7 +102,7 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Run unit tests
         if: steps.check_project.outputs.exists == 'true'
         run: |
@@ -112,7 +112,7 @@ jobs:
             -scheme ${{ steps.check_project.outputs.scheme }} \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             -only-testing:NuzzleTests/NuzzleTests || echo "Tests skipped"
-      
+
       - name: Run UI tests
         if: steps.check_project.outputs.exists == 'true'
         run: |
@@ -122,7 +122,7 @@ jobs:
             -scheme ${{ steps.check_project.outputs.scheme }} \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             -only-testing:NuzzleUITests/NuzzleUITests || echo "UI tests skipped"
-      
+
       - name: Upload test results
         if: always() && steps.check_project.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
@@ -135,10 +135,10 @@ jobs:
   lint-swift:
     name: Swift Lint
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check Swift files exist
         run: |
           if [ -d "ios/Nuzzle" ]; then
@@ -147,5 +147,3 @@ jobs:
           else
             echo "No Swift files found"
           fi
-
-

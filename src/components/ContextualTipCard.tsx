@@ -22,26 +22,26 @@ export function ContextualTipCard({ tip, onDismiss }: ContextualTipCardProps) {
   };
 
   return (
-    <Card className="bg-primary/5 border-primary/20">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 mt-0.5">
-            <Lightbulb className="w-5 h-5 text-primary" />
+    <Card className='bg-primary/5 border-primary/20'>
+      <CardContent className='p-4'>
+        <div className='flex items-start gap-3'>
+          <div className='flex-shrink-0 mt-0.5'>
+            <Lightbulb className='w-5 h-5 text-primary' />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-sm text-foreground leading-relaxed">
-                <span className="mr-2">{tip.icon}</span>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-start justify-between gap-2'>
+              <p className='text-sm text-foreground leading-relaxed'>
+                <span className='mr-2'>{tip.icon}</span>
                 {tip.content}
               </p>
               {onDismiss && (
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 flex-shrink-0"
+                  variant='ghost'
+                  size='sm'
+                  className='h-6 w-6 p-0 flex-shrink-0'
                   onClick={handleDismiss}
                 >
-                  <X className="h-4 w-4" />
+                  <X className='h-4 w-4' />
                 </Button>
               )}
             </div>

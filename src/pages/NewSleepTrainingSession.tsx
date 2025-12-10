@@ -82,27 +82,27 @@ export default function NewSleepTrainingSession() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-        <div className="container mx-auto p-4">
-          <div className="flex items-center gap-4">
-            <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4" />
+    <div className='min-h-screen bg-background pb-20'>
+      <div className='sticky top-0 z-10 bg-background/95 backdrop-blur border-b'>
+        <div className='container mx-auto p-4'>
+          <div className='flex items-center gap-4'>
+            <Button onClick={() => navigate(-1)} variant='ghost' size='sm'>
+              <ArrowLeft className='h-4 w-4' />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">New Sleep Training</h1>
-              <p className="text-sm text-muted-foreground">Choose a method to get started</p>
+              <h1 className='text-2xl font-bold'>New Sleep Training</h1>
+              <p className='text-sm text-muted-foreground'>Choose a method to get started</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto p-4 max-w-2xl space-y-6">
-        <MedicalDisclaimer variant="sleep" />
+      <div className='container mx-auto p-4 max-w-2xl space-y-6'>
+        <MedicalDisclaimer variant='sleep' />
 
-        <div className="space-y-3">
-          <Label className="text-lg font-semibold">Select Method</Label>
-          {sleepMethods.map((method) => (
+        <div className='space-y-3'>
+          <Label className='text-lg font-semibold'>Select Method</Label>
+          {sleepMethods.map(method => (
             <Card
               key={method.name}
               className={`cursor-pointer transition-colors ${
@@ -111,11 +111,11 @@ export default function NewSleepTrainingSession() {
               onClick={() => setSelectedMethod(method.name)}
             >
               <CardHeader>
-                <div className="flex items-start gap-3">
-                  <Moon className="h-6 w-6 mt-1 flex-shrink-0" />
+                <div className='flex items-start gap-3'>
+                  <Moon className='h-6 w-6 mt-1 flex-shrink-0' />
                   <div>
-                    <CardTitle className="text-lg">{method.name}</CardTitle>
-                    <CardDescription className="mt-1">{method.description}</CardDescription>
+                    <CardTitle className='text-lg'>{method.name}</CardTitle>
+                    <CardDescription className='mt-1'>{method.description}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -124,33 +124,33 @@ export default function NewSleepTrainingSession() {
         </div>
 
         {selectedMethod && (
-          <Card className="p-6 space-y-4">
-            <h3 className="font-semibold">Session Details</h3>
-            
+          <Card className='p-6 space-y-4'>
+            <h3 className='font-semibold'>Session Details</h3>
+
             <div>
               <Label>Start Date</Label>
               <Input
-                type="date"
+                type='date'
                 value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                onChange={e => setFormData({ ...formData, start_date: e.target.value })}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className='grid grid-cols-2 gap-4'>
               <div>
                 <Label>Target Bedtime</Label>
                 <Input
-                  type="time"
+                  type='time'
                   value={formData.target_bedtime}
-                  onChange={(e) => setFormData({ ...formData, target_bedtime: e.target.value })}
+                  onChange={e => setFormData({ ...formData, target_bedtime: e.target.value })}
                 />
               </div>
               <div>
                 <Label>Target Wake Time</Label>
                 <Input
-                  type="time"
+                  type='time'
                   value={formData.target_wake_time}
-                  onChange={(e) => setFormData({ ...formData, target_wake_time: e.target.value })}
+                  onChange={e => setFormData({ ...formData, target_wake_time: e.target.value })}
                 />
               </div>
             </div>
@@ -159,8 +159,8 @@ export default function NewSleepTrainingSession() {
               <Label>Notes (Optional)</Label>
               <Textarea
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Any specific goals or concerns..."
+                onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                placeholder='Any specific goals or concerns...'
                 rows={3}
               />
             </div>
@@ -168,8 +168,8 @@ export default function NewSleepTrainingSession() {
             <Button
               onClick={() => createSessionMutation.mutate()}
               disabled={createSessionMutation.isPending}
-              className="w-full"
-              size="lg"
+              className='w-full'
+              size='lg'
             >
               Start Sleep Training
             </Button>

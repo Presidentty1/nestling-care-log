@@ -9,6 +9,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Setup & First Launch
 
 ### Test 1: First Launch & Onboarding
+
 1. **Delete app** from simulator (if installed)
 2. **Launch app** (⌘R)
 3. **Expected**: Onboarding flow appears
@@ -25,6 +26,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 5. **Expected**: App navigates to Home screen with demo baby
 
 ### Test 2: Data Persistence
+
 1. **Log a feed**: Quick action → Feed → Save
 2. **Force quit app**: Swipe up in app switcher
 3. **Relaunch app**
@@ -35,6 +37,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Home Dashboard
 
 ### Test 3: Summary Cards
+
 1. **Log multiple events**:
    - 2 feeds
    - 3 diapers
@@ -47,6 +50,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - Tummy Time: 1
 
 ### Test 4: Quick Actions
+
 1. **Tap Feed quick action**
    - **Expected**: Feed logged immediately with defaults (120ml)
    - **Verify**: Appears in timeline
@@ -58,6 +62,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Sleep stops, event saved
 
 ### Test 5: Timeline
+
 1. **Scroll timeline**
    - **Expected**: Events appear in chronological order (newest first)
 2. **Swipe right on event**
@@ -72,6 +77,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Event restored
 
 ### Test 6: Search & Filters
+
 1. **Pull down** on Home screen
    - **Expected**: Search bar appears
 2. **Type "feed"**
@@ -86,6 +92,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Event Forms
 
 ### Test 7: Feed Form
+
 1. **Open Feed form** (long-press Feed quick action)
 2. **Fill form**:
    - Type: Bottle
@@ -101,6 +108,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Event updated in timeline
 
 ### Test 8: Sleep Form - Timer Mode
+
 1. **Open Sleep form**
 2. **Verify**: Timer mode selected by default
 3. **Tap Start Timer**
@@ -112,6 +120,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Sleep event saved with correct duration
 
 ### Test 9: Sleep Form - Manual Mode
+
 1. **Open Sleep form**
 2. **Switch to Manual mode**
 3. **Set start time**: 2 hours ago
@@ -120,6 +129,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Sleep event saved with 1-hour duration
 
 ### Test 10: Diaper Form
+
 1. **Open Diaper form**
 2. **Select**: Wet
 3. **Add note**: "Changed"
@@ -127,6 +137,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Diaper event saved
 
 ### Test 11: Tummy Time Form - Timer
+
 1. **Open Tummy Time form**
 2. **Verify**: Timer mode selected
 3. **Tap Start Timer**
@@ -136,6 +147,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Tummy time saved with ~3 minute duration
 
 ### Test 12: Form Validation
+
 1. **Open Feed form**
 2. **Set amount to 5** (below minimum)
 3. **Tap Save**
@@ -149,6 +161,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## History View
 
 ### Test 13: Date Navigation
+
 1. **Navigate to History tab**
 2. **Tap date picker**
 3. **Select yesterday**
@@ -157,6 +170,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Timeline shows today's events
 
 ### Test 14: History Timeline
+
 1. **Log events on different days**:
    - Today: 2 feeds
    - Yesterday: 1 diaper
@@ -167,6 +181,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Shows 2 feed events
 
 ### Test 15: Edit from History
+
 1. **Navigate to History**
 2. **Select a day with events**
 3. **Tap event → Edit**
@@ -179,9 +194,10 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Predictions
 
 ### Test 16: Predictions Gating
+
 1. **Navigate to Labs tab**
 2. **Tap Smart Predictions**
-3. **If AI disabled**: 
+3. **If AI disabled**:
    - **Expected**: "Enable AI" message shown
 4. **Navigate to Settings → AI Data Sharing**
 5. **Enable AI Data Sharing**
@@ -189,6 +205,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Generate buttons enabled
 
 ### Test 17: Generate Predictions
+
 1. **Ensure AI enabled** (Settings → AI Data Sharing)
 2. **Navigate to Predictions**
 3. **Tap "Generate Next Nap"**
@@ -202,6 +219,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Settings
 
 ### Test 18: Units Toggle
+
 1. **Navigate to Settings**
 2. **Find Units setting**
 3. **Toggle between ml and oz**
@@ -211,6 +229,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Unit preference persisted
 
 ### Test 19: AI Data Sharing Toggle
+
 1. **Navigate to Settings → AI Data Sharing**
 2. **Toggle off**
    - **Expected**: Predictions view shows "Enable AI" message
@@ -218,6 +237,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Predictions view enables generate buttons
 
 ### Test 20: Notification Settings
+
 1. **Navigate to Settings → Notification Settings**
 2. **Toggle Feed Reminder on**
 3. **Set hours to 3**
@@ -227,6 +247,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Notification appears (if permission granted)
 
 ### Test 21: Privacy & Data - Export
+
 1. **Navigate to Settings → Privacy & Data**
 2. **Tap Export CSV**
    - **Expected**: CSV file generated, share sheet opens
@@ -236,6 +257,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: CSV contains event data
 
 ### Test 22: Privacy & Data - Delete All
+
 1. **Navigate to Settings → Privacy & Data**
 2. **Scroll to Delete All Data**
 3. **Tap Delete All**
@@ -245,6 +267,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: All data deleted, app reseeds mock data
 
 ### Test 23: Manage Babies
+
 1. **Navigate to Settings → Manage Babies**
 2. **Tap Add Baby**
 3. **Fill form**:
@@ -262,12 +285,14 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Edge Cases
 
 ### Test 24: No Events Today
+
 1. **Delete all today's events**
 2. **Navigate to Home**
    - **Expected**: Empty state message appears
    - **Expected**: Summary cards show zeros
 
 ### Test 25: Multiple Babies
+
 1. **Add second baby** (Settings → Manage Babies)
 2. **Log events for Baby 1**
 3. **Switch to Baby 2** (baby selector)
@@ -278,6 +303,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Baby 1's events still present
 
 ### Test 26: App Kill During Active Sleep
+
 1. **Start sleep timer**
 2. **Force quit app** (swipe up in app switcher)
 3. **Relaunch app**
@@ -285,6 +311,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Timer continues from where it left off
 
 ### Test 27: Form Double-Submission Prevention
+
 1. **Open Feed form**
 2. **Fill form**
 3. **Tap Save rapidly 3 times**
@@ -292,6 +319,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Save button disabled while saving
 
 ### Test 28: Undo Window Expiry
+
 1. **Delete an event**
 2. **Wait 8 seconds** (past undo window)
 3. **Expected**: Undo toast disappears
@@ -302,6 +330,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Accessibility
 
 ### Test 29: VoiceOver
+
 1. **Enable VoiceOver** (Settings → Accessibility → VoiceOver)
 2. **Navigate Home screen**
 3. **Swipe through elements**
@@ -313,6 +342,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Labels and hints read correctly
 
 ### Test 30: Dynamic Type
+
 1. **Settings → Accessibility → Display & Text Size → Larger Text**
 2. **Set to largest size**
 3. **Navigate Home screen**
@@ -320,6 +350,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: Layout remains usable
 
 ### Test 31: Dark Mode
+
 1. **Settings → Display & Brightness → Dark**
 2. **Navigate app**
    - **Expected**: All screens render correctly
@@ -331,6 +362,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
 ## Performance
 
 ### Test 32: Launch Time
+
 1. **Force quit app**
 2. **Launch app** (⌘R)
 3. **Measure time** to Home screen visible
@@ -338,6 +370,7 @@ Run these tests in the iOS Simulator after building the project in Xcode.
    - **Expected**: App feels snappy
 
 ### Test 33: Timeline Scrolling
+
 1. **Log 50+ events** (use quick actions)
 2. **Navigate to Home**
 3. **Scroll timeline rapidly**
@@ -395,8 +428,8 @@ iOS Version: __________
 [ ] Test 33: Timeline Scrolling
 
 Issues Found:
-- 
+-
 
 Notes:
-- 
+-
 ```

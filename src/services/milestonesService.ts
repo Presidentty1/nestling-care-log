@@ -14,11 +14,7 @@ class MilestonesService {
   }
 
   async getMilestone(id: string): Promise<Milestone | null> {
-    const { data, error } = await supabase
-      .from('milestones')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('milestones').select('*').eq('id', id).single();
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
@@ -27,7 +23,9 @@ class MilestonesService {
     return data as Milestone;
   }
 
-  async createMilestone(milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>): Promise<Milestone> {
+  async createMilestone(
+    milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Milestone> {
     const { data, error } = await supabase
       .from('milestones')
       .insert(milestone)
@@ -51,15 +49,11 @@ class MilestonesService {
   }
 
   async deleteMilestone(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('milestones')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('milestones').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const milestonesService = new MilestonesService();
-
 

@@ -9,16 +9,19 @@ Nestling ("we", "our", "us") is committed to protecting your privacy. This polic
 ## Data Collection
 
 ### Local Data
+
 - All baby tracking data (feeds, sleep, diapers, etc.) is stored locally on your device
 - We do not access, transmit, or store your data on external servers unless you explicitly enable cloud sync
 - Data is stored using iOS Core Data and can be exported at any time
 
 ### Optional Cloud Sync
+
 - If you enable cloud sync, data is encrypted and stored securely
 - You can disable cloud sync at any time
 - When disabled, all data remains local
 
 ### Analytics
+
 - We use local analytics only (no third-party services)
 - No personally identifiable information is collected
 - Analytics help us improve the app experience
@@ -26,6 +29,7 @@ Nestling ("we", "our", "us") is committed to protecting your privacy. This polic
 ## Data Usage
 
 We use your data only to:
+
 - Provide app functionality (tracking, predictions)
 - Improve app features (with your consent)
 - Never sell or share data with third parties
@@ -47,5 +51,3 @@ We may update this policy. Changes will be posted here with an updated "Last Upd
 ## Contact
 
 For privacy questions, contact: [support@nestling.app]
-
-

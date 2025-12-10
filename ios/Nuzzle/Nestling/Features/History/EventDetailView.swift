@@ -258,3 +258,4 @@ struct EventDetailView: View {
         onClose: {}
     )
 }
+

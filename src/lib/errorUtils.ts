@@ -84,7 +84,11 @@ export const errorUtils = {
     }
 
     // Don't retry validation errors
-    if (error.status === 400 || error.message?.includes('invalid') || error.message?.includes('required')) {
+    if (
+      error.status === 400 ||
+      error.message?.includes('invalid') ||
+      error.message?.includes('required')
+    ) {
       return false;
     }
 
@@ -99,7 +103,11 @@ export const errorUtils = {
     }
 
     // Retry network and timeout errors
-    if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('timeout')) {
+    if (
+      error.message?.includes('network') ||
+      error.message?.includes('fetch') ||
+      error.message?.includes('timeout')
+    ) {
       return true;
     }
 
@@ -119,18 +127,22 @@ export const errorUtils = {
     const shouldRetry = errorUtils.shouldRetry(error);
 
     // Log the error for debugging
-    logger.error('Error processed', {
-      error: error.message || error,
-      context,
-      shouldRetry,
-      userMessage
-    }, 'errorUtils');
+    logger.error(
+      'Error processed',
+      {
+        error: error.message || error,
+        context,
+        shouldRetry,
+        userMessage,
+      },
+      'errorUtils'
+    );
 
     return {
       message: error.message || 'Unknown error',
       userMessage,
       shouldRetry,
-      context
+      context,
     };
   },
 
@@ -143,9 +155,5 @@ export const errorUtils = {
       const message = customMessage || errorResult.userMessage;
       toast.error(message);
     };
-  }
+  },
 };
-
-
-
-

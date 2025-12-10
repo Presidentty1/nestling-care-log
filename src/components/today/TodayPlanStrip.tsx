@@ -21,9 +21,8 @@ export function TodayPlanStrip({ events, napWindow, summary }: TodayPlanStripPro
 
   // Calculate time until next nap window
   const now = new Date();
-  const timeUntilNextNap = napWindow && napWindow.start > now
-    ? differenceInMinutes(napWindow.start, now)
-    : null;
+  const timeUntilNextNap =
+    napWindow && napWindow.start > now ? differenceInMinutes(napWindow.start, now) : null;
 
   const formatNapWindow = () => {
     if (!napWindow) return null;
@@ -40,35 +39,31 @@ export function TodayPlanStrip({ events, napWindow, summary }: TodayPlanStripPro
   };
 
   return (
-    <div className="bg-background border border-border rounded-lg p-3 mb-4">
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Timer className="h-4 w-4" />
-          <span className="font-medium text-foreground">Now:</span>
+    <div className='bg-background border border-border rounded-lg p-3 mb-4'>
+      <div className='flex items-center gap-3 text-sm text-muted-foreground'>
+        <div className='flex items-center gap-1'>
+          <Timer className='h-4 w-4' />
+          <span className='font-medium text-foreground'>Now:</span>
         </div>
 
         {/* Last feed */}
         {timeSinceLastFeed !== null && (
-          <span className="text-event-feed">
-            last feed {formatTime(timeSinceLastFeed)} ago
-          </span>
+          <span className='text-event-feed'>last feed {formatTime(timeSinceLastFeed)} ago</span>
         )}
 
         {/* Next nap window */}
         {napWindow && (
-          <span className="text-event-sleep">
+          <span className='text-event-sleep'>
             next nap {formatNapWindow()}
             {timeUntilNextNap !== null && timeUntilNextNap > 0 && (
-              <span className="ml-1 text-xs">
-                (≈ in {formatTime(timeUntilNextNap)})
-              </span>
+              <span className='ml-1 text-xs'>(≈ in {formatTime(timeUntilNextNap)})</span>
             )}
           </span>
         )}
 
         {/* Diapers so far today */}
         {summary && summary.diaperTotal > 0 && (
-          <span className="text-event-diaper">
+          <span className='text-event-diaper'>
             {summary.diaperTotal} diaper{summary.diaperTotal !== 1 ? 's' : ''} so far today
           </span>
         )}

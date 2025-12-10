@@ -54,17 +54,17 @@ export function FloatingActionButtonRadial({ className }: FloatingActionButtonRa
         {/* Backdrop overlay */}
         {isExpanded && (
           <div
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm -z-10"
+            className='fixed inset-0 bg-background/80 backdrop-blur-sm -z-10'
             onClick={handleCancel}
-            aria-hidden="true"
+            aria-hidden='true'
           />
         )}
 
         {/* Radial menu items */}
-        <div className="relative">
+        <div className='relative'>
           {/* Voice Log button */}
           <Button
-            size="lg"
+            size='lg'
             onClick={handleVoiceClick}
             className={cn(
               'absolute rounded-full w-12 h-12 shadow-lg transition-all duration-300',
@@ -73,15 +73,15 @@ export function FloatingActionButtonRadial({ className }: FloatingActionButtonRa
                 ? 'opacity-100 translate-y-[-80px] translate-x-0 scale-100'
                 : 'opacity-0 translate-y-0 scale-50 pointer-events-none'
             )}
-            aria-label="Voice logging (Beta)"
+            aria-label='Voice logging (Beta)'
           >
-            <Mic className="h-5 w-5" />
+            <Mic className='h-5 w-5' />
           </Button>
 
           {/* Main FAB */}
           <Button
             onClick={handleMainClick}
-            size="lg"
+            size='lg'
             className={cn(
               'rounded-full w-14 h-14 shadow-lg transition-all duration-300',
               isExpanded ? 'rotate-45 scale-110' : 'rotate-0 scale-100'
@@ -89,11 +89,7 @@ export function FloatingActionButtonRadial({ className }: FloatingActionButtonRa
             aria-label={isExpanded ? 'Close menu' : 'Open voice menu'}
             aria-expanded={isExpanded}
           >
-            {isExpanded ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Mic className="h-5 w-5" />
-            )}
+            {isExpanded ? <X className='h-5 w-5' /> : <Mic className='h-5 w-5' />}
           </Button>
         </div>
 

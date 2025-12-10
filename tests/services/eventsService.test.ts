@@ -222,9 +222,7 @@ describe('EventsService', () => {
         error: null,
       });
 
-      await expect(
-        eventsService.updateEvent('event-1', { side: 'right' })
-      ).rejects.toThrow();
+      await expect(eventsService.updateEvent('event-1', { side: 'right' })).rejects.toThrow();
     });
   });
 
@@ -285,4 +283,3 @@ describe('EventsService', () => {
     });
   });
 });
-

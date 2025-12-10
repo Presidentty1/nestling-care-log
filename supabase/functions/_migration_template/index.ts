@@ -7,24 +7,24 @@
 // AFTER: Using OpenAI direct (for production outside Lovable)
 // =============================================================================
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // =============================================================================
 // OPTION 1: LOVABLE AI (Current - works in Lovable environment)
 // =============================================================================
 
 const lovableAIHandler = async (prompt: string) => {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  
-  const response = await fetch("https://api.lovable.app/v1/ai/generate", {
-    method: "POST",
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+
+  const response = await fetch('https://api.lovable.app/v1/ai/generate', {
+    method: 'POST',
     headers: {
-      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: 'google/gemini-2.5-flash',
       prompt,
       max_tokens: 500,
     }),
@@ -39,23 +39,23 @@ const lovableAIHandler = async (prompt: string) => {
 // =============================================================================
 
 const openAIHandler = async (prompt: string) => {
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-  
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
+  const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
     headers: {
-      "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: "gpt-4-turbo",
+      model: 'gpt-4-turbo',
       messages: [
         {
-          role: "system",
-          content: "You are a helpful baby care assistant.",
+          role: 'system',
+          content: 'You are a helpful baby care assistant.',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -72,14 +72,14 @@ const openAIHandler = async (prompt: string) => {
 // =============================================================================
 
 const googleAIHandler = async (prompt: string) => {
-  const GOOGLE_AI_API_KEY = Deno.env.get("GOOGLE_AI_API_KEY");
-  
+  const GOOGLE_AI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY');
+
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GOOGLE_AI_API_KEY}`,
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         contents: [
@@ -103,13 +103,13 @@ const googleAIHandler = async (prompt: string) => {
 // MAIN HANDLER (Switch between providers)
 // =============================================================================
 
-serve(async (req) => {
+serve(async req => {
   // CORS headers
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
       },
     });
   }
@@ -119,39 +119,36 @@ serve(async (req) => {
 
     // Choose AI provider based on environment
     let response: string;
-    
-    if (Deno.env.get("LOVABLE_API_KEY")) {
+
+    if (Deno.env.get('LOVABLE_API_KEY')) {
       // Use Lovable AI (current)
       response = await lovableAIHandler(prompt);
-    } else if (Deno.env.get("OPENAI_API_KEY")) {
+    } else if (Deno.env.get('OPENAI_API_KEY')) {
       // Use OpenAI (production)
       response = await openAIHandler(prompt);
-    } else if (Deno.env.get("GOOGLE_AI_API_KEY")) {
+    } else if (Deno.env.get('GOOGLE_AI_API_KEY')) {
       // Use Google AI (alternative)
       response = await googleAIHandler(prompt);
     } else {
-      throw new Error("No AI provider configured");
+      throw new Error('No AI provider configured');
     }
 
     return new Response(JSON.stringify({ response }), {
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
-    console.error("Error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    console.error('Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 });
 

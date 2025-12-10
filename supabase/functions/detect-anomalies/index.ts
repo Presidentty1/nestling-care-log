@@ -1,19 +1,19 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { babyId } = await req.json();
-    
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -39,8 +39,14 @@ serve(async (req) => {
 
     // Check feeding frequency
     const feeds = events.filter(e => e.type === 'feed');
-    const recentFeeds = feeds.filter(f => new Date(f.start_time) >= new Date(Date.now() - 2 * 24 * 60 * 60 * 1000));
-    const olderFeeds = feeds.filter(f => new Date(f.start_time) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) && new Date(f.start_time) >= fourteenDaysAgo);
+    const recentFeeds = feeds.filter(
+      f => new Date(f.start_time) >= new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+    );
+    const olderFeeds = feeds.filter(
+      f =>
+        new Date(f.start_time) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) &&
+        new Date(f.start_time) >= fourteenDaysAgo
+    );
 
     const recentFeedRate = recentFeeds.length / 2; // per day
     const olderFeedRate = olderFeeds.length / 12; // per day
@@ -53,30 +59,39 @@ serve(async (req) => {
         description: `Feeding frequency has decreased from ${olderFeedRate.toFixed(1)} to ${recentFeedRate.toFixed(1)} feeds per day`,
         metrics: { recentFeedRate, olderFeedRate },
         suggested_actions: [
-          'Monitor baby\'s weight',
+          "Monitor baby's weight",
           'Check for signs of dehydration',
-          'Consider consulting pediatrician if persists'
-        ]
+          'Consider consulting pediatrician if persists',
+        ],
       });
     }
 
     // Check sleep duration
     const sleeps = events.filter(e => e.type === 'sleep' && e.end_time);
-    const recentSleeps = sleeps.filter(s => new Date(s.start_time) >= new Date(Date.now() - 2 * 24 * 60 * 60 * 1000));
-    
-    if (recentSleeps.length > 0) {
-      const avgRecentSleep = recentSleeps.reduce((acc, s) => {
-        const duration = (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
-        return acc + duration;
-      }, 0) / recentSleeps.length;
+    const recentSleeps = sleeps.filter(
+      s => new Date(s.start_time) >= new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+    );
 
-      const olderSleeps = sleeps.filter(s => new Date(s.start_time) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000));
-      
-      if (olderSleeps.length > 0) {
-        const avgOlderSleep = olderSleeps.reduce((acc, s) => {
-          const duration = (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
+    if (recentSleeps.length > 0) {
+      const avgRecentSleep =
+        recentSleeps.reduce((acc, s) => {
+          const duration =
+            (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) / (1000 * 60 * 60);
           return acc + duration;
-        }, 0) / olderSleeps.length;
+        }, 0) / recentSleeps.length;
+
+      const olderSleeps = sleeps.filter(
+        s => new Date(s.start_time) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      );
+
+      if (olderSleeps.length > 0) {
+        const avgOlderSleep =
+          olderSleeps.reduce((acc, s) => {
+            const duration =
+              (new Date(s.end_time).getTime() - new Date(s.start_time).getTime()) /
+              (1000 * 60 * 60);
+            return acc + duration;
+          }, 0) / olderSleeps.length;
 
         if (avgRecentSleep < avgOlderSleep * 0.65) {
           anomalies.push({
@@ -88,8 +103,8 @@ serve(async (req) => {
             suggested_actions: [
               'Check for signs of sleep regression',
               'Review sleep environment',
-              'Monitor for illness symptoms'
-            ]
+              'Monitor for illness symptoms',
+            ],
           });
         }
       }
@@ -97,22 +112,26 @@ serve(async (req) => {
 
     // Save anomalies to database
     for (const anomaly of anomalies) {
-      await supabaseClient
-        .from('anomalies')
-        .insert(anomaly);
+      await supabaseClient.from('anomalies').insert(anomaly);
     }
 
-    return new Response(JSON.stringify({ 
-      anomalies,
-      detectedAt: new Date().toISOString()
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        anomalies,
+        detectedAt: new Date().toISOString(),
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("Error in detect-anomalies:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in detect-anomalies:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

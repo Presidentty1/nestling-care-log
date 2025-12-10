@@ -7,12 +7,14 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 ## Completed Phases
 
 ### ✅ Phase 1: Xcode Project & Targets
+
 - Created project structure with 5 targets (App, Tests, UITests, Widgets, Intents)
 - Configured Info.plist files and entitlements
 - Set up App Groups for shared storage
 - Created `XCODE_SETUP.md` with detailed setup instructions
 
 ### ✅ Phase 2: Core Data Migration
+
 - Implemented CoreDataDataStore with full DataStore protocol conformance
 - Created Core Data model with all entities (Baby, Event, AppSettings, PredictionCache, LastUsedValues)
 - Added DataStoreSelector for switching implementations
@@ -20,18 +22,21 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Added migration UI in Settings
 
 ### ✅ Phase 3: Onboarding
+
 - Multi-step onboarding flow (Welcome, Baby Setup, Preferences, AI Consent, Notifications Intro)
 - OnboardingCoordinator for state management
 - OnboardingService for persistence
 - Reset onboarding debug option
 
 ### ✅ Phase 4: Predictions Engine
+
 - WakeWindowCalculator with age-based wake windows
 - FeedSpacingCalculator for feed interval predictions
 - PredictionsEngine for on-device predictions
 - No networking required - all calculations are local
 
 ### ✅ Phase 5: Cry Insights
+
 - AudioRecorderService with AVAudioSession
 - CryClassifier with rule-based classification (NO ML)
 - CryRecorderView with recording UI
@@ -39,18 +44,21 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Prominent medical disclaimers
 
 ### ✅ Phase 6: Widgets & Live Activities
+
 - WidgetKit widgets (Next Nap, Next Feed, Today Summary)
 - WidgetBundle for all widgets
 - Timeline providers with reload policies
 - LiveActivityManager placeholder for sleep tracking
 
 ### ✅ Phase 7: App Intents
+
 - LogFeedIntent, StartSleepIntent, StopSleepIntent
 - LogDiaperIntent, LogTummyTimeIntent
 - AppShortcuts with Siri phrases
 - Intent handlers for quick logging
 
 ### ✅ Phase 8: Local Notifications
+
 - NotificationScheduler with UNUserNotificationCenter
 - NotificationPermissionManager for permission handling
 - Feed reminders, nap window alerts, diaper reminders
@@ -58,12 +66,14 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Test notification button
 
 ### ✅ Phase 9: Deep Links
+
 - DeepLinkRouter for URL parsing
 - NavigationCoordinator for routing
 - Custom URL scheme: `nestling://`
 - Support for logging actions and opening views
 
 ### ✅ Phase 10: Privacy & Security
+
 - AuthenticationManager with Face ID / Touch ID
 - PrivacyManager for app privacy settings
 - App privacy blur in app switcher
@@ -71,6 +81,7 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - PrivacySettingsView
 
 ### ✅ Phase 11: Exports & Backups
+
 - PDFExportService for formatted reports
 - BackupService for complete backups (ZIP with JSON + PDF)
 - Enhanced CSV export
@@ -78,6 +89,7 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Restore from backup functionality
 
 ### ✅ Phase 12: Achievements
+
 - Achievement model with unlock tracking
 - StreakService for streak calculations
 - AchievementService for checking achievements
@@ -85,30 +97,35 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Celebratory UI (respects Reduce Motion)
 
 ### ✅ Phase 13: Performance
+
 - PerformanceLogger with OSLog categories
 - SignpostLogger for performance measurement
 - Background context optimization
 - Memory audit recommendations
 
 ### ✅ Phase 14: UI Tests
+
 - OnboardingFlowTests
 - QuickActionsTests
 - PredictionsTests
 - ExportTests with screenshot attachments
 
 ### ✅ Phase 15: Localization
+
 - Expanded English (en) strings
 - Added Spanish (es) support
 - Unit conversion support (ml ↔ oz)
 - Date/time localization
 
 ### ✅ Phase 16: Branding
+
 - App icon asset catalog structure
 - Accent color definition
 - AboutView with version info
 - Links to privacy policy, terms, support
 
 ### ✅ Phase 17: Documentation
+
 - Updated IOS_ARCHITECTURE.md
 - Created RELEASE_NOTES.md
 - Created OPERATIONS_RUNBOOK.md
@@ -118,6 +135,7 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 ## File Summary
 
 ### New Files Created: ~120 files
+
 - Core Data models and services
 - Onboarding views and coordinator
 - Predictions engine components
@@ -132,6 +150,7 @@ This sprint transformed the Nestling iOS app from a polished MVP into an App Sto
 - Documentation files
 
 ### Modified Files: ~50 files
+
 - Updated existing views for new features
 - Enhanced DataStore implementations
 - Updated AppSettings model
@@ -168,5 +187,3 @@ See `RELEASE_NOTES.md` for a complete demo script covering all major features.
 4. Run UI tests: `xcodebuild test -scheme NestlingUITests`
 5. Follow `TEST_PLAN.md` for manual QA
 6. Use `OPERATIONS_RUNBOOK.md` for debugging and operations
-
-

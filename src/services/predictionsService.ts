@@ -49,4 +49,3 @@ class PredictionsService {
 
 export const predictionsService = new PredictionsService();
 
-

@@ -1,6 +1,7 @@
 # Adding New Swift Files to Xcode Project
 
 ## Problem
+
 The new files we created today exist in the file system but are NOT added to the Xcode project, so they're not being compiled:
 
 1. **InitialStateView.swift** - `ios/Sources/Features/Onboarding/InitialStateView.swift`
@@ -10,6 +11,7 @@ The new files we created today exist in the file system but are NOT added to the
 ## Solution: Add Files in Xcode
 
 ### Method 1: Drag and Drop (Easiest)
+
 1. Open Xcode with the project
 2. In the Project Navigator (left sidebar), navigate to:
    - `Sources/Features/Onboarding/` folder
@@ -24,6 +26,7 @@ The new files we created today exist in the file system but are NOT added to the
    - Click "Finish"
 
 ### Method 2: Add Files Menu
+
 1. In Xcode, right-click on the `Sources/Features/Onboarding/` folder
 2. Select "Add Files to Nuzzle..."
 3. Navigate to `ios/Sources/Features/Onboarding/InitialStateView.swift`
@@ -34,12 +37,15 @@ The new files we created today exist in the file system but are NOT added to the
 6. Repeat for `GuidanceStripView.swift` and `ExampleDataBanner.swift` in the `Home` folder
 
 ### After Adding Files
+
 1. Clean Build Folder: `Cmd + Shift + K`
 2. Build: `Cmd + B`
 3. Verify the new features appear in the app
 
 ## Verification
+
 After adding and building, you should see:
+
 - ✅ Initial state question in onboarding (step 3 of 4)
 - ✅ Three-segment guidance strip on home screen (Now / Next Nap / Next Feed)
 - ✅ Example data banner when example timeline is shown

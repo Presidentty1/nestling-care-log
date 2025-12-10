@@ -195,3 +195,4 @@ struct NapPredictionCard: View {
     .padding()
     .background(Color.background)
 }
+

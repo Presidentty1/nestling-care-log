@@ -3,7 +3,7 @@ import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
 export function formatDuration(durationMin: number): string {
   const hours = Math.floor(durationMin / 60);
   const mins = durationMin % 60;
-  
+
   if (hours > 0) {
     return `${hours}h ${mins}m`;
   }

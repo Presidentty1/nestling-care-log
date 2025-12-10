@@ -40,3 +40,4 @@ struct AIMessage: Identifiable, Codable {
         self.containsRedFlag = containsRedFlag
     }
 }
+

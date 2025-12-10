@@ -1,15 +1,19 @@
 # ADR 005: Cross-Platform Consistency Patterns
 
 ## Status
+
 Accepted
 
 ## Context
+
 The application runs on both web (React) and mobile (iOS) platforms, requiring consistent behavior, naming conventions, and architectural patterns across platforms.
 
 ## Decision
+
 We established consistent patterns and conventions across React and SwiftUI platforms while respecting each platform's idioms.
 
 ## Rationale
+
 - **User Experience**: Consistent behavior across platforms reduces confusion
 - **Developer Experience**: Shared patterns make it easier to work across platforms
 - **Maintainability**: Consistent naming and structure simplifies codebase navigation
@@ -17,6 +21,7 @@ We established consistent patterns and conventions across React and SwiftUI plat
 - **Platform Appropriateness**: Respect each platform's conventions and capabilities
 
 ## Consequences
+
 - **Positive**:
   - Predictable user experience across platforms
   - Easier onboarding for developers working on multiple platforms
@@ -29,6 +34,7 @@ We established consistent patterns and conventions across React and SwiftUI plat
   - Additional complexity in maintaining consistency
 
 ## Implementation
+
 - **Naming Conventions**: Consistent naming for features, components, and services
 - **Error Handling**: Similar error handling patterns with platform-appropriate implementations
 - **State Management**: MVVM (iOS) and React Query (Web) with similar data flow concepts
@@ -37,6 +43,7 @@ We established consistent patterns and conventions across React and SwiftUI plat
 - **UI Patterns**: Consistent interaction patterns adapted to each platform
 
 ## Key Consistency Rules
+
 - Feature names match between platforms (e.g., `HomeView` / `Home.tsx`)
 - Service methods have consistent signatures
 - Error types and handling patterns are similar
@@ -44,16 +51,14 @@ We established consistent patterns and conventions across React and SwiftUI plat
 - Navigation patterns follow platform conventions
 
 ## Alternatives Considered
+
 - **Complete Code Sharing**: Not feasible due to UI and platform differences
 - **Platform-Specific Patterns Only**: Would lead to inconsistent user experience
 - **Web-First Approach**: Would compromise iOS user experience
 - **iOS-First Approach**: Would compromise web user experience
 
 ## Related Decisions
+
 - ADR 001: MVVM Pattern for SwiftUI Architecture
 - ADR 002: React Query for State Management
 - ADR 007: Capacitor for Cross-Platform Mobile
-
-
-
-

@@ -32,15 +32,17 @@ export function usePerformance(componentName: string, trackMetrics = false) {
     }
 
     // Track performance metrics if enabled and component is slow
-    if (trackMetrics && renderTime > 16) { // 16ms = 60fps
+    if (trackMetrics && renderTime > 16) {
+      // 16ms = 60fps
       track('component_slow_render', {
         component: componentName,
         render_time: Math.round(renderTime),
-        render_count: renderCount.current
+        render_count: renderCount.current,
       });
     }
 
-    if (renderTime > 16) { // More than one frame (16ms at 60fps)
+    if (renderTime > 16) {
+      // More than one frame (16ms at 60fps)
       console.warn(`[Performance] ${componentName} render took ${renderTime.toFixed(2)}ms`);
     }
   });
@@ -52,7 +54,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
       return {
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,
-        limit: memory.jsHeapSizeLimit
+        limit: memory.jsHeapSizeLimit,
       };
     }
     return null;
@@ -68,7 +70,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
       averageRenderTime: averageTime,
       totalRenderTime: totalTime,
       lastRenderTime: renderTimes.current[renderTimes.current.length - 1] || 0,
-      memoryUsage: memoryUsage?.used
+      memoryUsage: memoryUsage?.used,
     };
   }, [getMemoryUsage]);
 
@@ -80,7 +82,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
         track('component_unmount', {
           component: componentName,
           total_renders: metrics.renderCount,
-          avg_render_time: Math.round(metrics.averageRenderTime)
+          avg_render_time: Math.round(metrics.averageRenderTime),
         });
       }
     };
@@ -89,7 +91,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
   return {
     renderCount: renderCount.current,
     getMetrics,
-    getMemoryUsage
+    getMemoryUsage,
   };
 }
 
@@ -110,7 +112,7 @@ export function useRoutePerformance(routeName: string) {
       track('route_performance', {
         route: routeName,
         load_time: Math.round(loadTime),
-        interactions: interactionCount.current
+        interactions: interactionCount.current,
       });
     };
 
@@ -147,10 +149,12 @@ export function useMemoryLeakDetection(componentName: string) {
     renderCount.current += 1;
 
     if (renderCount.current > warningThreshold) {
-      console.warn(`${componentName} has rendered ${renderCount.current} times. Possible memory leak.`);
+      console.warn(
+        `${componentName} has rendered ${renderCount.current} times. Possible memory leak.`
+      );
       track('potential_memory_leak', {
         component: componentName,
-        render_count: renderCount.current
+        render_count: renderCount.current,
       });
     }
   });
@@ -164,14 +168,14 @@ export function useMemoryLeakDetection(componentName: string) {
 export function reportWebVitals() {
   if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
     // Largest Contentful Paint
-    const lcpObserver = new PerformanceObserver((list) => {
+    const lcpObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1];
       const lcp = lastEntry.startTime;
 
       track('web_vitals_lcp', {
         value: Math.round(lcp),
-        rating: lcp > 4000 ? 'poor' : lcp > 2500 ? 'needs-improvement' : 'good'
+        rating: lcp > 4000 ? 'poor' : lcp > 2500 ? 'needs-improvement' : 'good',
       });
 
       console.log('[WebVitals] LCP:', lcp.toFixed(2), 'ms');
@@ -184,14 +188,14 @@ export function reportWebVitals() {
     }
 
     // First Input Delay
-    const fidObserver = new PerformanceObserver((list) => {
+    const fidObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
       entries.forEach((entry: any) => {
         const fid = entry.processingStart - entry.startTime;
 
         track('web_vitals_fid', {
           value: Math.round(fid),
-          rating: fid > 300 ? 'poor' : fid > 100 ? 'needs-improvement' : 'good'
+          rating: fid > 300 ? 'poor' : fid > 100 ? 'needs-improvement' : 'good',
         });
 
         console.log('[WebVitals] FID:', fid.toFixed(2), 'ms');
@@ -206,7 +210,7 @@ export function reportWebVitals() {
 
     // Cumulative Layout Shift
     let clsValue = 0;
-    const clsObserver = new PerformanceObserver((list) => {
+    const clsObserver = new PerformanceObserver(list => {
       for (const entry of list.getEntries() as any[]) {
         if (!entry.hadRecentInput) {
           clsValue += entry.value;
@@ -215,7 +219,7 @@ export function reportWebVitals() {
 
       track('web_vitals_cls', {
         value: Math.round(clsValue * 1000) / 1000, // Round to 3 decimal places
-        rating: clsValue > 0.25 ? 'poor' : clsValue > 0.1 ? 'needs-improvement' : 'good'
+        rating: clsValue > 0.25 ? 'poor' : clsValue > 0.1 ? 'needs-improvement' : 'good',
       });
 
       console.log('[WebVitals] CLS:', clsValue.toFixed(4));

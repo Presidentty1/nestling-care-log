@@ -111,21 +111,25 @@ Task { [weak self] in
 ## Performance Budgets
 
 ### Launch Time
+
 - **Target**: < 400ms to first content
 - **Current**: Measured with signposts
 - **Optimization**: Lazy initialization, background loading
 
 ### Scrolling Performance
+
 - **Target**: 60 FPS with 100+ events
 - **Current**: Uses LazyVStack
 - **Optimization**: Virtualization, view recycling
 
 ### Memory Usage
+
 - **Target**: < 50MB for typical usage
 - **Current**: Monitored via Instruments
 - **Optimization**: Release unused data, cache limits
 
 ### Battery Impact
+
 - **Target**: Minimal background activity
 - **Current**: No continuous background tasks
 - **Optimization**: Efficient timers, batch operations
@@ -193,7 +197,7 @@ func testTimelinePerformance() {
 func testScrollPerformance() {
     let app = XCUIApplication()
     app.launch()
-    
+
     let timeline = app.scrollViews.firstMatch
     measure {
         timeline.swipeUp()
@@ -209,5 +213,3 @@ func testScrollPerformance() {
 3. **Incremental Sync**: Only sync changed data
 4. **Background Refresh**: Refresh data in background
 5. **Predictive Prefetching**: ML-based prefetching
-
-

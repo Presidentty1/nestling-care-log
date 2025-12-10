@@ -89,12 +89,13 @@ src/
 ### Development Process
 
 1. **Write tests first** (TDD approach)
+
    ```typescript
    // Write failing test
    test('should format duration', () => {
      expect(formatDuration(90)).toBe('1h 30m');
    });
-   
+
    // Implement feature
    export function formatDuration(min: number): string {
      // implementation
@@ -130,6 +131,7 @@ test: add E2E tests for history page
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -143,6 +145,7 @@ Types:
 ### Unit Tests
 
 Required for:
+
 - Utility functions
 - Data transformations
 - Business logic
@@ -155,7 +158,7 @@ describe('formatDuration', () => {
   it('formats hours and minutes', () => {
     expect(formatDuration(90)).toBe('1h 30m');
   });
-  
+
   it('formats minutes only', () => {
     expect(formatDuration(45)).toBe('45m');
   });
@@ -165,6 +168,7 @@ describe('formatDuration', () => {
 ### E2E Tests
 
 Required for:
+
 - User flows
 - Critical features
 - Bug fixes
@@ -192,12 +196,14 @@ All contributions must maintain WCAG 2.1 AA compliance:
 ## Performance
 
 Target metrics:
+
 - LCP < 2.5s
 - FID < 100ms
 - CLS < 0.1
 - Time to Interactive < 3.5s
 
 Use performance hooks:
+
 ```typescript
 import { usePerformance } from '@/hooks/usePerformance';
 
@@ -210,6 +216,7 @@ function MyComponent() {
 ## Pull Request Process
 
 1. **Update your branch**
+
    ```bash
    git checkout main
    git pull upstream main
@@ -218,6 +225,7 @@ function MyComponent() {
    ```
 
 2. **Run checks**
+
    ```bash
    npm run lint
    npm run test
@@ -232,21 +240,26 @@ function MyComponent() {
    - List manual testing performed
 
 4. **PR Template**
+
    ```markdown
    ## Description
+
    Brief description of changes
-   
+
    ## Type of Change
+
    - [ ] Bug fix
    - [ ] New feature
    - [ ] Breaking change
-   
+
    ## Testing
+
    - [ ] Unit tests added/updated
    - [ ] E2E tests added/updated
    - [ ] Manually tested on mobile
-   
+
    ## Screenshots
+
    (if applicable)
    ```
 
@@ -260,6 +273,7 @@ function MyComponent() {
 ### IndexedDB in Tests
 
 Always clear between tests:
+
 ```typescript
 test.beforeEach(async ({ page }) => {
   await page.evaluate(() => {
@@ -271,6 +285,7 @@ test.beforeEach(async ({ page }) => {
 ### Type Errors
 
 Import types correctly:
+
 ```typescript
 import type { Baby, EventRecord } from '@/types/events';
 ```
@@ -278,6 +293,7 @@ import type { Baby, EventRecord } from '@/types/events';
 ### Mobile Viewport
 
 Test on mobile sizes:
+
 ```bash
 npx playwright test --project="Mobile Chrome"
 ```

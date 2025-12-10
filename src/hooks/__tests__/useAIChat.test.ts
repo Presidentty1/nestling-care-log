@@ -72,7 +72,10 @@ describe('useAIChat', () => {
 
   describe('initialization', () => {
     it('should initialize with empty messages when no conversation exists', () => {
-      mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-1' } },
+        error: null,
+      });
       mockSupabase.from.mockReturnValue({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
@@ -155,7 +158,10 @@ describe('useAIChat', () => {
     });
 
     it('should handle authentication failure', async () => {
-      mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: new Error('Not authenticated') });
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: new Error('Not authenticated'),
+      });
 
       const { result } = renderHook(() => useAIChat(mockBaby), { wrapper });
 
@@ -202,7 +208,7 @@ describe('useAIChat', () => {
       // Mock edge function error
       mockSupabase.functions.invoke.mockResolvedValue({
         data: null,
-        error: new Error('Network error')
+        error: new Error('Network error'),
       });
 
       const { result } = renderHook(() => useAIChat(mockBaby), { wrapper });
@@ -265,4 +271,3 @@ describe('useAIChat', () => {
     });
   });
 });
-

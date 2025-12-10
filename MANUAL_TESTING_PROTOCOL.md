@@ -1,6 +1,7 @@
 # Manual Testing Protocol - Pre-Launch
 
 ## Test Environment Setup
+
 - [ ] iOS Simulator (iPhone 15 Pro)
 - [ ] Physical iPhone device (if available)
 - [ ] Chrome desktop
@@ -8,6 +9,7 @@
 - [ ] Clear all data before testing
 
 ## Critical Path 1: First-Time User Experience
+
 **Goal:** New user can onboard and log first event in <2 minutes
 
 1. [ ] Open app (fresh install simulation)
@@ -24,6 +26,7 @@
 **Pass criteria:** Zero confusion, smooth flow
 
 ## Critical Path 2: Timer-Based Logging
+
 **Goal:** Sleep timer works correctly, including backgrounding
 
 1. [ ] Tap "Sleep" button
@@ -42,6 +45,7 @@
 **Pass criteria:** Timer survives backgrounding
 
 ## Critical Path 3: Offline → Online Sync
+
 **Goal:** Events logged offline sync when connection restored
 
 1. [ ] Enable airplane mode
@@ -60,6 +64,7 @@
 **Pass criteria:** All events sync successfully
 
 ## Critical Path 4: Multi-Caregiver Sync
+
 **Goal:** Events logged on Device A appear on Device B
 
 **Setup:** Need 2 devices with same account
@@ -73,6 +78,7 @@
 **Pass criteria:** Real-time sync works
 
 ## Critical Path 5: Data Export
+
 **Goal:** User can export all data to CSV
 
 1. [ ] Navigate to Settings
@@ -86,6 +92,7 @@
 **Pass criteria:** CSV opens correctly, data complete
 
 ## Critical Path 6: Delete Account
+
 **Goal:** User can delete all data and account
 
 1. [ ] Navigate to Settings → Privacy & Data
@@ -101,6 +108,7 @@
 ## Accessibility Testing
 
 ### Large Text Support (iOS)
+
 1. [ ] Settings → Accessibility → Larger Text → Max
 2. [ ] Open app
 3. [ ] Navigate all screens
@@ -108,6 +116,7 @@
 5. [ ] Verify buttons remain tappable (>44pt)
 
 ### VoiceOver Testing (iOS)
+
 1. [ ] Enable VoiceOver (triple-click home)
 2. [ ] Navigate Home screen
 3. [ ] Verify all buttons announced clearly
@@ -117,6 +126,7 @@
 7. [ ] Verify success toast announced
 
 ### Keyboard Navigation (Desktop)
+
 1. [ ] Tab through all buttons on Home
 2. [ ] Verify focus indicators visible
 3. [ ] Open Feed form
@@ -128,6 +138,7 @@
 ## Performance Testing
 
 ### Load Time (Cold Start)
+
 1. [ ] Clear cache
 2. [ ] Force quit app
 3. [ ] Start timer
@@ -135,9 +146,10 @@
 5. [ ] Stop timer when interactive
 
 **Target:** < 2 seconds on iPhone 12
-**Measured:** _____ seconds
+**Measured:** **\_** seconds
 
 ### Scroll Performance (Large Dataset)
+
 **Setup:** Need 100+ events
 
 1. [ ] Navigate to History
@@ -148,6 +160,7 @@
 **Pass criteria:** Smooth 60fps scrolling
 
 ### Memory Usage
+
 1. [ ] Open app
 2. [ ] Log 50 events
 3. [ ] Navigate all screens
@@ -169,12 +182,14 @@
 ## Error Handling Testing
 
 ### Network Errors
+
 1. [ ] Enable airplane mode
 2. [ ] Try to use AI features
 3. [ ] Verify friendly error message
 4. [ ] Verify "Works offline" message
 
 ### Form Validation
+
 1. [ ] Open Feed form
 2. [ ] Leave all fields empty
 3. [ ] Tap Save
@@ -183,6 +198,7 @@
 6. [ ] Verify errors clear
 
 ### Edge Function Failures
+
 1. [ ] Navigate to AI Assistant
 2. [ ] Ask question
 3. [ ] If function fails, verify error message
@@ -191,27 +207,32 @@
 ## Sign-Off Checklist
 
 **Critical Paths:**
+
 - [ ] All 6 critical paths pass
 - [ ] Zero blocking bugs found
 - [ ] All features work as expected
 
 **Accessibility:**
+
 - [ ] Large Text support verified
 - [ ] VoiceOver navigation works
 - [ ] Keyboard navigation complete
 
 **Performance:**
+
 - [ ] Load time < 2 seconds
 - [ ] Scrolling smooth (60fps)
 - [ ] Memory usage reasonable
 
 **Polish:**
+
 - [ ] Dark mode looks great
 - [ ] Error messages helpful
 - [ ] Loading states consistent
 - [ ] Empty states friendly
 
 **Final Approval:**
-- [ ] Tested by: ___________
-- [ ] Date: ___________
+
+- [ ] Tested by: \***\*\_\_\_\*\***
+- [ ] Date: \***\*\_\_\_\*\***
 - [ ] Ready for App Store: YES / NO

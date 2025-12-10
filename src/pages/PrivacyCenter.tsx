@@ -3,7 +3,17 @@ import { useMutation } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Download, Trash2, AlertTriangle, Upload, RefreshCw } from 'lucide-react';
@@ -33,11 +43,7 @@ export default function PrivacyCenter() {
       if (!membership) throw new Error('No family found');
 
       // Export using dataService (IndexedDB)
-      await exportToJSON(
-        membership.family_id,
-        new Date(0),
-        new Date()
-      );
+      await exportToJSON(membership.family_id, new Date(0), new Date());
     },
     onSuccess: () => {
       toast({ title: 'Data exported successfully!' });
@@ -55,7 +61,7 @@ export default function PrivacyCenter() {
     mutationFn: async (file: File) => {
       const data = await parseImportFile(file);
       const validation = await validateImportData(data);
-      
+
       if (!validation.valid) {
         throw new Error(validation.error);
       }
@@ -63,8 +69,8 @@ export default function PrivacyCenter() {
       setImportPreview(data);
       return data;
     },
-    onSuccess: (data) => {
-      toast({ 
+    onSuccess: data => {
+      toast({
         title: 'Import preview ready',
         description: `Found ${data.events?.length || 0} events, ${data.babies?.length || 0} babies`,
       });
@@ -98,8 +104,8 @@ export default function PrivacyCenter() {
 
       return result;
     },
-    onSuccess: (result) => {
-      toast({ 
+    onSuccess: result => {
+      toast({
         title: 'Import completed!',
         description: `Added ${result.added} events, skipped ${result.skipped} duplicates`,
       });
@@ -121,19 +127,19 @@ export default function PrivacyCenter() {
     mutationFn: async () => {
       // Clear IndexedDB
       const result = await dataService.clearAllData();
-      
+
       // Clear localStorage
       localStorage.removeItem('nap_predictions');
       localStorage.removeItem('nestling_sync_history');
       localStorage.removeItem('nestling-react-query-cache');
-      
+
       // Clear React Query cache
       queryClient.clear();
-      
+
       return result;
     },
-    onSuccess: (result) => {
-      toast({ 
+    onSuccess: result => {
+      toast({
         title: 'Local data cleared',
         description: `Cleared ${result.eventsCleared} events. Refresh to re-sync from cloud.`,
       });
@@ -187,62 +193,62 @@ export default function PrivacyCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Privacy Center</h1>
+    <div className='min-h-screen bg-background p-4'>
+      <div className='max-w-2xl mx-auto space-y-6'>
+        <h1 className='text-3xl font-bold'>Privacy Center</h1>
 
         <Alert>
-          <Shield className="w-4 h-4" />
+          <Shield className='w-4 h-4' />
           <AlertDescription>
             Your privacy is important to us. All data is encrypted and stored securely.
           </AlertDescription>
         </Alert>
 
-        <Card className="p-6 space-y-4">
-          <h3 className="font-semibold">Data Management</h3>
+        <Card className='p-6 space-y-4'>
+          <h3 className='font-semibold'>Data Management</h3>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
               <div>
-                <p className="font-medium">Export Your Data</p>
-                <p className="text-sm text-muted-foreground">
+                <p className='font-medium'>Export Your Data</p>
+                <p className='text-sm text-muted-foreground'>
                   Download all your data in JSON format
                 </p>
               </div>
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={() => exportDataMutation.mutate()}
                 disabled={exportDataMutation.isPending}
               >
-                <Download className="w-4 h-4 mr-2" />
+                <Download className='w-4 h-4 mr-2' />
                 Export
               </Button>
             </div>
 
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between">
+            <div className='border-t pt-4'>
+              <div className='flex items-center justify-between'>
                 <div>
-                  <p className="font-medium">Delete Account</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className='font-medium'>Delete Account</p>
+                  <p className='text-sm text-muted-foreground'>
                     Permanently delete your account and all data
                   </p>
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                      <Trash2 className="w-4 h-4 mr-2" />
+                    <Button variant='destructive'>
+                      <Trash2 className='w-4 h-4 mr-2' />
                       Delete
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                      <AlertDialogTitle className='flex items-center gap-2'>
+                        <AlertTriangle className='w-5 h-5 text-destructive' />
                         Are you absolutely sure?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove all your data from our servers.
+                        This action cannot be undone. This will permanently delete your account and
+                        remove all your data from our servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -252,7 +258,7 @@ export default function PrivacyCenter() {
                           setIsDeleting(true);
                           deleteAccountMutation.mutate();
                         }}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
                       >
                         Delete Account
                       </AlertDialogAction>
@@ -264,9 +270,9 @@ export default function PrivacyCenter() {
           </div>
         </Card>
 
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4">Privacy Policy Highlights</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+        <Card className='p-6'>
+          <h3 className='font-semibold mb-4'>Privacy Policy Highlights</h3>
+          <ul className='space-y-2 text-sm text-muted-foreground'>
             <li>• Your data is encrypted at rest and in transit</li>
             <li>• We never sell or share your personal information</li>
             <li>• You can export your data at any time</li>

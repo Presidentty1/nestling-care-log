@@ -1,34 +1,34 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from "@/lib/utils";
-import { hapticFeedback } from "@/lib/haptics";
+import { cn } from '@/lib/utils';
+import { hapticFeedback } from '@/lib/haptics';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-[15px] leading-[20px] font-medium ring-offset-background transition-all duration-100 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-[15px] leading-[20px] font-medium ring-offset-background transition-all duration-100 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]',
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-600 shadow-soft",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border-2 border-border bg-surface hover:bg-accent/50 hover:border-primary",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: 'bg-primary text-primary-foreground hover:bg-primary-600 shadow-soft',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline: 'border-2 border-border bg-surface hover:bg-accent/50 hover:border-primary',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent/50',
+        link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: "h-11 px-5 py-2.5 min-h-[44px]",
-        sm: "h-9 rounded-sm px-3 min-h-[36px]",
-        lg: "h-12 rounded-sm px-8 min-h-[48px]",
-        icon: "h-11 w-11 min-h-[44px] min-w-[44px]",
+        default: 'h-11 px-5 py-2.5 min-h-[44px]',
+        sm: 'h-9 rounded-sm px-3 min-h-[36px]',
+        lg: 'h-12 rounded-sm px-8 min-h-[48px]',
+        icon: 'h-11 w-11 min-h-[44px] min-w-[44px]',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
-  },
+  }
 );
 
 export interface ButtonProps
@@ -39,25 +39,25 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    
+    const Comp = asChild ? Slot : 'button';
+
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!props.disabled) {
         hapticFeedback.light();
       }
       onClick?.(e);
     };
-    
+
     return (
-      <Comp 
-        className={cn(buttonVariants({ variant, size, className }))} 
-        ref={ref} 
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
         onClick={handleClick}
-        {...props} 
+        {...props}
       />
     );
-  },
+  }
 );
-Button.displayName = "Button";
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };

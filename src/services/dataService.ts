@@ -1,6 +1,19 @@
 import localforage from 'localforage';
-import type { EventRecord, TimerState, Baby, NapFeedback, NotificationSettings } from '@/types/events';
-import type { DataListener, NapPrediction, StorageEstimate, TimerData, StoredEvent, StoredBaby } from '@/types/common';
+import type {
+  EventRecord,
+  TimerState,
+  Baby,
+  NapFeedback,
+  NotificationSettings,
+} from '@/types/events';
+import type {
+  DataListener,
+  NapPrediction,
+  StorageEstimate,
+  TimerData,
+  StoredEvent,
+  StoredBaby,
+} from '@/types/common';
 import { differenceInMinutes } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { dateUtils, validationUtils } from '@/lib/sharedUtils';
@@ -78,12 +91,17 @@ class DataService {
       // Check storage quota
       if ('storage' in navigator && 'estimate' in navigator.storage) {
         const estimate = await navigator.storage.estimate();
-        if (estimate.quota && estimate.usage && estimate.usage > estimate.quota * 0.9) { // 90% threshold
-          logger.warn('Storage usage is above 90% of quota', {
-            usage: estimate.usage,
-            quota: estimate.quota,
-            percentage: (estimate.usage / estimate.quota * 100).toFixed(1)
-          }, 'DataService');
+        if (estimate.quota && estimate.usage && estimate.usage > estimate.quota * 0.9) {
+          // 90% threshold
+          logger.warn(
+            'Storage usage is above 90% of quota',
+            {
+              usage: estimate.usage,
+              quota: estimate.quota,
+              percentage: ((estimate.usage / estimate.quota) * 100).toFixed(1),
+            },
+            'DataService'
+          );
         }
       }
     } catch (error) {
@@ -227,7 +245,7 @@ class DataService {
 
     await timersStore.iterate((timer: TimerData, key: string) => {
       // Remove timers older than 24 hours
-      if (timer.timestamp && (now - timer.timestamp) > TIME.DAY) {
+      if (timer.timestamp && now - timer.timestamp > TIME.DAY) {
         expiredTimerIds.push(key);
       }
     });
@@ -243,7 +261,9 @@ class DataService {
     // Could implement data compression, deduplication, etc.
   }
 
-  async addEvent(event: Omit<EventRecord, 'id' | 'createdAt' | 'updatedAt' | 'source'>): Promise<EventRecord> {
+  async addEvent(
+    event: Omit<EventRecord, 'id' | 'createdAt' | 'updatedAt' | 'source'>
+  ): Promise<EventRecord> {
     try {
       // Check connection status
       if (!this.isOnline) {
@@ -291,14 +311,21 @@ class DataService {
 
       this.emitChange('add', record);
 
-      logger.debug('Event added successfully', { eventId: record.id, type: record.type }, 'DataService');
+      logger.debug(
+        'Event added successfully',
+        { eventId: record.id, type: record.type },
+        'DataService'
+      );
 
       return record;
     } catch (error) {
       logger.error('Failed to add event', error, 'DataService');
 
       // Handle different error types
-      if (error.message?.includes('offline') || error.message?.includes('Cannot add events while offline')) {
+      if (
+        error.message?.includes('offline') ||
+        error.message?.includes('Cannot add events while offline')
+      ) {
         throw error; // Re-throw offline errors as-is
       }
 
@@ -335,7 +362,9 @@ class DataService {
     });
   }
 
-  private validateEventInput(event: Omit<EventRecord, 'id' | 'createdAt' | 'updatedAt' | 'source'>): void {
+  private validateEventInput(
+    event: Omit<EventRecord, 'id' | 'createdAt' | 'updatedAt' | 'source'>
+  ): void {
     if (!event.babyId || typeof event.babyId !== 'string') {
       throw new Error('Valid baby ID is required');
     }
@@ -348,22 +377,35 @@ class DataService {
       throw new Error('Valid start time is required');
     }
 
-      // Validate future dates (allow small clock drift)
+    // Validate future dates (allow small clock drift)
     if (dateUtils.isInFuture(event.startTime, 5)) {
       throw new Error('Event time cannot be in the future');
     }
 
     // Validate amount for feeds
     if (event.type === 'feed' && event.amount !== undefined) {
-      if (typeof event.amount !== 'number' || event.amount <= 0 || event.amount > LIMITS.MAX_FEED_AMOUNT_ML) {
+      if (
+        typeof event.amount !== 'number' ||
+        event.amount <= 0 ||
+        event.amount > LIMITS.MAX_FEED_AMOUNT_ML
+      ) {
         throw new Error(`Feed amount must be between 0 and ${LIMITS.MAX_FEED_AMOUNT_ML}`);
       }
     }
 
     // Validate duration for sleep/tummy_time
-    if ((event.type === 'sleep' || event.type === 'tummy_time') && event.durationMin !== undefined) {
-      if (typeof event.durationMin !== 'number' || event.durationMin < 0 || event.durationMin > LIMITS.MAX_EVENT_DURATION_MINUTES) {
-        throw new Error(`Duration must be between 0 and ${LIMITS.MAX_EVENT_DURATION_MINUTES} minutes`);
+    if (
+      (event.type === 'sleep' || event.type === 'tummy_time') &&
+      event.durationMin !== undefined
+    ) {
+      if (
+        typeof event.durationMin !== 'number' ||
+        event.durationMin < 0 ||
+        event.durationMin > LIMITS.MAX_EVENT_DURATION_MINUTES
+      ) {
+        throw new Error(
+          `Duration must be between 0 and ${LIMITS.MAX_EVENT_DURATION_MINUTES} minutes`
+        );
       }
     }
   }
@@ -404,7 +446,7 @@ class DataService {
       logger.error('Storage recovery failed', error, 'DataService');
     }
   }
-  
+
   async updateEvent(id: string, updates: Partial<EventRecord>): Promise<EventRecord> {
     try {
       const existing = await eventsStore.getItem<EventRecord>(id);
@@ -443,7 +485,11 @@ class DataService {
       await eventsStore.setItem(id, updated);
       this.emitChange('update', updated);
 
-      logger.debug('Event updated successfully', { eventId: id, type: updated.type }, 'DataService');
+      logger.debug(
+        'Event updated successfully',
+        { eventId: id, type: updated.type },
+        'DataService'
+      );
 
       return updated;
     } catch (error) {
@@ -457,7 +503,7 @@ class DataService {
       throw error;
     }
   }
-  
+
   async deleteEvent(id: string): Promise<void> {
     try {
       const existing = await eventsStore.getItem<EventRecord>(id);
@@ -469,7 +515,11 @@ class DataService {
       await eventsStore.removeItem(id);
       this.emitChange('delete', { id });
 
-      logger.debug('Event deleted successfully', { eventId: id, type: existing.type }, 'DataService');
+      logger.debug(
+        'Event deleted successfully',
+        { eventId: id, type: existing.type },
+        'DataService'
+      );
     } catch (error) {
       logger.error('Failed to delete event', { eventId: id, error }, 'DataService');
       throw error;
@@ -479,7 +529,7 @@ class DataService {
   async getEvent(id: string): Promise<EventRecord | null> {
     return await eventsStore.getItem<EventRecord>(id);
   }
-  
+
   async listEventsByDay(babyId: string, dayISO: string): Promise<EventRecord[]> {
     try {
       if (!babyId || typeof babyId !== 'string') {
@@ -522,7 +572,11 @@ class DataService {
 
             // Additional validation for date parsing
             if (isNaN(eventTime.getTime())) {
-              logger.warn('Skipping event with invalid date', { key, startTime: event.startTime }, 'DataService');
+              logger.warn(
+                'Skipping event with invalid date',
+                { key, startTime: event.startTime },
+                'DataService'
+              );
               return;
             }
 
@@ -544,11 +598,15 @@ class DataService {
         })
         .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
-      logger.debug('Events listed successfully', {
-        babyId,
-        dayISO,
-        eventCount: validEvents.length
-      }, 'DataService');
+      logger.debug(
+        'Events listed successfully',
+        {
+          babyId,
+          dayISO,
+          eventCount: validEvents.length,
+        },
+        'DataService'
+      );
 
       return validEvents;
     } catch (error) {
@@ -556,13 +614,13 @@ class DataService {
       throw error;
     }
   }
-  
+
   async listEventsRange(babyId: string, fromISO: string, toISO: string): Promise<EventRecord[]> {
     const events: EventRecord[] = [];
     const start = new Date(fromISO);
     const end = new Date(toISO);
-    
-    await eventsStore.iterate<EventRecord, void>((event) => {
+
+    await eventsStore.iterate<EventRecord, void>(event => {
       if (event.babyId === babyId) {
         const eventTime = new Date(event.startTime);
         if (eventTime >= start && eventTime <= end) {
@@ -570,17 +628,15 @@ class DataService {
         }
       }
     });
-    
-    return events.sort((a, b) => 
-      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-    );
+
+    return events.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
   }
-  
+
   async getLastEventByType(babyId: string, type: string): Promise<EventRecord | null> {
     let lastEvent: EventRecord | null = null;
     let latestTime = 0;
-    
-    await eventsStore.iterate<EventRecord, void>((event) => {
+
+    await eventsStore.iterate<EventRecord, void>(event => {
       if (event.babyId === babyId && event.type === type) {
         const eventTime = new Date(event.startTime).getTime();
         if (eventTime > latestTime) {
@@ -589,14 +645,14 @@ class DataService {
         }
       }
     });
-    
+
     return lastEvent;
   }
-  
+
   async saveTimerState(babyId: string, state: TimerState): Promise<void> {
     await timersStore.setItem(`timer_${babyId}`, state);
   }
-  
+
   async getTimerState(babyId: string): Promise<TimerState | null> {
     try {
       if (!babyId || typeof babyId !== 'string') {
@@ -632,13 +688,17 @@ class DataService {
       // Add timestamp for cleanup purposes
       const timerWithTimestamp = {
         ...timerState,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       await timersStore.setItem(`timer_${babyId}`, timerWithTimestamp);
       this.emitChange('timer_updated', { babyId, timerState });
 
-      logger.debug('Timer state set successfully', { babyId, isRunning: timerState.isRunning }, 'DataService');
+      logger.debug(
+        'Timer state set successfully',
+        { babyId, isRunning: timerState.isRunning },
+        'DataService'
+      );
     } catch (error) {
       logger.error('Failed to set timer state', { babyId, error }, 'DataService');
       throw error;
@@ -666,7 +726,8 @@ class DataService {
       timerState &&
       typeof timerState === 'object' &&
       typeof timerState.isRunning === 'boolean' &&
-      (timerState.startTime === null || (typeof timerState.startTime === 'string' && !isNaN(Date.parse(timerState.startTime)))) &&
+      (timerState.startTime === null ||
+        (typeof timerState.startTime === 'string' && !isNaN(Date.parse(timerState.startTime)))) &&
       typeof timerState.elapsed === 'number' &&
       timerState.elapsed >= 0
     );
@@ -686,13 +747,21 @@ class DataService {
 
           // Additional validation for date parsing
           if (isNaN(new Date(event.startTime).getTime())) {
-            logger.warn('Skipping event with invalid date during getAllEvents', { key, startTime: event.startTime }, 'DataService');
+            logger.warn(
+              'Skipping event with invalid date during getAllEvents',
+              { key, startTime: event.startTime },
+              'DataService'
+            );
             return;
           }
 
           events.push(event);
         } catch (error) {
-          logger.error('Error processing event during getAllEvents iteration', { key, error }, 'DataService');
+          logger.error(
+            'Error processing event during getAllEvents iteration',
+            { key, error },
+            'DataService'
+          );
           // Continue processing other events
         }
       });
@@ -707,7 +776,11 @@ class DataService {
         }
       });
 
-      logger.debug('All events retrieved successfully', { count: sortedEvents.length }, 'DataService');
+      logger.debug(
+        'All events retrieved successfully',
+        { count: sortedEvents.length },
+        'DataService'
+      );
       return sortedEvents;
     } catch (error) {
       logger.error('Failed to get all events', error, 'DataService');
@@ -735,7 +808,11 @@ class DataService {
       await babiesStore.setItem(record.id, record);
       this.emitChange('baby_added', record);
 
-      logger.debug('Baby added successfully', { babyId: record.id, name: record.name }, 'DataService');
+      logger.debug(
+        'Baby added successfully',
+        { babyId: record.id, name: record.name },
+        'DataService'
+      );
 
       return record;
     } catch (error) {
@@ -774,8 +851,11 @@ class DataService {
     }
 
     // Validate feeding style if provided
-    if (baby.primaryFeedingStyle !== undefined && baby.primaryFeedingStyle !== null &&
-        !['breast', 'bottle', 'both'].includes(baby.primaryFeedingStyle)) {
+    if (
+      baby.primaryFeedingStyle !== undefined &&
+      baby.primaryFeedingStyle !== null &&
+      !['breast', 'bottle', 'both'].includes(baby.primaryFeedingStyle)
+    ) {
       throw new Error('Invalid feeding style');
     }
   }
@@ -814,9 +894,7 @@ class DataService {
           const time = new Date(baby.createdAt).getTime();
           return !isNaN(time);
         })
-        .sort((a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
       logger.debug('Babies listed successfully', { count: validBabies.length }, 'DataService');
 
@@ -834,13 +912,13 @@ class DataService {
   async updateBaby(id: string, updates: Partial<Baby>): Promise<Baby> {
     const existing = await babiesStore.getItem<Baby>(id);
     if (!existing) throw new Error('Baby not found');
-    
+
     const updated: Baby = {
       ...existing,
       ...updates,
       updatedAt: new Date().toISOString(),
     };
-    
+
     await babiesStore.setItem(id, updated);
     this.emitChange('baby_updated', updated);
     return updated;
@@ -863,13 +941,13 @@ class DataService {
 
   async listNapFeedback(babyId: string): Promise<NapFeedback[]> {
     const feedbacks: NapFeedback[] = [];
-    await napFeedbackStore.iterate<NapFeedback, void>((feedback) => {
+    await napFeedbackStore.iterate<NapFeedback, void>(feedback => {
       if (feedback.babyId === babyId) {
         feedbacks.push(feedback);
       }
     });
-    return feedbacks.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return feedbacks.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
@@ -881,19 +959,23 @@ class DataService {
     return await settingsStore.getItem(`notifications_${babyId}`);
   }
 
-  async clearAllData(): Promise<{ eventsCleared: number; timersCleared: number; babiesCleared: number }> {
+  async clearAllData(): Promise<{
+    eventsCleared: number;
+    timersCleared: number;
+    babiesCleared: number;
+  }> {
     const eventsCount = await eventsStore.length();
     const timersCount = await timersStore.length();
     const babiesCount = await babiesStore.length();
-    
+
     await eventsStore.clear();
     await timersStore.clear();
     await babiesStore.clear();
     await napFeedbackStore.clear();
     await settingsStore.clear();
-    
+
     this.emitChange('clear', {});
-    
+
     return {
       eventsCleared: eventsCount,
       timersCleared: timersCount,
@@ -919,11 +1001,11 @@ class DataService {
 
   async getDaySummary(babyId: string, dateISO: string) {
     const events = await this.listEventsByDay(babyId, dateISO);
-    
+
     const feeds = events.filter(e => e.type === 'feed');
     const sleeps = events.filter(e => e.type === 'sleep' && e.endTime);
     const diapers = events.filter(e => e.type === 'diaper');
-    
+
     const totalMl = feeds.reduce((sum, e) => {
       if (!e.amount) return sum;
       // Convert oz to ml if needed (1 oz = 29.5735 ml)
@@ -933,13 +1015,9 @@ class DataService {
 
     const sleepMinutes = sleeps.reduce((sum, e) => sum + (e.durationMin || 0), 0);
 
-    const diaperWet = diapers.filter(e => 
-      e.subtype === 'wet' || e.subtype === 'both'
-    ).length;
-    
-    const diaperDirty = diapers.filter(e => 
-      e.subtype === 'dirty' || e.subtype === 'both'
-    ).length;
+    const diaperWet = diapers.filter(e => e.subtype === 'wet' || e.subtype === 'both').length;
+
+    const diaperDirty = diapers.filter(e => e.subtype === 'dirty' || e.subtype === 'both').length;
 
     // Get last feed and wake times
     const lastFeed = feeds.length > 0 ? feeds[0] : null;

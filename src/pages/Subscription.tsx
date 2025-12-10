@@ -42,23 +42,25 @@ export default function Subscription() {
   };
 
   const selectedPricing = selectedPlan === 'monthly' ? PRICING.monthly : PRICING.yearly;
-  const savings = selectedPlan === 'yearly' ?
-    `Save ${(PRICING.monthly.amount * 12 - PRICING.yearly.amount).toFixed(0)} vs monthly` : '';
+  const savings =
+    selectedPlan === 'yearly'
+      ? `Save ${(PRICING.monthly.amount * 12 - PRICING.yearly.amount).toFixed(0)} vs monthly`
+      : '';
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+    <div className='min-h-screen bg-background'>
+      <div className='container mx-auto px-4 py-8'>
+        <div className='max-w-4xl mx-auto'>
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-4">Upgrade to Nuzzle Premium</h1>
-            <p className="text-lg text-muted-foreground">
+          <div className='text-center mb-8'>
+            <h1 className='text-3xl font-bold mb-4'>Upgrade to Nuzzle Premium</h1>
+            <p className='text-lg text-muted-foreground'>
               Unlock AI-powered features to make parenting easier and get more sleep
             </p>
           </div>
 
           {/* Plan Selection */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className='grid md:grid-cols-2 gap-6 mb-8'>
             {/* Monthly Plan */}
             <Card
               className={`cursor-pointer transition-all ${
@@ -67,24 +69,24 @@ export default function Subscription() {
               onClick={() => setSelectedPlan('monthly')}
             >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className='flex items-center gap-2'>
                   <span>Monthly</span>
                   {selectedPlan === 'monthly' && <Badge>Selected</Badge>}
                 </CardTitle>
                 <CardDescription>Pay month-to-month</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold mb-2">
+                <div className='text-3xl font-bold mb-2'>
                   ${PRICING.monthly.amount}
-                  <span className="text-lg font-normal text-muted-foreground">/month</span>
+                  <span className='text-lg font-normal text-muted-foreground'>/month</span>
                 </div>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-success" />
+                <ul className='space-y-2 text-sm'>
+                  <li className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-success' />
                     7-day free trial
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-success" />
+                  <li className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-success' />
                     Cancel anytime
                   </li>
                 </ul>
@@ -99,36 +101,37 @@ export default function Subscription() {
               onClick={() => setSelectedPlan('yearly')}
             >
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className='flex items-center justify-between'>
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Crown className="h-5 w-5 text-primary" />
+                    <CardTitle className='flex items-center gap-2'>
+                      <Crown className='h-5 w-5 text-primary' />
                       <span>Yearly</span>
                     </CardTitle>
                     <CardDescription>Best value - save 30%</CardDescription>
                   </div>
-                  {selectedPlan === 'yearly' && <Badge className="bg-primary">Selected</Badge>}
+                  {selectedPlan === 'yearly' && <Badge className='bg-primary'>Selected</Badge>}
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold mb-2">
+                <div className='text-3xl font-bold mb-2'>
                   ${PRICING.yearly.amount}
-                  <span className="text-lg font-normal text-muted-foreground">/year</span>
+                  <span className='text-lg font-normal text-muted-foreground'>/year</span>
                 </div>
-                <div className="text-sm text-success font-medium mb-4">
-                  Save ${(PRICING.monthly.amount * 12 - PRICING.yearly.amount).toFixed(0)} vs monthly
+                <div className='text-sm text-success font-medium mb-4'>
+                  Save ${(PRICING.monthly.amount * 12 - PRICING.yearly.amount).toFixed(0)} vs
+                  monthly
                 </div>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-success" />
+                <ul className='space-y-2 text-sm'>
+                  <li className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-success' />
                     7-day free trial
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-success" />
+                  <li className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-success' />
                     Cancel anytime
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-success" />
+                  <li className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-success' />
                     Priority support
                   </li>
                 </ul>
@@ -137,54 +140,50 @@ export default function Subscription() {
           </div>
 
           {/* Feature Comparison */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-center mb-6">What's Included</h2>
+          <div className='mb-8'>
+            <h2 className='text-2xl font-bold text-center mb-6'>What's Included</h2>
             <FeatureComparisonTable onUpgrade={handleSubscribe} />
           </div>
 
           {/* CTA */}
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold mb-2">
+          <Card className='bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20'>
+            <CardContent className='pt-6'>
+              <div className='text-center'>
+                <h3 className='text-xl font-semibold mb-2'>
                   Start Your {PRICING.trialDays}-Day Free Trial
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className='text-muted-foreground mb-6'>
                   No credit card required • Cancel anytime • Upgrade when ready
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
                   <Button
-                    size="lg"
+                    size='lg'
                     onClick={handleSubscribe}
                     disabled={isLoading}
-                    className="min-w-[200px]"
+                    className='min-w-[200px]'
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
                         Starting Trial...
                       </>
                     ) : (
                       <>
-                        <Crown className="h-4 w-4 mr-2" />
+                        <Crown className='h-4 w-4 mr-2' />
                         Start Free Trial
                       </>
                     )}
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate('/settings')}
-                  >
+                  <Button variant='outline' size='lg' onClick={() => navigate('/settings')}>
                     Maybe Later
                   </Button>
                 </div>
 
-                <p className="text-xs text-muted-foreground mt-4">
-                  By subscribing, you agree to our Terms of Service and Privacy Policy.
-                  Your payment information is processed securely by Stripe.
+                <p className='text-xs text-muted-foreground mt-4'>
+                  By subscribing, you agree to our Terms of Service and Privacy Policy. Your payment
+                  information is processed securely by Stripe.
                 </p>
               </div>
             </CardContent>

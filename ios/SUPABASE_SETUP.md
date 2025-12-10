@@ -59,27 +59,27 @@ import Supabase  // ✅ Uncommented
 
 final class SupabaseClientProvider {
     static let shared = SupabaseClientProvider()
-    
+
     let client: SupabaseClient  // ✅ Uncommented
-    
+
     private init() {
         let url = Secrets.supabaseURL
         let anonKey = Secrets.supabaseAnonKey
-        
+
         guard !url.isEmpty, !anonKey.isEmpty else {
             print("⚠️ WARNING: Supabase credentials not configured")
             return
         }
-        
+
         // ✅ Uncommented
         self.client = SupabaseClient(
             supabaseURL: URL(string: url)!,
             supabaseKey: anonKey
         )
-        
+
         self.configured = true
     }
-    
+
     // ... rest of the file
 }
 ```
@@ -93,16 +93,19 @@ final class SupabaseClientProvider {
 ## Troubleshooting
 
 ### Package Not Found
+
 - Ensure you're using Xcode 15.0 or later
 - Check your internet connection
 - Try cleaning the build folder (Product → Clean Build Folder)
 
 ### Build Errors
+
 - Ensure the Supabase package is added to the correct target (Nestling, not tests)
 - Check that `import Supabase` is uncommented in `SupabaseClient.swift`
 - Verify your Secrets.swift has valid URLs and keys
 
 ### Runtime Errors
+
 - Verify your Supabase project URL and anon key are correct
 - Check that your Supabase project is active and accessible
 - Ensure RLS (Row Level Security) policies allow access if needed
@@ -116,4 +119,3 @@ After completing this setup:
 3. Set up data migration (Phase 1.3)
 
 See `MVP_LAUNCH_PLAN.md` for the complete implementation roadmap.
-

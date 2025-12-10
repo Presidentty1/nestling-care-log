@@ -5,6 +5,7 @@ This document maps Nestling's web design tokens to iOS equivalents for consisten
 ## Color Palette
 
 ### Primary Colors
+
 ```swift
 // Web: --primary: 168 46% 34%
 static let primary = Color(hue: 168/360, saturation: 0.46, brightness: 0.34)
@@ -15,6 +16,7 @@ static let primarySoft = Color(hue: 168/360, saturation: 0.46, brightness: 0.88)
 ```
 
 ### Event Colors
+
 ```swift
 static let eventFeed = Color(hue: 199/360, saturation: 0.89, brightness: 0.48)
 static let eventSleep = Color(hue: 237/360, saturation: 0.51, brightness: 0.55)
@@ -23,6 +25,7 @@ static let eventTummyTime = Color(hue: 291/360, saturation: 0.47, brightness: 0.
 ```
 
 ### Semantic Colors
+
 ```swift
 static let success = Color(hue: 142/360, saturation: 0.76, brightness: 0.36)
 static let warning = Color(hue: 38/360, saturation: 0.92, brightness: 0.50)
@@ -31,6 +34,7 @@ static let info = Color(hue: 199/360, saturation: 0.89, brightness: 0.48)
 ```
 
 ### Background & Surface
+
 ```swift
 static let background = Color(.systemBackground)
 static let surface = Color(.secondarySystemBackground)
@@ -40,6 +44,7 @@ static let border = Color(.separator)
 ## Typography
 
 ### Font Sizes
+
 ```swift
 enum FontSize {
     static let h1: CGFloat = 28  // Large title
@@ -52,6 +57,7 @@ enum FontSize {
 ```
 
 ### Font Weights
+
 ```swift
 // Use SF Pro (system font) with appropriate weights
 .font(.system(size: FontSize.h1, weight: .bold))
@@ -60,6 +66,7 @@ enum FontSize {
 ```
 
 ### Dynamic Type Support
+
 ```swift
 // Enable automatic text scaling
 Text("Hello")
@@ -70,6 +77,7 @@ Text("Hello")
 ## Spacing
 
 ### Padding Scale
+
 ```swift
 enum Spacing {
     static let xs: CGFloat = 4
@@ -82,6 +90,7 @@ enum Spacing {
 ```
 
 ### Safe Areas
+
 ```swift
 // Always respect safe areas for notch/home indicator
 .padding(.top, geometry.safeAreaInsets.top)
@@ -141,14 +150,15 @@ Button("Action") { }
 ## Usage Examples
 
 ### Card Component
+
 ```swift
 struct NestlingCard<Content: View>: View {
     let content: Content
-    
+
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             content
@@ -162,11 +172,12 @@ struct NestlingCard<Content: View>: View {
 ```
 
 ### Button Component
+
 ```swift
 struct PrimaryButton: View {
     let title: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
@@ -182,11 +193,12 @@ struct PrimaryButton: View {
 ```
 
 ### Event Pill
+
 ```swift
 struct EventPill: View {
     let type: EventType
     let count: Int
-    
+
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: type.icon)

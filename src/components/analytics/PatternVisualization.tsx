@@ -18,16 +18,16 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
       const startDate = subDays(new Date(), daysAgo);
       const endDate = new Date();
 
-      return dataService.listEventsRange(
-        babyId,
-        startDate.toISOString(),
-        endDate.toISOString()
-      );
+      return dataService.listEventsRange(babyId, startDate.toISOString(), endDate.toISOString());
     },
   });
 
   if (isLoading) {
-    return <Card className="p-6"><p className="text-muted-foreground">Analyzing patterns...</p></Card>;
+    return (
+      <Card className='p-6'>
+        <p className='text-muted-foreground'>Analyzing patterns...</p>
+      </Card>
+    );
   }
 
   // Analyze patterns
@@ -45,10 +45,12 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
       });
 
       if (nightSleeps.length > 0) {
-        const avgDuration = nightSleeps.reduce((acc, s) => {
-          const duration = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / (1000 * 60 * 60);
-          return acc + duration;
-        }, 0) / nightSleeps.length;
+        const avgDuration =
+          nightSleeps.reduce((acc, s) => {
+            const duration =
+              (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / (1000 * 60 * 60);
+            return acc + duration;
+          }, 0) / nightSleeps.length;
 
         patterns.push({
           type: 'sleep',
@@ -65,7 +67,9 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
     if (feeds.length > 5) {
       const intervals: number[] = [];
       for (let i = 1; i < feeds.length; i++) {
-        const interval = (new Date(feeds[i].startTime).getTime() - new Date(feeds[i-1].startTime).getTime()) / (1000 * 60 * 60);
+        const interval =
+          (new Date(feeds[i].startTime).getTime() - new Date(feeds[i - 1].startTime).getTime()) /
+          (1000 * 60 * 60);
         intervals.push(interval);
       }
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
@@ -114,28 +118,26 @@ export function PatternVisualization({ babyId, dateRange }: PatternVisualization
   const patterns = analyzePatterns();
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {patterns.length > 0 ? (
         patterns.map((pattern, idx) => (
-          <Card key={idx} className="p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-start gap-3">
-                <pattern.icon className="h-5 w-5 text-primary mt-0.5" />
+          <Card key={idx} className='p-4'>
+            <div className='flex items-start justify-between mb-2'>
+              <div className='flex items-start gap-3'>
+                <pattern.icon className='h-5 w-5 text-primary mt-0.5' />
                 <div>
-                  <h4 className="font-medium">{pattern.title}</h4>
-                  <p className="text-sm text-muted-foreground mt-1">{pattern.description}</p>
+                  <h4 className='font-medium'>{pattern.title}</h4>
+                  <p className='text-sm text-muted-foreground mt-1'>{pattern.description}</p>
                 </div>
               </div>
-              <Badge variant="secondary">
-                {pattern.confidence}% confidence
-              </Badge>
+              <Badge variant='secondary'>{pattern.confidence}% confidence</Badge>
             </div>
           </Card>
         ))
       ) : (
-        <Card className="p-8 text-center">
-          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">
+        <Card className='p-8 text-center'>
+          <AlertCircle className='h-12 w-12 mx-auto mb-4 text-muted-foreground' />
+          <p className='text-muted-foreground'>
             Not enough data to detect patterns yet. Keep tracking events to see insights!
           </p>
         </Card>

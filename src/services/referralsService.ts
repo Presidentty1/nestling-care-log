@@ -11,7 +11,9 @@ export interface ReferralCode {
 
 class ReferralsService {
   async getOrCreateReferralCode(): Promise<ReferralCode> {
-    const { data: { user } } = await authService.getUser();
+    const {
+      data: { user },
+    } = await authService.getUser();
     if (!user) throw new Error('Not authenticated');
 
     let { data: existing } = await supabase
@@ -27,7 +29,7 @@ class ReferralsService {
         .insert({ user_id: user.id, code })
         .select()
         .single();
-      
+
       if (error) throw error;
       existing = created;
     }
@@ -51,5 +53,4 @@ class ReferralsService {
 }
 
 export const referralsService = new ReferralsService();
-
 

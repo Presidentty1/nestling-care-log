@@ -1,10 +1,5 @@
 import type { Baby } from '@/lib/types';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Plus } from 'lucide-react';
@@ -20,7 +15,13 @@ interface BabySwitcherProps {
   onClose: () => void;
 }
 
-export function BabySwitcher({ babies, selectedBabyId, onSelect, isOpen, onClose }: BabySwitcherProps) {
+export function BabySwitcher({
+  babies,
+  selectedBabyId,
+  onSelect,
+  isOpen,
+  onClose,
+}: BabySwitcherProps) {
   const navigate = useNavigate();
 
   const getAgeLabel = (dateOfBirth: string) => {
@@ -53,10 +54,10 @@ export function BabySwitcher({ babies, selectedBabyId, onSelect, isOpen, onClose
     if (selectedBabyId && selectedBabyId !== babyId) {
       track('baby_switched', {
         from_baby_id: selectedBabyId,
-        to_baby_id: babyId
+        to_baby_id: babyId,
       });
     }
-    
+
     onSelect(babyId);
     onClose();
   };
@@ -70,40 +71,37 @@ export function BabySwitcher({ babies, selectedBabyId, onSelect, isOpen, onClose
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="rounded-t-[24px]">
+      <DrawerContent className='rounded-t-[24px]'>
         <DrawerHeader>
           <DrawerTitle>Switch Baby</DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 pb-8 space-y-2">
-          {babies.map((baby) => (
+        <div className='px-4 pb-8 space-y-2'>
+          {babies.map(baby => (
             <button
               key={baby.id}
               onClick={() => handleSelect(baby.id)}
               className={`
                 w-full flex items-center gap-3 p-4 rounded-lg transition-colors
-                ${selectedBabyId === baby.id 
-                  ? 'bg-primary/10 border-2 border-primary' 
-                  : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
+                ${
+                  selectedBabyId === baby.id
+                    ? 'bg-primary/10 border-2 border-primary'
+                    : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
                 }
               `}
             >
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+              <Avatar className='h-12 w-12'>
+                <AvatarFallback className='bg-primary text-primary-foreground text-lg'>
                   {getInitials(baby.name)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 text-left">
-                <p className="font-medium">{baby.name}</p>
-                <p className="text-sm text-muted-foreground">{getAgeLabel(baby.date_of_birth)}</p>
+              <div className='flex-1 text-left'>
+                <p className='font-medium'>{baby.name}</p>
+                <p className='text-sm text-muted-foreground'>{getAgeLabel(baby.date_of_birth)}</p>
               </div>
             </button>
           ))}
-          <Button
-            variant="outline"
-            className="w-full mt-4"
-            onClick={handleAddBaby}
-          >
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant='outline' className='w-full mt-4' onClick={handleAddBaby}>
+            <Plus className='h-4 w-4 mr-2' />
             Add Baby
           </Button>
         </div>

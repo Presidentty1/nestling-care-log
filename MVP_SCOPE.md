@@ -9,6 +9,7 @@ This document defines the **P0 features** that must be in the first iOS native r
 These features are **essential** and must be implemented in the native iOS app.
 
 ### 1. Authentication & Onboarding
+
 - **Email/Password Sign Up**
   - Auto-confirm email (no verification required for MVP)
   - Profile creation (name, email)
@@ -22,12 +23,14 @@ These features are **essential** and must be implemented in the native iOS app.
   - Defer caregiver invitations to Phase 2
 
 **Screens:**
+
 - `Auth.tsx` → Sign Up / Sign In
 - `Onboarding.tsx` or `OnboardingSimple.tsx` → Baby profile setup
 
 ---
 
 ### 2. Home Dashboard (Today View)
+
 - **Timeline of Today's Events**
   - Last feed, last diaper, sleep status
   - Chronological list of all events (swipeable to delete)
@@ -41,6 +44,7 @@ These features are **essential** and must be implemented in the native iOS app.
   - Tap to open log sheets for Feed, Diaper, Sleep
 
 **Screens:**
+
 - `Home.tsx` → Main dashboard
 - `FloatingActionButton.tsx` or `FloatingActionButtonRadial.tsx` → Quick actions
 
@@ -49,6 +53,7 @@ These features are **essential** and must be implemented in the native iOS app.
 ### 3. Event Logging
 
 #### Feed Logging
+
 - **Type Selection**: Breast, Bottle, Pumping
 - **Side (Breast)**: Left, Right, or Both
 - **Amount (Bottle/Pumping)**: Numeric input with unit (ml/oz)
@@ -57,18 +62,22 @@ These features are **essential** and must be implemented in the native iOS app.
 - **Timestamp**: Auto-set to "now" or manual adjustment
 
 **Screens:**
+
 - `FeedForm.tsx` (bottom sheet or modal)
 
 #### Diaper Logging
+
 - **Type**: Wet, Dirty, or Both
 - **Optional**: Color, texture (defer to Phase 2 if too complex)
 - **Notes**: Optional text notes
 - **Timestamp**: Auto-set to "now" or manual adjustment
 
 **Screens:**
+
 - `DiaperForm.tsx` (bottom sheet or modal)
 
 #### Sleep Logging
+
 - **Start/End Time**
   - Timer-based (tap to start, tap to stop)
   - Or manual entry with time pickers
@@ -77,12 +86,14 @@ These features are **essential** and must be implemented in the native iOS app.
 - **Notes**: Optional text notes
 
 **Screens:**
+
 - `SleepForm.tsx` (bottom sheet or modal)
 - `TimerControls.tsx` + `TimerDisplay.tsx` → Active sleep timer
 
 ---
 
 ### 4. History / Calendar View
+
 - **Day-by-Day Event List**
   - Navigate forward/backward by day
   - Filter by event type (All, Feeds, Diapers, Sleep)
@@ -92,6 +103,7 @@ These features are **essential** and must be implemented in the native iOS app.
   - Date strip or calendar picker
 
 **Screens:**
+
 - `History.tsx` → Historical event list
 - `DayStrip.tsx` → Date navigation
 - `TimelineList.tsx` → Event timeline
@@ -99,6 +111,7 @@ These features are **essential** and must be implemented in the native iOS app.
 ---
 
 ### 5. Nap Prediction (Next Nap / Wake Window)
+
 - **Display Next Nap Window**
   - "Next nap around 3:00 PM - 3:30 PM"
   - Reasoning: "Typical wake window for age" or "Based on recent patterns"
@@ -109,17 +122,20 @@ These features are **essential** and must be implemented in the native iOS app.
   - "This is guidance based on typical patterns, not medical advice."
 
 **Screens:**
+
 - `NapPredictor.tsx` → Next nap prediction
 - `NapPredictionCard.tsx` → Dashboard widget
 - `NapFeedbackButtons.tsx` → User feedback
 
 **Backend:**
+
 - `calculate-nap-window` edge function
 - `napPredictorService.ts` → Age-based wake windows
 
 ---
 
 ### 6. AI Assistant (Basic Q&A)
+
 - **Chat Interface**
   - Text input for user questions
   - AI responses using Lovable AI (Gemini)
@@ -135,17 +151,20 @@ These features are **essential** and must be implemented in the native iOS app.
   - "Is this sleep pattern normal?"
 
 **Screens:**
+
 - `AIAssistant.tsx` → Chat UI
 - `MedicalDisclaimer.tsx` → Disclaimer component
 - `QuickQuestions.tsx` → Suggested prompts
 
 **Backend:**
+
 - `ai-assistant` edge function
 - `useAIChat.ts` hook
 
 ---
 
 ### 7. Settings (Minimal)
+
 - **Baby Profile Management**
   - Edit baby name, DOB, sex
   - Switch between babies (if multiple)
@@ -158,12 +177,14 @@ These features are **essential** and must be implemented in the native iOS app.
 - **No caregiver management, no notifications, no privacy settings in MVP**
 
 **Screens:**
+
 - `Settings.tsx` → Main settings hub
 - `Settings/ManageBabies.tsx` → Baby profiles
 
 ---
 
 ### 8. Empty, Loading, Error States
+
 - **Empty States**
   - "No events logged yet. Tap + to log your first feed!"
   - Friendly, encouraging copy
@@ -176,6 +197,7 @@ These features are **essential** and must be implemented in the native iOS app.
   - Calm, supportive tone
 
 **Components:**
+
 - `EmptyState.tsx` → Reusable empty state
 - `LoadingSpinner.tsx` / `SkeletonCard.tsx` → Loading UI
 - `ErrorState.tsx` → Error handling
@@ -183,11 +205,13 @@ These features are **essential** and must be implemented in the native iOS app.
 ---
 
 ### 9. Medical Disclaimers
+
 - **AI Assistant**: Always visible sticky disclaimer
 - **Nap Predictor**: Small disclaimer above prediction
 - **Sleep Training** (if included): Disclaimer on first screen
 
 **Components:**
+
 - `MedicalDisclaimer.tsx` (variants: `ai`, `sleep`, `predictions`)
 
 ---
@@ -197,6 +221,7 @@ These features are **essential** and must be implemented in the native iOS app.
 These features exist in the web app but are **deferred** for later iOS releases.
 
 ### Analytics & Insights
+
 - `Analytics.tsx` → Feeding/sleep charts
 - `Insights.tsx` → Pattern analysis
 - `PatternInsights.tsx` → AI-generated insights
@@ -207,6 +232,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Growth Tracking
+
 - `GrowthTracker.tsx` → Weight, length, head circumference
 - `GrowthChart.tsx` → WHO percentile curves
 
@@ -215,6 +241,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Health Records & Vaccines
+
 - `HealthRecords.tsx` → Illnesses, doctor visits
 - `VaccineScheduleView.tsx` → Vaccine tracking
 - `MedicationTracker.tsx` → Baby medication reminders
@@ -224,6 +251,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Milestones
+
 - `Milestones.tsx` → Developmental milestone tracking
 - `MilestoneModal.tsx` → Log milestones with photos
 
@@ -232,6 +260,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Journal & Photo Gallery
+
 - `Journal.tsx` → Daily journal entries
 - `JournalEntry.tsx` → Rich text editor with photos
 - `PhotoGallery.tsx` → Photo albums and galleries
@@ -241,6 +270,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Cry Insights (Prototype)
+
 - `CryInsights.tsx` → Cry pattern analysis
 - `CryRecorder.tsx` → Audio recording and AI analysis
 - `CryAnalysisResult.tsx` → Display cry category
@@ -250,6 +280,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Sleep Training
+
 - `SleepTraining.tsx` → Sleep training session management
 - `NewSleepTrainingSession.tsx` → Create training plans
 
@@ -258,6 +289,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Parent Wellness
+
 - `ParentWellness.tsx` → Parent mood and water intake tracking
 - `MoodTracker.tsx` → Daily mood logging
 - `WaterIntakeTracker.tsx` → Hydration tracking
@@ -268,6 +300,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Multi-Caregiver / Family Sharing
+
 - `CaregiverManagement.tsx` → Invite caregivers
 - `AcceptInvite.tsx` → Accept family invites
 - `Settings/ManageCaregivers.tsx` → Manage family members
@@ -278,6 +311,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Advanced Predictions
+
 - `Predictions.tsx` → Historical prediction accuracy
 - `generate-predictions` edge function → General prediction engine
 
@@ -286,6 +320,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Weekly/Monthly Recaps
+
 - `WeeklyReports.tsx` → Auto-generated weekly summaries
 - `generate-weekly-summary` edge function
 - `generate-monthly-recap` edge function
@@ -295,6 +330,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Notifications & Reminders
+
 - `NotificationSettings.tsx` → Configure reminders
 - `notificationManager.ts` → Schedule local notifications
 - `reminderService.ts` → Feed/diaper reminders
@@ -304,6 +340,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Voice Logging (Experimental)
+
 - `VoiceLogModal.tsx` → Voice command logging
 - `VoiceButton.tsx` → Voice input trigger
 - `process-voice-command` edge function
@@ -313,6 +350,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Data Export & Privacy
+
 - `Settings/PrivacyData.tsx` → Export data, delete account
 - `dataExport.ts` → CSV/PDF export
 - `doctorReportPDF.ts` → Generate doctor reports
@@ -322,6 +360,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Achievements & Gamification
+
 - `Achievements.tsx` → Logging streaks and badges
 - `StreakCounter.tsx` → Display logging streaks
 - `achievementService.ts` → Achievement logic
@@ -331,6 +370,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Referrals
+
 - `Referrals.tsx` → Referral program UI
 - `referralService.ts` → Referral tracking
 
@@ -339,6 +379,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ---
 
 ### Labs / Experimental Features
+
 - `Labs.tsx` → Beta feature toggles
 
 **Reason for Deferral**: Internal testing page, not user-facing.
@@ -348,6 +389,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 ## Summary Checklist
 
 ### iOS MVP Must-Haves (P0)
+
 - ✅ Email/password auth
 - ✅ Onboarding (baby profile)
 - ✅ Home dashboard with timeline
@@ -362,6 +404,7 @@ These features exist in the web app but are **deferred** for later iOS releases.
 - ✅ Medical disclaimers
 
 ### Defer to Phase 2+
+
 - ❌ Analytics & charts
 - ❌ Growth tracking
 - ❌ Health records & vaccines
@@ -389,7 +432,7 @@ Before mirroring this architecture into a native iOS app, the following technica
 
 - **`/predictions` (Smart Predictions)** ✅ FIXED
   - **Status**: Fully functional with proper error handling
-  - **Changes**: 
+  - **Changes**:
     - Added AI consent check before mutation
     - Improved error handling with specific messages for different failure cases
     - Better loading states and user feedback
@@ -429,7 +472,7 @@ Before mirroring this architecture into a native iOS app, the following technica
 
 - **Home Timeline (`/home`)**
   - **Status**: ✅ Fixed - Edit and delete handlers work correctly
-  - **Changes**: 
+  - **Changes**:
     - Added `loadTodayEvents()` call after delete to refresh timeline
     - EventSheet properly handles prefillData for all event types
   - **Location**: `src/pages/Home.tsx`
@@ -441,7 +484,7 @@ Before mirroring this architecture into a native iOS app, the following technica
 
 - **EventSheet Forms**
   - **Status**: ✅ Improved - All forms now properly use prefillData
-  - **Changes**: 
+  - **Changes**:
     - FeedForm, SleepForm, DiaperForm, TummyTimeForm all handle prefillData correctly
     - Forms fetch fresh data when editingEventId exists, use prefillData as fallback
   - **Location**: `src/components/sheets/*.tsx`
@@ -579,6 +622,7 @@ When implementing the iOS native app, consider:
 ## Contact
 
 For questions about this scope document, refer to:
+
 - `ARCHITECTURE.md` → Overall system design
 - `DATA_MODEL.md` → Database schema details
 - `DESIGN_SYSTEM.md` → UI component standards

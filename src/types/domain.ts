@@ -35,7 +35,7 @@ export interface EventRecord {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
-  
+
   // Additional specific fields
   side?: Side;
   diaperColor?: string;
@@ -118,7 +118,13 @@ export interface Medication {
   updatedAt: string;
 }
 
-export type HealthRecordType = 'temperature' | 'doctor_visit' | 'vaccine' | 'allergy' | 'illness' | 'other';
+export type HealthRecordType =
+  | 'temperature'
+  | 'doctor_visit'
+  | 'vaccine'
+  | 'allergy'
+  | 'illness'
+  | 'other';
 
 export interface HealthRecord {
   id: string;
@@ -171,5 +177,4 @@ export interface NotificationSettings {
   createdAt: string;
   updatedAt: string;
 }
-
 

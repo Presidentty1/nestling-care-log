@@ -42,5 +42,3 @@ The iOS project needs the following Swift Package dependencies. Since the automa
 ## Fix Import Error
 
 The `HomeView.swift` file had an incorrect import that has been fixed. The `FeatureGate` struct is in the same module and doesn't need a special import.
-
-

@@ -10,7 +10,11 @@ interface FeatureDiscoveryCardProps {
   onTryIt?: () => void;
 }
 
-export function FeatureDiscoveryCard({ featureKey, onDismiss, onTryIt }: FeatureDiscoveryCardProps) {
+export function FeatureDiscoveryCard({
+  featureKey,
+  onDismiss,
+  onTryIt,
+}: FeatureDiscoveryCardProps) {
   const navigate = useNavigate();
   const feature = getFeatureIntroMessage(featureKey);
 
@@ -35,40 +39,30 @@ export function FeatureDiscoveryCard({ featureKey, onDismiss, onTryIt }: Feature
   };
 
   return (
-    <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 animate-fade-in">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h4 className="font-semibold text-base">
-                ✨ New: {feature.title}
-              </h4>
+    <Card className='border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 animate-fade-in'>
+      <CardContent className='p-4'>
+        <div className='flex items-start gap-3'>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-start justify-between gap-2 mb-2'>
+              <h4 className='font-semibold text-base'>✨ New: {feature.title}</h4>
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={onDismiss}
-                className="h-6 w-6 p-0 shrink-0 -mr-1 -mt-1"
+                className='h-6 w-6 p-0 shrink-0 -mr-1 -mt-1'
               >
-                <X className="h-4 w-4" />
+                <X className='h-4 w-4' />
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+            <p className='text-sm text-muted-foreground mb-3 leading-relaxed'>
               {feature.description}
             </p>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleTryIt}
-                className="flex items-center gap-1"
-              >
+            <div className='flex gap-2'>
+              <Button size='sm' onClick={handleTryIt} className='flex items-center gap-1'>
                 {MESSAGING.cta.tryIt}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className='h-4 w-4' />
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onDismiss}
-              >
+              <Button size='sm' variant='ghost' onClick={onDismiss}>
                 Maybe Later
               </Button>
             </div>
@@ -78,6 +72,4 @@ export function FeatureDiscoveryCard({ featureKey, onDismiss, onTryIt }: Feature
     </Card>
   );
 }
-
-
 

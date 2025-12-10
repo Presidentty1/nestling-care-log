@@ -65,6 +65,19 @@ class PredictionsViewModel: ObservableObject {
                 let (feed, nap) = try await (feedPrediction, napPrediction)
                 self.nextFeedPrediction = feed
                 self.nextNapPrediction = nap
+                
+                if let nap = nap {
+                    await Analytics.shared.logPredictionShown(
+                        type: PredictionType.nextNap.rawValue,
+                        isPro: proService.isProUser,
+                        babyId: baby.id.uuidString
+                    )
+                    await Analytics.shared.log("prediction_loaded", parameters: [
+                        "type": PredictionType.nextNap.rawValue,
+                        "confidence": nap.confidence,
+                        "source": "cache"
+                    ])
+                }
             } catch {
                 self.errorMessage = "Failed to load predictions: \(error.localizedDescription)"
             }
@@ -118,6 +131,11 @@ class PredictionsViewModel: ObservableObject {
                     self.nextFeedPrediction = prediction
                 case .nextNap:
                     self.nextNapPrediction = prediction
+                    await Analytics.shared.logPredictionShown(
+                        type: type.rawValue,
+                        isPro: proService.isProUser,
+                        babyId: baby.id.uuidString
+                    )
                 }
                 
                 self.isLoading = false

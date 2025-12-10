@@ -44,20 +44,16 @@ export async function exportDaySummaryPDF(baby: Baby, date: Date) {
   doc.text(`Total Sleep: ${sleepHours}h ${sleepMins}m (${totals.sleepCount} naps)`, 20, y);
   y += 7;
 
-  doc.text(
-    `Diapers: ${totals.diaperTotal} (💧${totals.diaperWet} 💩${totals.diaperDirty})`,
-    20,
-    y
-  );
+  doc.text(`Diapers: ${totals.diaperTotal} (💧${totals.diaperWet} 💩${totals.diaperDirty})`, 20, y);
   y += 15;
 
   // Last feed and sleep
   const lastFeed = events
-    .filter((e) => e.type === 'feed')
+    .filter(e => e.type === 'feed')
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())[0];
 
   const lastSleep = events
-    .filter((e) => e.type === 'sleep')
+    .filter(e => e.type === 'sleep')
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())[0];
 
   if (lastFeed) {

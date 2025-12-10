@@ -23,12 +23,14 @@ interface DayCompletion {
 class StreakService {
   async getStreak(babyId: string): Promise<StreakData> {
     const streak = await streakStore.getItem<StreakData>(`streak_${babyId}`);
-    return streak || {
-      currentStreak: 0,
-      longestStreak: 0,
-      lastLogDate: '',
-      totalDaysLogged: 0,
-    };
+    return (
+      streak || {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastLogDate: '',
+        totalDaysLogged: 0,
+      }
+    );
   }
 
   async updateStreak(babyId: string): Promise<StreakData> {
@@ -41,7 +43,7 @@ class StreakService {
     }
 
     // Check if streak continues (yesterday or today)
-    const daysSinceLastLog = streak.lastLogDate 
+    const daysSinceLastLog = streak.lastLogDate
       ? differenceInDays(new Date(today), new Date(streak.lastLogDate))
       : 999;
 
@@ -74,17 +76,19 @@ class StreakService {
 
   async getDayCompletion(babyId: string, date: string): Promise<DayCompletion> {
     const completion = await streakStore.getItem<DayCompletion>(`completion_${babyId}_${date}`);
-    return completion || {
-      date,
-      hasFeed: false,
-      hasSleep: false,
-      hasDiaper: false,
-    };
+    return (
+      completion || {
+        date,
+        hasFeed: false,
+        hasSleep: false,
+        hasDiaper: false,
+      }
+    );
   }
 
   async markEventLogged(babyId: string, date: string, eventType: string): Promise<void> {
     const completion = await this.getDayCompletion(babyId, date);
-    
+
     if (eventType === 'feed') completion.hasFeed = true;
     if (eventType === 'sleep') completion.hasSleep = true;
     if (eventType === 'diaper') completion.hasDiaper = true;
@@ -102,7 +106,7 @@ class StreakService {
     const isComplete = await this.isDayComplete(babyId, today);
     const shownKey = `affirmation_shown_${babyId}_${today}`;
     const hasShown = await streakStore.getItem<boolean>(shownKey);
-    
+
     return isComplete && !hasShown;
   }
 

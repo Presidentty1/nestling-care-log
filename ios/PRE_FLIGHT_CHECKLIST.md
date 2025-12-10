@@ -100,5 +100,3 @@ Use this checklist before submitting to App Store.
 - [ ] Respond to reviewer questions promptly
 - [ ] Test any fixes requested by reviewers
 - [ ] Resubmit if needed
-
-

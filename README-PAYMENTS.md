@@ -20,6 +20,7 @@ ios/Nuzzle/Nuzzle.storekit
 ```
 
 **Products configured:**
+
 - `com.nestling.pro.monthly` - $5.99/month
 - `com.nestling.pro.yearly` - $39.99/year (with 7-day free trial)
 
@@ -45,11 +46,13 @@ For testing on real devices:
 ### 4. Test Subscription Flows
 
 **Local Testing (Simulator):**
+
 - Purchase flows complete instantly
 - Subscriptions renew every few minutes for testing
 - Use **Debug** → **StoreKit** → **Manage Transactions** to clear/manage test purchases
 
 **Device Testing (Real iPhone):**
+
 - Must use Sandbox test account
 - Apple shows "[Environment: Sandbox]" on purchase sheets
 - You won't be charged real money
@@ -66,6 +69,7 @@ print("[Pro] Time-based trial active: X days remaining")
 ```
 
 **Dev Mode Toggle:**
+
 - Settings → Developer Settings → Enable Pro Mode
 - Bypasses all subscription checks (useful for testing Pro features)
 
@@ -83,12 +87,14 @@ yearlyProductID = "com.nestling.pro.yearly"    // $39.99/yr
 ## Trial System
 
 ### Time-Based Trial (7 Days)
+
 - Starts automatically on first app launch
 - Stored in UserDefaults: `trial_start_date`
 - Calculated daily: `trialDaysRemaining`
 - After 7 days, app shows paywall on launch
 
 ### StoreKit Introductory Offers
+
 - Yearly plan includes 7-day free trial (configured in `Nuzzle.storekit`)
 - Detected via `Transaction.offer?.type == .introductory`
 - Managed automatically by StoreKit 2
@@ -102,15 +108,12 @@ Before submitting to App Store:
    - Products:
      - Monthly: `com.nestling.pro.monthly` at $5.99/month
      - Yearly: `com.nestling.pro.yearly` at $39.99/year
-   
 2. **Configure Introductory Offer:**
    - Yearly plan: 7-day free trial
    - Available to new subscribers only
-   
 3. **Set Subscription Level:**
    - Both products in same group (users can switch between them)
    - Yearly = Level 2 (higher benefits)
-   
 4. **Add Localized Descriptions:**
    - At minimum: English (US)
    - Recommended: All supported markets
@@ -168,4 +171,3 @@ The app tracks these subscription events:
 - [StoreKit 2 Documentation](https://developer.apple.com/documentation/storekit/in-app_purchase)
 - [Testing In-App Purchases](https://developer.apple.com/documentation/xcode/setting-up-storekit-testing-in-xcode)
 - [App Store Connect Help](https://help.apple.com/app-store-connect/#/devb57be10e7)
-

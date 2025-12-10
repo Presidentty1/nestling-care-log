@@ -7,7 +7,7 @@ export const MESSAGING = {
   // North Star / Value Proposition
   northStar: 'The fastest shared baby logger',
   tagline: 'The fastest way to track baby care',
-  
+
   // Core Value Props (3 pillars)
   valueProp: {
     speed: {
@@ -167,7 +167,7 @@ export const MESSAGING = {
     },
     trustYourself: {
       title: 'Trust yourself',
-      description: "You know your baby best. This app is here to support, not judge.",
+      description: 'You know your baby best. This app is here to support, not judge.',
     },
     invitePartner: {
       title: 'Invite your partner',
@@ -248,6 +248,3 @@ export function getTimeSinceMessage(minutes: number): string {
     return `${days}d ago`;
   }
 }
-
-
-

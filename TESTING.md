@@ -104,7 +104,7 @@ const testBaby = {
   name: 'Test Baby',
   date_of_birth: '2024-01-01',
   timezone: 'America/New_York',
-  units: 'metric'
+  units: 'metric',
 };
 ```
 
@@ -136,6 +136,7 @@ npx playwright show-report
 ## Continuous Integration
 
 Tests run automatically on:
+
 - Pull requests
 - Commits to main branch
 
@@ -159,6 +160,7 @@ npm run test -- --reporter=verbose
 ```
 
 Target test durations:
+
 - Unit tests: < 100ms each
 - E2E tests: < 30s each
 

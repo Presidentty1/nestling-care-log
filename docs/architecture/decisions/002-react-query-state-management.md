@@ -1,15 +1,19 @@
 # ADR 002: React Query for State Management
 
 ## Status
+
 Accepted
 
 ## Context
+
 The React web application needed an effective way to manage server state, caching, and synchronization. Traditional state management solutions like Redux were considered, but the app's needs were more focused on server state than complex client-side state.
 
 ## Decision
+
 We chose React Query (TanStack Query) for managing server state and API interactions in the React application.
 
 ## Rationale
+
 - **Server State Focus**: React Query excels at managing asynchronous server state, caching, and synchronization
 - **Automatic Caching**: Built-in intelligent caching with stale-while-revalidate strategy
 - **Background Updates**: Automatic refetching when data becomes stale or on window focus
@@ -19,6 +23,7 @@ We chose React Query (TanStack Query) for managing server state and API interact
 - **Type Safety**: Full TypeScript support with proper typing for queries and mutations
 
 ## Consequences
+
 - **Positive**:
   - Simplified state management for server data
   - Automatic caching and synchronization
@@ -31,6 +36,7 @@ We chose React Query (TanStack Query) for managing server state and API interact
   - Not suitable for complex client-side state logic
 
 ## Implementation
+
 - All API calls go through React Query hooks (`useQuery`, `useMutation`)
 - Custom hooks wrap React Query for specific data operations
 - Error boundaries catch and display query errors
@@ -38,16 +44,14 @@ We chose React Query (TanStack Query) for managing server state and API interact
 - Cache invalidation is handled through query keys and invalidation strategies
 
 ## Alternatives Considered
+
 - **Redux Toolkit**: Too complex for primarily server state management
 - **Zustand**: Good alternative, but React Query's server state features were more compelling
 - **SWR**: Similar to React Query, but React Query had better TypeScript support and feature set
 - **Apollo Client**: Overkill since we're not using GraphQL
 
 ## Related Decisions
+
 - ADR 001: MVVM Pattern for SwiftUI Architecture
 - ADR 003: Offline-First Architecture
 - ADR 005: Cross-Platform Consistency Patterns
-
-
-
-

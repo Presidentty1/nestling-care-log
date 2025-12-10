@@ -11,12 +11,12 @@ const STORAGE_KEY = 'featureDiscoveryState';
 
 // Feature introduction timeline (in days since first log)
 const FEATURE_TIMELINE = {
-  'ai-predictions': 2,    // Day 2-3: Show AI prediction card
-  'history': 4,            // Day 4-5: Introduce history view
-  'invite-partner': 6,     // Day 6-7: Show invite partner prompt
-  'analytics': 14,         // Week 2: Introduce analytics
-  'ai-assistant': 14,      // Week 2: Introduce AI assistant
-  'cry-insights': 21,      // Week 3: Introduce cry insights
+  'ai-predictions': 2, // Day 2-3: Show AI prediction card
+  history: 4, // Day 4-5: Introduce history view
+  'invite-partner': 6, // Day 6-7: Show invite partner prompt
+  analytics: 14, // Week 2: Introduce analytics
+  'ai-assistant': 14, // Week 2: Introduce AI assistant
+  'cry-insights': 21, // Week 3: Introduce cry insights
 };
 
 export function useFeatureDiscovery() {
@@ -53,13 +53,13 @@ export function useFeatureDiscovery() {
   const shouldIntroduceFeature = (featureKey: string): boolean => {
     const daysSince = getDaysSinceFirstLog();
     const requiredDays = FEATURE_TIMELINE[featureKey as keyof typeof FEATURE_TIMELINE] || 0;
-    
+
     // Check if feature has been introduced or dismissed
     const featureState = state[featureKey];
     if (featureState?.introduced || featureState?.dismissedAt) {
       return false;
     }
-    
+
     // Check if enough days have passed
     return daysSince >= requiredDays;
   };
@@ -92,14 +92,14 @@ export function useFeatureDiscovery() {
   // Get the next feature to introduce (only one at a time)
   const getNextFeatureToIntroduce = (): string | null => {
     const daysSince = getDaysSinceFirstLog();
-    
+
     // Find all features that are ready to introduce
     const readyFeatures = Object.keys(FEATURE_TIMELINE).filter(key => {
       const requiredDays = FEATURE_TIMELINE[key as keyof typeof FEATURE_TIMELINE];
       const featureState = state[key];
       return daysSince >= requiredDays && !featureState?.introduced && !featureState?.dismissedAt;
     });
-    
+
     // Return the first ready feature (they're already in order of introduction)
     return readyFeatures[0] || null;
   };
@@ -113,6 +113,4 @@ export function useFeatureDiscovery() {
     daysSinceFirstLog: getDaysSinceFirstLog(),
   };
 }
-
-
 

@@ -18,17 +18,20 @@
 ## What Was Fixed (Build Errors)
 
 ### Error 1: ProSubscriptionService.swift Line 103
+
 **Issue:** Function name had space: `initializeTimeBased Trial()`  
 **Fixed:** Changed to `initializeTimeBasedTrial()`  
 **Status:** ✅ RESOLVED
 
 ### Error 2: JSONBackedDataStore.swift Line 36
+
 **Issue:** Swift syntax error - `_ =` not allowed in guard  
 **Fixed:** Changed to `let _ =` (proper discard syntax)  
 **Status:** ✅ RESOLVED  
 **Note:** Pre-existing error, fixed proactively
 
 ### Error 3: HomeViewModel.swift Line 549
+
 **Issue:** Swift syntax error - `_ =` not allowed in if-let  
 **Fixed:** Changed to `let _ =` (proper discard syntax)  
 **Status:** ✅ RESOLVED  
@@ -39,6 +42,7 @@
 ## Files Modified (Final Count)
 
 ### Core Changes (23 files):
+
 1. `Services/ProSubscriptionService.swift` ✅
 2. `Services/NotificationScheduler.swift` ✅
 3. `Services/AnalyticsService.swift` ✅
@@ -62,10 +66,12 @@
 21. `App/NuzzleApp.swift` ✅
 
 ### New Components (2 files):
+
 22. `Design/Components/TrialBannerView.swift` ✅ NEW
 23. `Design/Components/MilestoneCelebrationView.swift` ✅ NEW
 
 ### Documentation (3 files):
+
 24. `README-PAYMENTS.md` ✅ NEW
 25. `MARKETING_CLAIMS.md` ✅ NEW
 26. `IOS_IMPROVEMENTS_COMPLETE.md` ✅ NEW
@@ -77,6 +83,7 @@
 ## Next Steps
 
 ### 1. Build in Xcode
+
 ```bash
 cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
 open ios/Nuzzle/Nestling.xcodeproj
@@ -85,6 +92,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ```
 
 ### 2. Run on Simulator
+
 ```
 # Select iPhone 15 Pro (or any device)
 # Product → Run (⌘R)
@@ -92,6 +100,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ```
 
 ### 3. Test Critical Flows
+
 - [ ] Fresh onboarding (3 screens)
 - [ ] Trial countdown shows on Home
 - [ ] Subscription loading works
@@ -100,6 +109,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 - [ ] Next Nap shows larger text
 
 ### 4. Review Before Launch
+
 - [ ] Read `MARKETING_CLAIMS.md` - validate or soften claims
 - [ ] Read `README-PAYMENTS.md` - set up StoreKit
 - [ ] Test on real device with Sandbox account
@@ -110,6 +120,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ## Key Metrics Implemented
 
 ### Monetization:
+
 - **Trial system:** 7-day time-based, auto-starts
 - **Paywall triggers:** 10 sources tracked
 - **Auto-conversion:** Paywall shows on Day 7
@@ -117,6 +128,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 - **Hero feature:** Daily Insights (not just predictions)
 
 ### UX:
+
 - **Onboarding:** 3 screens (was 4+)
 - **Time to value:** <60 seconds
 - **Personalization:** Goal-based Home layout
@@ -124,6 +136,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 - **Legal:** Privacy/Terms accessible
 
 ### Analytics:
+
 - **Onboarding funnel:** Step views, skips, completions
 - **Paywall sources:** 10 triggers tracked
 - **Conversion ready:** Track by source for optimization
@@ -133,12 +146,14 @@ open ios/Nuzzle/Nestling.xcodeproj
 ## Files You Should Review
 
 ### Most Important:
+
 1. `Services/ProSubscriptionService.swift` - Core trial logic
 2. `Design/Components/TrialBannerView.swift` - Trial UI
 3. `Features/Home/HomeContentView.swift` - Home layout changes
 4. `README-PAYMENTS.md` - Your setup guide
 
 ### Before Launch:
+
 1. `MARKETING_CLAIMS.md` - Legal compliance
 2. `IOS_IMPROVEMENTS_COMPLETE.md` - Full change log
 3. `QUICK_START_IMPROVEMENTS.md` - Testing guide
@@ -150,6 +165,7 @@ open ios/Nuzzle/Nestling.xcodeproj
 ### None - All Build Errors Resolved ✅
 
 Previously had:
+
 - ❌ `initializeTimeBased Trial()` typo → ✅ Fixed
 - ❌ `_ =` syntax in guards → ✅ Fixed (JSONBackedDataStore)
 - ❌ `_ =` syntax in if-let → ✅ Fixed (HomeViewModel)
@@ -177,6 +193,7 @@ The app is now ready to build and test. All critical monetization, onboarding, a
 ---
 
 **Build Command:**
+
 ```bash
 cd /Users/tyhorton/.cursor/worktrees/nestling-care-log/gnq
 xcodebuild -project ios/Nuzzle/Nestling.xcodeproj -scheme Nuzzle -configuration Debug clean build
@@ -185,4 +202,3 @@ xcodebuild -project ios/Nuzzle/Nestling.xcodeproj -scheme Nuzzle -configuration 
 Or simply open in Xcode and press ⌘B.
 
 Good luck! 🚀
-

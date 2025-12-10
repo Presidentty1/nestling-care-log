@@ -70,57 +70,47 @@ export function MilestoneModal({ isOpen, onClose, milestone }: MilestoneModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <div className="text-center py-6 animate-fade-in">
+      <DialogContent className='max-w-md'>
+        <div className='text-center py-6 animate-fade-in'>
           {/* Trophy Icon */}
-          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 animate-scale-in">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Trophy className="h-10 w-10 text-primary-foreground" />
+          <div className='w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 animate-scale-in'>
+            <div className='w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center'>
+              <Trophy className='h-10 w-10 text-primary-foreground' />
             </div>
           </div>
-          
+
           {/* Title */}
-          <h2 className="text-2xl font-bold mb-2">
-            {content.title}
-          </h2>
-          
+          <h2 className='text-2xl font-bold mb-2'>{content.title}</h2>
+
           {/* Subtitle */}
-          <p className="text-base text-muted-foreground mb-6">
-            {content.subtitle}
-          </p>
-          
+          <p className='text-base text-muted-foreground mb-6'>{content.subtitle}</p>
+
           {/* Benefits */}
-          <div className="space-y-3 mb-6">
+          <div className='space-y-3 mb-6'>
             {content.benefits.map((benefit, index) => (
-              <Card key={index} className="border-2 border-primary/20 bg-primary/5">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3 text-left">
-                    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-                      <benefit.icon className="h-5 w-5 text-primary" />
+              <Card key={index} className='border-2 border-primary/20 bg-primary/5'>
+                <CardContent className='p-4'>
+                  <div className='flex items-start gap-3 text-left'>
+                    <div className='w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0'>
+                      <benefit.icon className='h-5 w-5 text-primary' />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-sm mb-1">{benefit.title}</h3>
-                      <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                    <div className='flex-1'>
+                      <h3 className='font-semibold text-sm mb-1'>{benefit.title}</h3>
+                      <p className='text-xs text-muted-foreground'>{benefit.description}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-          
+
           {/* CTA */}
-          <Button
-            size="lg"
-            onClick={onClose}
-            className="w-full group"
-          >
+          <Button size='lg' onClick={onClose} className='w-full group'>
             {content.cta}
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className='ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform' />
           </Button>
-          
-          <p className="text-xs text-muted-foreground mt-4">
-            Keep logging to unlock more features
-          </p>
+
+          <p className='text-xs text-muted-foreground mt-4'>Keep logging to unlock more features</p>
         </div>
       </DialogContent>
     </Dialog>

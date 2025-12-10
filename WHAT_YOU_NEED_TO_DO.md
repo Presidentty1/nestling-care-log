@@ -14,6 +14,7 @@
 ### 1. Add Privacy Manifest to Xcode Project (5 minutes)
 
 The `PrivacyInfo.xcprivacy` file has been created at:
+
 ```
 ios/Nuzzle/Nestling/PrivacyInfo.xcprivacy
 ```
@@ -29,6 +30,7 @@ ios/Nuzzle/Nestling/PrivacyInfo.xcprivacy
 7. Click "Add"
 
 **Verify it's added:**
+
 - The file should appear in the Project Navigator
 - Select the file and check the "Target Membership" in the File Inspector
 - "Nuzzle" should be checked
@@ -36,6 +38,7 @@ ios/Nuzzle/Nestling/PrivacyInfo.xcprivacy
 ### 2. Set Version & Build Numbers (2 minutes)
 
 In Xcode:
+
 1. Select the "Nuzzle" project in Project Navigator
 2. Select the "Nuzzle" target
 3. Go to "General" tab
@@ -67,21 +70,25 @@ In Xcode:
 In App Store Connect, fill in all required fields:
 
 **App Information:**
+
 - **Subtitle**: "AI-powered feed & sleep log"
 - **Category**: Primary: Health & Fitness, Secondary: Lifestyle
 - **Age Rating**: 4+ (No Objectionable Content)
 
 **Pricing and Availability:**
+
 - **Price**: Free
 - **Availability**: All countries (or select specific ones)
 
 **App Privacy:**
+
 - Complete the privacy questionnaire
 - Declare data types collected (see APP_STORE_METADATA.md for details)
 - Set "Data used for tracking": No
 - Set "Data linked to user": Yes (for sync)
 
 **Support Information:**
+
 - **Support URL**: `https://nuzzle.app/support` (verify this is live)
 - **Marketing URL**: `https://nuzzle.app` (verify this is live)
 - **Privacy Policy URL**: `https://nuzzle.app/privacy` (verify this is live)
@@ -94,6 +101,7 @@ In App Store Connect, fill in all required fields:
 4. Click "Create"
 
 **Create Monthly Subscription:**
+
 1. Click "+" next to "Nuzzle Pro" group
 2. **Reference Name**: "Nuzzle Pro Monthly"
 3. **Product ID**: `com.nestling.pro.monthly`
@@ -104,6 +112,7 @@ In App Store Connect, fill in all required fields:
 8. Set status to "Ready to Submit"
 
 **Create Yearly Subscription:**
+
 1. Click "+" next to "Nuzzle Pro" group
 2. **Reference Name**: "Nuzzle Pro Yearly"
 3. **Product ID**: `com.nestling.pro.yearly`
@@ -121,10 +130,12 @@ In App Store Connect, fill in all required fields:
 ### 7. Prepare Screenshots (2-4 hours)
 
 You need screenshots for:
+
 - **iPhone 6.5" Display** (iPhone 14 Pro Max / 15 Pro Max): 5 screenshots minimum
 - **iPhone 5.5" Display** (iPhone 8 Plus): 5 screenshots minimum
 
 **Screenshot Ideas:**
+
 1. Home screen with timeline and quick actions
 2. Event logging form (feed/diaper/sleep)
 3. History view with date picker
@@ -132,6 +143,7 @@ You need screenshots for:
 5. AI predictions or insights screen
 
 **How to Capture:**
+
 1. Run app on simulator or device
 2. Use Cmd+S in simulator or screenshot on device
 3. Edit to remove status bar if needed
@@ -140,15 +152,18 @@ You need screenshots for:
 ### 8. Set Up Legal Pages (1-2 hours)
 
 **Privacy Policy** (`https://nuzzle.app/privacy`):
+
 - Must be live and accessible
 - Include: data collection, AI usage, third-party services
 - Must comply with App Store guidelines
 
 **Terms of Service** (`https://nuzzle.app/terms`):
+
 - Must be live and accessible
 - Include: usage terms, subscription terms, refund policy
 
 **Support Page** (`https://nuzzle.app/support`):
+
 - Contact information
 - FAQ
 - How to get help
@@ -243,14 +258,4 @@ You need screenshots for:
 - Product IDs `com.nestling.pro.monthly` and `com.nestling.pro.yearly` are preserved
 - All URLs should point to `nuzzle.app` domain
 - All email addresses should use `@nuzzle.app`
-
-
-
-
-
-
-
-
-
-
 

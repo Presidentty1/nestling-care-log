@@ -20,7 +20,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         className={`min-w-[44px] min-h-[44px] ${className || ''}`}
         {...props}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className='h-5 w-5' />
       </Button>
     );
   }

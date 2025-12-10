@@ -118,7 +118,7 @@ struct AcceptInviteView: View {
                 // Check if baby exists in data store
                 do {
                     let babies = try await environment.dataStore.fetchBabies()
-                    if let sharedBaby = babies.first(where: { $0.id == babyId }) {
+                    if babies.contains(where: { $0.id == babyId }) {
                         await MainActor.run {
                             isProcessing = false
                             showSuccess = true
@@ -150,6 +150,7 @@ struct AcceptInviteView: View {
     AcceptInviteView()
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
 }
+
 
 
 

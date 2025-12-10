@@ -15,7 +15,7 @@ export const queryClient = new QueryClient({
         // Retry up to 3 times for network/server errors
         return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false, // Disable to improve performance
       refetchOnReconnect: true,
       refetchOnMount: true,
@@ -45,11 +45,12 @@ if (typeof window !== 'undefined') {
   const updateCacheSize = () => {
     const cache = queryClient.getQueryCache().getAll();
     const newSize = JSON.stringify(cache).length;
-    if (Math.abs(newSize - cacheSize) > 10000) { // Only track significant changes
+    if (Math.abs(newSize - cacheSize) > 10000) {
+      // Only track significant changes
       cacheSize = newSize;
       track('cache_size_change', {
         size_kb: Math.round(newSize / 1024),
-        query_count: cache.length
+        query_count: cache.length,
       });
     }
   };
@@ -63,7 +64,8 @@ if (typeof window !== 'undefined') {
       const cacheAge = Date.now() - (parsed.timestamp || 0);
       const cacheSize = JSON.stringify(parsed).length;
 
-      if (cacheAge < 24 * 60 * 60 * 1000 && cacheSize < 5 * 1024 * 1024) { // 24h, 5MB
+      if (cacheAge < 24 * 60 * 60 * 1000 && cacheSize < 5 * 1024 * 1024) {
+        // 24h, 5MB
         queryClient.setQueryData(['cached'], parsed);
         console.log('Restored query cache:', Math.round(cacheSize / 1024), 'KB');
       } else {
@@ -84,7 +86,7 @@ if (typeof window !== 'undefined') {
         const cache = queryClient.getQueryCache().getAll();
         const cacheData = {
           timestamp: Date.now(),
-          data: cache
+          data: cache,
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
         updateCacheSize();
@@ -104,7 +106,8 @@ if (typeof window !== 'undefined') {
       try {
         const parsed = JSON.parse(oldCache);
         const age = Date.now() - (parsed.timestamp || 0);
-        if (age > 7 * 24 * 60 * 60 * 1000) { // 7 days
+        if (age > 7 * 24 * 60 * 60 * 1000) {
+          // 7 days
           localStorage.removeItem(CACHE_KEY);
           console.log('Cleaned up old cache');
         }
@@ -119,11 +122,12 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
   // Only refetch on window focus if app was hidden for more than 5 minutes
   let lastHiddenTime = 0;
-  focusManager.setEventListener((onFocus) => {
+  focusManager.setEventListener(onFocus => {
     const cleanup = onFocus(() => {
       const now = Date.now();
       const timeSinceHidden = now - lastHiddenTime;
-      if (timeSinceHidden > 5 * 60 * 1000) { // 5 minutes
+      if (timeSinceHidden > 5 * 60 * 1000) {
+        // 5 minutes
         queryClient.invalidateQueries();
       }
     });
@@ -139,7 +143,7 @@ if (typeof window !== 'undefined') {
   });
 
   // Custom online manager for better offline detection
-  onlineManager.setEventListener((setOnline) => {
+  onlineManager.setEventListener(setOnline => {
     const cleanup = () => {
       window.addEventListener('online', () => setOnline(true));
       window.addEventListener('offline', () => setOnline(false));

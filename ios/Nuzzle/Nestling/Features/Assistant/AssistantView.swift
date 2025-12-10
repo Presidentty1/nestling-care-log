@@ -21,6 +21,15 @@ struct AssistantView: View {
             .padding(.spacingMD)
             .background(Color.surface)
             
+            InfoBanner(
+                title: "Safety",
+                message: "No diagnoses. If anything feels urgent or serious, contact a pediatric professional immediately.",
+                variant: .warning
+            )
+            .padding(.horizontal, .spacingMD)
+            .padding(.bottom, .spacingSM)
+            .background(Color.surface)
+            
             // Messages
             ScrollViewReader { proxy in
                 ScrollView {
@@ -208,6 +217,13 @@ struct AssistantView: View {
                     .background(Color.warning.opacity(0.1))
                     .cornerRadius(.radiusSM)
                 }
+                    
+                    if message.role == .assistant {
+                        Text("Not medical advice. Contact your pediatrician for medical concerns.")
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
             }
             
             if message.role == .user {
@@ -354,3 +370,4 @@ class AssistantViewModel: ObservableObject {
             .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
     }
 }
+

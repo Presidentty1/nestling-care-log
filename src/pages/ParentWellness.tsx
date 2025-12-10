@@ -104,31 +104,28 @@ export default function ParentWellness() {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+    <div className='min-h-screen bg-surface pb-20'>
+      <div className='max-w-2xl mx-auto p-4 space-y-4'>
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/settings')}
-            >
-              <ArrowLeft className="h-4 w-4" />
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <Button variant='ghost' size='sm' onClick={() => navigate('/settings')}>
+              <ArrowLeft className='h-4 w-4' />
             </Button>
             <div>
-              <h1 className="text-headline">Parent Wellness</h1>
-              <p className="text-sm text-muted-foreground">Take care of yourself too 💚</p>
+              <h1 className='text-headline'>Parent Wellness</h1>
+              <p className='text-sm text-muted-foreground'>Take care of yourself too 💚</p>
             </div>
           </div>
-          <Badge variant="secondary">Beta</Badge>
+          <Badge variant='secondary'>Beta</Badge>
         </div>
 
         {/* Info Card */}
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="p-4">
-            <p className="text-sm text-foreground">
-              💡 Self-care isn't selfish. Tracking your wellness helps you be your best for your baby.
+        <Card className='bg-primary/5 border-primary/20'>
+          <CardContent className='p-4'>
+            <p className='text-sm text-foreground'>
+              💡 Self-care isn't selfish. Tracking your wellness helps you be your best for your
+              baby.
             </p>
           </CardContent>
         </Card>
@@ -136,39 +133,36 @@ export default function ParentWellness() {
         {/* Quick Check-In */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
+            <CardTitle className='flex items-center gap-2'>
+              <Heart className='h-5 w-5 text-primary' />
               Quick Check-In
             </CardTitle>
             <CardDescription>How are you feeling today?</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <MoodTracker
-              currentMood={todayLog?.mood}
-              onMoodSelect={handleMoodUpdate}
-            />
+          <CardContent className='space-y-6'>
+            <MoodTracker currentMood={todayLog?.mood} onMoodSelect={handleMoodUpdate} />
 
-            <div className="border-t pt-4">
+            <div className='border-t pt-4'>
               <WaterIntakeTracker
                 currentIntake={todayLog?.water_intake_ml || 0}
                 onAddWater={handleWaterUpdate}
               />
             </div>
 
-            <div className="border-t pt-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Moon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Sleep Quality</span>
+            <div className='border-t pt-4'>
+              <div className='space-y-3'>
+                <div className='flex items-center gap-2'>
+                  <Moon className='h-4 w-4 text-muted-foreground' />
+                  <span className='text-sm font-medium'>Sleep Quality</span>
                 </div>
-                <div className="flex gap-2">
-                  {['great', 'good', 'fair', 'poor'].map((quality) => (
+                <div className='flex gap-2'>
+                  {['great', 'good', 'fair', 'poor'].map(quality => (
                     <Button
                       key={quality}
                       variant={todayLog?.sleep_quality === quality ? 'default' : 'outline'}
-                      size="sm"
+                      size='sm'
                       onClick={() => handleSleepQualityUpdate(quality)}
-                      className="flex-1 capitalize"
+                      className='flex-1 capitalize'
                     >
                       {quality}
                     </Button>
@@ -182,17 +176,14 @@ export default function ParentWellness() {
         {/* Medications & Supplements */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Pill className="h-5 w-5 text-primary" />
+            <CardTitle className='flex items-center gap-2'>
+              <Pill className='h-5 w-5 text-primary' />
               Medications & Supplements
             </CardTitle>
             <CardDescription>Track what you're taking</CardDescription>
           </CardHeader>
           <CardContent>
-            <ParentMedicationTracker
-              medications={medications}
-              onRefresh={loadMedications}
-            />
+            <ParentMedicationTracker medications={medications} onRefresh={loadMedications} />
           </CardContent>
         </Card>
       </div>

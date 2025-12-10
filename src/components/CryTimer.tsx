@@ -54,18 +54,22 @@ export function CryTimer({ baby }: CryTimerProps) {
 
       const now = new Date();
       const timeOfDay = now.getHours();
-      
+
       // Calculate time since last feed
       const lastFeed = recentEvents?.find(e => e.type === 'feed');
-      const timeSinceLastFeed = lastFeed 
+      const timeSinceLastFeed = lastFeed
         ? Math.floor((Date.now() - new Date(lastFeed.start_time).getTime()) / (1000 * 60))
         : 999;
 
       // Calculate last sleep duration
       const lastSleep = recentEvents?.find(e => e.type === 'sleep' && e.end_time);
-      const lastSleepDuration = lastSleep && lastSleep.end_time
-        ? Math.floor((new Date(lastSleep.end_time).getTime() - new Date(lastSleep.start_time).getTime()) / (1000 * 60))
-        : 0;
+      const lastSleepDuration =
+        lastSleep && lastSleep.end_time
+          ? Math.floor(
+              (new Date(lastSleep.end_time).getTime() - new Date(lastSleep.start_time).getTime()) /
+                (1000 * 60)
+            )
+          : 0;
 
       return await cryAnalysisService.analyzeCryPattern({
         babyId: baby.id,
@@ -75,11 +79,11 @@ export function CryTimer({ baby }: CryTimerProps) {
         lastSleepDuration,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       setAnalysis(data);
       setIsAnalyzing(false);
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Analysis error:', error);
       toast({
         title: 'Analysis Failed',
@@ -122,7 +126,7 @@ export function CryTimer({ baby }: CryTimerProps) {
       toast({ title: 'Cry log saved successfully' });
       resetTimer();
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Save error:', error);
       toast({
         title: 'Failed to save',
@@ -161,23 +165,21 @@ export function CryTimer({ baby }: CryTimerProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="p-6">
-        <div className="text-center space-y-4">
-          <div className="text-5xl font-bold font-mono">
-            {formatTime(elapsedSeconds)}
-          </div>
+    <div className='space-y-4'>
+      <Card className='p-6'>
+        <div className='text-center space-y-4'>
+          <div className='text-5xl font-bold font-mono'>{formatTime(elapsedSeconds)}</div>
 
           {!isTracking && !startTime && (
-            <Button onClick={startTracking} size="lg" className="w-full">
-              <Play className="mr-2 h-5 w-5" />
+            <Button onClick={startTracking} size='lg' className='w-full'>
+              <Play className='mr-2 h-5 w-5' />
               Start Cry Timer
             </Button>
           )}
 
           {isTracking && (
-            <Button onClick={stopTracking} size="lg" variant="destructive" className="w-full">
-              <Square className="mr-2 h-5 w-5" />
+            <Button onClick={stopTracking} size='lg' variant='destructive' className='w-full'>
+              <Square className='mr-2 h-5 w-5' />
               Stop & Analyze
             </Button>
           )}
@@ -185,31 +187,31 @@ export function CryTimer({ baby }: CryTimerProps) {
       </Card>
 
       {isAnalyzing && (
-        <Card className="p-6 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-          <p className="text-muted-foreground">Analyzing cry pattern...</p>
+        <Card className='p-6 text-center'>
+          <Loader2 className='h-8 w-8 animate-spin mx-auto mb-2' />
+          <p className='text-muted-foreground'>Analyzing cry pattern...</p>
         </Card>
       )}
 
       {analysis && !isTracking && (
-        <Card className="p-6 space-y-4">
-          <h3 className="font-semibold text-lg">Analysis Results</h3>
-          
+        <Card className='p-6 space-y-4'>
+          <h3 className='font-semibold text-lg'>Analysis Results</h3>
+
           <div>
-            <Label className="text-sm font-medium">Possible Causes</Label>
-            <div className="space-y-2 mt-2">
+            <Label className='text-sm font-medium'>Possible Causes</Label>
+            <div className='space-y-2 mt-2'>
               {analysis.possibleCauses?.map((cause: any, idx: number) => (
-                <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
-                  <span className="capitalize">{cause.cause}</span>
-                  <span className="text-sm text-muted-foreground">{cause.confidence}%</span>
+                <div key={idx} className='flex justify-between items-center p-2 bg-muted rounded'>
+                  <span className='capitalize'>{cause.cause}</span>
+                  <span className='text-sm text-muted-foreground'>{cause.confidence}%</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <Label className="text-sm font-medium">Suggestions</Label>
-            <ul className="list-disc list-inside space-y-1 mt-2 text-sm">
+            <Label className='text-sm font-medium'>Suggestions</Label>
+            <ul className='list-disc list-inside space-y-1 mt-2 text-sm'>
               {analysis.suggestions?.map((suggestion: string, idx: number) => (
                 <li key={idx}>{suggestion}</li>
               ))}
@@ -218,41 +220,41 @@ export function CryTimer({ baby }: CryTimerProps) {
 
           {analysis.reasoning && (
             <div>
-              <Label className="text-sm font-medium">Reasoning</Label>
-              <p className="text-sm text-muted-foreground mt-1">{analysis.reasoning}</p>
+              <Label className='text-sm font-medium'>Reasoning</Label>
+              <p className='text-sm text-muted-foreground mt-1'>{analysis.reasoning}</p>
             </div>
           )}
 
           <div>
-            <Label htmlFor="note">Notes (optional)</Label>
+            <Label htmlFor='note'>Notes (optional)</Label>
             <Textarea
-              id="note"
+              id='note'
               value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="What helped calm the baby?"
-              className="mt-1"
+              onChange={e => setNote(e.target.value)}
+              placeholder='What helped calm the baby?'
+              className='mt-1'
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">How was it resolved?</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={() => saveCryLogMutation.mutate('feeding')} variant="outline">
+          <div className='space-y-2'>
+            <Label className='text-sm font-medium'>How was it resolved?</Label>
+            <div className='grid grid-cols-2 gap-2'>
+              <Button onClick={() => saveCryLogMutation.mutate('feeding')} variant='outline'>
                 Feeding
               </Button>
-              <Button onClick={() => saveCryLogMutation.mutate('sleep')} variant="outline">
+              <Button onClick={() => saveCryLogMutation.mutate('sleep')} variant='outline'>
                 Sleep
               </Button>
-              <Button onClick={() => saveCryLogMutation.mutate('diaper change')} variant="outline">
+              <Button onClick={() => saveCryLogMutation.mutate('diaper change')} variant='outline'>
                 Diaper
               </Button>
-              <Button onClick={() => saveCryLogMutation.mutate('comfort')} variant="outline">
+              <Button onClick={() => saveCryLogMutation.mutate('comfort')} variant='outline'>
                 Comfort
               </Button>
             </div>
           </div>
 
-          <Button onClick={resetTimer} variant="ghost" className="w-full">
+          <Button onClick={resetTimer} variant='ghost' className='w-full'>
             Cancel
           </Button>
         </Card>

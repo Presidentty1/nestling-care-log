@@ -1,7 +1,7 @@
-import { createRoot } from "react-dom/client";
-import { useEffect } from "react";
-import App from "./App.tsx";
-import "./index.css";
+import { createRoot } from 'react-dom/client';
+import { useEffect } from 'react';
+import App from './App.tsx';
+import './index.css';
 import { useAppStore } from './store/appStore';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { registerServiceWorker } from './lib/serviceWorker';
@@ -27,7 +27,7 @@ const initializeTheme = () => {
 const isDarkMode = initializeTheme();
 
 function AppWrapper() {
-  const caregiverMode = useAppStore((state) => state.caregiverMode);
+  const caregiverMode = useAppStore(state => state.caregiverMode);
 
   useEffect(() => {
     if (caregiverMode) {
@@ -40,7 +40,8 @@ function AppWrapper() {
   // Listen for system theme changes when using system preference
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (!savedTheme) { // Only listen if using system preference
+    if (!savedTheme) {
+      // Only listen if using system preference
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
       const handleChange = (e: MediaQueryListEvent) => {
@@ -60,7 +61,7 @@ function AppWrapper() {
   return <App />;
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
     <AppWrapper />
   </ErrorBoundary>

@@ -1,19 +1,19 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { babyId, shiftStart, shiftEnd } = await req.json();
-    
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -29,14 +29,17 @@ serve(async (req) => {
       .order('start_time', { ascending: true });
 
     if (!events || events.length === 0) {
-      return new Response(JSON.stringify({ 
-        summary: 'No events logged during this shift',
-        eventsSummary: {},
-        highlights: [],
-        concerns: []
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          summary: 'No events logged during this shift',
+          eventsSummary: {},
+          highlights: [],
+          concerns: [],
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Aggregate events by type
@@ -46,7 +49,7 @@ serve(async (req) => {
     }, {});
 
     // Use AI to generate summary
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     let summary = '';
     let highlights: string[] = [];
     let concerns: string[] = [];
@@ -60,7 +63,13 @@ Events during shift:
 ${JSON.stringify(eventsSummary, null, 2)}
 
 Recent events detail:
-${events.slice(-5).map(e => `- ${e.type} at ${new Date(e.start_time).toLocaleTimeString()}${e.note ? `: ${  e.note}` : ''}`).join('\n')}
+${events
+  .slice(-5)
+  .map(
+    e =>
+      `- ${e.type} at ${new Date(e.start_time).toLocaleTimeString()}${e.note ? `: ${e.note}` : ''}`
+  )
+  .join('\n')}
 
 Generate:
 1. A brief summary paragraph (2-3 sentences)
@@ -75,17 +84,20 @@ Format as JSON:
 }
 `;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
+      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: 'google/gemini-2.5-flash',
           messages: [
-            { role: "system", content: "You are a helpful childcare assistant. Be concise and factual." },
-            { role: "user", content: context }
+            {
+              role: 'system',
+              content: 'You are a helpful childcare assistant. Be concise and factual.',
+            },
+            { role: 'user', content: context },
           ],
         }),
       });
@@ -104,20 +116,26 @@ Format as JSON:
       }
     }
 
-    return new Response(JSON.stringify({
-      summary,
-      eventsSummary,
-      highlights,
-      concerns,
-      totalEvents: events.length,
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        summary,
+        eventsSummary,
+        highlights,
+        concerns,
+        totalEvents: events.length,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("Error in generate-handoff-report:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in generate-handoff-report:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

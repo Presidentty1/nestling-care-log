@@ -12,29 +12,22 @@ interface MobileContainerProps {
  * Standard mobile container with safe areas, max-width, and consistent padding
  * Use this as the root container for all page content
  */
-export function MobileContainer({ 
-  children, 
+export function MobileContainer({
+  children,
   className,
   noPadding = false,
-  noBottomPadding = false 
+  noBottomPadding = false,
 }: MobileContainerProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "min-h-screen bg-background",
-        !noBottomPadding && "pb-20", // Space for mobile nav
-        "safe-area-inset-bottom",
+        'min-h-screen bg-background',
+        !noBottomPadding && 'pb-20', // Space for mobile nav
+        'safe-area-inset-bottom',
         className
       )}
     >
-      <div 
-        className={cn(
-          "max-w-2xl mx-auto",
-          !noPadding && "p-4"
-        )}
-      >
-        {children}
-      </div>
+      <div className={cn('max-w-2xl mx-auto', !noPadding && 'p-4')}>{children}</div>
     </div>
   );
 }

@@ -14,15 +14,15 @@ This guide helps you convert the Nuzzle web app into a native iOS app using Swif
 
 ### Tech Stack Mapping
 
-| Web (Current) | iOS (Target) |
-|--------------|--------------|
-| React + TypeScript | SwiftUI + Swift |
-| Zustand (state) | @Observable + @State |
-| React Query | Swift async/await + Combine |
-| Supabase JS | Supabase Swift SDK |
-| localforage | UserDefaults + CoreData |
-| React Router | NavigationStack |
-| Tailwind CSS | Native SwiftUI styling |
+| Web (Current)      | iOS (Target)                |
+| ------------------ | --------------------------- |
+| React + TypeScript | SwiftUI + Swift             |
+| Zustand (state)    | @Observable + @State        |
+| React Query        | Swift async/await + Combine |
+| Supabase JS        | Supabase Swift SDK          |
+| localforage        | UserDefaults + CoreData     |
+| React Router       | NavigationStack             |
+| Tailwind CSS       | Native SwiftUI styling      |
 
 ## Phase 1: Project Setup
 
@@ -41,12 +41,13 @@ This guide helps you convert the Nuzzle web app into a native iOS app using Swif
 ### 1.2 Install Supabase iOS SDK
 
 Add to `Podfile`:
+
 ```ruby
 platform :ios, '17.0'
 
 target 'Nuzzle' do
   use_frameworks!
-  
+
   # Supabase
   pod 'Supabase', '~> 2.0'
   pod 'GoTrue', '~> 2.0'
@@ -58,6 +59,7 @@ end
 ```
 
 Run:
+
 ```bash
 pod install
 ```
@@ -65,6 +67,7 @@ pod install
 ### 1.3 Configure Supabase Client
 
 Create `Services/SupabaseClient.swift`:
+
 ```swift
 import Supabase
 import Foundation
@@ -72,9 +75,9 @@ import Foundation
 @MainActor
 class SupabaseClient: ObservableObject {
     static let shared = SupabaseClient()
-    
+
     let client: SupabaseClient
-    
+
     private init() {
         self.client = SupabaseClient(
             supabaseURL: URL(string: "https://your-project-id.supabase.co")!,
@@ -91,6 +94,7 @@ class SupabaseClient: ObservableObject {
 Map from `src/integrations/supabase/types.ts` to Swift structs.
 
 Create `Models/Baby.swift`:
+
 ```swift
 import Foundation
 
@@ -105,7 +109,7 @@ struct Baby: Codable, Identifiable {
     let timezone: String?
     let createdAt: Date
     let updatedAt: Date
-    
+
     enum CodingKeys: String, CodingKey {
         case id, name, sex, timezone
         case familyId = "family_id"
@@ -119,6 +123,7 @@ struct Baby: Codable, Identifiable {
 ```
 
 Create `Models/Event.swift`:
+
 ```swift
 import Foundation
 
@@ -137,11 +142,11 @@ struct Event: Codable, Identifiable {
     let createdBy: UUID?
     let createdAt: Date
     let updatedAt: Date
-    
+
     enum EventType: String, Codable {
         case feed, diaper, sleep, tummyTime = "tummy_time"
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case id, type, amount, unit, side, subtype, note
         case babyId = "baby_id"
@@ -158,6 +163,7 @@ struct Event: Codable, Identifiable {
 ### 2.2 Create ViewModels
 
 Create `ViewModels/BabyViewModel.swift`:
+
 ```swift
 import Foundation
 import Supabase
@@ -169,13 +175,13 @@ class BabyViewModel {
     var activeBaby: Baby?
     var isLoading = false
     var errorMessage: String?
-    
+
     private let supabase = SupabaseClient.shared.client
-    
+
     func fetchBabies() async {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let response: [Baby] = try await supabase
                 .from("babies")
@@ -183,7 +189,7 @@ class BabyViewModel {
                 .order("created_at", ascending: false)
                 .execute()
                 .value
-            
+
             babies = response
             if activeBaby == nil {
                 activeBaby = babies.first
@@ -191,10 +197,10 @@ class BabyViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
-        
+
         isLoading = false
     }
-    
+
     func setActiveBaby(_ baby: Baby) {
         activeBaby = baby
         UserDefaults.standard.set(baby.id.uuidString, forKey: "activeBabyId")
@@ -207,6 +213,7 @@ class BabyViewModel {
 ### 3.1 Main App Structure
 
 Create `NuzzleApp.swift`:
+
 ```swift
 import SwiftUI
 
@@ -214,7 +221,7 @@ import SwiftUI
 struct NuzzleApp: App {
     @State private var authViewModel = AuthViewModel()
     @State private var babyViewModel = BabyViewModel()
-    
+
     var body: some Scene {
         WindowGroup {
             if authViewModel.isAuthenticated {
@@ -233,12 +240,13 @@ struct NuzzleApp: App {
 ### 3.2 Tab Navigation
 
 Create `Views/MainTabView.swift`:
+
 ```swift
 import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab = 0
-    
+
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
@@ -246,19 +254,19 @@ struct MainTabView: View {
                     Label("Today", systemImage: "house.fill")
                 }
                 .tag(0)
-            
+
             HistoryView()
                 .tabItem {
                     Label("History", systemImage: "calendar")
                 }
                 .tag(1)
-            
+
             InsightsView()
                 .tabItem {
                     Label("Insights", systemImage: "chart.line.uptrend.xyaxis")
                 }
                 .tag(2)
-            
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
@@ -276,6 +284,7 @@ struct MainTabView: View {
 See `COMPONENT_INVENTORY.md` for complete component catalog.
 
 Key mappings:
+
 - `Button` → `Button` with `.buttonStyle()`
 - `Card` → `VStack` with `.background()` and `.cornerRadius()`
 - `Sheet` → `.sheet()` modifier
@@ -287,6 +296,7 @@ Key mappings:
 See `DESIGN_TOKENS_IOS.md` for complete design token mapping.
 
 Create `Theme/DesignTokens.swift`:
+
 ```swift
 import SwiftUI
 
@@ -299,7 +309,7 @@ enum DesignTokens {
         static let surface = Color(.secondarySystemBackground)
         // ... see DESIGN_TOKENS_IOS.md
     }
-    
+
     // Typography
     enum FontSize {
         static let h1: CGFloat = 32
@@ -308,7 +318,7 @@ enum DesignTokens {
         static let body: CGFloat = 16
         static let caption: CGFloat = 14
     }
-    
+
     // Spacing
     enum Spacing {
         static let xs: CGFloat = 4
@@ -317,7 +327,7 @@ enum DesignTokens {
         static let lg: CGFloat = 24
         static let xl: CGFloat = 32
     }
-    
+
     // Corner Radius
     enum CornerRadius {
         static let sm: CGFloat = 8
@@ -333,6 +343,7 @@ enum DesignTokens {
 ### 5.1 Home Screen (P0)
 
 Create `Views/Home/HomeView.swift`:
+
 ```swift
 import SwiftUI
 
@@ -341,7 +352,7 @@ struct HomeView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var showLogSheet = false
     @State private var logType: Event.EventType?
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -350,16 +361,16 @@ struct HomeView: View {
                     if let baby = babyViewModel.activeBaby {
                         BabySelectorCard(baby: baby)
                     }
-                    
+
                     // Next nap prediction
                     NapPredictionCard()
-                    
+
                     // Quick actions
                     QuickActionsGrid(onAction: { type in
                         logType = type
                         showLogSheet = true
                     })
-                    
+
                     // Today's timeline
                     TodayTimelineView()
                 }
@@ -379,6 +390,7 @@ struct HomeView: View {
 ### 5.2 Logging Screens (P0)
 
 Create `Views/Logging/LogEventSheet.swift`:
+
 ```swift
 import SwiftUI
 
@@ -386,7 +398,7 @@ struct LogEventSheet: View {
     let eventType: Event.EventType
     @Environment(\.dismiss) private var dismiss
     @State private var eventViewModel = EventViewModel()
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -424,6 +436,7 @@ struct LogEventSheet: View {
 ### 5.3 AI Features (P0)
 
 Create `ViewModels/AIViewModel.swift`:
+
 ```swift
 import Foundation
 import Supabase
@@ -434,9 +447,9 @@ class AIViewModel {
     var aiDataSharingEnabled = false
     var isLoading = false
     var errorMessage: String?
-    
+
     private let supabase = SupabaseClient.shared.client
-    
+
     func checkAIConsent() async {
         do {
             let profile: Profile = try await supabase
@@ -446,28 +459,28 @@ class AIViewModel {
                 .single()
                 .execute()
                 .value
-            
+
             aiDataSharingEnabled = profile.aiDataSharingEnabled ?? false
         } catch {
             errorMessage = error.localizedDescription
         }
     }
-    
+
     func updateAIConsent(enabled: Bool) async {
         isLoading = true
-        
+
         do {
             try await supabase
                 .from("profiles")
                 .update(["ai_data_sharing_enabled": enabled])
                 .eq("id", value: supabase.auth.currentUser?.id ?? "")
                 .execute()
-            
+
             aiDataSharingEnabled = enabled
         } catch {
             errorMessage = error.localizedDescription
         }
-        
+
         isLoading = false
     }
 }
@@ -478,6 +491,7 @@ class AIViewModel {
 ### 6.1 Unit Tests
 
 Create `NuzzleTests/ViewModelTests.swift`:
+
 ```swift
 import XCTest
 @testable import Nuzzle
@@ -494,6 +508,7 @@ final class BabyViewModelTests: XCTestCase {
 ### 6.2 UI Tests
 
 Create `NuzzleUITests/HomeFlowTests.swift`:
+
 ```swift
 import XCTest
 
@@ -501,7 +516,7 @@ final class HomeFlowTests: XCTestCase {
     func testQuickLogFlow() throws {
         let app = XCUIApplication()
         app.launch()
-        
+
         // Test feed logging
         app.buttons["Log Feed"].tap()
         // ... assertions
@@ -514,6 +529,7 @@ final class HomeFlowTests: XCTestCase {
 ### 7.1 App Store Assets
 
 Required:
+
 - App icon (1024x1024px) - see `APP_ICON_GUIDELINES.md`
 - Screenshots (6.7", 6.5", 5.5" displays)
 - Privacy nutrition labels
@@ -550,6 +566,7 @@ xcodebuild -exportArchive \
 ## Migration Checklist
 
 ### Must Have (P0)
+
 - [ ] Authentication (sign up, login, logout)
 - [ ] Baby profile creation/switching
 - [ ] Feed logging (breast, bottle, pumping)
@@ -562,6 +579,7 @@ xcodebuild -exportArchive \
 - [ ] Offline support (CoreData cache)
 
 ### Should Have (P1)
+
 - [ ] History view with filtering
 - [ ] Analytics/insights
 - [ ] Cry analysis
@@ -572,6 +590,7 @@ xcodebuild -exportArchive \
 - [ ] Medical disclaimers
 
 ### Nice to Have (P2+)
+
 - [ ] Photo gallery
 - [ ] Milestones
 - [ ] Growth tracking
@@ -595,6 +614,7 @@ xcodebuild -exportArchive \
 ## Getting Help
 
 If you encounter issues during migration:
+
 1. Check the web app's behavior in browser for reference
 2. Review error logs in Supabase dashboard
 3. Test API calls using Postman/Insomnia first

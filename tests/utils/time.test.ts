@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { formatDuration, formatTimerDisplay, formatTimeRange, calculateDuration, getElapsedSeconds, isCrossMidnight } from '@/utils/time';
+import {
+  formatDuration,
+  formatTimerDisplay,
+  formatTimeRange,
+  calculateDuration,
+  getElapsedSeconds,
+  isCrossMidnight,
+} from '@/utils/time';
 
 describe('Time Utils', () => {
   describe('formatDuration', () => {
@@ -29,7 +36,7 @@ describe('Time Utils', () => {
       const start = '2024-01-01T10:00:00Z';
       const end = '2024-01-01T11:30:00Z';
       const result = formatTimeRange(start, end);
-      
+
       // Format may vary by locale, but should contain both times
       expect(result).toContain('10:00');
       expect(result).toContain('11:30');
@@ -40,14 +47,14 @@ describe('Time Utils', () => {
     it('calculates duration in minutes', () => {
       const start = '2024-01-01T10:00:00Z';
       const end = '2024-01-01T11:30:00Z';
-      
+
       expect(calculateDuration(start, end)).toBe(90);
     });
 
     it('handles zero duration', () => {
       const start = '2024-01-01T10:00:00Z';
       const end = '2024-01-01T10:00:00Z';
-      
+
       expect(calculateDuration(start, end)).toBe(0);
     });
   });
@@ -56,7 +63,7 @@ describe('Time Utils', () => {
     it('calculates elapsed seconds from past time', () => {
       const pastTime = new Date(Date.now() - 60000).toISOString(); // 1 minute ago
       const elapsed = getElapsedSeconds(pastTime);
-      
+
       expect(elapsed).toBeGreaterThan(55); // Allow some variance
       expect(elapsed).toBeLessThan(65);
     });
@@ -66,17 +73,15 @@ describe('Time Utils', () => {
     it('detects cross-midnight events', () => {
       const start = '2024-01-01T23:00:00Z';
       const end = '2024-01-02T01:00:00Z';
-      
+
       expect(isCrossMidnight(start, end)).toBe(true);
     });
 
     it('detects same-day events', () => {
       const start = '2024-01-01T10:00:00Z';
       const end = '2024-01-01T11:00:00Z';
-      
+
       expect(isCrossMidnight(start, end)).toBe(false);
     });
   });
 });
-
-

@@ -13,39 +13,34 @@ interface VaccineScheduleViewProps {
 export function VaccineScheduleView({ baby, completedVaccines }: VaccineScheduleViewProps) {
   const babyAgeWeeks = differenceInWeeks(new Date(), new Date(baby.date_of_birth));
 
-  const upcomingVaccines = CDCVaccineSchedule
-    .filter(v => 
+  const upcomingVaccines = CDCVaccineSchedule.filter(
+    v =>
       babyAgeWeeks >= v.windowStartWeeks &&
       babyAgeWeeks <= v.windowEndWeeks + 4 &&
       !completedVaccines.includes(v.name)
-    )
-    .sort((a, b) => a.recommendedAgeWeeks - b.recommendedAgeWeeks);
+  ).sort((a, b) => a.recommendedAgeWeeks - b.recommendedAgeWeeks);
 
   const overdueVaccines = CDCVaccineSchedule.filter(
-    v => 
-      babyAgeWeeks > v.windowEndWeeks &&
-      !completedVaccines.includes(v.name)
+    v => babyAgeWeeks > v.windowEndWeeks && !completedVaccines.includes(v.name)
   );
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {overdueVaccines.length > 0 && (
-        <Card className="border-destructive">
+        <Card className='border-destructive'>
           <CardHeader>
-            <CardTitle className="text-destructive flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className='text-destructive flex items-center gap-2'>
+              <Clock className='h-5 w-5' />
               Overdue Vaccines
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {overdueVaccines.map(vaccine => (
-                <div key={vaccine.name} className="p-2 bg-destructive/10 rounded-lg">
-                  <div className="font-medium">{vaccine.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {vaccine.description}
-                  </div>
-                  <div className="text-xs text-destructive mt-1">
+                <div key={vaccine.name} className='p-2 bg-destructive/10 rounded-lg'>
+                  <div className='font-medium'>{vaccine.name}</div>
+                  <div className='text-sm text-muted-foreground'>{vaccine.description}</div>
+                  <div className='text-xs text-destructive mt-1'>
                     Recommended at {Math.floor(vaccine.recommendedAgeWeeks / 4)} months
                   </div>
                 </div>
@@ -58,28 +53,24 @@ export function VaccineScheduleView({ baby, completedVaccines }: VaccineSchedule
       {upcomingVaccines.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className='flex items-center gap-2'>
+              <Clock className='h-5 w-5' />
               Upcoming Vaccines
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {upcomingVaccines.map(vaccine => (
-                <div key={vaccine.name} className="p-2 bg-muted/50 rounded-lg">
-                  <div className="flex items-start justify-between">
+                <div key={vaccine.name} className='p-2 bg-muted/50 rounded-lg'>
+                  <div className='flex items-start justify-between'>
                     <div>
-                      <div className="font-medium">{vaccine.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {vaccine.description}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <div className='font-medium'>{vaccine.name}</div>
+                      <div className='text-sm text-muted-foreground'>{vaccine.description}</div>
+                      <div className='text-xs text-muted-foreground mt-1'>
                         Recommended: {Math.floor(vaccine.recommendedAgeWeeks / 4)} months
                       </div>
                     </div>
-                    {vaccine.required && (
-                      <Badge variant="secondary">Required</Badge>
-                    )}
+                    {vaccine.required && <Badge variant='secondary'>Required</Badge>}
                   </div>
                 </div>
               ))}
@@ -91,17 +82,17 @@ export function VaccineScheduleView({ baby, completedVaccines }: VaccineSchedule
       {completedVaccines.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <CardTitle className='flex items-center gap-2'>
+              <CheckCircle2 className='h-5 w-5 text-green-600' />
               Completed Vaccines
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
+            <div className='space-y-1'>
               {completedVaccines.map(name => {
                 const vaccine = CDCVaccineSchedule.find(v => v.name === name);
                 return (
-                  <div key={name} className="text-sm text-muted-foreground">
+                  <div key={name} className='text-sm text-muted-foreground'>
                     ✓ {name} {vaccine && `(${vaccine.description})`}
                   </div>
                 );

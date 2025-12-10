@@ -15,13 +15,15 @@
 **Problem**: App crashed when accessing speech recognition because Info.plist was missing privacy descriptions.
 
 **Solution**: Created `ios/Nuzzle/Nestling/Info.plist` with all required privacy keys:
+
 - NSSpeechRecognitionUsageDescription
-- NSMicrophoneUsageDescription  
+- NSMicrophoneUsageDescription
 - NSCameraUsageDescription
 - NSPhotoLibraryUsageDescription
 - NSUserNotificationsUsageDescription
 
-**Action Required**: 
+**Action Required**:
+
 1. Open Xcode project: `ios/Nuzzle/Nestling.xcodeproj`
 2. Drag `Info.plist` from Finder into the Nestling folder in Xcode
 3. Make sure "Copy items if needed" is checked
@@ -33,6 +35,7 @@
 **Problem**: Speech recognition was initialized immediately, causing crash if permissions not configured.
 
 **Solution**: Updated `SpeechRecognitionService.swift` to use lazy initialization:
+
 - No longer requests permissions on init
 - Permissions requested only when user actually tries to use voice input
 - Async permission check prevents crashes
@@ -44,6 +47,7 @@
 **Solution**: Created `Environment.xcconfig` template.
 
 **Action Required**:
+
 1. Copy `Environment.xcconfig.template` (if exists) or use the new `Environment.xcconfig`
 2. Fill in your actual Supabase credentials:
    ```
@@ -54,6 +58,7 @@
 4. Set Debug and Release configurations to use `Environment.xcconfig`
 
 **OR** (Simpler for testing):
+
 1. Open `Nestling/Services/Secrets.swift`
 2. Replace the placeholder values directly:
    ```swift
@@ -66,6 +71,7 @@
 **Problem**: GoogleService-Info.plist not found.
 
 **Solution**: Firebase is optional for MVP. If you want Firebase analytics:
+
 1. Download `GoogleService-Info.plist` from Firebase Console
 2. Drag it into the Nestling folder in Xcode
 3. Ensure "Copy items if needed" is checked
@@ -78,6 +84,7 @@
 **Problem**: Using placeholder Sentry DSN.
 
 **Solution**: Sentry is optional. If you want crash reporting:
+
 1. Get DSN from Sentry.io
 2. Add to `Environment.xcconfig`: `SENTRY_DSN = your-dsn`
 
@@ -90,12 +97,14 @@
 ### Option A: For Testing Without Backend (Guest Mode)
 
 The app already works in guest mode! Just:
+
 1. Add Info.plist to Xcode project (see Step 1 above)
 2. Build and run
 
 The app will:
+
 - ✅ Run in guest mode (no auth required)
-- ✅ Store data locally  
+- ✅ Store data locally
 - ✅ Show all UI features
 - ⚠️ Skip Supabase sync (data stays local)
 
@@ -106,6 +115,7 @@ The app will:
 3. Build and run
 
 The app will:
+
 - ✅ Support authentication
 - ✅ Sync data to Supabase
 - ✅ Enable multi-device sync
@@ -117,11 +127,13 @@ The app will:
 This is **REQUIRED** to prevent crashes:
 
 1. Open Xcode:
+
    ```bash
    open ios/Nuzzle/Nestling.xcodeproj
    ```
 
 2. In Finder, navigate to:
+
    ```
    ios/Nuzzle/Nestling/
    ```
@@ -154,13 +166,16 @@ This is **REQUIRED** to prevent crashes:
 ## Configuration Files Summary
 
 ### Created Files
+
 - ✅ `ios/Nuzzle/Nestling/Info.plist` - Privacy descriptions (MUST add to Xcode)
 - ✅ `ios/Nuzzle/Environment.xcconfig` - Environment variables template
 
 ### Modified Files
+
 - ✅ `ios/Nuzzle/Nestling/Services/SpeechRecognitionService.swift` - Lazy initialization
 
 ### Existing Files (No changes needed)
+
 - `ios/Nuzzle/Nestling/Services/Secrets.swift` - Already handles env vars
 - `ios/Nuzzle/Nestling/Services/SupabaseClient.swift` - Already handles missing config
 - `ios/Nuzzle/Nestling/Nestling.entitlements` - App capabilities
@@ -185,13 +200,16 @@ This is **REQUIRED** to prevent crashes:
 If you want data sync (not required for testing UX):
 
 ### Quick Method (Hardcode for Testing)
+
 Edit `Secrets.swift`:
+
 ```swift
 static let supabaseURL = "https://dwcucxgtyagjeyuoxayr.supabase.co"  // Your actual URL
 static let supabaseAnonKey = "eyJ..."  // Your actual anon key
 ```
 
 ### Proper Method (Environment Variables)
+
 1. Edit `Environment.xcconfig` with real values
 2. In Xcode → Project → Info → Configurations
 3. Set Debug to use `Environment.xcconfig`
@@ -202,6 +220,7 @@ static let supabaseAnonKey = "eyJ..."  // Your actual anon key
 ## Expected Behavior After Fix
 
 ### With Info.plist Added
+
 - ✅ App launches without crash
 - ✅ Can tap first log card
 - ✅ Forms open correctly
@@ -209,11 +228,13 @@ static let supabaseAnonKey = "eyJ..."  // Your actual anon key
 - ✅ All UX features work
 
 ### Without Supabase Configured
+
 - ✅ App runs in guest mode
 - ✅ Data stored locally
 - ⚠️ No multi-device sync
 
 ### With Supabase Configured
+
 - ✅ Full authentication
 - ✅ Data syncs across devices
 - ✅ Multi-caregiver features
@@ -230,4 +251,3 @@ static let supabaseAnonKey = "eyJ..."  // Your actual anon key
 ---
 
 **The crash fix is ready! Just need to add Info.plist to the Xcode project.**
-

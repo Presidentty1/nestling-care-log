@@ -39,7 +39,7 @@ describe('dateUtils', () => {
   });
 
   describe('todayISO', () => {
-    it('should return today\'s date in YYYY-MM-DD format', () => {
+    it("should return today's date in YYYY-MM-DD format", () => {
       const result = dateUtils.todayISO();
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       const date = new Date(result);
@@ -153,13 +153,17 @@ describe('dateUtils', () => {
     it('should reject end before start', () => {
       const start = new Date('2024-01-01T11:00:00Z');
       const end = new Date('2024-01-01T10:00:00Z');
-      expect(() => dateUtils.validateDateRange(start, end)).toThrow('End date cannot be before start date');
+      expect(() => dateUtils.validateDateRange(start, end)).toThrow(
+        'End date cannot be before start date'
+      );
     });
 
     it('should reject ranges exceeding 90 days', () => {
       const start = new Date('2024-01-01T10:00:00Z');
       const end = new Date('2024-04-15T10:00:00Z'); // More than 90 days
-      expect(() => dateUtils.validateDateRange(start, end)).toThrow('Date range cannot exceed 90 days');
+      expect(() => dateUtils.validateDateRange(start, end)).toThrow(
+        'Date range cannot exceed 90 days'
+      );
     });
 
     it('should allow ranges up to 90 days', () => {
@@ -169,4 +173,3 @@ describe('dateUtils', () => {
     });
   });
 });
-

@@ -13,9 +13,13 @@ export function parseVoiceCommand(transcript: string): VoiceCommand {
   const command: VoiceCommand = { type: null };
 
   // Feed detection
-  if (lowerTranscript.includes('feed') || lowerTranscript.includes('bottle') || lowerTranscript.includes('breast')) {
+  if (
+    lowerTranscript.includes('feed') ||
+    lowerTranscript.includes('bottle') ||
+    lowerTranscript.includes('breast')
+  ) {
     command.type = 'feed';
-    
+
     // Detect feed type
     if (lowerTranscript.includes('bottle')) {
       command.subtype = 'bottle';
@@ -28,7 +32,7 @@ export function parseVoiceCommand(transcript: string): VoiceCommand {
     // Extract amount (look for numbers followed by ml, oz, or ounces)
     const mlMatch = lowerTranscript.match(/(\d+)\s*(ml|milliliter)/);
     const ozMatch = lowerTranscript.match(/(\d+)\s*(oz|ounce)/);
-    
+
     if (mlMatch) {
       command.amount = parseInt(mlMatch[1]);
       command.unit = 'ml';
@@ -45,14 +49,21 @@ export function parseVoiceCommand(transcript: string): VoiceCommand {
   }
 
   // Diaper detection
-  if (lowerTranscript.includes('diaper') || lowerTranscript.includes('poop') || lowerTranscript.includes('pee')) {
+  if (
+    lowerTranscript.includes('diaper') ||
+    lowerTranscript.includes('poop') ||
+    lowerTranscript.includes('pee')
+  ) {
     command.type = 'diaper';
-    
+
     if (lowerTranscript.includes('wet') || lowerTranscript.includes('pee')) {
       command.subtype = 'wet';
     } else if (lowerTranscript.includes('dirty') || lowerTranscript.includes('poop')) {
       command.subtype = 'dirty';
-    } else if (lowerTranscript.includes('both') || (lowerTranscript.includes('wet') && lowerTranscript.includes('dirty'))) {
+    } else if (
+      lowerTranscript.includes('both') ||
+      (lowerTranscript.includes('wet') && lowerTranscript.includes('dirty'))
+    ) {
       command.subtype = 'both';
     }
   }
@@ -71,7 +82,7 @@ export function parseVoiceCommand(transcript: string): VoiceCommand {
   if (command.type === 'sleep') {
     const minutesMatch = lowerTranscript.match(/(\d+)\s*minute/);
     const hoursMatch = lowerTranscript.match(/(\d+)\s*hour/);
-    
+
     if (hoursMatch) {
       command.amount = parseInt(hoursMatch[1]) * 60;
       command.unit = 'minutes';

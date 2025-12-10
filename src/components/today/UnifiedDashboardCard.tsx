@@ -15,14 +15,17 @@ interface UnifiedDashboardCardProps {
   activeSleepTimer?: { startTime: Date; isRunning: boolean } | null;
 }
 
-export function UnifiedDashboardCard({ 
-  events, 
-  napWindow, 
+export function UnifiedDashboardCard({
+  events,
+  napWindow,
   summary,
-  activeSleepTimer 
+  activeSleepTimer,
 }: UnifiedDashboardCardProps) {
   const { isOnline } = useNetworkStatus();
-  const [syncStatus, setSyncStatus] = useState<{ pending: number; isSyncing: boolean }>({ pending: 0, isSyncing: false });
+  const [syncStatus, setSyncStatus] = useState<{ pending: number; isSyncing: boolean }>({
+    pending: 0,
+    isSyncing: false,
+  });
 
   useEffect(() => {
     const updateSyncStatus = () => {
@@ -52,9 +55,8 @@ export function UnifiedDashboardCard({
 
   // Calculate time until next nap
   const now = new Date();
-  const timeUntilNextNap = napWindow && napWindow.start > now
-    ? differenceInMinutes(napWindow.start, now)
-    : null;
+  const timeUntilNextNap =
+    napWindow && napWindow.start > now ? differenceInMinutes(napWindow.start, now) : null;
 
   // Calculate active sleep duration
   const sleepDuration = activeSleepTimer?.isRunning
@@ -76,73 +78,73 @@ export function UnifiedDashboardCard({
   };
 
   return (
-    <Card className="border-2 border-border bg-card shadow-soft animate-in fade-in slide-in-from-top-2 duration-300">
-      <CardContent className="p-4 space-y-4">
+    <Card className='border-2 border-border bg-card shadow-soft animate-in fade-in slide-in-from-top-2 duration-300'>
+      <CardContent className='p-4 space-y-4'>
         {/* Header with sync indicator */}
-        <div className="flex items-center justify-between">
-          <h2 className="font-title text-foreground">Right Now</h2>
+        <div className='flex items-center justify-between'>
+          <h2 className='font-title text-foreground'>Right Now</h2>
           {/* Small sync indicator */}
-          <div className="flex items-center gap-1.5">
+          <div className='flex items-center gap-1.5'>
             {isOnline ? (
               syncStatus.pending > 0 ? (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
-                  <span className="hidden sm:inline">Syncing</span>
+                <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                  <RefreshCw className='h-3.5 w-3.5 animate-spin text-primary' />
+                  <span className='hidden sm:inline'>Syncing</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-                  <span className="hidden sm:inline">Synced</span>
+                <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                  <CheckCircle2 className='h-3.5 w-3.5 text-success' />
+                  <span className='hidden sm:inline'>Synced</span>
                 </div>
               )
             ) : (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <CloudOff className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Offline</span>
+              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <CloudOff className='h-3.5 w-3.5' />
+                <span className='hidden sm:inline'>Offline</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Dashboard items in grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className='grid grid-cols-2 gap-3'>
           {/* Last Feed */}
-          <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-event-feed/5 border border-event-feed/20">
-            <Milk className="h-5 w-5 text-event-feed flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs text-muted-foreground mb-0.5">Last Feed</div>
+          <div className='flex items-start gap-2.5 p-2.5 rounded-lg bg-event-feed/5 border border-event-feed/20'>
+            <Milk className='h-5 w-5 text-event-feed flex-shrink-0 mt-0.5' />
+            <div className='flex-1 min-w-0'>
+              <div className='text-xs text-muted-foreground mb-0.5'>Last Feed</div>
               {timeSinceLastFeed !== null ? (
-                <div className="text-sm font-semibold text-foreground">
+                <div className='text-sm font-semibold text-foreground'>
                   {formatTime(timeSinceLastFeed)} ago
                 </div>
               ) : (
-                <div className="text-sm font-semibold text-muted-foreground">—</div>
+                <div className='text-sm font-semibold text-muted-foreground'>—</div>
               )}
             </div>
           </div>
 
           {/* Last Diaper */}
-          <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-event-diaper/5 border border-event-diaper/20">
-            <Droplet className="h-5 w-5 text-event-diaper flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs text-muted-foreground mb-0.5">Last Diaper</div>
+          <div className='flex items-start gap-2.5 p-2.5 rounded-lg bg-event-diaper/5 border border-event-diaper/20'>
+            <Droplet className='h-5 w-5 text-event-diaper flex-shrink-0 mt-0.5' />
+            <div className='flex-1 min-w-0'>
+              <div className='text-xs text-muted-foreground mb-0.5'>Last Diaper</div>
               {timeSinceLastDiaper !== null ? (
-                <div className="text-sm font-semibold text-foreground">
+                <div className='text-sm font-semibold text-foreground'>
                   {formatTime(timeSinceLastDiaper)} ago
                 </div>
               ) : (
-                <div className="text-sm font-semibold text-muted-foreground">—</div>
+                <div className='text-sm font-semibold text-muted-foreground'>—</div>
               )}
             </div>
           </div>
 
           {/* Active Sleep Timer */}
           {activeSleepTimer?.isRunning && sleepDuration !== null && (
-            <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-event-sleep/5 border border-event-sleep/20 col-span-2">
-              <Timer className="h-5 w-5 text-event-sleep flex-shrink-0 mt-0.5 animate-pulse" />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground mb-0.5">Sleep Timer</div>
-                <div className="text-sm font-semibold text-foreground">
+            <div className='flex items-start gap-2.5 p-2.5 rounded-lg bg-event-sleep/5 border border-event-sleep/20 col-span-2'>
+              <Timer className='h-5 w-5 text-event-sleep flex-shrink-0 mt-0.5 animate-pulse' />
+              <div className='flex-1 min-w-0'>
+                <div className='text-xs text-muted-foreground mb-0.5'>Sleep Timer</div>
+                <div className='text-sm font-semibold text-foreground'>
                   {formatTime(sleepDuration)} and counting
                 </div>
               </div>
@@ -151,31 +153,33 @@ export function UnifiedDashboardCard({
 
           {/* Next Nap Prediction */}
           {napWindow && (
-            <div className={cn(
-              "flex items-start gap-2.5 p-2.5 rounded-lg border col-span-2",
-              timeUntilNextNap !== null && timeUntilNextNap <= 30
-                ? "bg-warning/5 border-warning/20"
-                : "bg-event-sleep/5 border-event-sleep/20"
-            )}>
-              <Moon className="h-5 w-5 text-event-sleep flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <div className="text-xs text-muted-foreground">Next Nap</div>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+            <div
+              className={cn(
+                'flex items-start gap-2.5 p-2.5 rounded-lg border col-span-2',
+                timeUntilNextNap !== null && timeUntilNextNap <= 30
+                  ? 'bg-warning/5 border-warning/20'
+                  : 'bg-event-sleep/5 border-event-sleep/20'
+              )}
+            >
+              <Moon className='h-5 w-5 text-event-sleep flex-shrink-0 mt-0.5' />
+              <div className='flex-1 min-w-0'>
+                <div className='flex items-center gap-1.5 mb-0.5'>
+                  <div className='text-xs text-muted-foreground'>Next Nap</div>
+                  <span className='text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium'>
                     Suggestion
                   </span>
                 </div>
                 {formatNapWindow() && (
-                  <div className="text-sm font-semibold text-foreground mb-1">
+                  <div className='text-sm font-semibold text-foreground mb-1'>
                     {formatNapWindow()}
                     {timeUntilNextNap !== null && timeUntilNextNap > 0 && (
-                      <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                      <span className='ml-1.5 text-xs font-normal text-muted-foreground'>
                         (in {formatTime(timeUntilNextNap)})
                       </span>
                     )}
                   </div>
                 )}
-                <div className="text-[11px] text-muted-foreground leading-tight">
+                <div className='text-[11px] text-muted-foreground leading-tight'>
                   Based on age and last wake time
                 </div>
               </div>
@@ -186,4 +190,3 @@ export function UnifiedDashboardCard({
     </Card>
   );
 }
-

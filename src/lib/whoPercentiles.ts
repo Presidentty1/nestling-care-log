@@ -50,12 +50,14 @@ const girlLengthPercentiles: { [key: number]: PercentileData } = {
 };
 
 function interpolate(age: number, data: { [key: number]: PercentileData }): PercentileData {
-  const ages = Object.keys(data).map(Number).sort((a, b) => a - b);
-  
+  const ages = Object.keys(data)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   // Find surrounding ages
   let lowerAge = ages[0];
   let upperAge = ages[ages.length - 1];
-  
+
   for (let i = 0; i < ages.length - 1; i++) {
     if (age >= ages[i] && age <= ages[i + 1]) {
       lowerAge = ages[i];
@@ -63,14 +65,14 @@ function interpolate(age: number, data: { [key: number]: PercentileData }): Perc
       break;
     }
   }
-  
+
   if (age <= lowerAge) return data[lowerAge];
   if (age >= upperAge) return data[upperAge];
-  
+
   const ratio = (age - lowerAge) / (upperAge - lowerAge);
   const lower = data[lowerAge];
   const upper = data[upperAge];
-  
+
   return {
     p3: lower.p3 + (upper.p3 - lower.p3) * ratio,
     p15: lower.p15 + (upper.p15 - lower.p15) * ratio,
@@ -133,7 +135,7 @@ export function getExpectedWeight(
 ): number {
   const data = sex === 'male' ? boyWeightPercentiles : girlWeightPercentiles;
   const percentiles = interpolate(ageInDays, data);
-  
+
   if (percentile <= 3) return percentiles.p3;
   if (percentile <= 15) return percentiles.p15;
   if (percentile <= 50) return percentiles.p50;

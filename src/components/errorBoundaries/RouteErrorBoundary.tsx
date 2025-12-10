@@ -13,10 +13,7 @@ interface RouteErrorBoundaryProps {
  */
 export function RouteErrorBoundary({ children, routeName, onGoHome }: RouteErrorBoundaryProps) {
   return (
-    <ResilientErrorBoundary
-      context={`route-${routeName}`}
-      onGoHome={onGoHome}
-    >
+    <ResilientErrorBoundary context={`route-${routeName}`} onGoHome={onGoHome}>
       {children}
     </ResilientErrorBoundary>
   );
@@ -25,9 +22,15 @@ export function RouteErrorBoundary({ children, routeName, onGoHome }: RouteError
 /**
  * Error boundary for settings routes
  */
-export function SettingsErrorBoundary({ children, onGoHome }: { children: ReactNode; onGoHome?: () => void }) {
+export function SettingsErrorBoundary({
+  children,
+  onGoHome,
+}: {
+  children: ReactNode;
+  onGoHome?: () => void;
+}) {
   return (
-    <RouteErrorBoundary routeName="settings" onGoHome={onGoHome}>
+    <RouteErrorBoundary routeName='settings' onGoHome={onGoHome}>
       {children}
     </RouteErrorBoundary>
   );
@@ -36,9 +39,15 @@ export function SettingsErrorBoundary({ children, onGoHome }: { children: ReactN
 /**
  * Error boundary for main app routes (home, history, etc.)
  */
-export function MainAppErrorBoundary({ children, onGoHome }: { children: ReactNode; onGoHome?: () => void }) {
+export function MainAppErrorBoundary({
+  children,
+  onGoHome,
+}: {
+  children: ReactNode;
+  onGoHome?: () => void;
+}) {
   return (
-    <RouteErrorBoundary routeName="main-app" onGoHome={onGoHome}>
+    <RouteErrorBoundary routeName='main-app' onGoHome={onGoHome}>
       {children}
     </RouteErrorBoundary>
   );
@@ -47,9 +56,15 @@ export function MainAppErrorBoundary({ children, onGoHome }: { children: ReactNo
 /**
  * Error boundary for feature routes (labs, analytics, etc.)
  */
-export function FeatureErrorBoundary({ children, onGoHome }: { children: ReactNode; onGoHome?: () => void }) {
+export function FeatureErrorBoundary({
+  children,
+  onGoHome,
+}: {
+  children: ReactNode;
+  onGoHome?: () => void;
+}) {
   return (
-    <RouteErrorBoundary routeName="features" onGoHome={onGoHome}>
+    <RouteErrorBoundary routeName='features' onGoHome={onGoHome}>
       {children}
     </RouteErrorBoundary>
   );
@@ -58,14 +73,16 @@ export function FeatureErrorBoundary({ children, onGoHome }: { children: ReactNo
 /**
  * Error boundary for onboarding flow
  */
-export function OnboardingErrorBoundary({ children, onGoHome }: { children: ReactNode; onGoHome?: () => void }) {
+export function OnboardingErrorBoundary({
+  children,
+  onGoHome,
+}: {
+  children: ReactNode;
+  onGoHome?: () => void;
+}) {
   return (
-    <RouteErrorBoundary routeName="onboarding" onGoHome={onGoHome}>
+    <RouteErrorBoundary routeName='onboarding' onGoHome={onGoHome}>
       {children}
     </RouteErrorBoundary>
   );
 }
-
-
-
-

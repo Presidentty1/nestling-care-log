@@ -70,60 +70,56 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Pill className="h-5 w-5" />
+          <div className='flex items-center justify-between'>
+            <CardTitle className='flex items-center gap-2'>
+              <Pill className='h-5 w-5' />
               Active Medications
             </CardTitle>
             <Button
-              size="sm"
+              size='sm'
               onClick={() => {
                 setEditingMed(null);
                 setIsModalOpen(true);
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className='h-4 w-4 mr-2' />
               Add
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {activeMedications.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">
-              No active medications
-            </p>
+            <p className='text-muted-foreground text-center py-4'>No active medications</p>
           ) : (
-            <div className="space-y-3">
+            <div className='space-y-3'>
               {activeMedications.map(med => (
-                <div key={med.id} className="p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
+                <div key={med.id} className='p-3 bg-muted/50 rounded-lg'>
+                  <div className='flex items-start justify-between mb-2'>
                     <div>
-                      <h4 className="font-medium">{med.name}</h4>
-                      {med.dose && (
-                        <p className="text-sm text-muted-foreground">{med.dose}</p>
-                      )}
+                      <h4 className='font-medium'>{med.name}</h4>
+                      {med.dose && <p className='text-sm text-muted-foreground'>{med.dose}</p>}
                       {med.frequency && (
-                        <p className="text-xs text-muted-foreground">{med.frequency}</p>
+                        <p className='text-xs text-muted-foreground'>{med.frequency}</p>
                       )}
                     </div>
                     {med.reminder_enabled && (
-                      <Badge variant="outline">
-                        <Clock className="h-3 w-3 mr-1" />
+                      <Badge variant='outline'>
+                        <Clock className='h-3 w-3 mr-1' />
                         Reminders on
                       </Badge>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className='flex gap-2'>
                     <Button
-                      size="sm"
+                      size='sm'
                       onClick={() => markAsGivenMutation.mutate(med)}
                       disabled={markAsGivenMutation.isPending}
                     >
                       Mark as Given
                     </Button>
                     <Button
-                      size="sm"
-                      variant="outline"
+                      size='sm'
+                      variant='outline'
                       onClick={() => {
                         setEditingMed(med);
                         setIsModalOpen(true);
@@ -132,8 +128,8 @@ export function MedicationTracker({ baby }: MedicationTrackerProps) {
                       Edit
                     </Button>
                     <Button
-                      size="sm"
-                      variant="outline"
+                      size='sm'
+                      variant='outline'
                       onClick={() => stopMedicationMutation.mutate(med.id)}
                     >
                       Stop
@@ -210,59 +206,49 @@ function MedicationModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {medication ? 'Edit Medication' : 'Add Medication'}
-          </DialogTitle>
+          <DialogTitle>{medication ? 'Edit Medication' : 'Add Medication'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className='space-y-4'>
+          <div className='space-y-2'>
             <Label>Medication Name</Label>
             <Input
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Tylenol"
+              onChange={e => setName(e.target.value)}
+              placeholder='e.g., Tylenol'
             />
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Dose (optional)</Label>
-            <Input
-              value={dose}
-              onChange={(e) => setDose(e.target.value)}
-              placeholder="e.g., 2.5ml"
-            />
+            <Input value={dose} onChange={e => setDose(e.target.value)} placeholder='e.g., 2.5ml' />
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Frequency (optional)</Label>
             <Input
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              placeholder="e.g., Every 6 hours"
+              onChange={e => setFrequency(e.target.value)}
+              placeholder='e.g., Every 6 hours'
             />
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Start Date</Label>
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <Input type='date' value={startDate} onChange={e => setStartDate(e.target.value)} />
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Notes (optional)</Label>
             <Textarea
               value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Any additional information..."
+              onChange={e => setNote(e.target.value)}
+              placeholder='Any additional information...'
               rows={2}
             />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <Label>Enable Reminders</Label>
             <Switch checked={reminderEnabled} onCheckedChange={setReminderEnabled} />
           </div>
@@ -270,7 +256,7 @@ function MedicationModal({
           <Button
             onClick={() => saveMutation.mutate()}
             disabled={!name || saveMutation.isPending}
-            className="w-full"
+            className='w-full'
           >
             {saveMutation.isPending ? 'Saving...' : 'Save Medication'}
           </Button>

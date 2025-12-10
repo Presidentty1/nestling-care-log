@@ -13,7 +13,13 @@ interface TimelineListProps {
   onQuickAction?: (type: 'feed' | 'sleep' | 'diaper' | 'tummy_time') => void; // Optional quick action handler
 }
 
-export function TimelineList({ events, onEdit, onDelete, useVirtualization = true, onQuickAction }: TimelineListProps) {
+export function TimelineList({
+  events,
+  onEdit,
+  onDelete,
+  useVirtualization = true,
+  onQuickAction,
+}: TimelineListProps) {
   // Use virtualized list for large datasets (50+ events)
   if (useVirtualization && events.length >= 50) {
     return (
@@ -29,12 +35,16 @@ export function TimelineList({ events, onEdit, onDelete, useVirtualization = tru
     return (
       <EmptyState
         icon={Calendar}
-        title="Your day is off to a quiet start ✨"
+        title='Your day is off to a quiet start ✨'
         description="Some days you'll log everything, some days just one feed. Both are okay."
-        action={onQuickAction ? {
-          label: "Log a Feed",
-          onClick: () => onQuickAction('feed')
-        } : undefined}
+        action={
+          onQuickAction
+            ? {
+                label: 'Log a Feed',
+                onClick: () => onQuickAction('feed'),
+              }
+            : undefined
+        }
       />
     );
   }
@@ -51,18 +61,18 @@ export function TimelineList({ events, onEdit, onDelete, useVirtualization = tru
   });
 
   return (
-    <div className="space-y-2">
-      <AnimatePresence mode="popLayout">
+    <div className='space-y-2'>
+      <AnimatePresence mode='popLayout'>
         {sortedEvents.map((event, i) => (
           <motion.div
             key={event.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ 
-              duration: 0.2, 
+            transition={{
+              duration: 0.2,
               delay: i * 0.02,
-              ease: "easeOut" 
+              ease: 'easeOut',
             }}
           >
             <SwipeableTimelineRow

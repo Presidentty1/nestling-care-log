@@ -22,7 +22,7 @@ class TrialService {
   async startTrial(): Promise<TrialData> {
     const startDate = new Date();
     const endDate = addDays(startDate, 14);
-    
+
     const trialData: TrialData = {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),

@@ -2,16 +2,18 @@
 
 ## What Just Happened
 
-All your UX improvements are now **added to the Xcode project**! 
+All your UX improvements are now **added to the Xcode project**!
 
 The Ruby script just added:
+
 - 3 new onboarding views
-- 1 celebration component  
+- 1 celebration component
 - All modified files
 
 ## You MUST Rebuild to See Changes
 
 ### In Xcode:
+
 1. **Clean Build Folder**: Product → Clean Build Folder (⇧⌘K)
 2. **Build**: Product → Build (⌘B)
 3. **Run on Simulator**: ⌘R
@@ -19,6 +21,7 @@ The Ruby script just added:
 ### What You'll See After Rebuild:
 
 #### Onboarding
+
 - **4 progress dots** (not 9!)
 - Step 1: Welcome
 - Step 2: Baby Essentials (name, DOB, sex, initial state all in one)
@@ -26,21 +29,25 @@ The Ruby script just added:
 - Step 4: Ready to Go (celebration)
 
 #### Home Screen
+
 - **Next Nap is HUGE** (hero card with 28pt text)
 - Feed & Diaper are smaller satellite cards
 - Streak counter is prominent with big flame
 - Quick Actions are balanced 2x2 grid (no Cry Aid)
 
 #### History
+
 - Day selector selected state uses BORDER (not solid fill)
 - Teal border with subtle shadow
 
 #### Timeline
+
 - **6px colored left bar** (was 3px)
 - Better typography
 - "Log Again" in menu
 
 ### Lag Fix
+
 I just fixed the text input lag by using local state instead of binding directly to the coordinator.
 
 ## If You Still Don't See Changes
@@ -80,6 +87,7 @@ Should show "Nuzzle" as a target.
 - All changes now registered in Xcode project
 
 **After rebuild, you WILL see:**
+
 - 4-step onboarding
 - No lag on text input
 - Better visual hierarchy
@@ -88,4 +96,3 @@ Should show "Nuzzle" as a target.
 ---
 
 **REBUILD NOW and the changes will appear!**
-

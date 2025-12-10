@@ -31,39 +31,35 @@ export function FeatureComparisonTable({ onUpgrade }: FeatureComparisonTableProp
     <Card>
       <CardHeader>
         <CardTitle>Compare Plans</CardTitle>
-        <CardDescription>
-          Choose the plan that works best for you
-        </CardDescription>
+        <CardDescription>Choose the plan that works best for you</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4">
+        <div className='grid grid-cols-3 gap-4'>
           {/* Header */}
-          <div className="font-semibold text-sm">Feature</div>
-          <div className="text-center">
-            <Badge variant="outline">Free</Badge>
+          <div className='font-semibold text-sm'>Feature</div>
+          <div className='text-center'>
+            <Badge variant='outline'>Free</Badge>
           </div>
-          <div className="text-center">
-            <Badge className="bg-gradient-to-r from-primary to-primary/80">
-              Premium
-            </Badge>
+          <div className='text-center'>
+            <Badge className='bg-gradient-to-r from-primary to-primary/80'>Premium</Badge>
           </div>
 
           {/* Features */}
-          {FEATURES.map((feature) => (
+          {FEATURES.map(feature => (
             <>
-              <div className="text-sm py-2 border-t">{feature.name}</div>
-              <div className="flex justify-center items-center py-2 border-t">
+              <div className='text-sm py-2 border-t'>{feature.name}</div>
+              <div className='flex justify-center items-center py-2 border-t'>
                 {feature.free ? (
-                  <Check className="h-5 w-5 text-success" />
+                  <Check className='h-5 w-5 text-success' />
                 ) : (
-                  <X className="h-5 w-5 text-muted-foreground" />
+                  <X className='h-5 w-5 text-muted-foreground' />
                 )}
               </div>
-              <div className="flex justify-center items-center py-2 border-t">
+              <div className='flex justify-center items-center py-2 border-t'>
                 {feature.premium ? (
-                  <Check className="h-5 w-5 text-success" />
+                  <Check className='h-5 w-5 text-success' />
                 ) : (
-                  <X className="h-5 w-5 text-muted-foreground" />
+                  <X className='h-5 w-5 text-muted-foreground' />
                 )}
               </div>
             </>
@@ -71,16 +67,12 @@ export function FeatureComparisonTable({ onUpgrade }: FeatureComparisonTableProp
         </div>
 
         {onUpgrade && (
-          <div className="mt-6 pt-6 border-t">
-            <Button 
-              onClick={onUpgrade} 
-              className="w-full"
-              size="lg"
-            >
-              <Lock className="h-4 w-4 mr-2" />
+          <div className='mt-6 pt-6 border-t'>
+            <Button onClick={onUpgrade} className='w-full' size='lg'>
+              <Lock className='h-4 w-4 mr-2' />
               Upgrade to Premium
             </Button>
-            <p className="text-xs text-center text-muted-foreground mt-2">
+            <p className='text-xs text-center text-muted-foreground mt-2'>
               14-day free trial • Cancel anytime
             </p>
           </div>

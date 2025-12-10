@@ -429,3 +429,113 @@ struct FunnelMetrics {
     let day7RetentionCount: Int
     let day7RetentionRate: Double
 }
+
+// MARK: - Analytics Wrapper
+
+/// Analytics wrapper that provides a consistent API for tracking events
+/// Uses AnalyticsService under the hood
+actor Analytics {
+    static let shared = Analytics()
+    
+    private init() {}
+    
+    /// Log a generic event with parameters
+    func log(_ event: String, parameters: [String: Any]? = nil) async {
+        AnalyticsService.shared.track(event: event, properties: parameters ?? [:])
+    }
+    
+    // MARK: - Subscription Analytics
+    
+    func logSubscriptionTrialStarted(plan: String, source: String) async {
+        AnalyticsService.shared.track(event: "subscription_trial_started", properties: [
+            "plan": plan,
+            "source": source
+        ])
+    }
+    
+    func logSubscriptionRenewed(plan: String) async {
+        AnalyticsService.shared.track(event: "subscription_renewed", properties: [
+            "plan": plan
+        ])
+    }
+    
+    func logSubscriptionActivated(plan: String, price: String) async {
+        AnalyticsService.shared.track(event: "subscription_activated", properties: [
+            "plan": plan,
+            "price": price
+        ])
+    }
+    
+    func logSubscriptionCancelled(plan: String, reason: String?) async {
+        var properties: [String: Any] = ["plan": plan]
+        if let reason = reason {
+            properties["reason"] = reason
+        }
+        AnalyticsService.shared.track(event: "subscription_cancelled", properties: properties)
+    }
+    
+    func logSubscriptionPurchased(plan: String, price: String) async {
+        AnalyticsService.shared.track(event: "subscription_purchased", properties: [
+            "plan": plan,
+            "price": price
+        ])
+    }
+    
+    // MARK: - Onboarding Analytics
+    
+    func logOnboardingStepViewed(step: String) async {
+        AnalyticsService.shared.track(event: "onboarding_step_viewed", properties: [
+            "step": step
+        ])
+    }
+    
+    func logOnboardingStepSkipped(step: String) async {
+        AnalyticsService.shared.track(event: "onboarding_step_skipped", properties: [
+            "step": step
+        ])
+    }
+    
+    func logOnboardingGoalSelected(goal: String) async {
+        AnalyticsService.shared.track(event: "onboarding_goal_selected", properties: [
+            "goal": goal
+        ])
+    }
+    
+    func logOnboardingCompleted(babyId: String) async {
+        AnalyticsService.shared.track(event: "onboarding_completed", properties: [
+            "baby_id": babyId
+        ])
+    }
+    
+    // MARK: - Paywall Analytics
+    
+    func logPaywallViewed(source: String) async {
+        AnalyticsService.shared.track(event: "paywall_viewed", properties: [
+            "source": source
+        ])
+    }
+    
+    // MARK: - Prediction Analytics
+    
+    func logPredictionShown(type: String, isPro: Bool, babyId: String) async {
+        AnalyticsService.shared.track(event: "prediction_shown", properties: [
+            "type": type,
+            "is_pro": isPro,
+            "baby_id": babyId
+        ])
+    }
+    
+    // MARK: - First Log Analytics
+    
+    func logFirstLogCreated(eventType: String, babyId: String) async {
+        AnalyticsService.shared.track(event: "first_log_created", properties: [
+            "event_type": eventType,
+            "baby_id": babyId
+        ])
+    }
+    
+    func logOnboardingStarted() async {
+        AnalyticsService.shared.trackOnboardingStarted()
+    }
+    
+}

@@ -37,40 +37,38 @@ export function BabySwitcherModal({
         <DialogHeader>
           <DialogTitle>Switch Baby</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          {babies.map((baby) => (
+        <div className='space-y-2'>
+          {babies.map(baby => (
             <button
               key={baby.id}
               onClick={() => {
                 onSelect(baby.id);
                 onClose();
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+              className='w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors'
             >
               <Avatar>
                 <AvatarFallback>{getInitials(baby.name)}</AvatarFallback>
               </Avatar>
-              <div className="flex-1 text-left">
-                <div className="font-medium">{baby.name}</div>
-                <div className="text-sm text-muted-foreground">
+              <div className='flex-1 text-left'>
+                <div className='font-medium'>{baby.name}</div>
+                <div className='text-sm text-muted-foreground'>
                   {getAgeDisplay(baby.date_of_birth)}
                 </div>
               </div>
-              {baby.id === activeBabyId && (
-                <Check className="h-5 w-5 text-primary" />
-              )}
+              {baby.id === activeBabyId && <Check className='h-5 w-5 text-primary' />}
             </button>
           ))}
-          
+
           <Button
-            variant="outline"
-            className="w-full"
+            variant='outline'
+            className='w-full'
             onClick={() => {
               onAddNew();
               onClose();
             }}
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className='mr-2 h-4 w-4' />
             Add New Baby
           </Button>
         </div>

@@ -33,7 +33,9 @@ export async function generateDoctorReport(
   yPos += 6;
   doc.text(`Date of Birth: ${format(new Date(baby.date_of_birth), 'MMM dd, yyyy')}`, 20, yPos);
   yPos += 6;
-  const ageMonths = Math.floor((Date.now() - new Date(baby.date_of_birth).getTime()) / (1000 * 60 * 60 * 24 * 30));
+  const ageMonths = Math.floor(
+    (Date.now() - new Date(baby.date_of_birth).getTime()) / (1000 * 60 * 60 * 24 * 30)
+  );
   doc.text(`Age: ${ageMonths} months`, 20, yPos);
   yPos += 10;
 
@@ -45,19 +47,35 @@ export async function generateDoctorReport(
 
     doc.setFontSize(9);
     const latestGrowth = growthRecords[0];
-    doc.text(`Latest measurement (${format(new Date(latestGrowth.recorded_at), 'MMM dd, yyyy')}):`, 25, yPos);
+    doc.text(
+      `Latest measurement (${format(new Date(latestGrowth.recorded_at), 'MMM dd, yyyy')}):`,
+      25,
+      yPos
+    );
     yPos += 6;
-    
+
     if (latestGrowth.weight) {
-      doc.text(`Weight: ${latestGrowth.weight} kg (${latestGrowth.percentile_weight}th percentile)`, 30, yPos);
+      doc.text(
+        `Weight: ${latestGrowth.weight} kg (${latestGrowth.percentile_weight}th percentile)`,
+        30,
+        yPos
+      );
       yPos += 5;
     }
     if (latestGrowth.length) {
-      doc.text(`Length: ${latestGrowth.length} cm (${latestGrowth.percentile_length}th percentile)`, 30, yPos);
+      doc.text(
+        `Length: ${latestGrowth.length} cm (${latestGrowth.percentile_length}th percentile)`,
+        30,
+        yPos
+      );
       yPos += 5;
     }
     if (latestGrowth.head_circumference) {
-      doc.text(`Head: ${latestGrowth.head_circumference} cm (${latestGrowth.percentile_head}th percentile)`, 30, yPos);
+      doc.text(
+        `Head: ${latestGrowth.head_circumference} cm (${latestGrowth.percentile_head}th percentile)`,
+        30,
+        yPos
+      );
       yPos += 5;
     }
     yPos += 10;
@@ -89,7 +107,7 @@ export async function generateDoctorReport(
     yPos += 8;
 
     doc.setFontSize(9);
-    healthRecords.slice(0, 5).forEach((record) => {
+    healthRecords.slice(0, 5).forEach(record => {
       if (yPos > 270) {
         doc.addPage();
         yPos = 20;

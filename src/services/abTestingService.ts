@@ -29,69 +29,69 @@ const PAYWALL_VARIANTS: PaywallVariant[] = [
     pricing: {
       yearly: '$39.99/yr',
       monthly: '$4.99/mo',
-      lifetime: '$79.99 lifetime'
+      lifetime: '$79.99 lifetime',
     },
     features: [
       {
         title: 'Personalized predictions',
         description: 'Nap & feed predictions tuned to your baby',
-        icon: '🧠'
+        icon: '🧠',
       },
       {
         title: 'Weekly patterns',
         description: 'See sleep and feeding trends at a glance',
-        icon: '📊'
+        icon: '📊',
       },
       {
         title: 'Doctor reports',
         description: 'Share detailed summaries with pediatricians',
-        icon: '👨‍⚕️'
+        icon: '👨‍⚕️',
       },
       {
         title: 'Cry Insights',
         description: 'AI-powered cry analysis when you need help',
-        icon: '👶'
-      }
+        icon: '👶',
+      },
     ],
     socialProof: 'Join 10,000+ parents',
     ctaText: 'Start Free Trial',
-    backgroundColor: 'from-primary/10 via-primary/5 to-background'
+    backgroundColor: 'from-primary/10 via-primary/5 to-background',
   },
   {
     id: 'urgency',
     name: 'Urgency',
-    headline: 'Don\'t miss out on Pro features',
+    headline: "Don't miss out on Pro features",
     subheadline: 'Limited time: First month free',
     pricing: {
       yearly: '$39.99/yr (save 25%)',
       monthly: '$4.99/mo',
-      lifetime: '$79.99 lifetime'
+      lifetime: '$79.99 lifetime',
     },
     features: [
       {
         title: 'Smart predictions',
-        description: 'AI learns your baby\'s unique patterns',
-        icon: '🤖'
+        description: "AI learns your baby's unique patterns",
+        icon: '🤖',
       },
       {
         title: 'Data insights',
         description: 'Track growth, sleep quality, and more',
-        icon: '📈'
+        icon: '📈',
       },
       {
         title: 'Team coordination',
         description: 'Share with partner, nanny, and doctor',
-        icon: '👨‍👩‍👧'
+        icon: '👨‍👩‍👧',
       },
       {
         title: 'Peace of mind',
-        description: 'Expert AI support when you\'re unsure',
-        icon: '🛡️'
-      }
+        description: "Expert AI support when you're unsure",
+        icon: '🛡️',
+      },
     ],
     socialProof: '⭐⭐⭐⭐⭐ "Changed how I parent" - Sarah M.',
     ctaText: 'Claim Free Month',
-    backgroundColor: 'from-orange-500/10 via-orange-500/5 to-background'
+    backgroundColor: 'from-orange-500/10 via-orange-500/5 to-background',
   },
   {
     id: 'fear_of_missing_out',
@@ -101,34 +101,34 @@ const PAYWALL_VARIANTS: PaywallVariant[] = [
     pricing: {
       yearly: '$39.99/yr (most popular)',
       monthly: '$4.99/mo',
-      lifetime: '$79.99 lifetime'
+      lifetime: '$79.99 lifetime',
     },
     features: [
       {
         title: 'Predict the future',
         description: 'Know when baby will wake, feed, or nap',
-        icon: '🔮'
+        icon: '🔮',
       },
       {
         title: 'Track everything',
         description: 'Sleep efficiency, feeding patterns, growth trends',
-        icon: '📋'
+        icon: '📋',
       },
       {
         title: 'Family coordination',
         description: 'Real-time sync across all caregivers',
-        icon: '📱'
+        icon: '📱',
       },
       {
         title: 'AI parenting assistant',
         description: 'Answers questions, analyzes cries, gives advice',
-        icon: '💬'
-      }
+        icon: '💬',
+      },
     ],
     socialProof: '💝 Loved by 50,000+ families worldwide',
     ctaText: 'Join Pro Parents',
-    backgroundColor: 'from-purple-500/10 via-purple-500/5 to-background'
-  }
+    backgroundColor: 'from-purple-500/10 via-purple-500/5 to-background',
+  },
 ];
 
 class ABTestingService {
@@ -158,7 +158,7 @@ class ABTestingService {
     // Track which variant the user sees
     track('paywall_variant_shown', {
       variant_id: this.userVariant.id,
-      variant_name: this.userVariant.name
+      variant_name: this.userVariant.name,
     });
 
     return this.userVariant;
@@ -171,7 +171,7 @@ class ABTestingService {
     track('paywall_interaction', {
       action,
       variant_id: variantId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -182,7 +182,7 @@ class ABTestingService {
     track('paywall_conversion', {
       variant_id: variantId,
       plan_type: planType,
-      converted_at: new Date().toISOString()
+      converted_at: new Date().toISOString(),
     });
   }
 
@@ -193,7 +193,7 @@ class ABTestingService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash;
@@ -215,4 +215,3 @@ class ABTestingService {
 }
 
 export const abTestingService = new ABTestingService();
-

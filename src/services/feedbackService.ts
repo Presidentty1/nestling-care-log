@@ -12,8 +12,12 @@ export interface UserFeedback {
 }
 
 class FeedbackService {
-  async submitFeedback(feedback: Omit<UserFeedback, 'id' | 'user_id' | 'created_at'>): Promise<void> {
-    const { data: { user } } = await authService.getUser();
+  async submitFeedback(
+    feedback: Omit<UserFeedback, 'id' | 'user_id' | 'created_at'>
+  ): Promise<void> {
+    const {
+      data: { user },
+    } = await authService.getUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase.from('user_feedback').insert({
@@ -28,7 +32,9 @@ class FeedbackService {
   }
 
   async getFeedback(userId?: string): Promise<UserFeedback[]> {
-    const { data: { user } } = await authService.getUser();
+    const {
+      data: { user },
+    } = await authService.getUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) return [];
 
@@ -44,5 +50,4 @@ class FeedbackService {
 }
 
 export const feedbackService = new FeedbackService();
-
 

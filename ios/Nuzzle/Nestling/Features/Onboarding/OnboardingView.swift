@@ -42,6 +42,9 @@ struct OnboardingView: View {
                 onComplete()
             }
         }
+        .task {
+            await Analytics.shared.logOnboardingStarted()
+        }
     }
 }
 

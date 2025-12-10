@@ -49,12 +49,14 @@ For production deployments (Vercel, Netlify, etc.):
 3. **Other platforms**: Use their respective secret management
 
 **Required for Production:**
+
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 - `VITE_SUPABASE_PROJECT_ID`
 - `VITE_APP_VERSION`
 
 **Optional:**
+
 - `VITE_SENTRY_DSN` (recommended for production)
 - Firebase variables (if using Firebase)
 
@@ -76,14 +78,14 @@ supabase secrets set GOOGLE_AI_API_KEY=...
 
 ### Edge Function Environment Variables
 
-| Variable | Purpose | Required | Notes |
-|----------|---------|-----------|-------|
-| `SUPABASE_URL` | Supabase project URL | Yes | Auto-provided by Supabase |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key | Yes | Auto-provided by Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key | Yes | Auto-provided by Supabase |
-| `LOVABLE_API_KEY` | Lovable AI API key | Yes* | For AI features via Lovable |
-| `OPENAI_API_KEY` | OpenAI API key | No | Alternative to Lovable API |
-| `GOOGLE_AI_API_KEY` | Google AI API key | No | Alternative to Lovable API |
+| Variable                    | Purpose                | Required | Notes                       |
+| --------------------------- | ---------------------- | -------- | --------------------------- |
+| `SUPABASE_URL`              | Supabase project URL   | Yes      | Auto-provided by Supabase   |
+| `SUPABASE_ANON_KEY`         | Supabase anonymous key | Yes      | Auto-provided by Supabase   |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key       | Yes      | Auto-provided by Supabase   |
+| `LOVABLE_API_KEY`           | Lovable AI API key     | Yes\*    | For AI features via Lovable |
+| `OPENAI_API_KEY`            | OpenAI API key         | No       | Alternative to Lovable API  |
+| `GOOGLE_AI_API_KEY`         | Google AI API key      | No       | Alternative to Lovable API  |
 
 \* Required if using Lovable AI features. For production, replace with direct API keys.
 
@@ -92,6 +94,7 @@ supabase secrets set GOOGLE_AI_API_KEY=...
 ### Configuration Files
 
 iOS app uses:
+
 - `Info.plist` for app configuration
 - Xcode build settings for environment-specific values
 - No `.env` file (use Xcode build configurations)
@@ -108,9 +111,11 @@ Set in Xcode → Target → Build Settings:
 ### Supabase Configuration (iOS)
 
 Supabase credentials are configured in:
+
 - `ios/Nuzzle/Nestling/Services/SupabaseClient.swift`
 
 **⚠️ Important**: Never hardcode API keys in Swift files. Use:
+
 - Xcode build configurations
 - Info.plist (for non-sensitive config)
 - Keychain (for sensitive data)
@@ -122,12 +127,14 @@ Supabase credentials are configured in:
 Set in: Repository Settings → Secrets and variables → Actions
 
 **Required Secrets:**
+
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_ACCESS_TOKEN` (for Supabase CLI)
 
 **Optional:**
+
 - `SENTRY_AUTH_TOKEN` (for Sentry releases)
 - `APP_STORE_CONNECT_API_KEY` (for iOS deployment)
 - `APP_STORE_CONNECT_ISSUER_ID` (for iOS deployment)
@@ -170,6 +177,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=production-anon-key
 ### Check Environment Variables
 
 **Web:**
+
 ```bash
 # Check if variables are loaded
 npm run dev
@@ -177,6 +185,7 @@ npm run dev
 ```
 
 **Supabase Edge Functions:**
+
 ```bash
 # List secrets
 supabase secrets list
@@ -186,6 +195,7 @@ supabase functions invoke function-name
 ```
 
 **iOS:**
+
 ```bash
 # Check build settings
 cd ios/Nuzzle
@@ -201,12 +211,13 @@ If migrating from Lovable platform:
    - `GOOGLE_AI_API_KEY` for Google AI features
 
 2. **Update edge functions** to use new keys:
+
    ```typescript
    // Old
-   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-   
+   const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+
    // New
-   const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+   const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
    ```
 
 3. **Update client code** if any hardcoded URLs exist
@@ -249,14 +260,4 @@ If migrating from Lovable platform:
 - [Supabase Environment Variables](https://supabase.com/docs/guides/functions/secrets)
 - [Vite Environment Variables](https://vitejs.dev/guide/env-and-mode.html)
 - [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
-
-
-
-
-
-
-
-
-
-
 

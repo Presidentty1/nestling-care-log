@@ -1,12 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -23,8 +23,11 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
     if (authError || !user) {
       throw new Error('Unauthorized');
     }
@@ -92,19 +95,16 @@ serve(async (req) => {
 
     // Send invite email using Supabase Auth
     const inviteUrl = `${req.headers.get('origin')}/invite/${invite.token}`;
-    
+
     try {
-      const { error: emailError } = await supabase.auth.admin.inviteUserByEmail(
-        email,
-        {
-          data: {
-            invite_token: invite.token,
-            family_id: familyId,
-            role,
-          },
-          redirectTo: inviteUrl,
-        }
-      );
+      const { error: emailError } = await supabase.auth.admin.inviteUserByEmail(email, {
+        data: {
+          invite_token: invite.token,
+          family_id: familyId,
+          role,
+        },
+        redirectTo: inviteUrl,
+      });
 
       if (emailError) {
         console.error('Email error:', emailError);
@@ -114,19 +114,14 @@ serve(async (req) => {
       // Don't fail the request if email fails
     }
 
-    return new Response(
-      JSON.stringify({ success: true, invite }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    return new Response(JSON.stringify({ success: true, invite }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error: any) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Unknown error occurred' }),
-      { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message || 'Unknown error occurred' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

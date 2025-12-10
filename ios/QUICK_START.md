@@ -141,6 +141,7 @@ When you first launch the app:
 ## What Works Out of the Box
 
 ✅ **All core features**:
+
 - Event logging (Feed, Diaper, Sleep, Tummy Time)
 - Home dashboard with summary cards
 - History view with date picker
@@ -150,6 +151,7 @@ When you first launch the app:
 - Data persistence (JSON-backed)
 
 ✅ **Modern iOS features**:
+
 - Bottom sheet detents
 - Searchable timelines
 - Context menus
@@ -157,6 +159,7 @@ When you first launch the app:
 - SF Symbols effects
 
 ✅ **UX polish**:
+
 - Haptics
 - Loading/empty states
 - Toast notifications
@@ -203,5 +206,3 @@ ios/
 - **Setup Details**: See `XCODE_SETUP.md`
 - **Testing**: See `TEST_PLAN.md`
 - **Known Issues**: See `KNOWN_ISSUES.md`
-
-

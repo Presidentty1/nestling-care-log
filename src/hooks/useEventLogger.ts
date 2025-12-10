@@ -25,17 +25,15 @@ export function useEventLogger() {
   const createEvent = async (eventData: CreateEventData) => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const eventWithUser = {
         ...eventData,
         created_by: user?.id,
       };
 
-      const { data, error } = await supabase
-        .from('events')
-        .insert(eventWithUser)
-        .select()
-        .single();
+      const { data, error } = await supabase.from('events').insert(eventWithUser).select().single();
 
       if (error) {
         // Queue for offline sync
@@ -55,7 +53,9 @@ export function useEventLogger() {
     } catch (error: any) {
       console.error('Error creating event:', error);
       // Queue for offline sync on network error
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       offlineQueue.enqueue({
         type: 'create',
         table: 'events',

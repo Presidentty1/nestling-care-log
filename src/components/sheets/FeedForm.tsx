@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Milk, AlertCircle } from 'lucide-react';
-import type { CreateEventData} from '@/services/eventsService';
+import type { CreateEventData } from '@/services/eventsService';
 import { eventsService } from '@/services/eventsService';
 import { unitConversion } from '@/services/unitConversion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,8 +20,16 @@ interface FeedFormProps {
   prefillData?: any;
 }
 
-export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: FeedFormProps) {
-  const [feedType, setFeedType] = useState<'breast' | 'bottle'>(prefillData?.subtype === 'bottle' ? 'bottle' : 'breast');
+export function FeedForm({
+  babyId,
+  editingEventId,
+  onValidChange,
+  onSubmit,
+  prefillData,
+}: FeedFormProps) {
+  const [feedType, setFeedType] = useState<'breast' | 'bottle'>(
+    prefillData?.subtype === 'bottle' ? 'bottle' : 'breast'
+  );
   const [side, setSide] = useState<'left' | 'right' | 'both'>(prefillData?.side || 'left');
   const [amount, setAmount] = useState<string>(prefillData?.amount?.toString() || '');
   const [unit, setUnit] = useState<'ml' | 'oz'>(prefillData?.unit || 'oz');
@@ -130,56 +138,49 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className='space-y-6'>
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error}. Check your connection and try again.
-          </AlertDescription>
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{error}. Check your connection and try again.</AlertDescription>
         </Alert>
       )}
 
       {/* Quick Actions */}
       {!editingEventId && (
-        <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleSameAsLast}
-            className="w-full"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
+        <div className='space-y-3'>
+          <Button type='button' variant='outline' onClick={handleSameAsLast} className='w-full'>
+            <RotateCcw className='mr-2 h-4 w-4' />
             Same as last time
           </Button>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Quick presets</Label>
-            <div className="grid grid-cols-3 gap-2">
+          <div className='space-y-2'>
+            <Label className='text-sm font-medium'>Quick presets</Label>
+            <div className='grid grid-cols-3 gap-2'>
               <Button
-                type="button"
-                variant="outline"
-                size="sm"
+                type='button'
+                variant='outline'
+                size='sm'
                 onClick={() => handleQuickPreset(60)}
-                className="h-12"
+                className='h-12'
               >
                 60 ml
               </Button>
               <Button
-                type="button"
-                variant="outline"
-                size="sm"
+                type='button'
+                variant='outline'
+                size='sm'
                 onClick={() => handleQuickPreset(90)}
-                className="h-12"
+                className='h-12'
               >
                 90 ml
               </Button>
               <Button
-                type="button"
-                variant="outline"
-                size="sm"
+                type='button'
+                variant='outline'
+                size='sm'
                 onClick={() => handleQuickPreset(120)}
-                className="h-12"
+                className='h-12'
               >
                 120 ml
               </Button>
@@ -189,25 +190,25 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
       )}
 
       {/* Feed Type Selection */}
-      <div className="space-y-3">
-        <Label className="text-base font-medium">Feed Type</Label>
-        <div className="grid grid-cols-2 gap-3">
+      <div className='space-y-3'>
+        <Label className='text-base font-medium'>Feed Type</Label>
+        <div className='grid grid-cols-2 gap-3'>
           <Button
-            type="button"
+            type='button'
             variant={feedType === 'breast' ? 'default' : 'outline'}
-            className="h-16 text-base font-semibold"
+            className='h-16 text-base font-semibold'
             onClick={() => setFeedType('breast')}
           >
-            <Milk className="mr-2 h-5 w-5" />
+            <Milk className='mr-2 h-5 w-5' />
             Nursing
           </Button>
           <Button
-            type="button"
+            type='button'
             variant={feedType === 'bottle' ? 'default' : 'outline'}
-            className="h-16 text-base font-semibold"
+            className='h-16 text-base font-semibold'
             onClick={() => setFeedType('bottle')}
           >
-            <Milk className="mr-2 h-5 w-5" />
+            <Milk className='mr-2 h-5 w-5' />
             Bottle
           </Button>
         </div>
@@ -215,15 +216,15 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
 
       {/* Nursing Options */}
       {feedType === 'breast' && (
-        <div className="space-y-3">
-          <Label className="text-base font-medium">Side</Label>
-          <div className="grid grid-cols-3 gap-3">
-            {(['left', 'right', 'both'] as const).map((s) => (
+        <div className='space-y-3'>
+          <Label className='text-base font-medium'>Side</Label>
+          <div className='grid grid-cols-3 gap-3'>
+            {(['left', 'right', 'both'] as const).map(s => (
               <Button
                 key={s}
-                type="button"
+                type='button'
                 variant={side === s ? 'default' : 'outline'}
-                className="h-14 text-base capitalize"
+                className='h-14 text-base capitalize'
                 onClick={() => setSide(s)}
               >
                 {s}
@@ -235,28 +236,30 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
 
       {/* Bottle Amount */}
       {feedType === 'bottle' && (
-        <div className="space-y-3">
-          <Label htmlFor="amount" className="text-base font-medium">Amount</Label>
-          <div className="flex gap-3">
+        <div className='space-y-3'>
+          <Label htmlFor='amount' className='text-base font-medium'>
+            Amount
+          </Label>
+          <div className='flex gap-3'>
             <Input
-              id="amount"
-              type="number"
-              inputMode="decimal"
-              step="0.5"
-              min="0"
-              placeholder="0"
+              id='amount'
+              type='number'
+              inputMode='decimal'
+              step='0.5'
+              min='0'
+              placeholder='0'
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="flex-1 h-14 text-xl text-center font-semibold"
+              onChange={e => setAmount(e.target.value)}
+              className='flex-1 h-14 text-xl text-center font-semibold'
               autoFocus
             />
-            <div className="flex gap-2">
-              {(['oz', 'ml'] as const).map((u) => (
+            <div className='flex gap-2'>
+              {(['oz', 'ml'] as const).map(u => (
                 <Button
                   key={u}
-                  type="button"
+                  type='button'
                   variant={unit === u ? 'default' : 'outline'}
-                  className="h-14 w-16 text-base font-semibold"
+                  className='h-14 w-16 text-base font-semibold'
                   onClick={() => setUnit(u)}
                 >
                   {u}
@@ -268,18 +271,20 @@ export function FeedForm({ babyId, editingEventId, onValidChange, onSubmit, pref
       )}
 
       {/* Optional Notes */}
-      <div className="space-y-3">
-        <Label htmlFor="note" className="text-base">Notes (optional)</Label>
+      <div className='space-y-3'>
+        <Label htmlFor='note' className='text-base'>
+          Notes (optional)
+        </Label>
         <Textarea
-          id="note"
+          id='note'
           value={note}
-          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
-          placeholder="Any observations..."
-          className="min-h-[100px] text-base resize-none"
+          onChange={e => setNote(sanitizeEventNote(e.target.value))}
+          placeholder='Any observations...'
+          className='min-h-[100px] text-base resize-none'
           maxLength={500}
         />
         {note.length > 0 && (
-          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
+          <p className='text-xs text-muted-foreground text-right'>{note.length}/500</p>
         )}
       </div>
     </form>

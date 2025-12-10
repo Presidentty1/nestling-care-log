@@ -7,26 +7,25 @@ export interface ContextualTip {
   category: 'sleep' | 'feeding' | 'development' | 'general';
 }
 
-export function getContextualTips(
-  babyBirthDate: string,
-  recentEvents?: any[]
-): ContextualTip[] {
+export function getContextualTips(babyBirthDate: string, recentEvents?: any[]): ContextualTip[] {
   const ageInMonths = differenceInMonths(new Date(), new Date(babyBirthDate));
   const ageInWeeks = differenceInWeeks(new Date(), new Date(babyBirthDate));
-  
+
   const tips: ContextualTip[] = [];
 
   // Age-based tips
   if (ageInWeeks < 4) {
     tips.push({
       id: 'newborn-feeding',
-      content: 'Newborns typically eat 8-12 times per day. Cluster feeding in the evening is normal!',
+      content:
+        'Newborns typically eat 8-12 times per day. Cluster feeding in the evening is normal!',
       icon: '🍼',
       category: 'feeding',
     });
     tips.push({
       id: 'newborn-sleep',
-      content: 'Newborns sleep 14-17 hours per day in short bursts. Wake windows are 45-60 minutes.',
+      content:
+        'Newborns sleep 14-17 hours per day in short bursts. Wake windows are 45-60 minutes.',
       icon: '💤',
       category: 'sleep',
     });
@@ -39,7 +38,8 @@ export function getContextualTips(
     });
     tips.push({
       id: 'growth-spurt',
-      content: 'Growth spurts often happen around 3 weeks, 6 weeks, and 3 months. Extra feeds are normal!',
+      content:
+        'Growth spurts often happen around 3 weeks, 6 weeks, and 3 months. Extra feeds are normal!',
       icon: '📈',
       category: 'development',
     });
@@ -59,13 +59,15 @@ export function getContextualTips(
   } else if (ageInMonths < 9) {
     tips.push({
       id: 'wake-windows-6mo',
-      content: '6-8 months: wake windows are 2-3 hours. Most babies need 2-3 naps totaling 3-4 hours.',
+      content:
+        '6-8 months: wake windows are 2-3 hours. Most babies need 2-3 naps totaling 3-4 hours.',
       icon: '⏰',
       category: 'sleep',
     });
     tips.push({
       id: 'solids-intro',
-      content: 'Starting solids? Offer after milk feeds and watch for allergic reactions. Enjoy the mess!',
+      content:
+        'Starting solids? Offer after milk feeds and watch for allergic reactions. Enjoy the mess!',
       icon: '🥄',
       category: 'feeding',
     });
@@ -95,20 +97,23 @@ export function getContextualTips(
   if (recentEvents && recentEvents.length > 0) {
     const sleepEvents = recentEvents.filter(e => e.type === 'sleep');
     const feedEvents = recentEvents.filter(e => e.type === 'feed');
-    
+
     if (sleepEvents.length > 0) {
-      const avgSleepMinutes = sleepEvents.reduce((sum, e) => {
-        if (e.end_time) {
-          const duration = (new Date(e.end_time).getTime() - new Date(e.start_time).getTime()) / (1000 * 60);
-          return sum + duration;
-        }
-        return sum;
-      }, 0) / sleepEvents.length;
+      const avgSleepMinutes =
+        sleepEvents.reduce((sum, e) => {
+          if (e.end_time) {
+            const duration =
+              (new Date(e.end_time).getTime() - new Date(e.start_time).getTime()) / (1000 * 60);
+            return sum + duration;
+          }
+          return sum;
+        }, 0) / sleepEvents.length;
 
       if (avgSleepMinutes < 30 && ageInMonths < 6) {
         tips.push({
           id: 'short-naps',
-          content: 'Short naps (<30 min) are common for young babies. Try a darker room and white noise.',
+          content:
+            'Short naps (<30 min) are common for young babies. Try a darker room and white noise.',
           icon: '🌙',
           category: 'sleep',
         });
@@ -117,14 +122,16 @@ export function getContextualTips(
 
     if (feedEvents.length > 0) {
       const recentFeedCount = feedEvents.filter(e => {
-        const hoursSince = (new Date().getTime() - new Date(e.start_time).getTime()) / (1000 * 60 * 60);
+        const hoursSince =
+          (new Date().getTime() - new Date(e.start_time).getTime()) / (1000 * 60 * 60);
         return hoursSince <= 24;
       }).length;
 
       if (recentFeedCount > 12 && ageInWeeks > 4) {
         tips.push({
           id: 'frequent-feeding',
-          content: 'Feeding more than usual? Could be a growth spurt, teething, or just extra comfort needed.',
+          content:
+            'Feeding more than usual? Could be a growth spurt, teething, or just extra comfort needed.',
           icon: '🍼',
           category: 'feeding',
         });
@@ -136,13 +143,14 @@ export function getContextualTips(
   const essentialTips = [
     {
       id: 'loose-logging',
-      content: 'It\'s okay if you miss logs. We\'ll still use what you have and stay conservative if we\'re unsure.',
+      content:
+        "It's okay if you miss logs. We'll still use what you have and stay conservative if we're unsure.",
       icon: '✨',
       category: 'general' as const,
     },
     {
       id: 'trust-yourself',
-      content: 'You know your baby best. Trust your instincts—they\'re usually right!',
+      content: "You know your baby best. Trust your instincts—they're usually right!",
       icon: '💪',
       category: 'general' as const,
     },

@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -65,17 +71,20 @@ export default function Accessibility() {
     });
 
     // Apply font size
-    root.style.fontSize = {
-      small: '14px',
-      medium: '16px',
-      large: '18px',
-      xlarge: '20px',
-    }[settings.font_size] || '16px';
+    root.style.fontSize =
+      {
+        small: '14px',
+        medium: '16px',
+        large: '18px',
+        xlarge: '20px',
+      }[settings.font_size] || '16px';
   };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       await appSettingsService.createOrUpdateAppSettings({
@@ -99,82 +108,82 @@ export default function Accessibility() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Accessibility</h1>
+    <div className='min-h-screen bg-background p-4'>
+      <div className='max-w-2xl mx-auto space-y-6'>
+        <h1 className='text-3xl font-bold'>Accessibility</h1>
 
-        <Card className="p-6 space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="flex items-center gap-2">
-                  {settings.theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+        <Card className='p-6 space-y-6'>
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <div className='space-y-0.5'>
+                <Label className='flex items-center gap-2'>
+                  {settings.theme === 'dark' ? (
+                    <Moon className='w-4 h-4' />
+                  ) : (
+                    <Sun className='w-4 h-4' />
+                  )}
                   Theme
                 </Label>
-                <p className="text-sm text-muted-foreground">
-                  Choose your preferred color scheme
-                </p>
+                <p className='text-sm text-muted-foreground'>Choose your preferred color scheme</p>
               </div>
               <Select
                 value={settings.theme}
-                onValueChange={(value) => setSettings({ ...settings, theme: value })}
+                onValueChange={value => setSettings({ ...settings, theme: value })}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className='w-32'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
+                  <SelectItem value='light'>Light</SelectItem>
+                  <SelectItem value='dark'>Dark</SelectItem>
+                  <SelectItem value='system'>System</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="flex items-center gap-2">
-                  <Type className="w-4 h-4" />
+            <div className='flex items-center justify-between'>
+              <div className='space-y-0.5'>
+                <Label className='flex items-center gap-2'>
+                  <Type className='w-4 h-4' />
                   Font Size
                 </Label>
-                <p className="text-sm text-muted-foreground">
-                  Adjust text size for readability
-                </p>
+                <p className='text-sm text-muted-foreground'>Adjust text size for readability</p>
               </div>
               <Select
                 value={settings.font_size}
-                onValueChange={(value) => setSettings({ ...settings, font_size: value })}
+                onValueChange={value => setSettings({ ...settings, font_size: value })}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className='w-32'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="small">Small</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
-                  <SelectItem value="xlarge">X-Large</SelectItem>
+                  <SelectItem value='small'>Small</SelectItem>
+                  <SelectItem value='medium'>Medium</SelectItem>
+                  <SelectItem value='large'>Large</SelectItem>
+                  <SelectItem value='xlarge'>X-Large</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
+            <div className='flex items-center justify-between'>
+              <div className='space-y-0.5'>
+                <Label className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
                   Caregiver Mode
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className='text-sm text-muted-foreground'>
                   Larger buttons and simplified interface
                 </p>
               </div>
               <Switch
                 checked={settings.caregiver_mode}
-                onCheckedChange={(checked) => setSettings({ ...settings, caregiver_mode: checked })}
+                onCheckedChange={checked => setSettings({ ...settings, caregiver_mode: checked })}
               />
             </div>
           </div>
 
           <Button
-            className="w-full"
+            className='w-full'
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
           >
@@ -182,9 +191,9 @@ export default function Accessibility() {
           </Button>
         </Card>
 
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4">Accessibility Features</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+        <Card className='p-6'>
+          <h3 className='font-semibold mb-4'>Accessibility Features</h3>
+          <ul className='space-y-2 text-sm text-muted-foreground'>
             <li>✓ High contrast mode support</li>
             <li>✓ Screen reader optimized</li>
             <li>✓ Keyboard navigation</li>

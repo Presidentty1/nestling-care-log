@@ -38,7 +38,7 @@ export function calculateWakeWindow(ageInWeeks: number): WakeWindow {
 
 export function getLastWakeTime(events: BabyEvent[]): Date | null {
   const sleepEvents = events
-    .filter((e) => e.type === 'sleep' && e.end_time)
+    .filter(e => e.type === 'sleep' && e.end_time)
     .sort((a, b) => new Date(b.end_time!).getTime() - new Date(a.end_time!).getTime());
 
   if (sleepEvents.length > 0 && sleepEvents[0].end_time) {
@@ -58,10 +58,12 @@ export function predictNextNap(baby: Baby, events: BabyEvent[]): NapPrediction {
 
   // Calculate confidence based on available data
   const recentSleepEvents = events.filter(
-    (e) => e.type === 'sleep' && e.end_time && 
-    new Date(e.end_time).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+    e =>
+      e.type === 'sleep' &&
+      e.end_time &&
+      new Date(e.end_time).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
   );
-  
+
   let confidence: 'high' | 'medium' | 'low';
   if (recentSleepEvents.length >= 7) {
     confidence = 'high';

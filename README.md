@@ -19,18 +19,22 @@ A comprehensive baby care logging app with local-first architecture. Track feedi
 This project uses a comprehensive design system optimized for mobile-first experiences with iOS-quality patterns. All design tokens, components, and spacing scales are documented in **[DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)**.
 
 **Key Features:**
+
 - **Semantic Tokens** - Single source of truth for colors, spacing, shadows
 - **Component Variants** - Standardized Button, Card, Chip components
 - **Typography Scale** - iOS-style text hierarchy
 - **SwiftUI Ready** - Token mappings for native iOS implementation
 
 **Quick Example:**
+
 ```tsx
 // Use semantic tokens
-<Card variant="emphasis" className="shadow-lg">
-  <CardContent className="p-md space-y-sm">
-    <Button variant="default" size="lg">Primary Action</Button>
-    <Chip variant="success">Active</Chip>
+<Card variant='emphasis' className='shadow-lg'>
+  <CardContent className='p-md space-y-sm'>
+    <Button variant='default' size='lg'>
+      Primary Action
+    </Button>
+    <Chip variant='success'>Active</Chip>
   </CardContent>
 </Card>
 ```
@@ -49,11 +53,13 @@ Visit http://localhost:5173
 ## 📱 iOS Development
 
 ### Prerequisites
+
 - macOS with Xcode 15+
 - iOS 14+ device or simulator
 - Valid Apple Developer account (for device testing)
 
 ### Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -69,6 +75,7 @@ npm run cap:ios
 ```
 
 ### Development Workflow
+
 ```bash
 # Option 1: Hot reload from simulator
 # Edit capacitor.config.ts, set server.url to your local IP
@@ -80,11 +87,13 @@ npm run cap:run:ios
 ```
 
 ### Building for App Store
+
 See `DEPLOYMENT.md` for complete guide.
 
 ## 🔧 Development in Cursor
 
 This project is optimized for Cursor 2.0:
+
 1. Clone the repository
 2. Open in Cursor
 3. Run `npm install`
@@ -103,14 +112,16 @@ This project is optimized for Cursor 2.0:
 ## 🚀 Deployment
 
 See `DEPLOYMENT.md` for:
+
 - Vercel/Netlify deployment
-- Edge function deployment  
+- Edge function deployment
 - iOS App Store submission
 - Environment variable setup
 
 ## 📚 Documentation
 
 ### Architecture & Development
+
 - **[`ARCHITECTURE_WEB.md`](./ARCHITECTURE_WEB.md)** - Complete web application architecture
 - **[`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md)** - Design system with tokens, components, and SwiftUI mappings
 - **[`DEVELOPMENT.md`](./DEVELOPMENT.md)** - Complete local development guide
@@ -120,6 +131,7 @@ See `DEPLOYMENT.md` for:
 - **[`docs/CODE_QUALITY.md`](./docs/CODE_QUALITY.md)** - Code quality standards and linting rules
 
 ### Architecture Decisions
+
 - **[`docs/architecture/decisions/`](./docs/architecture/decisions/)** - Architecture Decision Records (ADRs)
   - `001-mvvm-pattern-swiftui.md` - MVVM pattern for SwiftUI
   - `002-react-query-state-management.md` - React Query for state management
@@ -130,12 +142,14 @@ See `DEPLOYMENT.md` for:
   - `007-capacitor-cross-platform.md` - Capacitor for cross-platform
 
 ### Testing & Quality
+
 - **[`TEST_PLAN_WEB.md`](./TEST_PLAN_WEB.md)** - Comprehensive testing strategy (unit, E2E, performance)
 - **[`TESTING_CHECKLIST.md`](./TESTING_CHECKLIST.md)** - Pre-deployment testing steps
 - **[`MVP_CHECKLIST.md`](./MVP_CHECKLIST.md)** - MVP launch requirements checklist
 - **[`PRE_LAUNCH_CHECKLIST.md`](./PRE_LAUNCH_CHECKLIST.md)** - App Store submission checklist
 
 ### Database & Security
+
 - **[`DB_OPERATIONS.md`](./DB_OPERATIONS.md)** - Database operations, migrations, seed data
 - **[`DB_SECURITY.md`](./DB_SECURITY.md)** - RLS policies and security documentation
 - **[`docs/security/AUDIT_CHECKLIST.md`](./docs/security/AUDIT_CHECKLIST.md)** - Security audit checklist
@@ -143,23 +157,27 @@ See `DEPLOYMENT.md` for:
 - **[`DATA_MODEL.md`](./DATA_MODEL.md)** - Complete database schema documentation
 
 ### Analytics & Business
+
 - **[`ANALYTICS_SPEC_WEB.md`](./ANALYTICS_SPEC_WEB.md)** - Analytics implementation and event tracking
 - **[`docs/analytics.md`](./docs/analytics.md)** - Analytics setup and configuration
 - **[`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md)** - Demo walkthrough for stakeholders
 - **[`USER_REVIEW_AND_VALUE_PROPOSITION.md`](./USER_REVIEW_AND_VALUE_PROPOSITION.md)** - User perspective and value analysis
 
 ### Legal & Compliance
+
 - **[`docs/PRIVACY_POLICY_TEMPLATE.md`](./docs/PRIVACY_POLICY_TEMPLATE.md)** - Privacy policy template
 - **[`docs/TERMS_OF_SERVICE_TEMPLATE.md`](./docs/TERMS_OF_SERVICE_TEMPLATE.md)** - Terms of service template
 - **[`PRE_LAUNCH_CHECKLIST.md`](./PRE_LAUNCH_CHECKLIST.md)** - App Store submission checklist
 
 ### iOS Development
+
 - **[`ios/README.md`](./ios/README.md)** - iOS app documentation
 - **[`ios/IOS_ARCHITECTURE.md`](./ios/IOS_ARCHITECTURE.md)** - iOS architecture guide
 - **[`docs/IOS_MIGRATION_GUIDE.md`](./docs/IOS_MIGRATION_GUIDE.md)** - Web to iOS migration guide
 - **[`docs/DESIGN_TOKENS_IOS.md`](./docs/DESIGN_TOKENS_IOS.md)** - iOS design tokens mapping
 
 ### Features & Components
+
 - **[`docs/AI_FEATURES.md`](./docs/AI_FEATURES.md)** - AI features documentation (nap predictor, cry insights, assistant)
 - **[`docs/VOICE_LOGGING.md`](./docs/VOICE_LOGGING.md)** - Voice logging feature guide
 - **[`docs/COMPONENT_INVENTORY.md`](./docs/COMPONENT_INVENTORY.md)** - Component library inventory
@@ -168,12 +186,14 @@ See `DEPLOYMENT.md` for:
 - **[`docs/API_ENDPOINTS.md`](./docs/API_ENDPOINTS.md)** - API endpoints documentation
 
 ### Deployment & Launch
+
 - **[`DEPLOYMENT.md`](./DEPLOYMENT.md)** - Production deployment instructions
 - **[`docs/APP_STORE_ASSETS_GUIDE.md`](./docs/APP_STORE_ASSETS_GUIDE.md)** - App Store assets guide
 - **[`docs/launch_checklist.md`](./docs/launch_checklist.md)** - Launch readiness checklist
 - **[`MIGRATION_CHECKLIST.md`](./MIGRATION_CHECKLIST.md)** - Lovable to Cursor migration guide
 
 ### Other
+
 - **[`SECRETS.md`](./SECRETS.md)** - Legacy secrets documentation (see ENVIRONMENT_VARIABLES.md)
 - **[`supabase/functions/README.md`](./supabase/functions/README.md)** - Edge functions documentation
 

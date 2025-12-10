@@ -5,6 +5,7 @@ The project needs the `ZipArchive` package. Follow these steps to add it:
 ## Steps to Add ZipArchive Package
 
 1. **Open the project in Xcode:**
+
    ```bash
    open ios/Nestling/Nestling.xcodeproj
    ```
@@ -18,6 +19,7 @@ The project needs the `ZipArchive` package. Follow these steps to add it:
 5. **Click the "+" button** at the bottom left
 
 6. **Enter the package URL:**
+
    ```
    https://github.com/ZipArchive/ZipArchive.git
    ```
@@ -46,12 +48,13 @@ If you prefer, you can also add it via Xcode's menu:
 ## Verify
 
 After adding, you should see:
+
 - The package listed under "Package Dependencies" in Project Navigator
 - No more build errors about missing ZipArchive module
 
 ## Build Again
 
 Once the package is added:
+
 1. Build: ⌘B
 2. Run: ⌘R
-

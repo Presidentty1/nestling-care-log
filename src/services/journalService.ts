@@ -44,8 +44,12 @@ class JournalService {
     return data;
   }
 
-  async createJournalEntry(entry: Omit<JournalEntry, 'id' | 'created_at' | 'updated_at'>): Promise<JournalEntry> {
-    const { data: { user } } = await authService.getUser();
+  async createJournalEntry(
+    entry: Omit<JournalEntry, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<JournalEntry> {
+    const {
+      data: { user },
+    } = await authService.getUser();
     if (!user) throw new Error('Not authenticated');
 
     const entryData = {
@@ -76,15 +80,11 @@ class JournalService {
   }
 
   async deleteJournalEntry(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('journal_entries')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('journal_entries').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const journalService = new JournalService();
-
 

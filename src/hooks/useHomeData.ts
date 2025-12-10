@@ -34,7 +34,9 @@ export function useHomeData() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<DailySummary | null>(null);
-  const [napWindow, setNapWindow] = useState<{ start: Date; end: Date; reason: string } | null>(null);
+  const [napWindow, setNapWindow] = useState<{ start: Date; end: Date; reason: string } | null>(
+    null
+  );
   const [streakDays, setStreakDays] = useState(0);
   const [showGuestBanner, setShowGuestBanner] = useState(false);
   const [showAffirmation, setShowAffirmation] = useState(false);
@@ -84,7 +86,7 @@ export function useHomeData() {
       loadTodayEvents();
     }
   }, [activeBabyId]);
-  
+
   useRealtimeEvents(selectedBaby?.family_id, handleRealtimeUpdate);
 
   // Helper Functions
@@ -103,7 +105,7 @@ export function useHomeData() {
     } else {
       setActiveBabyId(guestBaby.id);
     }
-    
+
     const count = await guestModeService.getGuestEventCount();
     setShowGuestBanner(count >= 3);
     setLoading(false);
@@ -113,11 +115,13 @@ export function useHomeData() {
     try {
       const babyList = await babyService.getUserBabies();
       setBabies(babyList);
-      
+
       if (babyList.length === 0) {
         // Auto-provision logic
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
           if (session) {
             const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -138,7 +142,7 @@ export function useHomeData() {
         navigate('/onboarding');
         return;
       }
-      
+
       const storedBabyId = localStorage.getItem('activeBabyId');
       const activeId = babyList.find(b => b.id === storedBabyId)?.id || babyList[0].id;
       setActiveBabyId(activeId);
@@ -180,63 +184,63 @@ export function useHomeData() {
       const today = new Date();
       const start = startOfDay(today);
       const end = endOfDay(today);
-      
+
       const todayEvents = await eventsService.getEventsByRange(
         activeBabyId,
         start.toISOString(),
         end.toISOString()
       );
-      
+
       setEvents(todayEvents);
       setSummary(eventsService.calculateSummary(todayEvents));
     } catch (error) {
       logger.error('Failed to load events', error, 'useHomeData');
     }
   };
-  
+
   const refreshEvents = async (babyOverride?: Baby) => {
-     if (!activeBabyId) return;
-     const babyToUse = babyOverride || selectedBaby;
-     
-     const today = new Date();
-     const start = startOfDay(today);
-     const end = endOfDay(today);
-     
-     const todayEvents = await eventsService.getEventsByRange(
-        activeBabyId,
-        start.toISOString(),
-        end.toISOString()
-      );
-      setEvents(todayEvents);
-      setSummary(eventsService.calculateSummary(todayEvents));
-      
-      if (babyToUse) {
-        const window = napPredictorService.calculateFromEvents(todayEvents, babyToUse.date_of_birth);
-        setNapWindow(window);
-        
-        const lastFeed = await eventsService.getLastEventByType(activeBabyId, 'feed');
-        reminderService.updateLastFeed(lastFeed);
-        if (window) {
-          reminderService.updateNapWindow({ start: window.start, end: window.end });
-        }
+    if (!activeBabyId) return;
+    const babyToUse = babyOverride || selectedBaby;
+
+    const today = new Date();
+    const start = startOfDay(today);
+    const end = endOfDay(today);
+
+    const todayEvents = await eventsService.getEventsByRange(
+      activeBabyId,
+      start.toISOString(),
+      end.toISOString()
+    );
+    setEvents(todayEvents);
+    setSummary(eventsService.calculateSummary(todayEvents));
+
+    if (babyToUse) {
+      const window = napPredictorService.calculateFromEvents(todayEvents, babyToUse.date_of_birth);
+      setNapWindow(window);
+
+      const lastFeed = await eventsService.getLastEventByType(activeBabyId, 'feed');
+      reminderService.updateLastFeed(lastFeed);
+      if (window) {
+        reminderService.updateNapWindow({ start: window.start, end: window.end });
       }
+    }
   };
 
   const handleEventAdded = (event: EventRecord) => {
     // Immediate UI updates (synchronous)
     if (event) {
-       const values: any = {};
-       if (event.type === 'feed') {
-         values.subtype = event.subtype;
-         values.amount = event.amount;
-         values.unit = event.unit;
-         values.side = event.side;
-       } else if (event.type === 'diaper') {
-         values.subtype = event.subtype;
-       } else if (event.type === 'tummy_time') {
-         values.duration_min = event.duration_min;
-       }
-       saveLastUsed(event.type as EventType, values);
+      const values: any = {};
+      if (event.type === 'feed') {
+        values.subtype = event.subtype;
+        values.amount = event.amount;
+        values.unit = event.unit;
+        values.side = event.side;
+      } else if (event.type === 'diaper') {
+        values.subtype = event.subtype;
+      } else if (event.type === 'tummy_time') {
+        values.duration_min = event.duration_min;
+      }
+      saveLastUsed(event.type as EventType, values);
     }
 
     if (events.length === 0 && !hasShownConfetti) {
@@ -277,30 +281,35 @@ export function useHomeData() {
         });
       });
     }
-    
+
     // Defer streak and achievement operations (non-critical for UI)
     if (activeBabyId) {
       scheduleIdleTask(() => {
         const today = format(new Date(), 'yyyy-MM-dd');
         // Batch streak operations
-        streakService.markEventLogged(activeBabyId, today, event.type).then(() => {
-          return streakService.updateStreak(activeBabyId);
-        }).then(streak => {
-          setStreakDays(streak.currentStreak);
-          // Defer achievement check further
-          scheduleIdleTask(() => {
-            achievementService.checkAndUnlockAchievements(activeBabyId, {
-              streakDays: streak.currentStreak,
-              eventType: event.type,
-              eventTime: new Date(event.start_time),
-            }).then(newAchievements => {
-              newAchievements.forEach(achievement => {
-                toast.success(`Achievement unlocked: ${achievement.title}!`);
-              });
+        streakService
+          .markEventLogged(activeBabyId, today, event.type)
+          .then(() => {
+            return streakService.updateStreak(activeBabyId);
+          })
+          .then(streak => {
+            setStreakDays(streak.currentStreak);
+            // Defer achievement check further
+            scheduleIdleTask(() => {
+              achievementService
+                .checkAndUnlockAchievements(activeBabyId, {
+                  streakDays: streak.currentStreak,
+                  eventType: event.type,
+                  eventTime: new Date(event.start_time),
+                })
+                .then(newAchievements => {
+                  newAchievements.forEach(achievement => {
+                    toast.success(`Achievement unlocked: ${achievement.title}!`);
+                  });
+                });
             });
           });
-        });
-        
+
         // Defer affirmation check
         scheduleIdleTask(() => {
           streakService.shouldShowAffirmation(activeBabyId).then(should => {
@@ -325,6 +334,6 @@ export function useHomeData() {
     hasShownConfetti,
     refreshEvents,
     setHasShownConfetti,
-    setActiveBabyId
+    setActiveBabyId,
   };
 }

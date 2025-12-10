@@ -1,19 +1,19 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { babyId, weekStart } = await req.json();
-    
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -31,10 +31,10 @@ serve(async (req) => {
       .lt('start_time', weekEndDate.toISOString());
 
     if (!events || events.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'No data for this week' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'No data for this week' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Analyze events
@@ -44,7 +44,7 @@ serve(async (req) => {
 
     const totalFeeds = feedEvents.length;
     const avgFeedsPerDay = totalFeeds / 7;
-    
+
     const totalSleepMinutes = sleepEvents.reduce((sum, e) => {
       const duration = (new Date(e.end_time).getTime() - new Date(e.start_time).getTime()) / 60000;
       return sum + duration;
@@ -66,7 +66,7 @@ serve(async (req) => {
         },
       },
       sleep: {
-        totalHours: Math.round(totalSleepMinutes / 60 * 10) / 10,
+        totalHours: Math.round((totalSleepMinutes / 60) * 10) / 10,
         avgHoursPerDay: Math.round(avgSleepHoursPerDay * 10) / 10,
         totalNaps: sleepEvents.length,
       },
@@ -109,10 +109,9 @@ serve(async (req) => {
       .select()
       .single();
 
-    return new Response(
-      JSON.stringify({ summary, data: summaryData }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ summary, data: summaryData }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('Error generating weekly summary:', error);
     return new Response(

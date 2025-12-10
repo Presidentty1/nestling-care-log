@@ -52,34 +52,38 @@ export default function Insights() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Insights & Patterns</h1>
-          <BabySelector babies={babies || []} selectedBabyId={selectedBabyId} onSelect={setSelectedBabyId} />
+    <div className='min-h-screen bg-background p-4'>
+      <div className='max-w-4xl mx-auto space-y-6'>
+        <div className='flex items-center justify-between'>
+          <h1 className='text-3xl font-bold'>Insights & Patterns</h1>
+          <BabySelector
+            babies={babies || []}
+            selectedBabyId={selectedBabyId}
+            onSelect={setSelectedBabyId}
+          />
         </div>
 
         {!selectedBabyId && (
-          <Card className="p-6 text-center text-muted-foreground">
+          <Card className='p-6 text-center text-muted-foreground'>
             Select a baby to view insights
           </Card>
         )}
 
         {selectedBabyId && (
           <>
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+            <div className='space-y-4'>
+              <h2 className='text-xl font-semibold flex items-center gap-2'>
+                <TrendingUp className='w-5 h-5' />
                 Detected Patterns
               </h2>
 
               {patterns && patterns.length > 0 ? (
-                patterns.map((pattern) => (
-                  <Card key={pattern.id} className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                patterns.map(pattern => (
+                  <Card key={pattern.id} className='p-6'>
+                    <div className='flex items-start justify-between mb-4'>
                       <div>
-                        <h3 className="font-semibold text-lg">{pattern.insight_title}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className='font-semibold text-lg'>{pattern.insight_title}</h3>
+                        <p className='text-sm text-muted-foreground'>
                           Detected {format(new Date(pattern.detected_at), 'MMM d, yyyy')}
                         </p>
                       </div>
@@ -88,36 +92,36 @@ export default function Insights() {
                       </Badge>
                     </div>
 
-                    <p className="text-muted-foreground mb-4">{pattern.insight_description}</p>
+                    <p className='text-muted-foreground mb-4'>{pattern.insight_description}</p>
 
-                    <Badge variant="outline" className="capitalize">
+                    <Badge variant='outline' className='capitalize'>
                       {pattern.pattern_type}
                     </Badge>
                   </Card>
                 ))
               ) : (
-                <Card className="p-6 text-center text-muted-foreground">
-                  <Lightbulb className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <Card className='p-6 text-center text-muted-foreground'>
+                  <Lightbulb className='w-12 h-12 mx-auto mb-2 opacity-50' />
                   <p>No patterns detected yet. Keep logging data to discover insights!</p>
                 </Card>
               )}
             </div>
 
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" />
+            <div className='space-y-4'>
+              <h2 className='text-xl font-semibold flex items-center gap-2'>
+                <CheckCircle2 className='w-5 h-5' />
                 Correlations
               </h2>
 
               {correlations && correlations.length > 0 ? (
-                correlations.map((correlation) => (
-                  <Card key={correlation.id} className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                correlations.map(correlation => (
+                  <Card key={correlation.id} className='p-6'>
+                    <div className='flex items-start justify-between mb-4'>
                       <div>
-                        <h3 className="font-semibold">
+                        <h3 className='font-semibold'>
                           {correlation.variable_a} ↔ {correlation.variable_b}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className='text-sm text-muted-foreground'>
                           Based on {correlation.sample_size} data points over{' '}
                           {correlation.analysis_period_days} days
                         </p>
@@ -129,12 +133,12 @@ export default function Insights() {
                     </div>
 
                     {correlation.insight && (
-                      <p className="text-sm text-muted-foreground">{correlation.insight}</p>
+                      <p className='text-sm text-muted-foreground'>{correlation.insight}</p>
                     )}
                   </Card>
                 ))
               ) : (
-                <Card className="p-6 text-center text-muted-foreground">
+                <Card className='p-6 text-center text-muted-foreground'>
                   Not enough data to identify correlations yet.
                 </Card>
               )}

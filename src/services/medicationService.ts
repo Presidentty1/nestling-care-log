@@ -13,7 +13,9 @@ class MedicationService {
     return data as Medication[];
   }
 
-  async createMedication(data: Omit<Medication, 'id' | 'created_at' | 'updated_at'>): Promise<Medication> {
+  async createMedication(
+    data: Omit<Medication, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Medication> {
     const { data: result, error } = await supabase
       .from('medications')
       .insert(data)
@@ -37,15 +39,11 @@ class MedicationService {
   }
 
   async deleteMedication(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('medications')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('medications').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const medicationService = new MedicationService();
-
 

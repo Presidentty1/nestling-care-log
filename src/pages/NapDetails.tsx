@@ -37,7 +37,7 @@ export default function NapDetails() {
       if (!babies || babies.length === 0) return;
 
       const selectedBabyId = localStorage.getItem('selected_baby_id') || babies[0].id;
-      const selectedBaby = babies.find((b) => b.id === selectedBabyId) || babies[0];
+      const selectedBaby = babies.find(b => b.id === selectedBabyId) || babies[0];
       setBaby(selectedBaby);
 
       // Get last 7 days of sleep events
@@ -80,7 +80,7 @@ export default function NapDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface pb-20 flex items-center justify-center">
+      <div className='min-h-screen bg-surface pb-20 flex items-center justify-center'>
         <p>Loading...</p>
       </div>
     );
@@ -88,7 +88,7 @@ export default function NapDetails() {
 
   if (!baby) {
     return (
-      <div className="min-h-screen bg-surface pb-20 flex items-center justify-center">
+      <div className='min-h-screen bg-surface pb-20 flex items-center justify-center'>
         <p>No baby found</p>
       </div>
     );
@@ -100,7 +100,7 @@ export default function NapDetails() {
     isAfter(now, prediction.napWindowStart) && isBefore(now, prediction.napWindowEnd);
   const isPast = isAfter(now, prediction.napWindowEnd);
 
-  const todaysSleeps = events.filter((e) => {
+  const todaysSleeps = events.filter(e => {
     const eventDate = new Date(e.start_time);
     return eventDate.toDateString() === now.toDateString();
   });
@@ -121,76 +121,74 @@ export default function NapDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <div className="flex items-center gap-3 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/home')}>
-            <ArrowLeft className="h-4 w-4" />
+    <div className='min-h-screen bg-surface pb-20'>
+      <div className='max-w-2xl mx-auto p-4 space-y-4'>
+        <div className='flex items-center gap-3 mb-4'>
+          <Button variant='ghost' size='sm' onClick={() => navigate('/home')}>
+            <ArrowLeft className='h-4 w-4' />
           </Button>
-          <h1 className="text-2xl font-bold">Nap Prediction</h1>
+          <h1 className='text-2xl font-bold'>Nap Prediction</h1>
         </div>
 
-        <MedicalDisclaimer variant="predictions" />
+        <MedicalDisclaimer variant='predictions' />
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className='flex items-center justify-between'>
               <span>Current Prediction</span>
               <Badge className={confidenceColors[prediction.confidence]}>
                 {prediction.confidence} confidence
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center py-6">
+          <CardContent className='space-y-4'>
+            <div className='text-center py-6'>
               {isWindowOpen ? (
                 <>
-                  <p className="text-lg font-semibold text-green-600 mb-2">
+                  <p className='text-lg font-semibold text-green-600 mb-2'>
                     Nap Window Open Now! 💤
                   </p>
-                  <p className="text-3xl font-bold">
+                  <p className='text-3xl font-bold'>
                     {format(prediction.napWindowStart, 'h:mm a')} -{' '}
                     {format(prediction.napWindowEnd, 'h:mm a')}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className='text-sm text-muted-foreground mt-2'>
                     Closes in {formatDistanceToNow(prediction.napWindowEnd)}
                   </p>
                 </>
               ) : isPast ? (
                 <>
-                  <p className="text-lg font-semibold text-orange-600 mb-2">
-                    Window has passed
-                  </p>
-                  <p className="text-2xl font-bold">
+                  <p className='text-lg font-semibold text-orange-600 mb-2'>Window has passed</p>
+                  <p className='text-2xl font-bold'>
                     {format(prediction.napWindowStart, 'h:mm a')} -{' '}
                     {format(prediction.napWindowEnd, 'h:mm a')}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className='text-sm text-muted-foreground mt-2'>
                     Ended {formatDistanceToNow(prediction.napWindowEnd, { addSuffix: true })}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-semibold mb-2">Next Nap Window</p>
-                  <p className="text-3xl font-bold">
+                  <p className='text-lg font-semibold mb-2'>Next Nap Window</p>
+                  <p className='text-3xl font-bold'>
                     {format(prediction.napWindowStart, 'h:mm a')} -{' '}
                     {format(prediction.napWindowEnd, 'h:mm a')}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className='text-sm text-muted-foreground mt-2'>
                     Starts in {formatDistanceToNow(prediction.napWindowStart)}
                   </p>
                 </>
               )}
             </div>
 
-            <div className="border-t pt-4">
-              <p className="text-sm text-muted-foreground">{prediction.explanation}</p>
+            <div className='border-t pt-4'>
+              <p className='text-sm text-muted-foreground'>{prediction.explanation}</p>
             </div>
 
             {prediction.lastWakeTime && (
-              <div className="text-sm">
-                <span className="text-muted-foreground">Last wake time: </span>
-                <span className="font-medium">
+              <div className='text-sm'>
+                <span className='text-muted-foreground'>Last wake time: </span>
+                <span className='font-medium'>
                   {format(prediction.lastWakeTime, 'h:mm a')} (
                   {formatDistanceToNow(prediction.lastWakeTime, { addSuffix: true })})
                 </span>
@@ -205,10 +203,10 @@ export default function NapDetails() {
           </CardHeader>
           <CardContent>
             {todaysSleeps.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No sleeps logged today</p>
+              <p className='text-muted-foreground text-center py-4'>No sleeps logged today</p>
             ) : (
-              <div className="space-y-3">
-                {todaysSleeps.map((sleep) => {
+              <div className='space-y-3'>
+                {todaysSleeps.map(sleep => {
                   const duration = sleep.end_time
                     ? Math.round(
                         (new Date(sleep.end_time).getTime() -
@@ -218,26 +216,27 @@ export default function NapDetails() {
                     : null;
 
                   return (
-                    <div key={sleep.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Moon className="h-4 w-4 text-purple-500" />
+                    <div key={sleep.id} className='flex items-center justify-between'>
+                      <div className='flex items-center gap-3'>
+                        <Moon className='h-4 w-4 text-purple-500' />
                         <div>
-                          <p className="text-sm font-medium">
+                          <p className='text-sm font-medium'>
                             {format(new Date(sleep.start_time), 'h:mm a')}
                             {sleep.end_time && ` - ${format(new Date(sleep.end_time), 'h:mm a')}`}
                           </p>
                           {duration && (
-                            <p className="text-xs text-muted-foreground">{duration} min</p>
+                            <p className='text-xs text-muted-foreground'>{duration} min</p>
                           )}
                         </div>
                       </div>
                     </div>
                   );
                 })}
-                <div className="border-t pt-3 mt-3">
-                  <p className="text-sm font-medium">
-                    Total: {Math.floor(totalSleepMinutes / 60)}h {Math.round(totalSleepMinutes % 60)}
-                    m ({todaysSleeps.length} {todaysSleeps.length === 1 ? 'nap' : 'naps'})
+                <div className='border-t pt-3 mt-3'>
+                  <p className='text-sm font-medium'>
+                    Total: {Math.floor(totalSleepMinutes / 60)}h{' '}
+                    {Math.round(totalSleepMinutes % 60)}m ({todaysSleeps.length}{' '}
+                    {todaysSleeps.length === 1 ? 'nap' : 'naps'})
                   </p>
                 </div>
               </div>
@@ -251,27 +250,27 @@ export default function NapDetails() {
               <CardTitle>How was the timing?</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className='text-sm text-muted-foreground mb-4'>
                 Your feedback helps us improve predictions for {baby.name}.
               </p>
-              <div className="flex gap-2">
+              <div className='flex gap-2'>
                 <Button
-                  variant="outline"
-                  className="flex-1"
+                  variant='outline'
+                  className='flex-1'
                   onClick={() => submitFeedback('too_early')}
                 >
                   Too Early
                 </Button>
                 <Button
-                  variant="default"
-                  className="flex-1"
+                  variant='default'
+                  className='flex-1'
                   onClick={() => submitFeedback('just_right')}
                 >
                   Just Right
                 </Button>
                 <Button
-                  variant="outline"
-                  className="flex-1"
+                  variant='outline'
+                  className='flex-1'
                   onClick={() => submitFeedback('too_late')}
                 >
                   Too Late

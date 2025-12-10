@@ -25,10 +25,10 @@ class WeeklySummariesService {
 
   async generateSummary(babyId: string, weekStart: string): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('generate-weekly-summary', {
-      body: { 
+      body: {
         babyId,
-        weekStart: weekStart.split('T')[0]
-      }
+        weekStart: weekStart.split('T')[0],
+      },
     });
 
     if (error) throw error;
@@ -37,5 +37,4 @@ class WeeklySummariesService {
 }
 
 export const weeklySummariesService = new WeeklySummariesService();
-
 

@@ -25,7 +25,9 @@ export interface Invite {
 
 class FamilyService {
   async getUserFamilies(): Promise<Family[]> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return [];
 
     const { data: memberships } = await supabase
@@ -53,36 +55,32 @@ class FamilyService {
       .eq('user_id', userId)
       .limit(1)
       .maybeSingle();
-    
+
     if (error) throw error;
     return data;
   }
 
   async createFamily(name: string) {
-    const { data, error } = await supabase
-      .from('families')
-      .insert({ name })
-      .select('id')
-      .single();
-    
+    const { data, error } = await supabase.from('families').insert({ name }).select('id').single();
+
     if (error) throw error;
     return data;
   }
 
   async addFamilyMember(familyId: string, userId: string, role: 'admin' | 'member' | 'viewer') {
-    const { error } = await supabase
-      .from('family_members')
-      .insert({
-        family_id: familyId,
-        user_id: userId,
-        role,
-      });
-    
+    const { error } = await supabase.from('family_members').insert({
+      family_id: familyId,
+      user_id: userId,
+      role,
+    });
+
     if (error) throw error;
   }
 
   async createFamilyWithBaby(familyName: string, babyName: string, dateOfBirth: string) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
     // Create family
@@ -92,13 +90,11 @@ class FamilyService {
     await this.addFamilyMember(family.id, user.id, 'admin');
 
     // Add role to user_roles (if needed)
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: user.id,
-        family_id: family.id,
-        role: 'admin',
-      });
+    const { error: roleError } = await supabase.from('user_roles').insert({
+      user_id: user.id,
+      family_id: family.id,
+      role: 'admin',
+    });
 
     if (roleError) throw roleError;
 
@@ -122,7 +118,8 @@ class FamilyService {
   async getFamilyMembers(familyId: string) {
     const { data, error } = await supabase
       .from('family_members')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         role,
@@ -130,7 +127,8 @@ class FamilyService {
           name,
           email
         )
-      `)
+      `
+      )
       .eq('family_id', familyId);
 
     if (error) throw error;
@@ -143,12 +141,16 @@ class FamilyService {
       .select('*')
       .eq('family_id', familyId)
       .eq('status', 'pending');
-    
+
     if (error) throw error;
     return data as Invite[];
   }
 
-  async inviteCaregiver(familyId: string, email: string, role: 'admin' | 'member' | 'viewer' = 'member') {
+  async inviteCaregiver(
+    familyId: string,
+    email: string,
+    role: 'admin' | 'member' | 'viewer' = 'member'
+  ) {
     // Direct insert if not using edge function
     const { data, error } = await supabase
       .from('caregiver_invites')
@@ -172,16 +174,13 @@ class FamilyService {
         role,
       },
     });
-    
+
     if (error) throw error;
     return data;
   }
 
   async removeMember(memberId: string) {
-    const { error } = await supabase
-      .from('family_members')
-      .delete()
-      .eq('id', memberId);
+    const { error } = await supabase.from('family_members').delete().eq('id', memberId);
 
     if (error) throw error;
   }
@@ -189,10 +188,12 @@ class FamilyService {
   async getActivityFeed(familyId: string, limit = 50) {
     const { data, error } = await supabase
       .from('activity_feed')
-      .select(`
+      .select(
+        `
         *,
         profiles:actor_id (name, email)
-      `)
+      `
+      )
       .eq('family_id', familyId)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -216,7 +217,12 @@ class FamilyService {
     return data;
   }
 
-  async acceptInvite(inviteId: string, userId: string, familyId: string, role: string): Promise<void> {
+  async acceptInvite(
+    inviteId: string,
+    userId: string,
+    familyId: string,
+    role: string
+  ): Promise<void> {
     // Add user to family
     const { error: memberError } = await supabase.from('family_members').insert({
       family_id: familyId,

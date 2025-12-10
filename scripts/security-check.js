@@ -45,20 +45,27 @@ class SecurityChecker {
       /API_KEY|SECRET_KEY|TOKEN/gi,
       /password|Password/gi,
       /mongodb\+srv:\/\//gi,
-      /postgresql:\/\//gi
+      /postgresql:\/\//gi,
     ];
 
     const filesToCheck = [
       'src/**/*.{ts,tsx,js,jsx}',
       'ios/**/*.{swift,m,h}',
       'android/**/*.{java,kt}',
-      '*.{json,env,config}'
+      '*.{json,env,config}',
     ];
 
     // Simple file reading (in production, use glob patterns)
     try {
-      const srcFiles = fs.readdirSync('src', { recursive: true })
-        .filter(file => file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.jsx'))
+      const srcFiles = fs
+        .readdirSync('src', { recursive: true })
+        .filter(
+          file =>
+            file.endsWith('.ts') ||
+            file.endsWith('.tsx') ||
+            file.endsWith('.js') ||
+            file.endsWith('.jsx')
+        )
         .map(file => path.join('src', file));
 
       srcFiles.forEach(filePath => {
@@ -68,10 +75,11 @@ class SecurityChecker {
             const matches = content.match(pattern);
             if (matches) {
               // Filter out legitimate environment variable usage
-              const filteredMatches = matches.filter(match =>
-                !match.includes('process.env') &&
-                !match.includes('ProcessInfo.processInfo.environment') &&
-                !match.includes('Bundle.main.infoDictionary')
+              const filteredMatches = matches.filter(
+                match =>
+                  !match.includes('process.env') &&
+                  !match.includes('ProcessInfo.processInfo.environment') &&
+                  !match.includes('Bundle.main.infoDictionary')
               );
               if (filteredMatches.length > 0) {
                 this.error(`Potential hardcoded secret in ${filePath}: ${filteredMatches[0]}`);
@@ -150,7 +158,7 @@ class SecurityChecker {
       'src/components/sheets/FeedForm.tsx',
       'src/components/sheets/DiaperForm.tsx',
       'src/services/eventsService.ts',
-      'src/services/babyService.ts'
+      'src/services/babyService.ts',
     ];
 
     keyFiles.forEach(file => {
@@ -194,7 +202,7 @@ class SecurityChecker {
     const keyFiles = [
       'src/services/eventsService.ts',
       'src/services/babyService.ts',
-      'src/lib/offlineQueue.ts'
+      'src/lib/offlineQueue.ts',
     ];
 
     keyFiles.forEach(file => {
@@ -268,7 +276,3 @@ if (require.main === module) {
 }
 
 module.exports = SecurityChecker;
-
-
-
-

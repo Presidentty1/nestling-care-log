@@ -18,52 +18,55 @@ Native SwiftUI iOS app mirroring the Nestling web application architecture.
 
 ```
 ios/
-├── Sources/
-│   ├── App/
-│   │   ├── NestlingApp.swift          # App entry point
-│   │   ├── AppEnvironment.swift       # Dependency injection
-│   │   └── DesignSystem.swift         # Colors, spacing, typography
-│   ├── Domain/
-│   │   ├── Models/
-│   │   │   ├── Baby.swift
-│   │   │   ├── Event.swift
-│   │   │   ├── Prediction.swift
-│   │   │   └── AppSettings.swift
-│   │   └── Services/
-│   │       ├── DataStore.swift        # Protocol
-│   │       └── InMemoryDataStore.swift # Mock implementation
-│   └── Features/
-│       ├── Home/
-│       │   ├── HomeView.swift
-│       │   └── HomeViewModel.swift
-│       ├── History/
-│       │   ├── HistoryView.swift
-│       │   └── HistoryViewModel.swift
-│       ├── Labs/
-│       │   ├── LabsView.swift
-│       │   ├── PredictionsView.swift
-│       │   └── PredictionsViewModel.swift
-│       └── Settings/
-│           ├── SettingsRootView.swift
-│           ├── AIDataSharingSettingsView.swift
-│           ├── PrivacyDataView.swift
-│           ├── NotificationSettingsView.swift
-│           ├── ManageBabiesView.swift
-│           └── ManageCaregiversView.swift
+├── Nuzzle/
+│   └── Nestling.xcodeproj/            # Active Xcode project
+│   └── Nestling/                      # Active source code
+│       ├── App/
+│       │   ├── NuzzleApp.swift        # App entry point (@main)
+│       │   ├── AppEnvironment.swift   # Dependency injection
+│       │   └── DesignSystem.swift     # Colors, spacing, typography
+│       ├── Domain/
+│       │   ├── Models/
+│       │   │   ├── Baby.swift
+│       │   │   ├── Event.swift
+│       │   │   ├── Prediction.swift
+│       │   │   ├── AppSettings.swift
+│       │   │   └── CoreData/          # CoreData models (.xcdatamodeld)
+│       │   └── Services/
+│       │       ├── DataStore.swift    # Protocol
+│       │       ├── CoreDataDataStore.swift
+│       │       ├── CoreDataStack.swift
+│       │       └── InMemoryDataStore.swift
+│       ├── Features/
+│       │   ├── Home/
+│       │   ├── History/
+│       │   ├── Labs/
+│       │   ├── Settings/
+│       │   ├── Onboarding/
+│       │   └── ...
+│       ├── Services/                  # Business logic services
+│       ├── Design/                    # UI components
+│       ├── Assets.xcassets/          # App icons, colors
+│       ├── Info.plist                # App configuration
+│       ├── Nestling.entitlements     # App capabilities
+│       └── PrivacyInfo.xcprivacy     # Privacy manifest
+├── Sources-archive/                   # Archived experimental code (SwiftData-based)
 ├── IOS_ARCHITECTURE.md                # Architecture documentation
-└── README.md                           # This file
+└── README.md                          # This file
 ```
 
 ## Project Structure
 
 **Active Code:**
-- `ios/Sources/...` - Current active iOS app code
 
-**Legacy/Reference:**
-- `ios/Nuzzle/...` - Legacy iOS project (reference only, not active)
-- `ios/Nestling/...` - Legacy iOS project (reference only, not active)
+- `ios/Nuzzle/Nestling/...` - **Active native iOS app code** (CoreData-based)
+- `ios/Nuzzle/Nestling.xcodeproj` - **Active Xcode project**
 
-**Note:** Only `ios/Sources/...` is actively maintained. Legacy directories are preserved for reference but are not used by the current Xcode project.
+**Archived:**
+
+- `ios/Sources-archive/...` - Archived experimental code (SwiftData-based, not used)
+
+**Note:** The active project uses **CoreData** for persistence and includes all native iOS resources (Assets, Info.plist, entitlements, PrivacyInfo). The archived `Sources-archive/` directory contained an experimental SwiftData-based implementation that was not integrated into the Xcode project.
 
 ## Features Implemented (P0 MVP)
 
@@ -106,16 +109,24 @@ ios/
 
 ## Data Layer
 
-Currently uses `InMemoryDataStore` with mock data:
-- 2-3 sample babies
-- Sample events for today and yesterday
-- Mock predictions
+The app uses **CoreData** for local persistence with automatic fallback:
 
-Future: Swap `InMemoryDataStore` for `RemoteDataStore` (Supabase/Swift backend) in `NestlingApp.swift`.
+- **Primary**: `CoreDataDataStore` - Full CoreData implementation with `.xcdatamodeld`
+- **Fallback**: `JSONBackedDataStore` - JSON file-based storage
+- **Development**: `InMemoryDataStore` - In-memory mock data for testing
+
+The `DataStoreSelector` automatically chooses the best available implementation. CoreData provides:
+- Native iOS persistence
+- Efficient querying and relationships
+- Background context support
+- Migration support
+
+Future: Add `RemoteDataStore` (Supabase/Swift backend) for cloud sync in `NuzzleApp.swift`.
 
 ## Design System
 
 Mapped from `DESIGN_SYSTEM.md`:
+
 - Colors: Primary, semantic, event-specific
 - Typography: Headline, title, body, caption, label
 - Spacing: XS (4pt) to 2XL (48pt)
@@ -124,6 +135,7 @@ Mapped from `DESIGN_SYSTEM.md`:
 ## Quick Actions Business Rules
 
 Mirroring web app requirements:
+
 - **Feed**: Minimum 10ml, default 120ml (4oz)
 - **Sleep**: 10-minute nap with note
 - **Diaper**: Default "wet"
@@ -149,11 +161,10 @@ Mirroring web app requirements:
    - Language: Swift
    - Save to `ios/` directory
 
-2. **Add Source Files**:
-   - Right-click project → Add Files to "Nestling"
-   - Select `ios/Sources/` directory
-   - Ensure "Create groups" is selected
-   - Add to target: Nestling ✅
+2. **Open Existing Project**:
+   - Open `ios/Nuzzle/Nestling.xcodeproj` in Xcode
+   - The project is already configured with all source files
+   - All files are in `ios/Nuzzle/Nestling/` directory
 
 3. **Configure Targets**:
    - See `XCODE_SETUP.md` for detailed instructions
@@ -182,11 +193,13 @@ Mirroring web app requirements:
 ## Manual QA Checklist
 
 ### Fresh Install Flow
+
 - [ ] App launches and seeds mock data on first run
 - [ ] Data persists across app relaunches (JSON storage)
 - [ ] Home view shows baby selector, summary cards, quick actions, timeline
 
 ### Quick Actions
+
 - [ ] Feed quick action logs with sensible defaults (min 10ml)
 - [ ] Sleep quick action: first tap starts timer, second tap stops and logs
 - [ ] Active sleep shows "Stop Sleep" button state
@@ -194,6 +207,7 @@ Mirroring web app requirements:
 - [ ] Tummy time quick action logs with default duration
 
 ### Event Forms
+
 - [ ] Feed form: supports bottle/breast/pumping, amount/unit, side (breast), notes
 - [ ] Sleep form: timer mode (start/stop) and manual mode (start/end times)
 - [ ] Diaper form: wet/dirty/both selection, notes
@@ -202,6 +216,7 @@ Mirroring web app requirements:
 - [ ] Forms validate inputs (min amounts, required fields)
 
 ### Timeline & History
+
 - [ ] Home timeline shows today's events with edit/delete menu
 - [ ] Swipe actions work (swipe right to delete/edit)
 - [ ] History view shows last 7 days with date picker
@@ -210,6 +225,7 @@ Mirroring web app requirements:
 - [ ] Pull-to-refresh works in History
 
 ### Predictions
+
 - [ ] PredictionsView gates on AI Data Sharing setting
 - [ ] Shows medical disclaimer banner
 - [ ] Shows "Enable AI" message if disabled
@@ -218,11 +234,13 @@ Mirroring web app requirements:
 - [ ] Empty state shows when no predictions
 
 ### Labs
+
 - [ ] Cry Insights opens "Coming Soon" sheet
 - [ ] "Notify me" toggle saves to settings
 - [ ] Smart Predictions navigates to PredictionsView
 
 ### Settings
+
 - [ ] AI Data Sharing toggle updates immediately
 - [ ] Notification settings persist (no real notifications yet)
 - [ ] Quiet hours pickers work
@@ -234,12 +252,14 @@ Mirroring web app requirements:
 - [ ] Manage Caregivers: Shows placeholder (not broken)
 
 ### Accessibility
+
 - [ ] VoiceOver reads all buttons and labels correctly
 - [ ] Dynamic Type: Text scales without clipping
 - [ ] Dark Mode: Contrast is acceptable
 - [ ] All interactive elements have accessibility labels
 
 ### State Persistence
+
 - [ ] Close and reopen app: data persists
 - [ ] Events, babies, settings all persist
 - [ ] Active sleep state persists (if app killed during sleep)
@@ -257,16 +277,19 @@ To reset the app to fresh state (useful for testing):
 The app handles various time-related edge cases:
 
 ### DST (Daylight Saving Time) Transitions
+
 - **Spring Forward**: When clocks jump forward (e.g., 2 AM → 3 AM), durations are calculated correctly
 - **Fall Back**: When clocks fall back (e.g., 2 AM → 1 AM), no negative durations occur
 - **Day Buckets**: Events are grouped by local day, respecting DST boundaries
 
 ### Timezone Changes
+
 - **Traveling**: If device timezone changes mid-day, events maintain their original timestamps
 - **Duration Calculation**: Uses `Calendar.dateComponents` for DST-safe duration calculations
 - **Day Boundaries**: Midnight rollover uses local timezone, not UTC
 
 ### Testing DST Scenarios
+
 ```swift
 // Test DST forward transition
 let beforeDST = Date() // Before spring forward
@@ -276,6 +299,7 @@ let duration = DateUtils.durationMinutes(from: beforeDST, to: afterDST)
 ```
 
 ### Known Behaviors
+
 - Events created during DST transitions maintain correct timestamps
 - "Today" grouping uses local calendar day boundaries
 - Duration calculations use absolute values (never negative)
@@ -286,36 +310,40 @@ Nestling supports custom URL scheme `nestling://` for quick actions and navigati
 
 ### Deep Link Matrix
 
-| URL | Purpose | Query Parameters | Behavior |
-|-----|---------|------------------|----------|
-| `nestling://log/feed` | Log a feed | `amount` (Double, optional), `unit` (String: "ml" or "oz", optional) | Opens Home tab, presents Feed form with prefill data |
-| `nestling://log/diaper` | Log a diaper change | `type` (String: "wet", "dirty", "both", optional) | Opens Home tab, presents Diaper form |
-| `nestling://log/tummy` | Log tummy time | `duration` (Double, minutes, optional) | Opens Home tab, presents Tummy Time form |
-| `nestling://sleep/start` | Start active sleep timer | None | Opens Home tab, presents Sleep form to start timer |
-| `nestling://sleep/stop` | Stop active sleep timer | None | Opens Home tab, stops active sleep and saves event |
-| `nestling://open/home` | Navigate to Home tab | None | Switches to Home tab (index 0) |
-| `nestling://open/history` | Navigate to History tab | None | Switches to History tab (index 1) |
-| `nestling://open/predictions` | Open Predictions view | None | Switches to Labs tab (index 2), presents Predictions sheet |
-| `nestling://open/settings` | Navigate to Settings tab | None | Switches to Settings tab (index 3) |
+| URL                           | Purpose                  | Query Parameters                                                     | Behavior                                                   |
+| ----------------------------- | ------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `nestling://log/feed`         | Log a feed               | `amount` (Double, optional), `unit` (String: "ml" or "oz", optional) | Opens Home tab, presents Feed form with prefill data       |
+| `nestling://log/diaper`       | Log a diaper change      | `type` (String: "wet", "dirty", "both", optional)                    | Opens Home tab, presents Diaper form                       |
+| `nestling://log/tummy`        | Log tummy time           | `duration` (Double, minutes, optional)                               | Opens Home tab, presents Tummy Time form                   |
+| `nestling://sleep/start`      | Start active sleep timer | None                                                                 | Opens Home tab, presents Sleep form to start timer         |
+| `nestling://sleep/stop`       | Stop active sleep timer  | None                                                                 | Opens Home tab, stops active sleep and saves event         |
+| `nestling://open/home`        | Navigate to Home tab     | None                                                                 | Switches to Home tab (index 0)                             |
+| `nestling://open/history`     | Navigate to History tab  | None                                                                 | Switches to History tab (index 1)                          |
+| `nestling://open/predictions` | Open Predictions view    | None                                                                 | Switches to Labs tab (index 2), presents Predictions sheet |
+| `nestling://open/settings`    | Navigate to Settings tab | None                                                                 | Switches to Settings tab (index 3)                         |
 
 ### Examples
 
 **Log a feed with amount:**
+
 ```
 nestling://log/feed?amount=120&unit=ml
 ```
 
 **Log a diaper change:**
+
 ```
 nestling://log/diaper?type=wet
 ```
 
 **Start sleep timer:**
+
 ```
 nestling://sleep/start
 ```
 
 **Navigate to Predictions:**
+
 ```
 nestling://open/predictions
 ```
@@ -323,6 +351,7 @@ nestling://open/predictions
 ### Testing Deep Links
 
 **Simulator**:
+
 ```bash
 # Log feed
 xcrun simctl openurl booted "nestling://log/feed?amount=120&unit=ml"
@@ -335,12 +364,14 @@ xcrun simctl openurl booted "nestling://open/predictions"
 ```
 
 **Device** (via Safari or Shortcuts):
+
 ```
 nestling://log/feed?amount=120&unit=ml
 ```
 
 **Xcode UI Tests:**
 All deep links are covered by smoke tests in `DeepLinkTests.swift`. Run:
+
 ```bash
 xcodebuild test -scheme Nestling -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:NestlingUITests/DeepLinkTests
 ```
@@ -348,6 +379,7 @@ xcodebuild test -scheme Nestling -destination 'platform=iOS Simulator,name=iPhon
 ### Universal Links
 
 The app also supports Universal Links (requires server configuration):
+
 - `https://nestling.app/log/feed`
 - `https://nestling.app/sleep/start`
 - `https://nestling.app/open/predictions`
@@ -359,19 +391,21 @@ The JSON file is stored at: `Documents/nestling_data.json`
 ## Performance Budgets
 
 ### Launch Time
+
 - **Target**: < 400ms to first content in release builds
 - **Measurement**: Time from app launch to Home view visible
 - **Tools**: Xcode Instruments (Time Profiler), OSLog signposts
 - **Signposts**: `AppLaunch` (from `NestlingApp` init to `ContentView` visible)
-- **Notes**: 
+- **Notes**:
   - Core Data initialization happens asynchronously
   - Onboarding check is non-blocking
   - TabView renders immediately with loading states
 
 ### Scrolling Performance
+
 - **Target**: 60 FPS on timeline with 100+ events
 - **Measurement**: Instruments (Core Animation FPS), Xcode Debug Navigator
-- **Optimization**: 
+- **Optimization**:
   - `LazyVStack` for timeline rows (only visible items rendered)
   - View recycling via SwiftUI's built-in optimization
   - Minimal work in `body` computed properties
@@ -379,29 +413,32 @@ The JSON file is stored at: `Documents/nestling_data.json`
 - **Signposts**: `TimelineRender` (when timeline view appears)
 
 ### Memory Usage
+
 - **Target**: < 50MB for typical usage (Home + History loaded)
 - **Measurement**: Instruments (Allocations), Xcode Debug Navigator
-- **Optimization**: 
+- **Optimization**:
   - Background context for Core Data fetches
   - Lazy loading of events (only current day + selected history day)
   - No image caching (no images yet)
   - ViewModels released when views disappear
-- **Notes**: 
+- **Notes**:
   - Core Data uses faulting to minimize memory
   - Large timelines (>100 events) may spike to ~60MB temporarily
 
 ### Battery Impact
+
 - **Target**: Minimal background activity
 - **Measurement**: Instruments (Energy Log), Settings → Battery
-- **Optimization**: 
+- **Optimization**:
   - Sleep timer uses `Timer.scheduledTimer` with 1s interval (efficient)
   - No background location or significant background processing
   - Notifications scheduled via `UNUserNotificationCenter` (system-managed)
-- **Notes**: 
+- **Notes**:
   - Active sleep timer runs only when form is open
   - No continuous background tasks
 
 ### Network Performance
+
 - **Target**: N/A (local-first, no networking yet)
 - **Future**: When Supabase integration is added, target < 500ms for API calls
 
@@ -409,21 +446,23 @@ The JSON file is stored at: `Documents/nestling_data.json`
 
 Signposts are added around critical paths using `SignpostLogger`:
 
-| Signpost Name | Category | When Fired | Expected Duration |
-|--------------|----------|------------|-------------------|
-| `TimelineLoad` | UI | Loading events for a day | < 100ms |
-| `PredictionGenerate` | Predictions | Generating on-device predictions | < 50ms |
-| `DataStoreSave` | DataStore | Saving event to Core Data | < 50ms |
-| `AppLaunch` | UI | App initialization to first view | < 400ms |
-| `ViewRender` | UI | View body computation | < 16ms (60 FPS) |
+| Signpost Name        | Category    | When Fired                       | Expected Duration |
+| -------------------- | ----------- | -------------------------------- | ----------------- |
+| `TimelineLoad`       | UI          | Loading events for a day         | < 100ms           |
+| `PredictionGenerate` | Predictions | Generating on-device predictions | < 50ms            |
+| `DataStoreSave`      | DataStore   | Saving event to Core Data        | < 50ms            |
+| `AppLaunch`          | UI          | App initialization to first view | < 400ms           |
+| `ViewRender`         | UI          | View body computation            | < 16ms (60 FPS)   |
 
 **Viewing Signposts:**
+
 1. Run app in Xcode
 2. Open Instruments → "os_signpost" instrument
 3. Filter by subsystem: `com.nestling.app`
 4. View intervals and events
 
 **Performance Logging:**
+
 - `PerformanceLogger` wraps operations with timing logs
 - Logs visible in Xcode Console (filter by "Performance" category)
 - Example: `Performance.info("TimelineLoad completed in 0.045s")`
@@ -431,6 +470,7 @@ Signposts are added around critical paths using `SignpostLogger`:
 ### Performance Testing
 
 **Heavy Timeline Test:**
+
 ```swift
 // ios/Tests/PerformanceTests.swift
 func testHeavyTimelineScrolling() {
@@ -440,6 +480,7 @@ func testHeavyTimelineScrolling() {
 ```
 
 **Launch Time Test:**
+
 ```swift
 func testLaunchTime() {
     // Measure time from app start to Home view visible
@@ -448,6 +489,7 @@ func testLaunchTime() {
 ```
 
 Run performance tests:
+
 ```bash
 xcodebuild test -scheme Nestling -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:NestlingTests/PerformanceTests
 ```
@@ -457,11 +499,13 @@ View in Instruments → Logging → Points of Interest
 ## Next Steps
 
 ### Phase 1: Networking
+
 - Implement `RemoteDataStore` with Supabase Swift SDK
 - Add authentication flow
 - Real-time event synchronization
 
 ### Phase 2: Advanced Features
+
 - Push notifications (real scheduling)
 - Widgets (Home Screen, Lock Screen)
 - HealthKit integration
@@ -469,14 +513,15 @@ View in Instruments → Logging → Points of Interest
 
 ## Notes
 
-- **JSON Persistence**: Data persists via `JSONBackedDataStore` to Documents directory
+- **CoreData Persistence**: Primary data storage uses CoreData with `.xcdatamodeld` models
+- **Native iOS Resources**: Includes Assets.xcassets, Info.plist, entitlements, and PrivacyInfo.xcprivacy
 - **SwiftUI Previews**: All views have preview implementations
 - **Type Safety**: Strong typing with Swift enums and structs
 - **Design Parity**: UI matches web app semantics, uses iOS-native patterns
 - **Localization**: Strings scaffolded in `Localizable.strings` (English only for now)
+- **App Store Ready**: Configured with privacy descriptions, entitlements, and app groups for widgets
 
 ---
 
 **Version**: 1.1  
 **Last Updated**: November 2025
-

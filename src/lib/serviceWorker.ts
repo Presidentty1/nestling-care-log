@@ -86,9 +86,10 @@ if (typeof window !== 'undefined') {
   });
 
   // Check for updates every hour
-  setInterval(() => {
-    checkForUpdates();
-  }, 60 * 60 * 1000);
+  setInterval(
+    () => {
+      checkForUpdates();
+    },
+    60 * 60 * 1000
+  );
 }
-
-

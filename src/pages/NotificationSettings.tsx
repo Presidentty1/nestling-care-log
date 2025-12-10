@@ -4,7 +4,13 @@ import type { Baby, NotificationSettings as NotificationSettingsType } from '@/l
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -15,7 +21,9 @@ import { notificationSettingsService } from '@/services/notificationSettingsServ
 
 export default function NotificationSettings() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
-  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'prompt-with-rationale'>('prompt');
+  const [permissionStatus, setPermissionStatus] = useState<
+    'granted' | 'denied' | 'prompt' | 'prompt-with-rationale'
+  >('prompt');
   const queryClient = useQueryClient();
 
   const { data: babies } = useQuery({
@@ -89,66 +97,62 @@ export default function NotificationSettings() {
 
   if (!selectedBaby || !settings) {
     return (
-      <div className="container max-w-4xl mx-auto p-4">
-        <p className="text-muted-foreground text-center py-8">Loading...</p>
+      <div className='container max-w-4xl mx-auto p-4'>
+        <p className='text-muted-foreground text-center py-8'>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 pb-20">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Notification Settings</h1>
-        <p className="text-muted-foreground">{selectedBaby.name}</p>
+    <div className='container max-w-4xl mx-auto p-4 pb-20'>
+      <div className='mb-6'>
+        <h1 className='text-3xl font-bold mb-2'>Notification Settings</h1>
+        <p className='text-muted-foreground'>{selectedBaby.name}</p>
       </div>
 
-      <Card className="mb-4">
+      <Card className='mb-4'>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Bell className='h-5 w-5' />
               <CardTitle>Notifications</CardTitle>
             </div>
             <Switch
               checked={settings.enabled}
-              onCheckedChange={(checked) => 
-                updateSettingsMutation.mutate({ enabled: checked })
-              }
+              onCheckedChange={checked => updateSettingsMutation.mutate({ enabled: checked })}
             />
           </div>
-          <p className="text-sm text-muted-foreground">
-            {permissionStatus === 'granted' 
+          <p className='text-sm text-muted-foreground'>
+            {permissionStatus === 'granted'
               ? 'Notifications are enabled'
               : 'Enable notifications to receive reminders'}
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           {permissionStatus !== 'granted' && (
-            <Button onClick={requestPermission} className="w-full">
+            <Button onClick={requestPermission} className='w-full'>
               Enable Notifications
             </Button>
           )}
           {permissionStatus === 'granted' && (
-            <Button variant="outline" onClick={sendTestNotification} className="w-full">
+            <Button variant='outline' onClick={sendTestNotification} className='w-full'>
               Send Test Notification
             </Button>
           )}
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
+      <Card className='mb-4'>
         <CardHeader>
           <CardTitle>Quiet Hours</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+        <CardContent className='space-y-4'>
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-2'>
               <Label>Start Time</Label>
               <Select
                 value={settings.quiet_hours_start || '22:00'}
-                onValueChange={(value) =>
-                  updateSettingsMutation.mutate({ quiet_hours_start: value })
-                }
+                onValueChange={value => updateSettingsMutation.mutate({ quiet_hours_start: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -165,13 +169,11 @@ export default function NotificationSettings() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>End Time</Label>
               <Select
                 value={settings.quiet_hours_end || '07:00'}
-                onValueChange={(value) =>
-                  updateSettingsMutation.mutate({ quiet_hours_end: value })
-                }
+                onValueChange={value => updateSettingsMutation.mutate({ quiet_hours_end: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -189,30 +191,30 @@ export default function NotificationSettings() {
               </Select>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className='text-sm text-muted-foreground'>
             No notifications will be sent during quiet hours
           </p>
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
+      <Card className='mb-4'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Feed Reminders</CardTitle>
             <Switch
               checked={settings.feed_reminders_enabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updateSettingsMutation.mutate({ feed_reminders_enabled: checked })
               }
             />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Remind me if no feed logged in:</Label>
             <Select
               value={settings.feed_reminder_interval_hours.toString()}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 updateSettingsMutation.mutate({ feed_reminder_interval_hours: parseInt(value) })
               }
               disabled={!settings.feed_reminders_enabled}
@@ -221,34 +223,34 @@ export default function NotificationSettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2">2 hours</SelectItem>
-                <SelectItem value="3">3 hours</SelectItem>
-                <SelectItem value="4">4 hours</SelectItem>
-                <SelectItem value="6">6 hours</SelectItem>
+                <SelectItem value='2'>2 hours</SelectItem>
+                <SelectItem value='3'>3 hours</SelectItem>
+                <SelectItem value='4'>4 hours</SelectItem>
+                <SelectItem value='6'>6 hours</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
+      <Card className='mb-4'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Nap Window Reminders</CardTitle>
             <Switch
               checked={settings.nap_reminders_enabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updateSettingsMutation.mutate({ nap_reminders_enabled: checked })
               }
             />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Alert me before nap window:</Label>
             <Select
               value={settings.nap_window_reminder_minutes.toString()}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 updateSettingsMutation.mutate({ nap_window_reminder_minutes: parseInt(value) })
               }
               disabled={!settings.nap_reminders_enabled}
@@ -257,33 +259,33 @@ export default function NotificationSettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="10">10 minutes</SelectItem>
-                <SelectItem value="15">15 minutes</SelectItem>
-                <SelectItem value="30">30 minutes</SelectItem>
+                <SelectItem value='10'>10 minutes</SelectItem>
+                <SelectItem value='15'>15 minutes</SelectItem>
+                <SelectItem value='30'>30 minutes</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
+      <Card className='mb-4'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Diaper Reminders</CardTitle>
             <Switch
               checked={settings.diaper_reminders_enabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updateSettingsMutation.mutate({ diaper_reminders_enabled: checked })
               }
             />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Remind me if no change in:</Label>
             <Select
               value={settings.diaper_reminder_interval_hours.toString()}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 updateSettingsMutation.mutate({ diaper_reminder_interval_hours: parseInt(value) })
               }
               disabled={!settings.diaper_reminders_enabled}
@@ -292,9 +294,9 @@ export default function NotificationSettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2">2 hours</SelectItem>
-                <SelectItem value="3">3 hours</SelectItem>
-                <SelectItem value="4">4 hours</SelectItem>
+                <SelectItem value='2'>2 hours</SelectItem>
+                <SelectItem value='3'>3 hours</SelectItem>
+                <SelectItem value='4'>4 hours</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -303,20 +305,18 @@ export default function NotificationSettings() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Medication Reminders</CardTitle>
             <Switch
               checked={settings.medication_reminders_enabled}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updateSettingsMutation.mutate({ medication_reminders_enabled: checked })
               }
             />
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Managed per medication in Health Records
-          </p>
+          <p className='text-sm text-muted-foreground'>Managed per medication in Health Records</p>
         </CardContent>
       </Card>
     </div>

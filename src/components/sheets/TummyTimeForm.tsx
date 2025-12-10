@@ -28,7 +28,13 @@ interface TummyTimeFormProps {
   prefillData?: any;
 }
 
-export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: TummyTimeFormProps) {
+export function TummyTimeForm({
+  babyId,
+  editingEventId,
+  onValidChange,
+  onSubmit,
+  prefillData,
+}: TummyTimeFormProps) {
   const [mode, setMode] = useState<'timer' | 'manual'>('timer');
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -118,7 +124,7 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit,
     let durationMin: number;
 
     let durationSec: number;
-    
+
     if (mode === 'timer') {
       start = startTime!;
       end = endTime!;
@@ -151,58 +157,58 @@ export function TummyTimeForm({ babyId, editingEventId, onValidChange, onSubmit,
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Tabs value={mode} onValueChange={(v) => setMode(v as 'timer' | 'manual')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="timer">Timer</TabsTrigger>
-          <TabsTrigger value="manual">Manual</TabsTrigger>
+    <form onSubmit={handleSubmit} className='space-y-4'>
+      <Tabs value={mode} onValueChange={v => setMode(v as 'timer' | 'manual')}>
+        <TabsList className='grid w-full grid-cols-2'>
+          <TabsTrigger value='timer'>Timer</TabsTrigger>
+          <TabsTrigger value='manual'>Manual</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="timer" className="space-y-4">
+        <TabsContent value='timer' className='space-y-4'>
           {!startTime && (
-            <Button type="button" onClick={handleStart} className="w-full" variant="default">
-              <Play className="mr-2 h-4 w-4" />
+            <Button type='button' onClick={handleStart} className='w-full' variant='default'>
+              <Play className='mr-2 h-4 w-4' />
               Start Timer
             </Button>
           )}
           {isRunning && (
-            <div className="space-y-3">
-              <div className="text-center text-3xl font-mono">{formatTime(elapsed)}</div>
-              <Button type="button" onClick={handleStop} className="w-full" variant="secondary">
-                <Square className="mr-2 h-4 w-4" />
+            <div className='space-y-3'>
+              <div className='text-center text-3xl font-mono'>{formatTime(elapsed)}</div>
+              <Button type='button' onClick={handleStop} className='w-full' variant='secondary'>
+                <Square className='mr-2 h-4 w-4' />
                 Stop
               </Button>
             </div>
           )}
           {!isRunning && startTime && endTime && (
-            <div className="text-center text-sm text-muted-foreground">
+            <div className='text-center text-sm text-muted-foreground'>
               Duration: {Math.floor((endTime.getTime() - startTime.getTime()) / 60000)} min
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="manual" className="space-y-4">
+        <TabsContent value='manual' className='space-y-4'>
           <div>
-            <Label htmlFor="duration">Duration (minutes)</Label>
+            <Label htmlFor='duration'>Duration (minutes)</Label>
             <Input
-              id="duration"
-              type="number"
-              min="1"
+              id='duration'
+              type='number'
+              min='1'
               value={manualDuration}
-              onChange={(e) => setManualDuration(e.target.value)}
-              placeholder="e.g., 5"
+              onChange={e => setManualDuration(e.target.value)}
+              placeholder='e.g., 5'
             />
           </div>
         </TabsContent>
       </Tabs>
 
       <div>
-        <Label htmlFor="note">Notes (optional)</Label>
+        <Label htmlFor='note'>Notes (optional)</Label>
         <Textarea
-          id="note"
+          id='note'
           value={note}
-          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
-          placeholder="Any observations..."
+          onChange={e => setNote(sanitizeEventNote(e.target.value))}
+          placeholder='Any observations...'
         />
       </div>
     </form>

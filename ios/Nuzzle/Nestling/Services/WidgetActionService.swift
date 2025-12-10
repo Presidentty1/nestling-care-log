@@ -37,7 +37,7 @@ class WidgetActionService {
     /// Get and clear pending widget action (called by app on launch)
     func consumePendingAction() -> (action: WidgetAction, parameters: [String: Any])? {
         guard let userDefaults = userDefaults,
-              let actionData = userDefaults.dictionary(forKey: "pendingWidgetAction") as? [String: Any],
+              let actionData = userDefaults.dictionary(forKey: "pendingWidgetAction"),
               let actionString = actionData["action"] as? String,
               let action = WidgetAction(rawValue: actionString) else {
             return nil

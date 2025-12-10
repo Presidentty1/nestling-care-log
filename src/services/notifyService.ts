@@ -29,7 +29,7 @@ class NotifyService {
     if (!settings) return;
 
     const now = new Date();
-    
+
     if (this.isQuietHours(now, settings)) {
       return;
     }
@@ -51,10 +51,10 @@ class NotifyService {
     const currentTime = now.getHours() * 60 + now.getMinutes();
     const [startHour, startMin] = settings.quietHoursStart.split(':').map(Number);
     const [endHour, endMin] = settings.quietHoursEnd.split(':').map(Number);
-    
+
     const quietStart = startHour * 60 + startMin;
     const quietEnd = endHour * 60 + endMin;
-    
+
     if (quietStart < quietEnd) {
       return currentTime >= quietStart && currentTime <= quietEnd;
     } else {
@@ -66,7 +66,7 @@ class NotifyService {
     const lastFeed = await dataService.getLastEventByType(babyId, 'feed');
     if (!lastFeed) return;
 
-    const hoursSinceLastFeed = 
+    const hoursSinceLastFeed =
       (Date.now() - new Date(lastFeed.startTime).getTime()) / (1000 * 60 * 60);
 
     if (hoursSinceLastFeed >= hours) {
@@ -86,10 +86,7 @@ class NotifyService {
     const windowEnd = new Date(prediction.nextWindowEndISO).getTime();
 
     if (now >= windowStart && now < windowEnd) {
-      await this.sendNotification(
-        'Nap Window',
-        'Ideal nap window is starting now!'
-      );
+      await this.sendNotification('Nap Window', 'Ideal nap window is starting now!');
     }
   }
 
@@ -97,7 +94,7 @@ class NotifyService {
     const lastDiaper = await dataService.getLastEventByType(babyId, 'diaper');
     if (!lastDiaper) return;
 
-    const hoursSinceLastDiaper = 
+    const hoursSinceLastDiaper =
       (Date.now() - new Date(lastDiaper.startTime).getTime()) / (1000 * 60 * 60);
 
     if (hoursSinceLastDiaper >= hours) {
@@ -113,12 +110,14 @@ class NotifyService {
       const hasPermission = await this.checkPermission();
       if (hasPermission) {
         await LocalNotifications.schedule({
-          notifications: [{
-            title,
-            body,
-            id: Date.now(),
-            schedule: { at: new Date(Date.now() + 1000) },
-          }],
+          notifications: [
+            {
+              title,
+              body,
+              id: Date.now(),
+              schedule: { at: new Date(Date.now() + 1000) },
+            },
+          ],
         });
       }
     } catch (error) {

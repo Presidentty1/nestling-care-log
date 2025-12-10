@@ -8,7 +8,7 @@ export interface UndoableDeletion<T = any> {
   item: T;
   deletedAt: Date;
   restoreAction: () => Promise<void> | void;
-  
+
   isExpired(): boolean;
 }
 
@@ -43,7 +43,7 @@ class UndoManager {
       isExpired: () => {
         const elapsed = Date.now() - deletion.deletedAt.getTime();
         return elapsed > this.UNDO_WINDOW_MS;
-      }
+      },
     };
 
     this.pendingDeletion = deletion;

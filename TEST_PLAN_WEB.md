@@ -18,12 +18,14 @@ This document outlines the comprehensive testing strategy for the Nuzzle web app
 **Location**: `tests/` directory
 
 **Coverage Targets:**
+
 - ✅ Service functions (80%+ coverage)
 - ✅ Utility functions (90%+ coverage)
 - ✅ Custom hooks (70%+ coverage)
 - ✅ Business logic (90%+ coverage)
 
 **Current Test Files:**
+
 - `tests/napService.test.ts` - Nap prediction logic
 - `tests/dataService.test.ts` - Data export/import
 - `tests/time.test.ts` - Time utilities
@@ -33,6 +35,7 @@ This document outlines the comprehensive testing strategy for the Nuzzle web app
 - `tests/components/SummaryChips.test.tsx` - Component tests
 
 **Running Unit Tests:**
+
 ```bash
 npm run test:unit          # Run once
 npm run test              # Watch mode
@@ -44,12 +47,14 @@ npm run test:coverage      # With coverage report
 **Location**: `tests/integration/` (to be created)
 
 **Coverage:**
+
 - Service + Supabase integration
 - React Query mutations
 - Real-time subscriptions
 - Offline queue processing
 
 **Test Scenarios:**
+
 - Create event → Verify database insert
 - Update event → Verify optimistic update
 - Delete event → Verify cache invalidation
@@ -60,6 +65,7 @@ npm run test:coverage      # With coverage report
 **Location**: `tests/e2e/`
 
 **Current Test Files:**
+
 - `mvp-critical-path.spec.ts` - Core user flows
 - `onboarding.spec.ts` - User onboarding
 - `events.spec.ts` - Event logging
@@ -70,6 +76,7 @@ npm run test:coverage      # With coverage report
 - `voice-logging.spec.ts` - Voice logging
 
 **Running E2E Tests:**
+
 ```bash
 npm run test:e2e          # Run all E2E tests
 npm run test:e2e:ui       # Playwright UI mode
@@ -79,18 +86,21 @@ npm run test:e2e:debug    # Debug mode
 **E2E Test Scenarios:**
 
 **Critical Path (MVP):**
+
 1. Sign up → Onboarding → Log feed → View history
 2. Log multiple events → Verify timeline
 3. Switch babies → Verify data isolation
 4. Offline logging → Online sync
 
 **Event Logging:**
+
 - Quick action → Form opens → Submit → Event appears
 - Manual entry → All fields → Validation → Submit
 - Edit event → Update → Verify change
 - Delete event → Confirm → Verify removal
 
 **History:**
+
 - Date picker → Select date → Events load
 - Filter by type → Verify filtered results
 - Export data → Verify CSV/PDF generation
@@ -98,6 +108,7 @@ npm run test:e2e:debug    # Debug mode
 ### 4. Performance Tests
 
 **Targets:**
+
 - **Lighthouse Score**: >90 (Performance, Accessibility, Best Practices, SEO)
 - **First Contentful Paint**: <1.5s
 - **Time to Interactive**: <3.5s
@@ -105,6 +116,7 @@ npm run test:e2e:debug    # Debug mode
 - **Cumulative Layout Shift**: <0.1
 
 **Running Performance Tests:**
+
 ```bash
 # Build production bundle
 npm run build
@@ -116,18 +128,21 @@ npx lighthouse-ci --collect.url=http://localhost:4173
 ### 5. Accessibility Tests
 
 **Targets:**
+
 - **WCAG 2.1 AA Compliance**: 100%
 - **Keyboard Navigation**: All features accessible
 - **Screen Reader**: Compatible with NVDA/JAWS
 - **Color Contrast**: WCAG AA minimum
 
 **Testing Tools:**
+
 - Lighthouse accessibility audit
 - axe DevTools
 - WAVE browser extension
 - Manual keyboard navigation
 
 **Test Checklist:**
+
 - [ ] All interactive elements keyboard accessible
 - [ ] Focus indicators visible
 - [ ] ARIA labels on custom components
@@ -139,6 +154,7 @@ npx lighthouse-ci --collect.url=http://localhost:4173
 ### Pre-Commit
 
 **Local Checks:**
+
 ```bash
 # Type check
 npx tsc --noEmit
@@ -163,6 +179,7 @@ npm run test:unit
 ### Pre-Release
 
 **Full Test Suite:**
+
 ```bash
 # Complete test run
 npm run lint
@@ -182,10 +199,12 @@ npm run a11y
 ### Test Users
 
 **Development:**
+
 - Use Supabase seed data (`supabase/seed.sql`)
 - Test user: `test@example.com` / `testpassword`
 
 **E2E Tests:**
+
 - Create test users programmatically
 - Clean up after test runs
 - Use unique email addresses per test run
@@ -201,6 +220,7 @@ npm run a11y
 ### Supabase Client
 
 **Unit Tests:**
+
 ```typescript
 import { vi } from 'vitest';
 
@@ -219,6 +239,7 @@ const mockSupabase = {
 ### React Query
 
 **Component Tests:**
+
 ```typescript
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -241,11 +262,13 @@ const queryClient = new QueryClient({
 ### Coverage Reports
 
 **Generate Report:**
+
 ```bash
 npm run test:coverage
 ```
 
 **View Report:**
+
 - HTML report: `coverage/index.html`
 - CI integration: Codecov
 
@@ -254,6 +277,7 @@ npm run test:coverage
 ### 1. Authentication Flow
 
 **Test Cases:**
+
 - [ ] Sign up with valid email/password
 - [ ] Sign in with correct credentials
 - [ ] Sign in with incorrect credentials (error handling)
@@ -264,6 +288,7 @@ npm run test:coverage
 ### 2. Event Logging
 
 **Test Cases:**
+
 - [ ] Quick action button opens correct form
 - [ ] Form validation (required fields)
 - [ ] Submit event → Appears in timeline
@@ -274,6 +299,7 @@ npm run test:coverage
 ### 3. Data Synchronization
 
 **Test Cases:**
+
 - [ ] Real-time updates across devices
 - [ ] Conflict resolution (last write wins)
 - [ ] Offline queue processing
@@ -283,6 +309,7 @@ npm run test:coverage
 ### 4. Baby Management
 
 **Test Cases:**
+
 - [ ] Create baby profile
 - [ ] Switch between babies
 - [ ] Edit baby profile
@@ -292,6 +319,7 @@ npm run test:coverage
 ### 5. History & Analytics
 
 **Test Cases:**
+
 - [ ] Date picker navigation
 - [ ] Event filtering by type
 - [ ] Export CSV/PDF
@@ -303,12 +331,14 @@ npm run test:coverage
 ### Smoke Tests (Every PR)
 
 **Critical Paths:**
+
 1. Sign up → Onboarding → Log event → View history
 2. Sign in → View home → Log feed → Verify timeline
 
 ### Full Regression (Pre-Release)
 
 **All Test Suites:**
+
 - Unit tests (100% pass rate)
 - E2E tests (all scenarios)
 - Performance benchmarks
@@ -319,12 +349,14 @@ npm run test:coverage
 ### Test Failures
 
 **Priority Levels:**
+
 1. **P0 (Critical)**: Blocks release, core functionality broken
 2. **P1 (High)**: Major feature broken, workaround exists
 3. **P2 (Medium)**: Minor feature issue, non-blocking
 4. **P3 (Low)**: Cosmetic issue, edge case
 
 **Response Times:**
+
 - P0: Immediate fix or rollback
 - P1: Fix within 24 hours
 - P2: Fix in next release
@@ -335,6 +367,7 @@ npm run test:coverage
 ### Test Metrics
 
 **Track:**
+
 - Test execution time
 - Coverage trends
 - Flaky test rate
@@ -343,6 +376,7 @@ npm run test:coverage
 ### Test Maintenance
 
 **Regular Tasks:**
+
 - Update tests for new features
 - Remove obsolete tests
 - Refactor flaky tests

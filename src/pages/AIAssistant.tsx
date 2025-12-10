@@ -55,7 +55,7 @@ export default function AIAssistant() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
+
     try {
       await sendMessage(input);
       setInput('');
@@ -74,24 +74,24 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto p-4">
-          <div className="flex items-center gap-4 mb-4">
-            <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4" />
+    <div className='min-h-screen bg-background pb-20'>
+      <div className='sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b'>
+        <div className='container mx-auto p-4'>
+          <div className='flex items-center gap-4 mb-4'>
+            <Button onClick={() => navigate(-1)} variant='ghost' size='sm'>
+              <ArrowLeft className='h-4 w-4' />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">AI Assistant</h1>
-              <p className="text-sm text-muted-foreground">Ask questions about baby care</p>
+              <h1 className='text-2xl font-bold'>AI Assistant</h1>
+              <p className='text-sm text-muted-foreground'>Ask questions about baby care</p>
             </div>
           </div>
           {babies && babies.length > 1 && (
             <Button
               onClick={() => setIsSwitcherOpen(true)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
+              variant='outline'
+              size='sm'
+              className='gap-2'
             >
               {selectedBaby?.name}
             </Button>
@@ -99,29 +99,34 @@ export default function AIAssistant() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4 max-w-3xl">
+      <div className='container mx-auto p-4 max-w-3xl'>
         {/* Trust messaging banner */}
-        <Alert className="mb-4 border-primary/20 bg-primary/5">
-          <AlertCircle className="h-4 w-4 text-primary" />
-          <AlertDescription className="text-primary font-medium">
+        <Alert className='mb-4 border-primary/20 bg-primary/5'>
+          <AlertCircle className='h-4 w-4 text-primary' />
+          <AlertDescription className='text-primary font-medium'>
             General guidance only; not a replacement for your pediatrician
           </AlertDescription>
         </Alert>
 
-        <MedicalDisclaimer variant="ai" className="sticky top-0 z-10 bg-background/95 backdrop-blur" />
+        <MedicalDisclaimer
+          variant='ai'
+          className='sticky top-0 z-10 bg-background/95 backdrop-blur'
+        />
 
         {aiEnabled === false && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>AI Assistant is disabled. Enable AI features in Settings to ask questions.</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+          <Alert variant='destructive' className='mb-4'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertDescription className='flex items-center justify-between'>
+              <span>
+                AI Assistant is disabled. Enable AI features in Settings to ask questions.
+              </span>
+              <Button
+                variant='ghost'
+                size='sm'
                 onClick={() => navigate('/settings/ai-data-sharing')}
-                className="ml-2"
+                className='ml-2'
               >
-                <Settings className="h-4 w-4 mr-1" />
+                <Settings className='h-4 w-4 mr-1' />
                 Settings
               </Button>
             </AlertDescription>
@@ -129,12 +134,13 @@ export default function AIAssistant() {
         )}
 
         {messages.length === 0 && (
-          <div className="space-y-4 mb-6">
-            <Card className="p-6 text-center">
-              <Bot className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <h3 className="font-semibold mb-2 text-foreground">Hi! I'm here to help</h3>
-              <p className="text-caption text-muted-foreground max-w-md mx-auto">
-                Ask me anything about baby care, feeding schedules, sleep tips, or developmental milestones. I'm here to support you.
+          <div className='space-y-4 mb-6'>
+            <Card className='p-6 text-center'>
+              <Bot className='h-12 w-12 mx-auto mb-4 text-primary' />
+              <h3 className='font-semibold mb-2 text-foreground'>Hi! I'm here to help</h3>
+              <p className='text-caption text-muted-foreground max-w-md mx-auto'>
+                Ask me anything about baby care, feeding schedules, sleep tips, or developmental
+                milestones. I'm here to support you.
               </p>
             </Card>
 
@@ -143,36 +149,38 @@ export default function AIAssistant() {
         )}
 
         {chatError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
+          <Alert variant='destructive' className='mb-4'>
+            <AlertCircle className='h-4 w-4' />
             <AlertDescription>
               Having trouble connecting. Check your internet and try asking again.
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="space-y-4 mb-4">
-          {messages.map((message) => (
+        <div className='space-y-4 mb-4'>
+          {messages.map(message => (
             <div
               key={message.id}
               className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {message.role === 'assistant' && (
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-primary-foreground" />
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 rounded-full bg-primary flex items-center justify-center'>
+                    <Bot className='h-4 w-4 text-primary-foreground' />
                   </div>
                 </div>
               )}
-              
-              <Card className={`p-4 max-w-[80%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : ''}`}>
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+
+              <Card
+                className={`p-4 max-w-[80%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : ''}`}
+              >
+                <p className='text-sm whitespace-pre-wrap'>{message.content}</p>
               </Card>
 
               {message.role === 'user' && (
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    <User className="h-4 w-4" />
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 rounded-full bg-muted flex items-center justify-center'>
+                    <User className='h-4 w-4' />
                   </div>
                 </div>
               )}
@@ -180,14 +188,14 @@ export default function AIAssistant() {
           ))}
 
           {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-primary-foreground" />
+            <div className='flex gap-3 justify-start'>
+              <div className='flex-shrink-0'>
+                <div className='w-8 h-8 rounded-full bg-primary flex items-center justify-center'>
+                  <Bot className='h-4 w-4 text-primary-foreground' />
                 </div>
               </div>
-              <Card className="p-4">
-                <Loader2 className="h-4 w-4 animate-spin" />
+              <Card className='p-4'>
+                <Loader2 className='h-4 w-4 animate-spin' />
               </Card>
             </div>
           )}
@@ -196,17 +204,23 @@ export default function AIAssistant() {
         </div>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 bg-background border-t p-4">
-        <div className="container mx-auto max-w-3xl flex gap-2">
+      <div className='fixed bottom-16 left-0 right-0 bg-background border-t p-4'>
+        <div className='container mx-auto max-w-3xl flex gap-2'>
           <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={aiEnabled === false ? "Enable AI features to chat..." : "Ask a question..."}
+            onChange={e => setInput(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && handleSend()}
+            placeholder={
+              aiEnabled === false ? 'Enable AI features to chat...' : 'Ask a question...'
+            }
             disabled={isLoading || aiEnabled === false}
           />
           <Button onClick={handleSend} disabled={!input.trim() || isLoading || aiEnabled === false}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {isLoading ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <Send className='h-4 w-4' />
+            )}
           </Button>
         </div>
       </div>

@@ -166,63 +166,50 @@ class CryRecorderViewModel: ObservableObject {
     
     private func analyzeRecording() {
         Task {
-            do {
-                // Check AI Data Sharing again (in case it was disabled during recording)
-                guard let settings = try? await dataStore.fetchAppSettings(), settings.aiDataSharingEnabled else {
-                    await MainActor.run {
-                        state = .error("AI data sharing is disabled. Enable it in Settings to use Cry Insights.")
-                    }
-                    audioService.deleteRecording()
-                    return
-                }
-                
-                // Use ML classifier if available, fallback to rule-based
-                // Note: For MVP, using local classifier. In production, this would call the edge function
-                let mlClassifier = MLCryClassifier()
-                let result = mlClassifier.classify(
-                    audioFeatures: nil, // TODO: Extract features from audio buffer
-                    duration: recordingDuration,
-                    averagePower: averagePower,
-                    peakPower: averagePower // Using average as proxy for peak
-                )
-                
-                // Increment quota after successful analysis
-                if let settings = try? await dataStore.fetchAppSettings(), !proService.isProUser {
-                    var updatedSettings = settings
-                    let quotaUpdate = CryInsightsQuotaManager.incrementQuota(
-                        currentCount: settings.cryInsightsWeeklyCount,
-                        currentWeekStart: settings.cryInsightsWeekStart
-                    )
-                    updatedSettings.cryInsightsWeeklyCount = quotaUpdate.count
-                    updatedSettings.cryInsightsWeekStart = quotaUpdate.weekStart
-                    try? await dataStore.saveAppSettings(updatedSettings)
-
-                    await MainActor.run {
-                        remainingQuota = CryInsightsQuotaManager.getRemainingQuota(
-                            isPro: false,
-                            weeklyCount: quotaUpdate.count,
-                            weekStart: quotaUpdate.weekStart
-                        )
-                    }
-                }
-                
+            // Check AI Data Sharing again (in case it was disabled during recording)
+            guard let settings = try? await dataStore.fetchAppSettings(), settings.aiDataSharingEnabled else {
                 await MainActor.run {
-                    classification = result.classification
-                    confidence = result.confidence
-                    explanation = result.explanation
-                    state = .result
-                }
-            } catch {
-                await MainActor.run {
-                    // Check if it's a network error
-                    if let nsError = error as NSError?, nsError.domain == NSURLErrorDomain {
-                        state = .error("We couldn't analyze that cry. Check your connection and try again.")
-                    } else {
-                        state = .error("We couldn't analyze that cry. Please try again.")
-                    }
-                    errorMessage = error.localizedDescription
+                    state = .error("AI data sharing is disabled. Enable it in Settings to use Cry Insights.")
                 }
                 audioService.deleteRecording()
+                return
+            }
+            
+            // Use ML classifier if available, fallback to rule-based
+            // Note: For MVP, using local classifier. In production, this would call the edge function
+            let mlClassifier = MLCryClassifier()
+            let result = mlClassifier.classify(
+                audioFeatures: nil, // TODO: Extract features from audio buffer
+                duration: recordingDuration,
+                averagePower: averagePower,
+                peakPower: averagePower // Using average as proxy for peak
+            )
+            
+            // Increment quota after successful analysis
+            if let settings = try? await dataStore.fetchAppSettings(), !proService.isProUser {
+                var updatedSettings = settings
+                let quotaUpdate = CryInsightsQuotaManager.incrementQuota(
+                    currentCount: settings.cryInsightsWeeklyCount,
+                    currentWeekStart: settings.cryInsightsWeekStart
+                )
+                updatedSettings.cryInsightsWeeklyCount = quotaUpdate.count
+                updatedSettings.cryInsightsWeekStart = quotaUpdate.weekStart
+                try? await dataStore.saveAppSettings(updatedSettings)
+
+                await MainActor.run {
+                    remainingQuota = CryInsightsQuotaManager.getRemainingQuota(
+                        isPro: false,
+                        weeklyCount: quotaUpdate.count,
+                        weekStart: quotaUpdate.weekStart
+                    )
+                }
+            }
+            
+            await MainActor.run {
+                classification = result.classification
+                confidence = result.confidence
+                explanation = result.explanation
+                state = .result
             }
         }
     }

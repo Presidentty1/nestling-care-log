@@ -15,7 +15,7 @@ export function useRealtimeEvents(familyId: string | undefined, onUpdate: () => 
           table: 'events',
           filter: `family_id=eq.${familyId}`,
         },
-        (payload) => {
+        payload => {
           console.log('Realtime event update:', payload);
           onUpdate();
         }

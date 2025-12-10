@@ -13,9 +13,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ## Phase 0 — Plan Summary
 
 ### Phase 1: Xcode Project & Targets
+
 **Goal**: Move from loose sources → real Xcode workspace
 
 **Files to Create**:
+
 - `ios/Nestling.xcodeproj/project.pbxproj` (Xcode project file)
 - `ios/Nestling.xcodeproj/project.xcworkspace/contents.xcworkspacedata`
 - `ios/Nestling/Info.plist`
@@ -28,10 +30,12 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/NestlingIntents/Intents.swift`
 
 **Files to Modify**:
+
 - `ios/README.md` (add Xcode setup instructions)
 - All existing source files (add to project, fix imports if needed)
 
 **Risks & Mitigation**:
+
 - **Risk**: Xcode project file complexity
   - **Mitigation**: Use Xcode GUI to create project, then manually edit `pbxproj` only for minor tweaks
 - **Risk**: Missing dependencies/references
@@ -40,9 +44,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 2: Local-First Sync Architecture (CoreData)
+
 **Goal**: Robust offline storage with migration path
 
 **Files to Create**:
+
 - `ios/Sources/Domain/Services/CoreDataDataStore.swift`
 - `ios/Sources/Domain/Services/CoreDataStack.swift`
 - `ios/Sources/Domain/Models/CoreData/Nestling.xcdatamodeld/Nestling.xcdatamodel/contents`
@@ -51,12 +57,14 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/Sources/Features/Settings/DataMigrationView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Domain/Services/DataStore.swift` (add migration methods)
 - `ios/Sources/App/AppEnvironment.swift` (use DataStoreSelector)
 - `ios/Sources/Features/Settings/PrivacyDataView.swift` (add import JSON → Core Data)
 - `ios/Sources/Domain/Services/JSONBackedDataStore.swift` (keep for export/import)
 
 **Risks & Mitigation**:
+
 - **Risk**: Core Data migration failures
   - **Mitigation**: Versioned schema (v1 → v2), lightweight migration, test migration paths
 - **Risk**: Performance with large datasets
@@ -67,9 +75,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 3: Onboarding & First-Run Experience
+
 **Goal**: Delightful, compliant first launch
 
 **Files to Create**:
+
 - `ios/Sources/Features/Onboarding/OnboardingCoordinator.swift`
 - `ios/Sources/Features/Onboarding/WelcomeView.swift`
 - `ios/Sources/Features/Onboarding/BabySetupView.swift`
@@ -79,11 +89,13 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/Sources/Services/OnboardingService.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/App/NestlingApp.swift` (check onboarding state, show flow)
 - `ios/Sources/Features/Settings/SettingsRootView.swift` (add "Reset Onboarding" debug option)
 - `ios/Sources/Domain/Models/AppSettings.swift` (add onboarding flags)
 
 **Risks & Mitigation**:
+
 - **Risk**: Onboarding state persistence
   - **Mitigation**: Store completion flag in AppSettings, check on launch
 - **Risk**: User skips critical steps
@@ -92,9 +104,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 4: Predictions Engine v1 (On-Device)
+
 **Goal**: Reliable, explainable predictor with NO networking
 
 **Files to Create**:
+
 - `ios/Sources/Services/PredictionsEngine.swift`
 - `ios/Sources/Services/WakeWindowCalculator.swift`
 - `ios/Sources/Services/FeedSpacingCalculator.swift`
@@ -102,11 +116,13 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/Sources/Features/Labs/PredictionsView.swift` (update to use engine)
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Labs/PredictionsViewModel.swift` (use PredictionsEngine)
 - `ios/Sources/Domain/Services/DataStore.swift` (add prediction cache methods)
 - `ios/Sources/Domain/Services/CoreDataDataStore.swift` (implement cache)
 
 **Risks & Mitigation**:
+
 - **Risk**: Prediction accuracy/explainability
   - **Mitigation**: Deterministic heuristics, clear confidence levels, unit tests for edge cases
 - **Risk**: Performance with complex calculations
@@ -115,9 +131,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 5: Cry Insights (Beta) with Local Recording
+
 **Goal**: Honest beta with local recording, rule-based classification
 
 **Files to Create**:
+
 - `ios/Sources/Features/CryInsights/CryRecorderView.swift`
 - `ios/Sources/Features/CryInsights/CryRecorderViewModel.swift`
 - `ios/Sources/Services/AudioRecorderService.swift`
@@ -125,10 +143,12 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/Sources/Features/CryInsights/CryAnalysisResultView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Labs/LabsView.swift` (navigate to CryRecorderView)
 - `ios/Sources/Domain/Models/Event.swift` (add cry insight note support)
 
 **Risks & Mitigation**:
+
 - **Risk**: Audio recording permissions/privacy
   - **Mitigation**: Clear explanations, auto-delete after analysis, prominent disclaimers
 - **Risk**: Background recording interruptions
@@ -139,9 +159,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 6: Widgets & Live Activities
+
 **Goal**: iOS presence outside the app
 
 **Files to Create**:
+
 - `ios/NestlingWidgets/NextNapWidget.swift`
 - `ios/NestlingWidgets/NextFeedWidget.swift`
 - `ios/NestlingWidgets/TodaySummaryWidget.swift`
@@ -151,10 +173,12 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/Sources/Features/Sleep/SleepLiveActivity.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Home/HomeViewModel.swift` (start Live Activity on sleep)
 - `ios/Sources/Features/Forms/SleepFormViewModel.swift` (integrate Live Activity)
 
 **Risks & Mitigation**:
+
 - **Risk**: Widget data freshness
   - **Mitigation**: Timeline reload policy, App Groups for shared data, background refresh
 - **Risk**: Live Activity state sync
@@ -163,9 +187,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 7: App Intents (Shortcuts & Siri)
+
 **Goal**: Hands-free quick logging
 
 **Files to Create**:
+
 - `ios/NestlingIntents/LogFeedIntent.swift`
 - `ios/NestlingIntents/LogSleepIntent.swift`
 - `ios/NestlingIntents/LogDiaperIntent.swift`
@@ -175,10 +201,12 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/NestlingIntents/IntentHandler.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Domain/Services/DataStore.swift` (ensure thread-safe for intents)
 - `ios/NestlingIntents/Info.plist` (add intent definitions)
 
 **Risks & Mitigation**:
+
 - **Risk**: Intent execution in background
   - **Mitigation**: Use App Groups for shared DataStore access, handle errors gracefully
 - **Risk**: Current baby context
@@ -187,19 +215,23 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 8: Local Notifications
+
 **Goal**: Useful, configurable reminders
 
 **Files to Create**:
+
 - `ios/Sources/Services/NotificationScheduler.swift`
 - `ios/Sources/Services/NotificationPermissionManager.swift`
 - `ios/Sources/Features/Settings/NotificationSettingsView.swift` (enhance with test buttons)
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Settings/NotificationSettingsView.swift` (add permission request, test buttons)
 - `ios/Sources/Domain/Models/AppSettings.swift` (notification preferences)
 - `ios/Sources/App/NestlingApp.swift` (register notification delegate)
 
 **Risks & Mitigation**:
+
 - **Risk**: Notification permission denial
   - **Mitigation**: Graceful degradation, explain value, allow retry
 - **Risk**: Quiet hours edge cases
@@ -208,38 +240,46 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 9: Deep Links & URL Schemes
+
 **Goal**: Jump directly into actions
 
 **Files to Create**:
+
 - `ios/Sources/Services/DeepLinkRouter.swift`
 - `ios/Sources/Features/Navigation/NavigationCoordinator.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/App/NestlingApp.swift` (handle URL schemes)
 - `ios/Nestling/Info.plist` (add URL scheme declaration)
 - `ios/README.md` (add deep link examples)
 
 **Risks & Mitigation**:
+
 - **Risk**: Navigation state conflicts
   - **Mitigation**: Centralized NavigationCoordinator, handle deep links when app is backgrounded/foregrounded
 
 ---
 
 ### Phase 10: Privacy, Security & Caregiver Mode
+
 **Goal**: Respectful defaults for family app
 
 **Files to Create**:
+
 - `ios/Sources/Services/PrivacyManager.swift`
 - `ios/Sources/Services/AuthenticationManager.swift`
 - `ios/Sources/Features/Settings/PrivacySettingsView.swift`
 - `ios/Sources/Features/Settings/CaregiverModeView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/App/NestlingApp.swift` (handle app privacy, Face ID)
 - `ios/Sources/Features/Home/HomeView.swift` (simplified UI for caregiver mode)
 - All views (add blur/redaction support)
 
 **Risks & Mitigation**:
+
 - **Risk**: Face ID failure handling
   - **Mitigation**: Fallback to passcode, allow disable, clear error messages
 - **Risk**: Caregiver mode complexity
@@ -248,18 +288,22 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 11: Exports (CSV + PDF) & Backups
+
 **Goal**: Get data out easily
 
 **Files to Create**:
+
 - `ios/Sources/Services/PDFExportService.swift`
 - `ios/Sources/Services/BackupService.swift`
 - `ios/Sources/Features/Settings/BackupRestoreView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Settings/PrivacyDataView.swift` (add PDF export, backup/restore)
 - `ios/Sources/Services/CSVExportService.swift` (enhance existing)
 
 **Risks & Mitigation**:
+
 - **Risk**: Large PDF generation performance
   - **Mitigation**: Background generation, progress indicator, pagination
 - **Risk**: Backup/restore data conflicts
@@ -268,19 +312,23 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 12: Achievements & Streaks
+
 **Goal**: Gentle motivation
 
 **Files to Create**:
+
 - `ios/Sources/Services/StreakService.swift`
 - `ios/Sources/Services/AchievementService.swift`
 - `ios/Sources/Domain/Models/Achievement.swift`
 - `ios/Sources/Features/Settings/AchievementsView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Home/HomeViewModel.swift` (track logging for streaks)
 - `ios/Sources/Domain/Services/DataStore.swift` (add achievement methods)
 
 **Risks & Mitigation**:
+
 - **Risk**: Performance with streak calculations
   - **Mitigation**: Precompute on save, cache results, background updates
 - **Risk**: Guilt-inducing notifications
@@ -289,19 +337,23 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 13: Performance & Reliability
+
 **Goal**: Smooth, testable app
 
 **Files to Create**:
+
 - `ios/Sources/Utilities/PerformanceLogger.swift`
 - `ios/Sources/Utilities/SignpostLogger.swift`
 
 **Files to Modify**:
+
 - All ViewModels (add OSLog categories)
 - `ios/Sources/Features/Home/HomeViewModel.swift` (add signposts)
 - `ios/Sources/Domain/Services/CoreDataDataStore.swift` (background context optimization)
 - `ios/README.md` (add performance notes)
 
 **Risks & Mitigation**:
+
 - **Risk**: Main thread blocking
   - **Mitigation**: Profile with Instruments, move heavy work to background, use @MainActor carefully
 - **Risk**: Memory leaks
@@ -310,9 +362,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 14: UI Tests & Screenshots
+
 **Goal**: Basic automation
 
 **Files to Create**:
+
 - `ios/NestlingUITests/OnboardingFlowTests.swift`
 - `ios/NestlingUITests/QuickActionsTests.swift`
 - `ios/NestlingUITests/SleepTimerTests.swift`
@@ -321,9 +375,11 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 - `ios/NestlingUITests/TestHelpers.swift`
 
 **Files to Modify**:
+
 - `ios/NestlingUITests/NestlingUITests.swift` (base test class)
 
 **Risks & Mitigation**:
+
 - **Risk**: Flaky tests
   - **Mitigation**: Use stable identifiers, wait for elements, retry logic
 - **Risk**: Screenshot consistency
@@ -332,18 +388,22 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 15: Localization Expansion
+
 **Goal**: International-ready
 
 **Files to Create**:
+
 - `ios/es.lproj/Localizable.strings` (Spanish)
 - `ios/Sources/Utilities/LocalizationHelper.swift`
 
 **Files to Modify**:
+
 - `ios/en.lproj/Localizable.strings` (expand with all new strings)
 - All views (use LocalizedStringKey)
 - `ios/Sources/Features/Settings/PreferencesView.swift` (unit toggle)
 
 **Risks & Mitigation**:
+
 - **Risk**: Incomplete translations
   - **Mitigation**: Use English as fallback, mark incomplete keys, test language switching
 - **Risk**: Unit conversion bugs
@@ -352,37 +412,45 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 ### Phase 16: Branding & App Store Assets
+
 **Goal**: Presentable build
 
 **Files to Create**:
+
 - `ios/Nestling/Assets.xcassets/AppIcon.appiconset/Contents.json` + images
 - `ios/Nestling/Assets.xcassets/AccentColor.colorset/Contents.json`
 - `ios/Nestling/LaunchScreen.storyboard` (or SwiftUI launch)
 - `ios/Sources/Features/Settings/AboutView.swift`
 
 **Files to Modify**:
+
 - `ios/Sources/Features/Settings/SettingsRootView.swift` (add About link)
 - `ios/README.md` (add demo script, screenshot shot list)
 
 **Risks & Mitigation**:
+
 - **Risk**: Asset generation complexity
   - **Mitigation**: Use asset catalog templates, placeholder images for now, document requirements
 
 ---
 
 ### Phase 17: Documentation & Ops
+
 **Goal**: Team-ready repository
 
 **Files to Create**:
+
 - `ios/RELEASE_NOTES.md`
 - `ios/OPERATIONS_RUNBOOK.md`
 - `ios/TEST_PLAN.md`
 
 **Files to Modify**:
+
 - `ios/IOS_ARCHITECTURE.md` (update with new layers)
 - `ios/README.md` (build/run instructions, deep links, feature flags)
 
 **Risks & Mitigation**:
+
 - **Risk**: Documentation drift
   - **Mitigation**: Update docs alongside code, review in PRs, version docs
 
@@ -488,5 +556,3 @@ This sprint transforms the Nestling iOS app from a polished MVP into an App Stor
 ---
 
 **Ready for approval to proceed with implementation.**
-
-

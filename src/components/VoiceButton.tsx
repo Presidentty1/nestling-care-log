@@ -19,11 +19,11 @@ export function VoiceButton({ onCommandParsed, className }: VoiceButtonProps) {
   const handleVoiceInput = async () => {
     setShowTranscript(false);
     const result = await startListening();
-    
+
     if (result) {
       setShowTranscript(true);
       const command = parseCommand(result);
-      
+
       if (command.type) {
         toast({
           title: 'Command Recognized',
@@ -46,29 +46,25 @@ export function VoiceButton({ onCommandParsed, className }: VoiceButtonProps) {
       <Button
         onClick={handleVoiceInput}
         disabled={isListening}
-        size="lg"
+        size='lg'
         className={cn(
           'rounded-full w-16 h-16 shadow-lg',
           isListening && 'animate-pulse bg-destructive hover:bg-destructive'
         )}
       >
-        {isListening ? (
-          <Loader2 className="h-6 w-6 animate-spin" />
-        ) : (
-          <Mic className="h-6 w-6" />
-        )}
+        {isListening ? <Loader2 className='h-6 w-6 animate-spin' /> : <Mic className='h-6 w-6' />}
       </Button>
 
       {showTranscript && transcript && (
-        <Card className="absolute bottom-20 left-1/2 -translate-x-1/2 p-3 min-w-[250px] shadow-lg">
-          <p className="text-sm text-muted-foreground">You said:</p>
-          <p className="text-sm font-medium">{transcript}</p>
+        <Card className='absolute bottom-20 left-1/2 -translate-x-1/2 p-3 min-w-[250px] shadow-lg'>
+          <p className='text-sm text-muted-foreground'>You said:</p>
+          <p className='text-sm font-medium'>{transcript}</p>
         </Card>
       )}
 
       {isListening && (
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <p className="text-xs text-muted-foreground">Listening...</p>
+        <div className='absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap'>
+          <p className='text-xs text-muted-foreground'>Listening...</p>
         </div>
       )}
     </div>

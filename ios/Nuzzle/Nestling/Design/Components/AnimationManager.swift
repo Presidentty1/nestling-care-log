@@ -195,3 +195,4 @@ private struct PulseModifier: ViewModifier {
     
     return PreviewContainer()
 }
+

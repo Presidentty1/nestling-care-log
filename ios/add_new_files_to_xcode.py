@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to add new Swift files to Xcode project.pbxproj
-Adds:
-- MonthlyCalendarView.swift
-- FreeTierUsageCard.swift
-- UpgradePromptBanner.swift
+Script to add TrialBannerView.swift to Xcode project.pbxproj
 """
 
 import re
@@ -27,24 +23,9 @@ def add_new_files(project_path):
     # Files to add
     files_to_add = [
         {
-            'name': 'MonthlyCalendarView.swift',
-            'path': 'Nestling/Features/History/MonthlyCalendarView.swift',
-            'group': 'History'
-        },
-        {
-            'name': 'FreeTierUsageCard.swift',
-            'path': 'Nestling/Design/Components/FreeTierUsageCard.swift',
-            'group': 'Components'
-        },
-        {
-            'name': 'UpgradePromptBanner.swift',
-            'path': 'Nestling/Design/Components/UpgradePromptBanner.swift',
-            'group': 'Components'
-        },
-        {
-            'name': 'FirstTasksChecklistCard.swift',
-            'path': 'Nestling/Features/Home/FirstTasksChecklistCard.swift',
-            'group': 'Home'
+            'name': 'CaregiverSyncService.swift',
+            'path': 'Nestling/Services/CaregiverSyncService.swift',
+            'group': 'Services'
         }
     ]
     
@@ -74,7 +55,7 @@ def add_new_files(project_path):
             print(f"  ✅ Added to PBXBuildFile section")
         
         # 2. Add to PBXFileReference section
-        file_ref_entry = f'\t\t{file_ref_id} /* {file_info["name"]} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {file_info["name"]}; sourceTree = "<group>"; }};\n'
+        file_ref_entry = f'\t\t{file_ref_id} /* {file_info["name"]} */ = {{isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = {file_info["name"]}; sourceTree = "<group>"; }};\n'
         
         match = re.search(r'(/\* Begin PBXFileReference section \*/\n)', content)
         if match:
@@ -82,7 +63,7 @@ def add_new_files(project_path):
             content = content[:insert_pos] + file_ref_entry + content[insert_pos:]
             print(f"  ✅ Added to PBXFileReference section")
         
-        # 3. Add to appropriate PBXGroup (History or Components)
+        # 3. Add to appropriate PBXGroup (Components)
         group_pattern = rf'(/\* {file_info["group"]} \*/.*?children = \(\n)(.*?)(\n\t\t\t\);)'
         match = re.search(group_pattern, content, re.DOTALL)
         
@@ -109,7 +90,7 @@ def add_new_files(project_path):
         print(f"  ✅ {file_info['name']} successfully added!\n")
     
     # Write back
-    backup_path = project_path + '.backup_pre_phase1'
+    backup_path = project_path + '.backup_caregiversync'
     print(f"\nCreating backup: {backup_path}")
     with open(backup_path, 'w', encoding='utf-8') as f:
         f.write(content)
@@ -119,11 +100,6 @@ def add_new_files(project_path):
         f.write(content)
     
     print("\n✅ All files added successfully!")
-    print("\nNext steps:")
-    print("1. Open Xcode")
-    print("2. Clean build folder (⇧⌘K)")
-    print("3. Build (⌘B)")
-    print("4. Run (⌘R)")
 
 if __name__ == '__main__':
     project_path = 'Nuzzle/Nestling.xcodeproj/project.pbxproj'
@@ -134,4 +110,3 @@ if __name__ == '__main__':
         sys.exit(1)
     
     add_new_files(project_path)
-

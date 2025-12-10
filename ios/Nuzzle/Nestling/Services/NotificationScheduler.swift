@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import OSLog
 
 class NotificationScheduler {
     static let shared = NotificationScheduler()
@@ -67,6 +68,12 @@ class NotificationScheduler {
         
         guard enabled else { return }
         
+        // Quiet hours guard
+        if isWithinQuietHours(start: quietHoursStart, end: quietHoursEnd) {
+            Logger.dataInfo("Skipping feed reminder: within quiet hours")
+            return
+        }
+        
         // Calculate time since last feed
         let hoursSinceLastFeed: Int
         if let lastFeed = lastFeedTime {
@@ -85,10 +92,21 @@ class NotificationScheduler {
         content.userInfo = ["deepLink": "nestling://log/feed"]
         
         // Track last notification time for deduplication
-        UserDefaults.standard.set(Date(), forKey: "last_feed_notification")
+        let now = Date()
+        if let last = UserDefaults.standard.object(forKey: "last_feed_notification") as? Date {
+            let minutes = Calendar.current.dateComponents([.minute], from: last, to: now).minute ?? 0
+            // Deduplicate if a feed notification fired in the last 30 minutes
+            if minutes < 30 {
+                Logger.dataInfo("Skipping feed reminder: deduped (last \(minutes) mins)")
+                return
+            }
+        }
+        UserDefaults.standard.set(now, forKey: "last_feed_notification")
         
         // Schedule recurring reminder every N hours
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(hours * 3600), repeats: true)
+        let initialFire = adjustedFireDate(base: now.addingTimeInterval(Double(hours * 3600)), quietHoursStart: quietHoursStart, quietHoursEnd: quietHoursEnd)
+        let interval = max(initialFire.timeIntervalSince(now), 60) // minimum 60s safety
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: true)
         let request = UNNotificationRequest(identifier: "feed_reminder", content: content, trigger: trigger)
         
         center.add(request) { error in
@@ -147,9 +165,11 @@ class NotificationScheduler {
         content.userInfo = ["deepLink": "nestling://log/sleep"]
         
         // Track last notification time
-        UserDefaults.standard.set(Date(), forKey: "last_nap_notification")
+        let now = Date()
+        UserDefaults.standard.set(now, forKey: "last_nap_notification")
         
-        let trigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: alertTime), repeats: false)
+        let adjustedAlertTime = adjustedFireDate(base: alertTime, quietHoursStart: nil, quietHoursEnd: nil)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: adjustedAlertTime), repeats: false)
         let request = UNNotificationRequest(identifier: "nap_window_alert", content: content, trigger: trigger)
         
         center.add(request) { error in
@@ -186,7 +206,15 @@ class NotificationScheduler {
         content.userInfo = ["deepLink": "nestling://log/diaper"]
         
         // Track last notification time for deduplication
-        UserDefaults.standard.set(Date(), forKey: "last_diaper_notification")
+        let now = Date()
+        if let last = UserDefaults.standard.object(forKey: "last_diaper_notification") as? Date {
+            let minutes = Calendar.current.dateComponents([.minute], from: last, to: now).minute ?? 0
+            if minutes < 30 {
+                Logger.dataInfo("Skipping diaper reminder: deduped (last \(minutes) mins)")
+                return
+            }
+        }
+        UserDefaults.standard.set(now, forKey: "last_diaper_notification")
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(hours * 3600), repeats: true)
         let request = UNNotificationRequest(identifier: "diaper_reminder", content: content, trigger: trigger)
@@ -266,6 +294,28 @@ class NotificationScheduler {
             // Quiet hours span midnight
             return now >= startTime || now <= endTime
         }
+    }
+    
+    private func adjustedFireDate(base: Date, quietHoursStart: Date?, quietHoursEnd: Date?) -> Date {
+        guard let start = quietHoursStart, let end = quietHoursEnd else {
+            return base
+        }
+        
+        if isWithinQuietHours(start: start, end: end) {
+            // Push to end of quiet window (today or next day)
+            let calendar = Calendar.current
+            let startComponents = calendar.dateComponents([.hour, .minute], from: start)
+            let endComponents = calendar.dateComponents([.hour, .minute], from: end)
+            let now = Date()
+            let endToday = calendar.date(bySettingHour: endComponents.hour ?? 0, minute: endComponents.minute ?? 0, second: 0, of: now) ?? base
+            if endToday > now {
+                return endToday
+            }
+            // Quiet hours cross midnight; schedule at tomorrow's end time
+            return calendar.date(byAdding: .day, value: 1, to: endToday) ?? base
+        }
+        
+        return base
     }
     
     // MARK: - Test Notifications

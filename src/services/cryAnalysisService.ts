@@ -19,4 +19,3 @@ class CryAnalysisService {
 
 export const cryAnalysisService = new CryAnalysisService();
 
-

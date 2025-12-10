@@ -29,5 +29,3 @@ See `screenshot_shot_list.md` for required screenshots and how to capture them.
 ### Demo Script
 
 See `demo_script.md` for a walkthrough suitable for App Store reviewers.
-
-

@@ -7,6 +7,7 @@ Nuzzle is a React-based baby care tracking application with a local-first archit
 ## Technology Stack
 
 ### Frontend Core
+
 - **Framework**: React 18.3+ with TypeScript 5.8+
 - **Build Tool**: Vite 5.4+ (fast HMR, optimized builds)
 - **Routing**: React Router v6.30+ (client-side routing)
@@ -14,6 +15,7 @@ Nuzzle is a React-based baby care tracking application with a local-first archit
 - **UI Components**: shadcn/ui (Radix UI primitives)
 
 ### State Management
+
 - **Global State**: Zustand 5.0+ (`src/store/appStore.ts`)
   - Baby selection, caregiver mode, UI preferences
 - **Server State**: TanStack React Query 5.83+ (`src/lib/queryClient.ts`)
@@ -22,6 +24,7 @@ Nuzzle is a React-based baby care tracking application with a local-first archit
   - Automatic background refetching
 
 ### Backend Services
+
 - **Database**: Supabase (PostgreSQL with RLS)
 - **Authentication**: Supabase Auth (email/password)
 - **Edge Functions**: Deno-based serverless functions
@@ -29,6 +32,7 @@ Nuzzle is a React-based baby care tracking application with a local-first archit
 - **Real-time**: Supabase Realtime subscriptions
 
 ### Development Tools
+
 - **Testing**: Vitest 4.0+ (unit), Playwright 1.56+ (E2E)
 - **Linting**: ESLint 9.32+ with TypeScript ESLint
 - **Type Checking**: TypeScript compiler
@@ -85,6 +89,7 @@ src/
 ### Route Structure
 
 **Public Routes:**
+
 - `/` → Redirects to `/home` or `/auth`
 - `/auth` → Authentication (sign up/sign in)
 - `/accept-invite/:token` → Accept caregiver invitation
@@ -92,6 +97,7 @@ src/
 - `/feedback` → User feedback form
 
 **Protected Routes (Require Authentication):**
+
 - `/home` → Main dashboard
 - `/history` → Event history with date picker
 - `/onboarding` → Initial baby profile setup
@@ -115,6 +121,7 @@ src/
 ```
 
 **AuthGuard Logic:**
+
 1. Check for active session via `useAuth()`
 2. If no session, redirect to `/auth`
 3. If session exists but no baby profile, redirect to `/onboarding`
@@ -126,6 +133,7 @@ src/
 **Store Location**: `src/store/appStore.ts`
 
 **State Structure:**
+
 ```typescript
 interface AppState {
   selectedBabyId: string | null;
@@ -135,6 +143,7 @@ interface AppState {
 ```
 
 **Usage:**
+
 ```typescript
 import { useAppStore } from '@/store/appStore';
 
@@ -146,34 +155,35 @@ const selectedBaby = useAppStore(state => state.selectedBabyId);
 **Query Client**: `src/lib/queryClient.ts`
 
 **Key Features:**
+
 - Automatic caching (5 minutes default)
 - Background refetching
 - Optimistic updates
 - Offline support via persistence
 
 **Query Keys:**
+
 ```typescript
 // Events
-['events', babyId, date]
-['events', babyId, 'today']
-
-// Babies
-['babies', familyId]
-['baby', babyId]
-
-// Predictions
-['predictions', babyId]
+['events', babyId, date][('events', babyId, 'today')][
+  // Babies
+  ('babies', familyId)
+][('baby', babyId)][
+  // Predictions
+  ('predictions', babyId)
+];
 ```
 
 **Mutation Pattern:**
+
 ```typescript
 const mutation = useMutation({
   mutationFn: eventsService.createEvent,
-  onMutate: async (newEvent) => {
+  onMutate: async newEvent => {
     // Optimistic update
     await queryClient.cancelQueries(['events']);
     const previous = queryClient.getQueryData(['events']);
-    queryClient.setQueryData(['events'], (old) => [...old, newEvent]);
+    queryClient.setQueryData(['events'], old => [...old, newEvent]);
     return { previous };
   },
   onError: (err, newEvent, context) => {
@@ -214,12 +224,14 @@ UI Update (automatic via React Query)
 ### Offline Support
 
 **Strategy:**
+
 1. **React Query Persistence**: Cached data stored in IndexedDB
 2. **Offline Queue**: Mutations queued when offline (`src/lib/offlineQueue.ts`)
 3. **Network Detection**: `useNetworkStatus` hook monitors connectivity
 4. **Automatic Sync**: Queue processed when connection restored
 
 **Implementation:**
+
 ```typescript
 // Network status detection
 const { isOnline } = useNetworkStatus();
@@ -256,15 +268,18 @@ App.tsx
 ### Component Patterns
 
 **1. Container/Presentational Pattern**
+
 - **Container**: Fetches data, manages state (`Home.tsx`)
 - **Presentational**: Displays UI (`QuickActions.tsx`, `EventTimeline.tsx`)
 
 **2. Custom Hooks Pattern**
+
 - Business logic extracted to hooks
 - Components focus on rendering
 - Example: `useEventLogger`, `useRealtimeEvents`
 
 **3. Compound Components**
+
 - Related components grouped together
 - Example: `EventTimeline` + `EventDialog`
 
@@ -273,16 +288,19 @@ App.tsx
 ### Service Responsibilities
 
 **Events Service** (`src/services/eventsService.ts`):
+
 - CRUD operations for events
 - Date filtering and aggregation
 - Validation and error handling
 
 **Baby Service** (`src/services/babyService.ts`):
+
 - Baby profile management
 - Family association
 - Age calculations
 
 **Nap Predictor Service** (`src/services/napPredictorService.ts`):
+
 - Wake window calculations
 - Nap timing predictions
 - Pattern analysis
@@ -300,11 +318,11 @@ export const eventsService = {
       .eq('baby_id', babyId)
       .gte('start_time', startOfDay(date))
       .lte('start_time', endOfDay(date));
-    
+
     if (error) throw error;
     return data;
   },
-  
+
   // Mutation functions (for React Query)
   createEvent: async (event: CreateEventInput) => {
     const { data, error } = await supabase
@@ -312,7 +330,7 @@ export const eventsService = {
       .insert(event)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   },
@@ -326,6 +344,7 @@ export const eventsService = {
 **Location**: `src/integrations/supabase/client.ts`
 
 **Configuration:**
+
 ```typescript
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -335,7 +354,7 @@ export const supabase = createClient(
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
-    }
+    },
   }
 );
 ```
@@ -355,19 +374,23 @@ export const supabase = createClient(
 useEffect(() => {
   const channel = supabase
     .channel('events')
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'events',
-      filter: `family_id=eq.${familyId}`,
-    }, (payload) => {
-      // Update React Query cache
-      queryClient.setQueryData(['events'], (old) => {
-        // Handle insert/update/delete
-      });
-    })
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'events',
+        filter: `family_id=eq.${familyId}`,
+      },
+      payload => {
+        // Update React Query cache
+        queryClient.setQueryData(['events'], old => {
+          // Handle insert/update/delete
+        });
+      }
+    )
     .subscribe();
-  
+
   return () => {
     supabase.removeChannel(channel);
   };
@@ -379,6 +402,7 @@ useEffect(() => {
 ### Code Splitting
 
 **Lazy Loading:**
+
 ```typescript
 // Route-level code splitting
 const Analytics = lazy(() => import('@/pages/Analytics'));
@@ -386,6 +410,7 @@ const GrowthTracker = lazy(() => import('@/pages/GrowthTracker'));
 ```
 
 **Component-level:**
+
 - Heavy components loaded on demand
 - Modal/sheet components lazy loaded
 
@@ -410,6 +435,7 @@ const GrowthTracker = lazy(() => import('@/pages/GrowthTracker'));
 **Location**: `src/components/ErrorBoundary.tsx`
 
 **Strategy:**
+
 - Top-level error boundary in `main.tsx`
 - Route-level boundaries for critical sections
 - Graceful degradation with fallback UI
@@ -437,6 +463,7 @@ try {
 **Location**: `tests/unit/`
 
 **Coverage:**
+
 - Service functions
 - Utility functions
 - Custom hooks
@@ -447,6 +474,7 @@ try {
 **Location**: `tests/e2e/`
 
 **Coverage:**
+
 - Critical user flows
 - Authentication
 - Event logging
@@ -465,11 +493,13 @@ try {
 ### Deployment
 
 **Platforms:**
+
 - Vercel (recommended)
 - Netlify
 - Any static hosting
 
 **Environment Variables:**
+
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 - `VITE_SENTRY_DSN` (optional)

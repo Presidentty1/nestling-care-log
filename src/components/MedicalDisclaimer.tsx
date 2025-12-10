@@ -14,9 +14,9 @@ const disclaimerContent = {
     icon: AlertTriangle,
     text: (
       <>
-        <strong>Medical Disclaimer:</strong> This AI assistant provides general information only 
-        and is not a substitute for professional medical advice. Always consult your pediatrician 
-        for health concerns.
+        <strong>Medical Disclaimer:</strong> This AI assistant provides general information only and
+        is not a substitute for professional medical advice. Always consult your pediatrician for
+        health concerns.
       </>
     ),
   },
@@ -24,7 +24,8 @@ const disclaimerContent = {
     icon: Info,
     text: (
       <>
-        This guidance is based on typical patterns and is not medical advice. Always follow your pediatrician's recommendations.
+        This guidance is based on typical patterns and is not medical advice. Always follow your
+        pediatrician's recommendations.
       </>
     ),
   },
@@ -32,7 +33,8 @@ const disclaimerContent = {
     icon: Info,
     text: (
       <>
-        Predictions are based on typical patterns and your baby's data. This is not medical advice—always consult your pediatrician.
+        Predictions are based on typical patterns and your baby's data. This is not medical
+        advice—always consult your pediatrician.
       </>
     ),
   },
@@ -40,13 +42,11 @@ const disclaimerContent = {
 
 export function MedicalDisclaimer({ variant = 'ai', className }: MedicalDisclaimerProps) {
   const { icon: Icon, text } = disclaimerContent[variant];
-  
+
   return (
     <Alert className={cn('mb-4', className)} variant={variant === 'ai' ? 'default' : 'default'}>
-      <Icon className="h-4 w-4" />
-      <AlertDescription className="text-xs leading-relaxed">
-        {text}
-      </AlertDescription>
+      <Icon className='h-4 w-4' />
+      <AlertDescription className='text-xs leading-relaxed'>{text}</AlertDescription>
     </Alert>
   );
 }

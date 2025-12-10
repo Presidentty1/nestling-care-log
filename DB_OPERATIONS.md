@@ -9,6 +9,7 @@ This document describes database operations, migrations, seed data, and maintena
 **Location**: `supabase/migrations/`
 
 **Key Tables:**
+
 - `profiles` - User profiles
 - `families` - Family groups
 - `family_members` - Family membership
@@ -27,6 +28,7 @@ This document describes database operations, migrations, seed data, and maintena
 ### Creating Migrations
 
 **Using Supabase CLI:**
+
 ```bash
 # Create new migration
 supabase migration new migration_name
@@ -36,6 +38,7 @@ supabase migration new migration_name
 ```
 
 **Manual Creation:**
+
 ```bash
 # Create file with timestamp
 touch supabase/migrations/$(date +%Y%m%d%H%M%S)_migration_name.sql
@@ -44,6 +47,7 @@ touch supabase/migrations/$(date +%Y%m%d%H%M%S)_migration_name.sql
 ### Migration Best Practices
 
 **1. Always Use Transactions:**
+
 ```sql
 BEGIN;
 -- Your migration SQL
@@ -51,6 +55,7 @@ COMMIT;
 ```
 
 **2. Make Migrations Reversible:**
+
 ```sql
 -- Up migration
 CREATE TABLE IF NOT EXISTS new_table (...);
@@ -60,18 +65,21 @@ CREATE TABLE IF NOT EXISTS new_table (...);
 ```
 
 **3. Test Migrations:**
+
 ```bash
 # Test locally
 supabase db reset  # Applies all migrations
 ```
 
 **4. Never Modify Existing Migrations:**
+
 - Create new migration to fix issues
 - Document breaking changes
 
 ### Applying Migrations
 
 **Local Development:**
+
 ```bash
 # Reset database (applies all migrations + seed)
 supabase db reset
@@ -81,6 +89,7 @@ supabase db push
 ```
 
 **Staging/Production:**
+
 ```bash
 # Link to project
 supabase link --project-ref your-project-ref
@@ -90,6 +99,7 @@ supabase db push
 ```
 
 **Via Supabase Dashboard:**
+
 1. Go to Database → Migrations
 2. Upload migration file
 3. Review and apply
@@ -101,11 +111,13 @@ supabase db push
 **Location**: `supabase/seed.sql` and `supabase/seed_enhanced.sql`
 
 **Purpose:**
+
 - Development testing
 - QA environment setup
 - Demo data
 
 **Running Seed:**
+
 ```bash
 # Seed is automatically applied with db reset
 supabase db reset
@@ -117,15 +129,18 @@ psql -h localhost -U postgres -d postgres -f supabase/seed.sql
 ### Seed Data Structure
 
 **Test Family:**
+
 - Family ID: `11111111-1111-1111-1111-111111111111`
 - Name: "Test Family"
 
 **Test Baby:**
+
 - Baby ID: `22222222-2222-2222-2222-222222222222`
 - Name: "Test Baby"
 - Age: 60 days old
 
 **Sample Events:**
+
 - Feed events (last 12 hours)
 - Sleep events (today)
 - Diaper events (today)
@@ -135,6 +150,7 @@ psql -h localhost -U postgres -d postgres -f supabase/seed.sql
 ### Customizing Seed Data
 
 **Update User ID:**
+
 ```sql
 -- Get your test user ID
 SELECT id FROM auth.users LIMIT 1;
@@ -149,11 +165,13 @@ SET user_id = 'your-user-id';
 ### Querying Data
 
 **Via Supabase Dashboard:**
+
 1. Go to SQL Editor
 2. Write query
 3. Run query
 
 **Via Supabase CLI:**
+
 ```bash
 # Connect to database
 supabase db connect
@@ -163,6 +181,7 @@ psql -f query.sql
 ```
 
 **Via Application:**
+
 ```typescript
 const { data, error } = await supabase
   .from('events')
@@ -173,6 +192,7 @@ const { data, error } = await supabase
 ### Data Export
 
 **Export Table:**
+
 ```sql
 -- Export to CSV
 COPY (SELECT * FROM events) TO '/tmp/events.csv' CSV HEADER;
@@ -182,6 +202,7 @@ COPY (SELECT * FROM events) TO '/tmp/events.csv' CSV HEADER;
 ```
 
 **Export All Data:**
+
 ```bash
 # Using pg_dump
 pg_dump -h db.your-project.supabase.co \
@@ -194,6 +215,7 @@ pg_dump -h db.your-project.supabase.co \
 ### Data Import
 
 **Import CSV:**
+
 ```sql
 -- Create temporary table
 CREATE TEMP TABLE temp_events (LIKE events);
@@ -206,6 +228,7 @@ INSERT INTO events SELECT * FROM temp_events;
 ```
 
 **Import Dump:**
+
 ```bash
 pg_restore -h db.your-project.supabase.co \
   -U postgres \
@@ -218,11 +241,13 @@ pg_restore -h db.your-project.supabase.co \
 ### Automated Backups
 
 **Supabase Managed:**
+
 - Daily backups (7 days retention)
 - Point-in-time recovery available
 - Automatic backup scheduling
 
 **Manual Backup:**
+
 ```bash
 # Full database backup
 supabase db dump -f backup.sql
@@ -234,6 +259,7 @@ supabase db dump -t events -f events_backup.sql
 ### Restore from Backup
 
 **Full Restore:**
+
 ```bash
 # Restore from SQL dump
 psql -h localhost -U postgres -d postgres -f backup.sql
@@ -243,6 +269,7 @@ psql -h localhost -U postgres -d postgres -f backup.sql
 ```
 
 **Point-in-Time Recovery:**
+
 1. Go to Supabase Dashboard
 2. Database → Backups
 3. Select restore point
@@ -253,6 +280,7 @@ psql -h localhost -U postgres -d postgres -f backup.sql
 ### Index Management
 
 **Check Existing Indexes:**
+
 ```sql
 SELECT tablename, indexname, indexdef
 FROM pg_indexes
@@ -261,15 +289,17 @@ ORDER BY tablename;
 ```
 
 **Create Index:**
+
 ```sql
-CREATE INDEX IF NOT EXISTS idx_events_baby_id 
+CREATE INDEX IF NOT EXISTS idx_events_baby_id
 ON public.events(baby_id);
 
-CREATE INDEX IF NOT EXISTS idx_events_start_time 
+CREATE INDEX IF NOT EXISTS idx_events_start_time
 ON public.events(start_time DESC);
 ```
 
 **Drop Index:**
+
 ```sql
 DROP INDEX IF EXISTS idx_events_baby_id;
 ```
@@ -277,6 +307,7 @@ DROP INDEX IF EXISTS idx_events_baby_id;
 ### Query Optimization
 
 **Analyze Query Performance:**
+
 ```sql
 EXPLAIN ANALYZE
 SELECT * FROM events
@@ -285,6 +316,7 @@ AND start_time >= NOW() - INTERVAL '7 days';
 ```
 
 **Common Optimizations:**
+
 - Add indexes on frequently queried columns
 - Use `LIMIT` for large result sets
 - Filter early in query
@@ -293,6 +325,7 @@ AND start_time >= NOW() - INTERVAL '7 days';
 ### Vacuum & Analyze
 
 **Regular Maintenance:**
+
 ```sql
 -- Vacuum (reclaim space)
 VACUUM ANALYZE events;
@@ -302,6 +335,7 @@ ANALYZE events;
 ```
 
 **Auto-Vacuum:**
+
 - Supabase handles automatically
 - Runs during low-traffic periods
 
@@ -310,6 +344,7 @@ ANALYZE events;
 ### Row Level Security (RLS)
 
 **Check RLS Status:**
+
 ```sql
 SELECT tablename, rowsecurity
 FROM pg_tables
@@ -317,11 +352,13 @@ WHERE schemaname = 'public';
 ```
 
 **Enable RLS:**
+
 ```sql
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ```
 
 **View Policies:**
+
 ```sql
 SELECT schemaname, tablename, policyname, cmd, qual
 FROM pg_policies
@@ -330,6 +367,7 @@ ORDER BY tablename, policyname;
 ```
 
 **Test RLS:**
+
 ```sql
 -- As authenticated user
 SET ROLE authenticated;
@@ -342,6 +380,7 @@ RESET ROLE;
 ### User Management
 
 **Create User:**
+
 ```sql
 -- Via Supabase Auth (recommended)
 -- Dashboard → Authentication → Add User
@@ -352,6 +391,7 @@ VALUES (gen_random_uuid(), 'user@example.com', crypt('password', gen_salt('bf'))
 ```
 
 **Delete User:**
+
 ```sql
 -- Via Supabase Dashboard (recommended)
 -- Or via SQL (cascades to related data)
@@ -363,11 +403,12 @@ DELETE FROM auth.users WHERE id = 'user-id';
 ### Database Size
 
 **Check Database Size:**
+
 ```sql
-SELECT 
+SELECT
   pg_size_pretty(pg_database_size('postgres')) AS database_size;
 
-SELECT 
+SELECT
   schemaname,
   tablename,
   pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
@@ -379,8 +420,9 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ### Connection Monitoring
 
 **Active Connections:**
+
 ```sql
-SELECT 
+SELECT
   pid,
   usename,
   application_name,
@@ -394,6 +436,7 @@ WHERE datname = 'postgres';
 ### Slow Queries
 
 **Enable Query Logging:**
+
 ```sql
 -- In Supabase Dashboard → Database → Settings
 -- Enable "Log Slow Queries"
@@ -405,18 +448,21 @@ WHERE datname = 'postgres';
 ### Common Issues
 
 **Migration Fails:**
+
 1. Check SQL syntax
 2. Verify table doesn't already exist
 3. Check for conflicting migrations
 4. Review error message
 
 **RLS Blocking Queries:**
+
 1. Verify user is authenticated
 2. Check RLS policies
 3. Test with service role (temporarily)
 4. Review policy conditions
 
 **Performance Issues:**
+
 1. Check for missing indexes
 2. Analyze query execution plan
 3. Review table statistics
@@ -425,6 +471,7 @@ WHERE datname = 'postgres';
 ### Getting Help
 
 **Resources:**
+
 - Supabase Documentation
 - PostgreSQL Documentation
 - Supabase Discord Community

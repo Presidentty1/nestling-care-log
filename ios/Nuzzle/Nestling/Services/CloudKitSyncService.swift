@@ -16,6 +16,8 @@ class CloudKitSyncService: ObservableObject {
     private let container: CKContainer
     private let privateDatabase: CKDatabase
     private var dataStore: DataStore
+    private let eventRecordType = "Event"
+    private let daysBackToSync = 30
     
     private init() {
         // TODO: Update container identifier from com.nestling to com.nuzzle when ready
@@ -84,8 +86,9 @@ class CloudKitSyncService: ObservableObject {
             // Sync babies
             try await syncBabies()
             
-            // Sync events
+            // Sync events (upload + download/merge)
             try await syncEvents()
+            try await pullRemoteEvents()
             
             lastSyncTime = Date()
             syncError = nil
@@ -105,12 +108,16 @@ class CloudKitSyncService: ObservableObject {
     }
     
     private func syncEvents() async throws {
-        // Sync last 30 days of events
-        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let startDate = Calendar.current.date(byAdding: .day, value: -daysBackToSync, to: Date()) ?? Date()
+        let endDate = Date()
         
-        // Note: This would need to fetch all babies' events
-        // For now, just log the intent
-        Logger.dataInfo("Syncing events from last 30 days")
+        let babies = try await dataStore.fetchBabies()
+        for baby in babies {
+            let events = try await dataStore.fetchEvents(for: baby, from: startDate, to: endDate)
+            for event in events {
+                try await uploadEvent(event)
+            }
+        }
     }
     
     private func uploadBaby(_ baby: Baby) async throws {
@@ -124,6 +131,155 @@ class CloudKitSyncService: ObservableObject {
         record["updatedAt"] = baby.updatedAt as CKRecordValue
         
         try await privateDatabase.save(record)
+    }
+    
+    private func uploadEvent(_ event: Event) async throws {
+        let recordID = CKRecord.ID(recordName: event.id.uuidString)
+        
+        // Try to fetch existing record to support conflict resolution
+        let remoteRecord = try? await privateDatabase.record(for: recordID)
+        let remoteUpdatedAt = remoteRecord?["updatedAt"] as? Date ?? .distantPast
+        
+        let winner = resolveConflict(
+            local: event,
+            remote: remoteRecord as Any,
+            timestamp: event.updatedAt,
+            remoteTimestamp: remoteUpdatedAt
+        )
+        
+        // If remote wins, do nothing (keep server copy)
+        guard winner is Event else { return }
+        
+        let record = record(from: event, recordID: recordID)
+        try await privateDatabase.modifyRecords(saving: [record], deleting: [])
+    }
+    
+    private func record(from event: Event, recordID: CKRecord.ID? = nil) -> CKRecord {
+        let record = CKRecord(recordType: eventRecordType, recordID: recordID ?? CKRecord.ID(recordName: event.id.uuidString))
+        record["babyId"] = event.babyId.uuidString as CKRecordValue
+        record["type"] = event.type.rawValue as CKRecordValue
+        if let subtype = event.subtype { record["subtype"] = subtype as CKRecordValue }
+        record["startTime"] = event.startTime as CKRecordValue
+        if let endTime = event.endTime { record["endTime"] = endTime as CKRecordValue }
+        if let amount = event.amount { record["amount"] = amount as CKRecordValue }
+        if let unit = event.unit { record["unit"] = unit as CKRecordValue }
+        if let side = event.side { record["side"] = side as CKRecordValue }
+        if let note = event.note { record["note"] = note as CKRecordValue }
+        if let photos = event.photoUrls { record["photoUrls"] = photos as CKRecordValue }
+        record["createdAt"] = event.createdAt as CKRecordValue
+        record["updatedAt"] = event.updatedAt as CKRecordValue
+        return record
+    }
+    
+    // MARK: - Download & Merge
+    
+    private func pullRemoteEvents() async throws {
+        let startDate = Calendar.current.date(byAdding: .day, value: -daysBackToSync, to: Date()) ?? Date()
+        let endDate = Date()
+        
+        let babies = try await dataStore.fetchBabies()
+        
+        // Build local cache for conflict resolution
+        var localEventsById: [UUID: Event] = [:]
+        for baby in babies {
+            let localEvents = try await dataStore.fetchEvents(for: baby, from: startDate, to: endDate)
+            for event in localEvents {
+                localEventsById[event.id] = event
+            }
+        }
+        
+        let remoteEvents = try await fetchRemoteEvents(from: startDate, to: endDate)
+        
+        for remoteEvent in remoteEvents {
+            let local = localEventsById[remoteEvent.id]
+            let resolved = resolveConflict(
+                local: local as Any,
+                remote: remoteEvent as Any,
+                timestamp: local?.updatedAt ?? .distantPast,
+                remoteTimestamp: remoteEvent.updatedAt
+            )
+            
+            guard let winner = resolved as? Event else { continue }
+            
+            if let local = local {
+                // Update only if remote is newer
+                if winner.updatedAt > local.updatedAt {
+                    try await dataStore.updateEvent(winner)
+                }
+            } else {
+                // New event from remote
+                try await dataStore.addEvent(winner)
+            }
+        }
+    }
+    
+    private func fetchRemoteEvents(from startDate: Date, to endDate: Date) async throws -> [Event] {
+        let predicate = NSPredicate(format: "startTime >= %@ AND startTime <= %@", startDate as NSDate, endDate as NSDate)
+        let query = CKQuery(recordType: eventRecordType, predicate: predicate)
+        var fetched: [Event] = []
+        
+        try await withCheckedThrowingContinuation { continuation in
+            let operation = CKQueryOperation(query: query)
+            operation.recordMatchedBlock = { _, result in
+                switch result {
+                case .success(let record):
+                    if let event = self.event(from: record) {
+                        fetched.append(event)
+                    }
+                case .failure(let error):
+                    Logger.dataError("Failed to fetch record: \(error.localizedDescription)")
+                }
+            }
+            
+            operation.queryResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: ())
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+            
+            self.privateDatabase.add(operation)
+        }
+        
+        return fetched
+    }
+    
+    private func event(from record: CKRecord) -> Event? {
+        guard let babyIdString = record["babyId"] as? String,
+              let babyId = UUID(uuidString: babyIdString),
+              let typeRaw = record["type"] as? String,
+              let eventType = EventType(rawValue: typeRaw),
+              let startTime = record["startTime"] as? Date,
+              let createdAt = record["createdAt"] as? Date,
+              let updatedAt = record["updatedAt"] as? Date else {
+            return nil
+        }
+        
+        let endTime = record["endTime"] as? Date
+        let amount = record["amount"] as? Double
+        let unit = record["unit"] as? String
+        let subtype = record["subtype"] as? String
+        let side = record["side"] as? String
+        let note = record["note"] as? String
+        let photos = record["photoUrls"] as? [String]
+        
+        return Event(
+            id: UUID(uuidString: record.recordID.recordName) ?? UUID(),
+            babyId: babyId,
+            type: eventType,
+            subtype: subtype,
+            startTime: startTime,
+            endTime: endTime,
+            amount: amount,
+            unit: unit,
+            side: side,
+            note: note,
+            photoUrls: photos,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
     }
     
     // MARK: - Conflict Resolution
@@ -140,3 +296,4 @@ class CloudKitSyncService: ObservableObject {
         }
     }
 }
+

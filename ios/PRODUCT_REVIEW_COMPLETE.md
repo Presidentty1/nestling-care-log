@@ -15,6 +15,7 @@ Conducted comprehensive product review and implemented all recommendations for N
 Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 
 **Findings:**
+
 1. **Onboarding:** 5 steps too long, not personalized, 30% drop-off
 2. **Landing Page:** No pricing, feature-focused (not outcome-focused)
 3. **Monetization:** AI features not gated, no upgrade prompts
@@ -26,27 +27,32 @@ Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 ### ✅ Implementation: 5-Phase UX Optimization
 
 **Phase 1 - Friction Reduction:**
+
 - Outcome-focused welcome ("Get 2 More Hours of Sleep")
 - Trust badges & pricing transparency
 - Reduced to 4 steps (<60 sec)
 - Auto-detected preferences
 
 **Phase 2 - Personalization:**
+
 - Goal selection (Sleep, Feeding, Survive, All)
 - Home adapts to goal
 - Celebration animation
 
 **Phase 3 - Conversion:**
+
 - Tutorial overlay (3 steps)
 - First Tasks checklist
 - Milestone upgrade prompts (50 events, 7 days, 3rd prediction)
 
 **Phase 4 - Advanced Personalization:**
+
 - Visual progress bar
 - Age-based smart defaults
 - Personalized welcome messages
 
 **Phase 5 - Optimization:**
+
 - Skip-to-app options
 - Comprehensive analytics
 - Post-onboarding survey
@@ -56,6 +62,7 @@ Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 ## Files Changed
 
 ### Created (6 new):
+
 1. `Features/Home/SpotlightTutorialOverlay.swift`
 2. `Features/Home/FirstTasksChecklistCard.swift`
 3. `Features/Home/UpgradePromptModal.swift`
@@ -64,6 +71,7 @@ Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 6. `Features/Onboarding/SmartDefaultsService.swift`
 
 ### Modified (10 existing):
+
 1. `Features/Onboarding/WelcomeView.swift`
 2. `Features/Onboarding/PreferencesAndConsentView.swift`
 3. `Features/Onboarding/OnboardingCoordinator.swift`
@@ -79,13 +87,13 @@ Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 
 ## Expected Impact
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Onboarding completion | 70% | 85% | +21% |
-| First log < 5 min | 40% | 70% | +75% |
-| Day 1 retention | 50% | 70% | +40% |
-| Free → Paid | 5% | 12% | +140% |
-| MRR (1K users) | $299 | $1,200 | +301% |
+| Metric                | Before | After  | Change |
+| --------------------- | ------ | ------ | ------ |
+| Onboarding completion | 70%    | 85%    | +21%   |
+| First log < 5 min     | 40%    | 70%    | +75%   |
+| Day 1 retention       | 50%    | 70%    | +40%   |
+| Free → Paid           | 5%     | 12%    | +140%  |
+| MRR (1K users)        | $299   | $1,200 | +301%  |
 
 ---
 
@@ -105,4 +113,3 @@ Reviewed from experience at Apple, Tesla, Microsoft, Cursor, etc.:
 - `CALENDAR_VIEW_IMPLEMENTATION_PLAN.md` - Next feature
 
 All work done in correct location: **gnq** project.
-

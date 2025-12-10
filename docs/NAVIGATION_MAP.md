@@ -90,12 +90,13 @@ Floating Action Button: Optional (voice logging)
 ```
 
 **iOS Structure:**
+
 ```swift
 struct HomeView: View {
     @State private var showBabySwitcher = false
     @State private var showLogSheet = false
     @State private var logType: EventType?
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -131,10 +132,11 @@ Bottom Nav Visible: Yes
 ```
 
 **iOS Structure:**
+
 ```swift
 struct HistoryView: View {
     @State private var selectedDate = Date()
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -167,6 +169,7 @@ Bottom Nav Visible: Yes
 ```
 
 **iOS Structure:**
+
 ```swift
 struct InsightsView: View {
     var body: some View {
@@ -695,22 +698,28 @@ nestling://conversation/:conversationId
 ## iOS Navigation Patterns
 
 ### NavigationStack (Primary)
+
 Use for main tab content and drill-down flows.
 
 ### Sheet (Modals)
+
 Use for:
+
 - Event logging
 - Baby switcher
 - Add/edit forms
 - Confirmations
 
 ### Alert
+
 Use for:
+
 - Quick confirmations
 - Error messages
 - Success toasts
 
 ### TabView
+
 Use for bottom navigation.
 
 ---
@@ -718,6 +727,7 @@ Use for bottom navigation.
 ## Priority Mapping for iOS Migration
 
 **P0 (Must Have):**
+
 - /home
 - /history
 - /insights (basic)
@@ -728,6 +738,7 @@ Use for bottom navigation.
 - EventSheet (all forms)
 
 **P1 (Should Have):**
+
 - /analytics
 - /cry-insights
 - /growth-tracker
@@ -737,6 +748,7 @@ Use for bottom navigation.
 - Full notification settings
 
 **P2+ (Nice to Have):**
+
 - /photo-gallery
 - /journal
 - /parent-wellness

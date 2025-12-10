@@ -21,36 +21,34 @@ export const SummaryChips = memo(({ summary }: SummaryChipsProps) => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-md">
+    <div className='grid grid-cols-3 gap-md'>
       {/* Feed Chip */}
-      <Card className="shadow-soft border-event-feed/20 bg-event-feed/5">
-        <CardContent className="pt-5 px-md pb-md text-center space-y-sm">
-          <Milk className="h-7 w-7 mx-auto text-event-feed" strokeWidth={2.5} />
-          <div className="space-y-1">
-            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+      <Card className='shadow-soft border-event-feed/20 bg-event-feed/5'>
+        <CardContent className='pt-5 px-md pb-md text-center space-y-sm'>
+          <Milk className='h-7 w-7 mx-auto text-event-feed' strokeWidth={2.5} />
+          <div className='space-y-1'>
+            <div className='text-[28px] leading-[34px] font-semibold tabular-nums'>
               {summary.feedCount || 0}
             </div>
-            <div className="text-caption text-muted-foreground">Feeds</div>
+            <div className='text-caption text-muted-foreground'>Feeds</div>
             {summary.totalMl > 0 && (
-              <div className="text-caption text-text-subtle">
-                {Math.round(summary.totalMl)} ml
-              </div>
+              <div className='text-caption text-text-subtle'>{Math.round(summary.totalMl)} ml</div>
             )}
           </div>
         </CardContent>
       </Card>
 
       {/* Sleep Chip */}
-      <Card className="shadow-soft border-event-sleep/20 bg-event-sleep/5">
-        <CardContent className="pt-5 px-md pb-md text-center space-y-sm">
-          <Moon className="h-7 w-7 mx-auto text-event-sleep" strokeWidth={2.5} />
-          <div className="space-y-1">
-            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+      <Card className='shadow-soft border-event-sleep/20 bg-event-sleep/5'>
+        <CardContent className='pt-5 px-md pb-md text-center space-y-sm'>
+          <Moon className='h-7 w-7 mx-auto text-event-sleep' strokeWidth={2.5} />
+          <div className='space-y-1'>
+            <div className='text-[28px] leading-[34px] font-semibold tabular-nums'>
               {formatSleepTime()}
             </div>
-            <div className="text-caption text-muted-foreground">Sleep</div>
+            <div className='text-caption text-muted-foreground'>Sleep</div>
             {summary.sleepCount > 0 && (
-              <div className="text-caption text-text-subtle">
+              <div className='text-caption text-text-subtle'>
                 {summary.sleepCount} {summary.sleepCount === 1 ? 'nap' : 'naps'}
               </div>
             )}
@@ -59,16 +57,16 @@ export const SummaryChips = memo(({ summary }: SummaryChipsProps) => {
       </Card>
 
       {/* Diaper Chip */}
-      <Card className="shadow-soft border-event-diaper/20 bg-event-diaper/5">
-        <CardContent className="pt-5 px-md pb-md text-center space-y-sm">
-          <Baby className="h-7 w-7 mx-auto text-event-diaper" strokeWidth={2.5} />
-          <div className="space-y-1">
-            <div className="text-[28px] leading-[34px] font-semibold tabular-nums">
+      <Card className='shadow-soft border-event-diaper/20 bg-event-diaper/5'>
+        <CardContent className='pt-5 px-md pb-md text-center space-y-sm'>
+          <Baby className='h-7 w-7 mx-auto text-event-diaper' strokeWidth={2.5} />
+          <div className='space-y-1'>
+            <div className='text-[28px] leading-[34px] font-semibold tabular-nums'>
               {summary.diaperTotal || 0}
             </div>
-            <div className="text-caption text-muted-foreground">Diapers</div>
+            <div className='text-caption text-muted-foreground'>Diapers</div>
             {summary.diaperTotal > 0 && (
-              <div className="text-caption text-text-subtle">
+              <div className='text-caption text-text-subtle'>
                 💧{summary.diaperWet || 0} 💩{summary.diaperDirty || 0}
               </div>
             )}

@@ -30,12 +30,12 @@ describe('Time Utilities', () => {
       expect(formatDuration(90)).toBe('1h 30m');
       expect(formatDuration(125)).toBe('2h 5m');
     });
-    
+
     it('should handle single-digit minutes', () => {
       expect(formatDuration(5)).toBe('5m');
       expect(formatDuration(65)).toBe('1h 5m');
     });
-    
+
     it('should handle large durations', () => {
       expect(formatDuration(600)).toBe('10h 0m');
       expect(formatDuration(1440)).toBe('24h 0m');
@@ -49,7 +49,7 @@ describe('Time Utilities', () => {
       const durationMin = (end.getTime() - start.getTime()) / 60000;
       expect(durationMin).toBe(60);
     });
-    
+
     it('should calculate correct duration in different timezones', () => {
       const start = new Date('2024-01-01T10:00:00Z');
       const end = new Date('2024-01-01T12:00:00Z');

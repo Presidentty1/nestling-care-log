@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import type { CreateEventData} from '@/services/eventsService';
+import type { CreateEventData } from '@/services/eventsService';
 import { eventsService } from '@/services/eventsService';
 import { Droplet, Circle, AlertCircle, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,7 +17,13 @@ interface DiaperFormProps {
   prefillData?: any;
 }
 
-export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, prefillData }: DiaperFormProps) {
+export function DiaperForm({
+  babyId,
+  editingEventId,
+  onValidChange,
+  onSubmit,
+  prefillData,
+}: DiaperFormProps) {
   const [subtype, setSubtype] = useState<'wet' | 'dirty' | 'both'>(prefillData?.subtype || 'wet');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -68,50 +74,48 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
   };
 
   const getIcon = (type: 'wet' | 'dirty' | 'both') => {
-    if (type === 'wet') return <Droplet className="h-5 w-5" />;
-    if (type === 'dirty') return <Circle className="h-5 w-5" />;
-    return <Circle className="h-5 w-5" />;
+    if (type === 'wet') return <Droplet className='h-5 w-5' />;
+    if (type === 'dirty') return <Circle className='h-5 w-5' />;
+    return <Circle className='h-5 w-5' />;
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className='space-y-6'>
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error}. Please try saving again.
-          </AlertDescription>
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{error}. Please try saving again.</AlertDescription>
         </Alert>
       )}
 
       {/* Quick Log Toggle */}
       {!editingEventId && (
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Quick log</span>
+        <div className='flex items-center justify-between p-3 bg-muted/50 rounded-lg'>
+          <div className='flex items-center gap-2'>
+            <Zap className='h-4 w-4 text-primary' />
+            <span className='text-sm font-medium'>Quick log</span>
           </div>
           <Button
-            type="button"
-            variant={quickMode ? "default" : "outline"}
-            size="sm"
+            type='button'
+            variant={quickMode ? 'default' : 'outline'}
+            size='sm'
             onClick={() => setQuickMode(!quickMode)}
           >
-            {quickMode ? "On" : "Off"}
+            {quickMode ? 'On' : 'Off'}
           </Button>
         </div>
       )}
 
       {/* Type Selection */}
-      <div className="space-y-3">
-        <Label className="text-base font-medium">Type</Label>
-        <div className="grid grid-cols-3 gap-3">
-          {(['wet', 'dirty', 'both'] as const).map((type) => (
+      <div className='space-y-3'>
+        <Label className='text-base font-medium'>Type</Label>
+        <div className='grid grid-cols-3 gap-3'>
+          {(['wet', 'dirty', 'both'] as const).map(type => (
             <Button
               key={type}
-              type="button"
+              type='button'
               variant={subtype === type ? 'default' : 'outline'}
-              className="h-20 text-lg font-semibold capitalize flex flex-col gap-1"
+              className='h-20 text-lg font-semibold capitalize flex flex-col gap-1'
               onClick={() => setSubtype(type)}
             >
               {getIcon(type)}
@@ -123,20 +127,22 @@ export function DiaperForm({ babyId, editingEventId, onValidChange, onSubmit, pr
 
       {/* Optional Notes */}
       {!quickMode && (
-      <div className="space-y-3">
-        <Label htmlFor="note" className="text-base">Notes (optional)</Label>
-        <Textarea
-          id="note"
-          value={note}
-          onChange={(e) => setNote(sanitizeEventNote(e.target.value))}
-          placeholder="Any observations..."
-          className="min-h-[100px] text-base resize-none"
-          maxLength={500}
-        />
-        {note.length > 0 && (
-          <p className="text-xs text-muted-foreground text-right">{note.length}/500</p>
-        )}
-      </div>
+        <div className='space-y-3'>
+          <Label htmlFor='note' className='text-base'>
+            Notes (optional)
+          </Label>
+          <Textarea
+            id='note'
+            value={note}
+            onChange={e => setNote(sanitizeEventNote(e.target.value))}
+            placeholder='Any observations...'
+            className='min-h-[100px] text-base resize-none'
+            maxLength={500}
+          />
+          {note.length > 0 && (
+            <p className='text-xs text-muted-foreground text-right'>{note.length}/500</p>
+          )}
+        </div>
       )}
     </form>
   );

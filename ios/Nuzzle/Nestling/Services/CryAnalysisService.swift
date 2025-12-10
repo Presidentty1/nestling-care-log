@@ -258,3 +258,4 @@ enum CryAnalysisError: LocalizedError {
         }
     }
 }
+

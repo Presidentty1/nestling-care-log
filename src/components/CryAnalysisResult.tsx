@@ -30,7 +30,7 @@ export function CryAnalysisResult({ result, onFeedback }: CryAnalysisResultProps
       gas: Wind,
     };
     const Icon = icons[category.toLowerCase()] || Baby;
-    return <Icon className="h-8 w-8" />;
+    return <Icon className='h-8 w-8' />;
   };
 
   const getCategoryColor = (category: string) => {
@@ -41,38 +41,41 @@ export function CryAnalysisResult({ result, onFeedback }: CryAnalysisResultProps
       pain: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
       gas: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
     };
-    return colors[category.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200';
+    return (
+      colors[category.toLowerCase()] ||
+      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+    );
   };
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-3">
+          <CardTitle className='flex items-center gap-3'>
             <div className={`p-3 rounded-full ${getCategoryColor(result.category)}`}>
               {getCategoryIcon(result.category)}
             </div>
             <div>
-              <div className="capitalize">{result.category}</div>
-              <Badge variant="secondary" className="mt-1">
+              <div className='capitalize'>{result.category}</div>
+              <Badge variant='secondary' className='mt-1'>
                 {result.confidence}% confident
               </Badge>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           <div>
-            <h4 className="font-semibold mb-2">Analysis</h4>
-            <p className="text-sm text-muted-foreground">{result.reasoning}</p>
+            <h4 className='font-semibold mb-2'>Analysis</h4>
+            <p className='text-sm text-muted-foreground'>{result.reasoning}</p>
           </div>
 
           {result.suggestions && result.suggestions.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-2">Suggestions</h4>
-              <ul className="space-y-2">
+              <h4 className='font-semibold mb-2'>Suggestions</h4>
+              <ul className='space-y-2'>
                 {result.suggestions.map((suggestion, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                  <li key={idx} className='text-sm text-muted-foreground flex items-start gap-2'>
+                    <span className='text-primary'>•</span>
                     <span>{suggestion}</span>
                   </li>
                 ))}
@@ -81,38 +84,41 @@ export function CryAnalysisResult({ result, onFeedback }: CryAnalysisResultProps
           )}
 
           {result.contextInfo && (
-            <div className="p-3 bg-muted rounded-lg text-sm">
-              <h4 className="font-semibold mb-2">Recent Activity</h4>
+            <div className='p-3 bg-muted rounded-lg text-sm'>
+              <h4 className='font-semibold mb-2'>Recent Activity</h4>
               {result.contextInfo.lastFeed && (
-                <p className="text-muted-foreground">Last feed: {result.contextInfo.lastFeed}</p>
+                <p className='text-muted-foreground'>Last feed: {result.contextInfo.lastFeed}</p>
               )}
               {result.contextInfo.lastNap && (
-                <p className="text-muted-foreground">Last nap: {result.contextInfo.lastNap}</p>
+                <p className='text-muted-foreground'>Last nap: {result.contextInfo.lastNap}</p>
               )}
               {result.contextInfo.lastDiaper && (
-                <p className="text-muted-foreground">Last diaper: {result.contextInfo.lastDiaper}</p>
+                <p className='text-muted-foreground'>
+                  Last diaper: {result.contextInfo.lastDiaper}
+                </p>
               )}
             </div>
           )}
         </CardContent>
       </Card>
 
-      <Card className="p-4">
-        <h4 className="font-semibold mb-3">Was this helpful?</h4>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => onFeedback(true)} className="flex-1">
+      <Card className='p-4'>
+        <h4 className='font-semibold mb-3'>Was this helpful?</h4>
+        <div className='flex gap-2'>
+          <Button variant='outline' onClick={() => onFeedback(true)} className='flex-1'>
             👍 Yes, helpful
           </Button>
-          <Button variant="outline" onClick={() => onFeedback(false)} className="flex-1">
+          <Button variant='outline' onClick={() => onFeedback(false)} className='flex-1'>
             👎 Not helpful
           </Button>
         </div>
       </Card>
 
       <Alert>
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className='h-4 w-4' />
         <AlertDescription>
-          This is AI-powered guidance only, not medical advice. Contact your pediatrician if you have concerns about your baby's health.
+          This is AI-powered guidance only, not medical advice. Contact your pediatrician if you
+          have concerns about your baby's health.
         </AlertDescription>
       </Alert>
     </div>

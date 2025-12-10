@@ -19,15 +19,15 @@ class DataMigration {
    */
   async runMigrations(): Promise<void> {
     const currentVersion = await this.getCurrentVersion();
-    
+
     if (currentVersion < CURRENT_VERSION) {
       console.log(`[Migration] Running migrations from v${currentVersion} to v${CURRENT_VERSION}`);
-      
+
       // Run migrations sequentially
       for (let version = currentVersion + 1; version <= CURRENT_VERSION; version++) {
         await this.runMigration(version);
       }
-      
+
       await this.setVersion(CURRENT_VERSION);
       console.log('[Migration] Migrations complete');
     }
@@ -53,7 +53,7 @@ class DataMigration {
    */
   private async runMigration(version: number): Promise<void> {
     console.log(`[Migration] Running migration v${version}`);
-    
+
     switch (version) {
       case 1:
         await this.migrateToV1();
@@ -79,7 +79,7 @@ class DataMigration {
     const eventsStore = localforage.createInstance({ name: 'nestling', storeName: 'events' });
     const babiesStore = localforage.createInstance({ name: 'nestling', storeName: 'babies' });
     const settingsStore = localforage.createInstance({ name: 'nestling', storeName: 'settings' });
-    
+
     const backup = {
       version: await this.getCurrentVersion(),
       timestamp: new Date().toISOString(),
@@ -91,11 +91,11 @@ class DataMigration {
     };
 
     // Collect all data
-    await eventsStore.iterate<EventRecord, void>((value) => {
+    await eventsStore.iterate<EventRecord, void>(value => {
       backup.data.events.push(value);
     });
 
-    await babiesStore.iterate<Baby, void>((value) => {
+    await babiesStore.iterate<Baby, void>(value => {
       backup.data.babies.push(value);
     });
 
@@ -112,7 +112,7 @@ class DataMigration {
   async restore(backupJson: string): Promise<void> {
     try {
       const backup = JSON.parse(backupJson);
-      
+
       const eventsStore = localforage.createInstance({ name: 'nestling', storeName: 'events' });
       const babiesStore = localforage.createInstance({ name: 'nestling', storeName: 'babies' });
       const settingsStore = localforage.createInstance({ name: 'nestling', storeName: 'settings' });

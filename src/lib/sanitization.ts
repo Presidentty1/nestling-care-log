@@ -13,10 +13,7 @@ export interface SanitizationOptions {
 /**
  * Sanitizes text input by removing potentially dangerous characters
  */
-export function sanitizeTextInput(
-  input: string,
-  options: SanitizationOptions = {}
-): string {
+export function sanitizeTextInput(input: string, options: SanitizationOptions = {}): string {
   if (typeof input !== 'string') {
     return '';
   }
@@ -148,9 +145,18 @@ export function sanitizeDuration(duration: string | number): number | null {
 export function sanitizeTimeZone(timeZone: string): string {
   // Only allow valid IANA time zone identifiers
   const validTimeZones = [
-    'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-    'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Tokyo',
-    'Australia/Sydney', 'Pacific/Auckland', 'UTC', 'GMT'
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Los_Angeles',
+    'Europe/London',
+    'Europe/Paris',
+    'Europe/Berlin',
+    'Asia/Tokyo',
+    'Australia/Sydney',
+    'Pacific/Auckland',
+    'UTC',
+    'GMT',
   ];
 
   if (validTimeZones.includes(timeZone)) {
@@ -218,7 +224,3 @@ export function validateFormData<T extends Record<string, any>>(
     sanitizedData,
   };
 }
-
-
-
-

@@ -157,8 +157,9 @@ export function getUpcomingVaccines(
   return CDCVaccineSchedule.filter(vaccine => {
     // Check if already completed
     const isCompleted = completedVaccines.some(
-      cv => cv.vaccine_name === vaccine.name && 
-      (vaccine.doseNumber ? cv.vaccine_dose?.includes(`${vaccine.doseNumber}`) : true)
+      cv =>
+        cv.vaccine_name === vaccine.name &&
+        (vaccine.doseNumber ? cv.vaccine_dose?.includes(`${vaccine.doseNumber}`) : true)
     );
 
     if (isCompleted) return false;

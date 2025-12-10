@@ -34,7 +34,9 @@ export function useAIChat(baby: Baby | null) {
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data: familyMember } = await supabase
@@ -59,7 +61,7 @@ export function useAIChat(baby: Baby | null) {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       setConversationId(data.id);
     },
   });
@@ -121,16 +123,16 @@ export function useAIChat(baby: Baby | null) {
     onError: (error: any) => {
       console.error('Send message error:', error);
       setError(error);
-      
+
       const errorMessage = error.message?.toLowerCase() || '';
       let description = "We couldn't send your message. Please try again.";
-      
+
       if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        description = "Check your internet connection and try again.";
+        description = 'Check your internet connection and try again.';
       } else if (errorMessage.includes('not found')) {
-        description = "AI assistant is temporarily unavailable. Try again soon.";
+        description = 'AI assistant is temporarily unavailable. Try again soon.';
       }
-      
+
       toast({
         title: 'Message not sent',
         description,

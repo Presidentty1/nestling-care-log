@@ -31,7 +31,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
     super(props);
     this.state = {
       hasError: false,
-      retryCount: 0
+      retryCount: 0,
     };
   }
 
@@ -39,7 +39,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
     return {
       hasError: true,
       error,
-      lastErrorTime: new Date()
+      lastErrorTime: new Date(),
     };
   }
 
@@ -52,7 +52,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
       error_stack: error.stack,
       component_stack: errorInfo.componentStack,
       context: this.props.context || 'unknown',
-      retry_count: this.state.retryCount
+      retry_count: this.state.retryCount,
     });
 
     console.error('Error boundary caught error:', error, errorInfo);
@@ -74,7 +74,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
 
     // Increment retry count
     this.setState(prevState => ({
-      retryCount: prevState.retryCount + 1
+      retryCount: prevState.retryCount + 1,
     }));
 
     // Call parent's retry handler
@@ -86,7 +86,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
         this.setState({
           hasError: false,
           error: undefined,
-          errorInfo: undefined
+          errorInfo: undefined,
         });
       }, delay);
     }
@@ -97,7 +97,7 @@ export class ResilientErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: undefined,
       errorInfo: undefined,
-      retryCount: 0
+      retryCount: 0,
     });
   };
 
@@ -114,10 +114,10 @@ export class ResilientErrorBoundary extends Component<Props, State> {
       // Network-related errors
       if (error?.message.includes('network') || error?.message.includes('fetch')) {
         return (
-          <div className="min-h-screen flex items-center justify-center p-4">
+          <div className='min-h-screen flex items-center justify-center p-4'>
             <ErrorState
-              title="Connection Problem"
-              message="Unable to connect to our servers. Please check your internet connection and try again."
+              title='Connection Problem'
+              message='Unable to connect to our servers. Please check your internet connection and try again.'
               onRetry={this.handleRetry}
               retrying={!!this.retryTimeoutId}
             />
@@ -128,15 +128,15 @@ export class ResilientErrorBoundary extends Component<Props, State> {
       // Authentication errors
       if (error?.message.includes('auth') || error?.message.includes('unauthorized')) {
         return (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="max-w-md w-full">
+          <div className='min-h-screen flex items-center justify-center p-4'>
+            <div className='max-w-md w-full'>
               <ErrorState
-                title="Authentication Required"
-                message="Your session has expired. Please sign in again to continue."
+                title='Authentication Required'
+                message='Your session has expired. Please sign in again to continue.'
               />
-              <div className="mt-4 flex gap-2">
-                <Button onClick={onGoHome} className="flex-1">
-                  <Home className="mr-2 h-4 w-4" />
+              <div className='mt-4 flex gap-2'>
+                <Button onClick={onGoHome} className='flex-1'>
+                  <Home className='mr-2 h-4 w-4' />
                   Go Home
                 </Button>
               </div>
@@ -150,37 +150,33 @@ export class ResilientErrorBoundary extends Component<Props, State> {
       const isRetrying = !!this.retryTimeoutId;
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="max-w-md w-full">
+        <div className='min-h-screen flex items-center justify-center p-4'>
+          <div className='max-w-md w-full'>
             <ErrorState
-              title="Something went wrong"
+              title='Something went wrong'
               message={`We encountered an unexpected error${context ? ` in ${context}` : ''}. ${canRetry ? 'Would you like us to try again?' : 'Please try refreshing the page.'}`}
               onRetry={canRetry ? this.handleRetry : undefined}
               retrying={isRetrying}
             />
 
-            <div className="mt-4 flex gap-2">
+            <div className='mt-4 flex gap-2'>
               {canRetry && (
-                <Button
-                  variant="outline"
-                  onClick={this.handleReset}
-                  className="flex-1"
-                >
-                  <AlertTriangle className="mr-2 h-4 w-4" />
+                <Button variant='outline' onClick={this.handleReset} className='flex-1'>
+                  <AlertTriangle className='mr-2 h-4 w-4' />
                   Dismiss
                 </Button>
               )}
 
               {onGoHome && (
-                <Button onClick={onGoHome} variant="outline" className="flex-1">
-                  <Home className="mr-2 h-4 w-4" />
+                <Button onClick={onGoHome} variant='outline' className='flex-1'>
+                  <Home className='mr-2 h-4 w-4' />
                   Go Home
                 </Button>
               )}
             </div>
 
             {this.state.retryCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
+              <p className='text-xs text-muted-foreground mt-2 text-center'>
                 Attempt {this.state.retryCount} of {this.maxRetries}
               </p>
             )}
@@ -201,24 +197,24 @@ export function useErrorRecovery() {
     track('network_error_handled', {
       error_message: error.message,
       context,
-      is_online: isOnline
+      is_online: isOnline,
     });
 
     if (!isOnline) {
       return {
         title: "You're offline",
-        message: "This feature requires an internet connection. Your changes will be saved and synced when you're back online.",
-        actionText: "Got it"
+        message:
+          "This feature requires an internet connection. Your changes will be saved and synced when you're back online.",
+        actionText: 'Got it',
       };
     }
 
     return {
-      title: "Connection issue",
-      message: "Unable to connect right now. Please check your internet and try again.",
-      actionText: "Retry"
+      title: 'Connection issue',
+      message: 'Unable to connect right now. Please check your internet and try again.',
+      actionText: 'Retry',
     };
   };
 
   return { handleNetworkError };
 }
-

@@ -3,11 +3,13 @@
 ## Correct Xcode Project
 
 **USE THIS PROJECT:**
+
 ```
 ios/Nuzzle/Nestling.xcodeproj
 ```
 
 **CLOSE THIS PROJECT (wrong location):**
+
 ```
 /Users/tyhorton/Coding Projects/nestling-care-log/ios/Nuzzle/Nestling.xcodeproj
 ```
@@ -34,6 +36,7 @@ ios/Nuzzle/Nestling.xcodeproj
 ## Packages That Should Resolve
 
 The following packages are configured and should resolve:
+
 - ✅ Sentry (sentry-cocoa)
 - ✅ Supabase (supabase-swift)
 - ✅ FirebaseAnalytics
@@ -42,8 +45,8 @@ The following packages are configured and should resolve:
 ## If Issues Persist
 
 If packages still don't resolve:
+
 1. Close Xcode completely
 2. Delete `~/Library/Developer/Xcode/DerivedData/Nestling-*` (already done)
 3. Reopen the correct Xcode project
 4. Let Xcode resolve packages automatically on first build
-

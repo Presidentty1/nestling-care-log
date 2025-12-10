@@ -1,4 +1,4 @@
-import type { Stripe} from '@stripe/stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 import { loadStripe, StripeElements } from '@stripe/stripe-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -75,8 +75,9 @@ class StripeService {
    */
   async getSubscriptionStatus(userId: string): Promise<SubscriptionStatus | null> {
     try {
-      const { data, error } = await supabase
-        .rpc('check_subscription_status', { user_uuid: userId });
+      const { data, error } = await supabase.rpc('check_subscription_status', {
+        user_uuid: userId,
+      });
 
       if (error) {
         console.error('Failed to check subscription status:', error);
@@ -92,7 +93,8 @@ class StripeService {
         .limit(1)
         .single();
 
-      if (subError && subError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      if (subError && subError.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned"
         console.error('Failed to fetch subscription details:', subError);
         return { tier: data as 'free' | 'premium' };
       }

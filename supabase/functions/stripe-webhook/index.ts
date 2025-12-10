@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
-serve(async (req) => {
+serve(async req => {
   const signature = req.headers.get('stripe-signature');
 
   if (!signature || !endpointSecret) {
@@ -72,22 +72,27 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
     cancel_at_period_end: subscription.cancel_at_period_end,
-    trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
-    trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+    trial_start: subscription.trial_start
+      ? new Date(subscription.trial_start * 1000).toISOString()
+      : null,
+    trial_end: subscription.trial_end
+      ? new Date(subscription.trial_end * 1000).toISOString()
+      : null,
     stripe_price_id: subscription.items.data[0]?.price.id,
   };
 
   // Upsert subscription record
-  const { error } = await supabase
-    .from('subscriptions')
-    .upsert({
+  const { error } = await supabase.from('subscriptions').upsert(
+    {
       user_id: userId,
       stripe_customer_id: customerId,
       ...subscriptionData,
       updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'user_id'
-    });
+    },
+    {
+      onConflict: 'user_id',
+    }
+  );
 
   if (error) {
     console.error('Error updating subscription:', error);
@@ -95,7 +100,8 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   }
 
   // Update user's subscription tier in profiles
-  const tier = subscription.status === 'trialing' || subscription.status === 'active' ? 'premium' : 'free';
+  const tier =
+    subscription.status === 'trialing' || subscription.status === 'active' ? 'premium' : 'free';
 
   const { error: profileError } = await supabase
     .from('profiles')

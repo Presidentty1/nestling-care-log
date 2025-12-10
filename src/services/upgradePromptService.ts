@@ -23,84 +23,84 @@ const UPGRADE_PROMPTS: UpgradePrompt[] = [
   {
     id: 'first_patterns_view',
     title: 'Unlock Detailed Patterns',
-    message: 'See your baby\'s sleep and feeding trends over the past week with beautiful charts and insights.',
+    message:
+      "See your baby's sleep and feeding trends over the past week with beautiful charts and insights.",
     ctaText: 'View Patterns',
     icon: '📊',
     priority: 'high',
     conditions: [
       { type: 'event_count', value: 10, operator: 'gte' },
-      { type: 'page_view', value: 'patterns', operator: 'eq' }
+      { type: 'page_view', value: 'patterns', operator: 'eq' },
     ],
     maxDisplays: 3,
-    cooldownDays: 7
+    cooldownDays: 7,
   },
   {
     id: 'second_baby_added',
     title: 'Multi-Baby Support',
-    message: 'Track multiple babies with one Pro subscription. Perfect for twins or growing families!',
+    message:
+      'Track multiple babies with one Pro subscription. Perfect for twins or growing families!',
     ctaText: 'Add Another Baby',
     icon: '👶👶',
     priority: 'high',
     conditions: [
       { type: 'event_count', value: 50, operator: 'gte' },
-      { type: 'page_view', value: 'manage-babies', operator: 'eq' }
+      { type: 'page_view', value: 'manage-babies', operator: 'eq' },
     ],
     maxDisplays: 2,
-    cooldownDays: 14
+    cooldownDays: 14,
   },
   {
     id: 'cry_analysis_used',
     title: 'Advanced Cry Insights',
-    message: 'Get detailed AI analysis of your baby\'s cries with confidence scores and personalized tips.',
+    message:
+      "Get detailed AI analysis of your baby's cries with confidence scores and personalized tips.",
     ctaText: 'Upgrade for Full Analysis',
     icon: '👂',
     priority: 'medium',
-    conditions: [
-      { type: 'feature_used', value: 'cry_insights', operator: 'eq' }
-    ],
+    conditions: [{ type: 'feature_used', value: 'cry_insights', operator: 'eq' }],
     maxDisplays: 5,
-    cooldownDays: 3
+    cooldownDays: 3,
   },
   {
     id: 'doctor_report_generated',
     title: 'Professional Reports',
-    message: 'Generate and share detailed reports with your pediatrician. Include charts, patterns, and insights.',
+    message:
+      'Generate and share detailed reports with your pediatrician. Include charts, patterns, and insights.',
     ctaText: 'Create Doctor Report',
     icon: '📋',
     priority: 'high',
     conditions: [
       { type: 'event_count', value: 30, operator: 'gte' },
-      { type: 'page_view', value: 'doctor-report', operator: 'eq' }
+      { type: 'page_view', value: 'doctor-report', operator: 'eq' },
     ],
     maxDisplays: 3,
-    cooldownDays: 7
+    cooldownDays: 7,
   },
   {
     id: 'streak_recovery',
     title: 'Never Lose Your Streak',
-    message: 'Pro users maintain their logging streaks even when life gets busy. Keep your momentum going!',
+    message:
+      'Pro users maintain their logging streaks even when life gets busy. Keep your momentum going!',
     ctaText: 'Protect My Streak',
     icon: '🔥',
     priority: 'medium',
-    conditions: [
-      { type: 'streak_broken', value: true, operator: 'eq' }
-    ],
+    conditions: [{ type: 'streak_broken', value: true, operator: 'eq' }],
     maxDisplays: 2,
-    cooldownDays: 30
+    cooldownDays: 30,
   },
   {
     id: 'ai_assistant_used',
     title: 'Full AI Parenting Support',
-    message: 'Get unlimited access to AI guidance, cry analysis, and personalized parenting advice.',
+    message:
+      'Get unlimited access to AI guidance, cry analysis, and personalized parenting advice.',
     ctaText: 'Unlock AI Assistant',
     icon: '🤖',
     priority: 'high',
-    conditions: [
-      { type: 'feature_used', value: 'ai_assistant', operator: 'eq' }
-    ],
+    conditions: [{ type: 'feature_used', value: 'ai_assistant', operator: 'eq' }],
     maxDisplays: 5,
-    cooldownDays: 1
-  }
+    cooldownDays: 1,
+  },
 ];
 
 class UpgradePromptService {
@@ -163,9 +163,7 @@ class UpgradePromptService {
     }
 
     // Check conditions
-    return prompt.conditions.every(condition =>
-      this.checkCondition(condition, context)
-    );
+    return prompt.conditions.every(condition => this.checkCondition(condition, context));
   }
 
   /**
@@ -198,15 +196,26 @@ class UpgradePromptService {
   /**
    * Generic value comparison
    */
-  private compareValues(actual: number | string | boolean, expected: number | string | boolean, operator: string): boolean {
+  private compareValues(
+    actual: number | string | boolean,
+    expected: number | string | boolean,
+    operator: string
+  ): boolean {
     switch (operator) {
-      case 'gt': return (actual as number) > (expected as number);
-      case 'gte': return (actual as number) >= (expected as number);
-      case 'lt': return (actual as number) < (expected as number);
-      case 'lte': return (actual as number) <= (expected as number);
-      case 'eq': return actual === expected;
-      case 'contains': return (actual as string).includes(expected as string);
-      default: return false;
+      case 'gt':
+        return (actual as number) > (expected as number);
+      case 'gte':
+        return (actual as number) >= (expected as number);
+      case 'lt':
+        return (actual as number) < (expected as number);
+      case 'lte':
+        return (actual as number) <= (expected as number);
+      case 'eq':
+        return actual === expected;
+      case 'contains':
+        return (actual as string).includes(expected as string);
+      default:
+        return false;
     }
   }
 
@@ -220,7 +229,7 @@ class UpgradePromptService {
 
     track('upgrade_prompt_shown', {
       prompt_id: promptId,
-      display_count: this.promptDisplayCount[promptId]
+      display_count: this.promptDisplayCount[promptId],
     });
   }
 
@@ -232,7 +241,7 @@ class UpgradePromptService {
     this.saveToStorage();
 
     track('upgrade_prompt_dismissed', {
-      prompt_id: promptId
+      prompt_id: promptId,
     });
   }
 
@@ -242,7 +251,7 @@ class UpgradePromptService {
   trackPromptAction(promptId: string, action: 'upgrade_clicked' | 'feature_viewed'): void {
     track('upgrade_prompt_action', {
       prompt_id: promptId,
-      action
+      action,
     });
   }
 
@@ -269,7 +278,7 @@ class UpgradePromptService {
         this.lastDisplayed = Object.fromEntries(
           Object.entries(parsed.lastDisplayed || {}).map(([key, value]) => [
             key,
-            new Date(value as string)
+            new Date(value as string),
           ])
         );
       }
@@ -289,9 +298,9 @@ class UpgradePromptService {
         lastDisplayed: Object.fromEntries(
           Object.entries(this.lastDisplayed).map(([key, value]) => [
             key,
-            (value as Date).toISOString()
+            (value as Date).toISOString(),
           ])
-        )
+        ),
       };
       localStorage.setItem('upgrade_prompts', JSON.stringify(data));
     } catch (error) {
@@ -309,4 +318,3 @@ export interface UserContext {
 }
 
 export const upgradePromptService = new UpgradePromptService();
-

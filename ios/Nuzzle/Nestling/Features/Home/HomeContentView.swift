@@ -64,7 +64,7 @@ struct HomeContentView: View {
             BabySelectorView(baby: baby, babies: environment.babies) { selectedBaby in
                 onBabySelected(selectedBaby)
             }
-            .padding(.horizontal, CGFloat.spacingMD)
+            .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -74,13 +74,17 @@ struct HomeContentView: View {
         if let daysRemaining = ProSubscriptionService.shared.trialDaysRemaining,
            daysRemaining > 0,
            !ProSubscriptionService.shared.isProUser {
+            // Note: TrialBannerView must be included in the Nuzzle target in Xcode
+            // If you see a "cannot find 'TrialBannerView' in scope" error,
+            // ensure ios/Nuzzle/Nestling/Design/Components/TrialBannerView.swift
+            // is checked in the Target Membership for the Nuzzle target
             TrialBannerView(daysRemaining: daysRemaining) {
                 Task {
                     await Analytics.shared.logPaywallViewed(source: "trial_banner_home")
                 }
                 showProSubscription = true
             }
-            .padding(.horizontal, CGFloat.spacingMD)
+            .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -94,7 +98,7 @@ struct HomeContentView: View {
                 },
                 userGoal: viewModel.userGoal
             )
-            .padding(.horizontal, CGFloat.spacingMD)
+            .padding(.horizontal, .spacingMD)
         } else if shouldShowTasksChecklist {
             // Phase 3: Show tasks checklist after first log
             FirstTasksChecklistCard(
@@ -110,7 +114,7 @@ struct HomeContentView: View {
                     UserDefaults.standard.set(true, forKey: "hasDissmissedTasksChecklist")
                 }
             )
-            .padding(.horizontal, CGFloat.spacingMD)
+            .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -146,7 +150,7 @@ struct HomeContentView: View {
     private var guidanceStripSection: some View {
         if let baby = environment.currentBaby {
             GuidanceStripView(dataStore: environment.dataStore, baby: baby)
-                .padding(.horizontal, CGFloat.spacingMD)
+                .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -155,13 +159,13 @@ struct HomeContentView: View {
         if let topRecommendation = viewModel.recommendations.first {
             FeatureGate.check(.todaysInsight, accessible: {
                 TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, CGFloat.spacingMD)
+                    .padding(.horizontal, .spacingMD)
                     .onTapGesture {
                         Haptics.light()
                     }
             }, paywall: {
                 TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, CGFloat.spacingMD)
+                    .padding(.horizontal, .spacingMD)
                     .blur(radius: 4)
                     .overlay(
                         Color.background.opacity(0.3)
@@ -174,7 +178,7 @@ struct HomeContentView: View {
                                         }
                                         showProSubscription = true
                                     }
-                                    .padding(.horizontal, CGFloat.spacingMD)
+                                    .padding(.horizontal, .spacingMD)
                                     Spacer()
                                 }
                             )
@@ -193,7 +197,7 @@ struct HomeContentView: View {
     private var streaksSection: some View {
         if viewModel.currentStreak > 0 || viewModel.longestStreak > 0 {
             StreaksView(currentStreak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
-                .padding(.horizontal, CGFloat.spacingMD)
+                .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -252,7 +256,7 @@ struct HomeContentView: View {
             } else {
                 // Progress indicator banner - shows until user has 6+ events
                 ExampleDataBanner(eventCount: viewModel.events.count)
-                    .padding(.horizontal, CGFloat.spacingMD)
+                    .padding(.horizontal, .spacingMD)
                 
                 // Filter chips
                 FilterChipsView(
@@ -301,7 +305,7 @@ struct HomeContentView: View {
                         }
                     }
                 )
-                .padding(.horizontal, CGFloat.spacingMD)
+                .padding(.horizontal, .spacingMD)
             }
         }
     }

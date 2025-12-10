@@ -20,12 +20,14 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 ## Feature Gating
 
 ### Free Features (Always Available)
+
 - Unlimited logging (feeds/diapers/sleep)
 - Multi-caregiver sync
 - Dashboard with last feed/diaper/sleep status
 - Basic time-since-feed and nap-window reminders
 
 ### Pro Features (Requires Subscription)
+
 - `smartPredictions`: AI nap predictor with personalized suggestions
 - `cryInsights`: Cry analysis (3 free uses, unlimited with Pro)
 - `aiAssistant`: AI-powered parenting assistance
@@ -49,6 +51,7 @@ private let yearlyProductID = "com.nestling.pro.yearly"
 ### Local StoreKit Configuration
 
 Update `Nuzzle.storekit`:
+
 - Monthly price: "5.99"
 - Yearly price: "39.99"
 - Add introductory offer to yearly: `{"type": "FreeTrial", "duration": "P7D"}`
@@ -167,4 +170,3 @@ Available in Developer Settings (debug builds only):
 - Server-side receipt validation recommended for production
 - No sensitive data stored locally
 - UserDefaults used only for trial state (not sensitive)
-

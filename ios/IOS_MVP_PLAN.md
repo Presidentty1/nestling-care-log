@@ -8,7 +8,7 @@ The iOS codebase is **extensively developed** with:
 
 - **Complete SwiftUI app structure** under `ios/Sources/`
 - **Domain models**: Baby, Event, AppSettings, Prediction
-- **DataStore implementations**: 
+- **DataStore implementations**:
   - `InMemoryDataStore` (mock data)
   - `JSONBackedDataStore` (local persistence)
   - `CoreDataDataStore` (production-ready)
@@ -62,12 +62,14 @@ The iOS codebase is **extensively developed** with:
 ### Data Persistence Strategy
 
 **MVP**: `JSONBackedDataStore`
+
 - Stores data in JSON files in app Documents directory
 - Simple, debuggable, no external dependencies
 - Persists across app launches
 - Easy to migrate to Core Data later
 
 **Future**: `CoreDataDataStore` (already implemented)
+
 - Production-ready persistence
 - Better performance for large datasets
 - Migration path from JSON available
@@ -75,6 +77,7 @@ The iOS codebase is **extensively developed** with:
 ## Core Screens for MVP
 
 ### 1. Home (`HomeView`)
+
 - ✅ **Implemented**: Summary cards (Feeds, Diapers, Sleep count)
 - ✅ **Implemented**: Quick actions (Feed, Sleep, Diaper, Tummy Time)
 - ✅ **Implemented**: Today's timeline with events
@@ -83,12 +86,14 @@ The iOS codebase is **extensively developed** with:
 - ✅ **Implemented**: Swipe actions (edit/delete)
 
 ### 2. History (`HistoryView`)
+
 - ✅ **Implemented**: Date picker for selecting past days
 - ✅ **Implemented**: Timeline for selected day
 - ✅ **Implemented**: Edit/delete events
 - ✅ **Implemented**: Empty states
 
 ### 3. Event Forms
+
 - ✅ **Implemented**: `FeedFormView` - Type, amount, unit, side, notes
 - ✅ **Implemented**: `DiaperFormView` - Type (wet/dirty/both), notes
 - ✅ **Implemented**: `SleepFormView` - Timer mode or manual, start/end times
@@ -98,12 +103,14 @@ The iOS codebase is **extensively developed** with:
 - ✅ **Implemented**: Last-used values persistence
 
 ### 4. Predictions (`PredictionsView`)
+
 - ✅ **Implemented**: Local predictions engine (wake windows, feed spacing)
 - ✅ **Implemented**: Gated behind AI Data Sharing toggle
 - ✅ **Implemented**: Medical disclaimer banner
 - ✅ **Implemented**: Generate/recalculate predictions
 
 ### 5. Settings (`SettingsRootView`)
+
 - ✅ **Implemented**: Units selection (ml/oz)
 - ✅ **Implemented**: AI Data Sharing toggle
 - ✅ **Implemented**: Notification settings (UI only, no real notifications yet)
@@ -112,6 +119,7 @@ The iOS codebase is **extensively developed** with:
 - ✅ **Implemented**: About screen
 
 ### 6. Onboarding (`OnboardingView`)
+
 - ✅ **Implemented**: Multi-step onboarding flow
 - ✅ **Implemented**: Welcome → Baby Setup → Preferences → AI Consent → Notifications
 - ✅ **Implemented**: Skip paths and completion tracking
@@ -145,6 +153,7 @@ The iOS codebase is **extensively developed** with:
 ## MVP Feature Checklist
 
 ### Core Event Logging ✅
+
 - [x] Log Feed (bottle/breast, amount, unit, side, notes)
 - [x] Log Diaper (wet/dirty/both, notes)
 - [x] Log Sleep (timer or manual, start/end times)
@@ -154,6 +163,7 @@ The iOS codebase is **extensively developed** with:
 - [x] Last-used values remembered
 
 ### Home Dashboard ✅
+
 - [x] Summary cards (feeds, diapers, sleep count)
 - [x] Quick actions (one-tap logging)
 - [x] Today's timeline
@@ -161,12 +171,14 @@ The iOS codebase is **extensively developed** with:
 - [x] Pull-to-refresh
 
 ### History ✅
+
 - [x] Date picker
 - [x] Timeline for selected day
 - [x] Edit/delete events
 - [x] Empty states
 
 ### Predictions ✅
+
 - [x] Local predictions engine
 - [x] Wake window calculations
 - [x] Feed spacing heuristics
@@ -174,6 +186,7 @@ The iOS codebase is **extensively developed** with:
 - [x] Medical disclaimers
 
 ### Settings ✅
+
 - [x] Units (ml/oz)
 - [x] AI Data Sharing toggle
 - [x] Notification settings UI
@@ -182,12 +195,14 @@ The iOS codebase is **extensively developed** with:
 - [x] About screen
 
 ### Data Persistence ✅
+
 - [x] JSON-backed storage
 - [x] Persists across launches
 - [x] Core Data option available
 - [x] Migration path documented
 
 ### UX Polish ✅
+
 - [x] Haptics
 - [x] Loading states
 - [x] Empty states
@@ -201,6 +216,7 @@ The iOS codebase is **extensively developed** with:
 ### ✅ Completed (MVP Ready)
 
 All core MVP features are **fully implemented**:
+
 - Event logging (all 4 types)
 - Home dashboard
 - History view
@@ -214,6 +230,7 @@ All core MVP features are **fully implemented**:
 ### 🔧 Remaining Work
 
 **Must be done in Xcode**:
+
 1. Create `.xcodeproj` file (follow `XCODE_SETUP.md`)
 2. Add all source files to targets
 3. Configure build settings
@@ -223,6 +240,7 @@ All core MVP features are **fully implemented**:
 7. Test build and run
 
 **Post-MVP Enhancements**:
+
 1. Enable real notifications
 2. Add Supabase sync
 3. Complete Cry Analysis ML integration
@@ -250,5 +268,3 @@ All core MVP features are **fully implemented**:
    - Update `ios/README.md` with build status
    - Add troubleshooting section
    - Document known issues
-
-

@@ -13,22 +13,26 @@ All 5 phases of UX optimization have been implemented in the **CORRECT location:
 **6 new Swift files need to be added:**
 
 ### Home Features (4 files):
+
 1. `Nuzzle/Nestling/Features/Home/SpotlightTutorialOverlay.swift`
 2. `Nuzzle/Nestling/Features/Home/FirstTasksChecklistCard.swift`
 3. `Nuzzle/Nestling/Features/Home/UpgradePromptModal.swift`
 4. `Nuzzle/Nestling/Features/Home/PostOnboardingSurvey.swift`
 
 ### Onboarding Features (2 files):
+
 5. `Nuzzle/Nestling/Features/Onboarding/OnboardingProgressIndicatorEnhanced.swift`
 6. `Nuzzle/Nestling/Features/Onboarding/SmartDefaultsService.swift`
 
 **How to Add:**
+
 ```bash
 cd ios/Nuzzle
 open Nestling.xcodeproj
 ```
 
 **In Xcode:**
+
 1. Right-click "Features/Home" group → "Add Files to Nestling..."
 2. Navigate to `Nestling/Features/Home/`
 3. Select all 4 new Home files (hold ⌘ to select multiple)
@@ -49,6 +53,7 @@ open Nestling.xcodeproj
 ## 🧪 Step 2: Test the Changes
 
 ### Onboarding Flow:
+
 ```
 1. Clean build (⌘⇧K)
 2. Run app in simulator
@@ -60,6 +65,7 @@ open Nestling.xcodeproj
 ```
 
 ### Home Screen:
+
 ```
 4. After onboarding completes:
    ✓ Tutorial overlay appears
@@ -76,6 +82,7 @@ open Nestling.xcodeproj
 ## 📊 Step 3: Monitor Metrics
 
 Check Console for analytics events:
+
 ```
 onboarding_goal_selected
 onboarding_completed (with time, age, goal)
@@ -103,7 +110,7 @@ Expected MRR improvement: **3-4x** (from $299 to $1,200+ with 1,000 users)
 All changes in: `ios/Nuzzle/`
 
 Documentation:
+
 - `UX_IMPROVEMENTS_SUMMARY.md` (this file)
 - `PRODUCT_REVIEW_IMPLEMENTATION_COMPLETE.md` (full review)
 - `CALENDAR_VIEW_IMPLEMENTATION_PLAN.md` (next feature)
-

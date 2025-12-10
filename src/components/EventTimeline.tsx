@@ -35,7 +35,7 @@ function groupEventsByTimeBand(events: BabyEvent[]) {
     night: [],
   };
 
-  events.forEach((event) => {
+  events.forEach(event => {
     const band = getTimeBand(new Date(event.start_time));
     groups[band].push(event);
   });
@@ -109,7 +109,10 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
           onClick: async () => {
             try {
               await undoManager.undo();
-              analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+              analyticsService.trackEventDeleted(
+                eventId,
+                eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time'
+              );
               track('undo_action', { action_type: 'event_deleted' });
             } catch (error) {
               if (error instanceof Error && error.message.includes('expired')) {
@@ -125,7 +128,10 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
       });
 
       // Track analytics
-      analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+      analyticsService.trackEventDeleted(
+        eventId,
+        eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time'
+      );
       track('event_deleted', {
         event_type: eventToDelete.type,
         undo_available: true,
@@ -136,11 +142,11 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
       undoManager.clear(); // Clear undo if delete failed
     }
   };
-  
+
   if (events.length === 0) {
     return (
       <Card>
-        <CardContent className="p-8 text-center text-muted-foreground">
+        <CardContent className='p-8 text-center text-muted-foreground'>
           No events logged yet. Tap a button above to get started!
         </CardContent>
       </Card>
@@ -152,7 +158,7 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
 
   const formatEventTitle = (event: BabyEvent) => {
     let title = event.type.charAt(0).toUpperCase() + event.type.slice(1);
-    
+
     if (event.subtype) {
       if (event.subtype.startsWith('breast_')) {
         const side = event.subtype.replace('breast_', '');
@@ -167,9 +173,12 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
     }
 
     if (event.end_time) {
-      const duration = event.duration_sec || 
-        Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 1000);
-      
+      const duration =
+        event.duration_sec ||
+        Math.round(
+          (new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 1000
+        );
+
       if (duration < 60) {
         title += ` · ${duration}s`;
       } else if (duration < 3600) {
@@ -188,35 +197,33 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
 
   return (
     <>
-      <div className="space-y-6">
-        {bands.map((band) => {
+      <div className='space-y-6'>
+        {bands.map(band => {
           const bandEvents = grouped[band];
           if (bandEvents.length === 0) return null;
 
           return (
             <div key={band}>
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
+              <h3 className='text-sm font-medium text-muted-foreground mb-3'>
                 {timeBandLabels[band]}
               </h3>
-              <div className="space-y-2">
-                {bandEvents.map((event) => {
+              <div className='space-y-2'>
+                {bandEvents.map(event => {
                   const Icon = eventIcons[event.type] || BabyIcon;
                   const color = eventColors[event.type] || 'text-gray-500';
 
                   return (
-                    <Card key={event.id} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
+                    <Card key={event.id} className='overflow-hidden'>
+                      <CardContent className='p-4'>
+                        <div className='flex items-start gap-3'>
                           <div className={`mt-1 ${color}`}>
-                            <Icon className="h-5 w-5" />
+                            <Icon className='h-5 w-5' />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm">
-                                  {formatEventTitle(event)}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
+                          <div className='flex-1 min-w-0'>
+                            <div className='flex items-start justify-between gap-2'>
+                              <div className='flex-1 min-w-0'>
+                                <p className='font-medium text-sm'>{formatEventTitle(event)}</p>
+                                <p className='text-xs text-muted-foreground mt-1'>
                                   {isToday(new Date(event.start_time))
                                     ? formatDistanceToNow(new Date(event.start_time), {
                                         addSuffix: true,
@@ -224,25 +231,21 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
                                     : format(new Date(event.start_time), 'h:mm a')}
                                 </p>
                                 {event.note && (
-                                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                  <p className='text-sm text-muted-foreground mt-2 line-clamp-2'>
                                     {event.note}
                                   </p>
                                 )}
                               </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onEdit(event)}
-                                >
-                                  <Edit className="h-4 w-4" />
+                              <div className='flex gap-1'>
+                                <Button variant='ghost' size='sm' onClick={() => onEdit(event)}>
+                                  <Edit className='h-4 w-4' />
                                 </Button>
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
+                                  variant='ghost'
+                                  size='sm'
                                   onClick={() => handleDeleteWithUndo(event.id)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className='h-4 w-4' />
                                 </Button>
                               </div>
                             </div>
@@ -257,7 +260,6 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
           );
         })}
       </div>
-
     </>
   );
 }

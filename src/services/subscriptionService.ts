@@ -74,7 +74,10 @@ export class SubscriptionService {
   /**
    * Get feature usage for current period
    */
-  private async getFeatureUsage(feature: keyof SubscriptionLimits, userId: string): Promise<number> {
+  private async getFeatureUsage(
+    feature: keyof SubscriptionLimits,
+    userId: string
+  ): Promise<number> {
     const now = new Date();
     let startDate: Date;
 

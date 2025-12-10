@@ -41,7 +41,7 @@ class NapService {
     await dataService.storeNapPrediction(babyId, prediction);
     return prediction;
   }
-  
+
   private getAgeBand(months: number): string {
     if (months < 3) return '0-2m';
     if (months < 5) return '3-4m';

@@ -32,7 +32,7 @@ private var appGroupURL: URL? {
 }
 
 private var dataFileURL: URL {
-    appGroupURL?.appendingPathComponent(AppConstants.dataStoreFileName) 
+    appGroupURL?.appendingPathComponent(AppConstants.dataStoreFileName)
         ?? documentsURL.appendingPathComponent(AppConstants.dataStoreFileName)
 }
 ```
@@ -42,6 +42,7 @@ private var dataFileURL: URL {
 ### Basic Widget Testing
 
 1. **Build and Run**:
+
    ```bash
    xcodebuild -scheme Nestling -destination 'platform=iOS Simulator,name=iPhone 15' build
    ```
@@ -62,9 +63,11 @@ private var dataFileURL: URL {
 
 1. **Log an Event** in the app
 2. **Reload Widget Timeline**:
+
    ```swift
    WidgetCenter.shared.reloadAllTimelines()
    ```
+
    Or use Developer Settings → "Reload All Widgets"
 
 3. **Verify Widget Updates**:
@@ -126,6 +129,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 **Cause**: App Groups not configured or data not shared
 
 **Fix**:
+
 1. Verify App Groups capability added to both targets
 2. Check group ID matches: `group.com.nestling.Nestling`
 3. Verify DataStore saves to App Groups container
@@ -136,6 +140,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 **Cause**: Timeline not reloaded after data change
 
 **Fix**:
+
 1. Call `WidgetCenter.shared.reloadAllTimelines()` after data changes
 2. Check widget refresh policy (`.atEnd` vs `.after`)
 3. Verify widget entry provider fetches latest data
@@ -145,6 +150,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 **Cause**: App Intents not configured or not handling actions
 
 **Fix**:
+
 1. Verify App Intents target added to project
 2. Check intent handlers registered
 3. Test intent in Shortcuts app first
@@ -153,6 +159,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 ## Testing Checklist
 
 ### Home Screen Widgets
+
 - [ ] Widget displays correct data
 - [ ] Widget updates when data changes
 - [ ] Widget handles empty states
@@ -161,12 +168,14 @@ let verified = WidgetTestHelper.verifyAppGroups()
 - [ ] Widget supports dark mode
 
 ### Lock Screen Widgets
+
 - [ ] Circular widget displays correctly
 - [ ] Inline widget displays correctly
 - [ ] Widget updates in background
 - [ ] Widget actions work (if interactive)
 
 ### Dynamic Island / Live Activity
+
 - [ ] Compact view displays
 - [ ] Expanded view displays
 - [ ] Stop button works
@@ -174,6 +183,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 - [ ] Fallback UI works on older devices
 
 ### Performance
+
 - [ ] Widget loads quickly (< 1 second)
 - [ ] No memory leaks
 - [ ] Efficient data fetching
@@ -202,7 +212,7 @@ func testAppGroupsVerification() {
 func testWidgetDisplays() {
     let app = XCUIApplication()
     app.launch()
-    
+
     // Add widget (manual step)
     // Verify widget content
     // This requires manual interaction or screenshot comparison
@@ -220,6 +230,7 @@ func testWidgetDisplays() {
 ### View Widget Logs
 
 Widget logs appear in Xcode console when:
+
 - Widget is added to home screen
 - Widget timeline reloads
 - Widget entry provider runs
@@ -238,5 +249,3 @@ print("[Widget] Entry: \(entry)")
 - [App Intents Documentation](https://developer.apple.com/documentation/appintents)
 - [Live Activities Documentation](https://developer.apple.com/documentation/activitykit)
 - [App Groups Documentation](https://developer.apple.com/documentation/xcode/configuring-app-groups)
-
-

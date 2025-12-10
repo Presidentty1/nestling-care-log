@@ -22,7 +22,8 @@ export async function buildBabyContext(baby: Baby) {
   const sleepEvents = recentEvents?.filter(e => e.type === 'sleep' && e.end_time) || [];
   const totalSleepHours = sleepEvents.reduce((acc, e) => {
     if (!e.end_time) return acc;
-    const duration = (new Date(e.end_time).getTime() - new Date(e.start_time).getTime()) / (1000 * 60 * 60);
+    const duration =
+      (new Date(e.end_time).getTime() - new Date(e.start_time).getTime()) / (1000 * 60 * 60);
     return acc + duration;
   }, 0);
   const avgSleepHours = sleepEvents.length > 0 ? totalSleepHours / sleepEvents.length : 0;

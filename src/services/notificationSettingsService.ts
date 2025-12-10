@@ -3,8 +3,13 @@ import { authService } from './authService';
 import type { NotificationSettings } from '@/lib/types';
 
 class NotificationSettingsService {
-  async getNotificationSettings(babyId: string, userId?: string): Promise<NotificationSettings | null> {
-    const { data: { user } } = await authService.getUser();
+  async getNotificationSettings(
+    babyId: string,
+    userId?: string
+  ): Promise<NotificationSettings | null> {
+    const {
+      data: { user },
+    } = await authService.getUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) return null;
 
@@ -16,7 +21,7 @@ class NotificationSettingsService {
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') throw error;
-    
+
     if (!data) {
       // Create default settings
       const defaultSettings: Partial<NotificationSettings> = {
@@ -45,16 +50,18 @@ class NotificationSettingsService {
     return data as NotificationSettings;
   }
 
-  async updateNotificationSettings(id: string, updates: Partial<NotificationSettings>): Promise<void> {
-    const { error } = await supabase
-      .from('notification_settings')
-      .update(updates)
-      .eq('id', id);
+  async updateNotificationSettings(
+    id: string,
+    updates: Partial<NotificationSettings>
+  ): Promise<void> {
+    const { error } = await supabase.from('notification_settings').update(updates).eq('id', id);
 
     if (error) throw error;
   }
 
-  async createNotificationSettings(settings: Omit<NotificationSettings, 'id' | 'created_at' | 'updated_at'>): Promise<NotificationSettings> {
+  async createNotificationSettings(
+    settings: Omit<NotificationSettings, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<NotificationSettings> {
     const { data, error } = await supabase
       .from('notification_settings')
       .insert(settings)
@@ -66,15 +73,11 @@ class NotificationSettingsService {
   }
 
   async deleteNotificationSettings(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('notification_settings')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('notification_settings').delete().eq('id', id);
 
     if (error) throw error;
   }
 }
 
 export const notificationSettingsService = new NotificationSettingsService();
-
 

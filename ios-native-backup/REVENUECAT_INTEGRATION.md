@@ -1,6 +1,7 @@
 # RevenueCat Integration Guide
 
 ## Status
+
 RevenueCat service is **prepared but not fully integrated**. The SDK needs to be added to the Xcode project.
 
 ## Current Implementation
@@ -12,12 +13,14 @@ The `RevenueCatService` class exists at `ios/Sources/Services/RevenuCatService.s
 ### 1. Add RevenueCat SDK
 
 **Option A: Swift Package Manager (Recommended)**
+
 1. In Xcode, go to File → Add Package Dependencies
 2. Enter: `https://github.com/RevenueCat/purchases-ios`
 3. Select version: `7.0.0` or latest
 4. Add to target: `Nestling`
 
 **Option B: CocoaPods**
+
 ```ruby
 pod 'Purchases', '~> 7.0'
 ```
@@ -26,6 +29,7 @@ pod 'Purchases', '~> 7.0'
 
 1. Get your RevenueCat API key from https://app.revenuecat.com
 2. Add to `Info.plist`:
+
 ```xml
 <key>REVENUECAT_API_KEY</key>
 <string>your_api_key_here</string>
@@ -71,6 +75,7 @@ func checkSubscriptionStatus() async {
 ### 5. Test
 
 Use StoreKit Testing in Xcode:
+
 1. Xcode → Product → Scheme → Edit Scheme
 2. Run → Options → StoreKit Configuration
 3. Select test configuration file
@@ -78,6 +83,7 @@ Use StoreKit Testing in Xcode:
 ## Current Mock Behavior
 
 The service currently:
+
 - Returns mock subscription status (always `.notSubscribed`)
 - Returns mock offerings (monthly/yearly with placeholder prices)
 - Simulates successful purchases (for testing UI)

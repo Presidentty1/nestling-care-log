@@ -44,7 +44,7 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
         toast.success(`Synced ${result.success} changes`);
         track('sync_success', {
           changes_synced: result.success,
-          auto_sync: true
+          auto_sync: true,
         });
       }
 
@@ -52,7 +52,7 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
         toast.error(`Failed to sync ${result.failed} changes`);
         track('sync_partial_failure', {
           failed_count: result.failed,
-          auto_sync: true
+          auto_sync: true,
         });
       }
     } catch (error) {
@@ -80,7 +80,7 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
         toast.success(`Synced ${result.success} changes`);
         track('sync_success', {
           changes_synced: result.success,
-          manual_sync: true
+          manual_sync: true,
         });
       } else if (result.failed === 0) {
         toast.success('All changes are up to date');
@@ -101,8 +101,8 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
   if (isOnline && queueStatus.pending === 0 && queueStatus.failed === 0 && !isSyncing) {
     if (showDetailed && lastSyncTime) {
       return (
-        <div className="px-4 py-2 text-xs text-muted-foreground text-center">
-          <CheckCircle className="h-3 w-3 inline mr-1" />
+        <div className='px-4 py-2 text-xs text-muted-foreground text-center'>
+          <CheckCircle className='h-3 w-3 inline mr-1' />
           Last synced {lastSyncTime.toLocaleTimeString()}
         </div>
       );
@@ -114,25 +114,23 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
     <Alert className={`mb-4 ${!isOnline ? 'border-orange-200 bg-orange-50' : ''}`}>
       {!isOnline ? (
         <>
-          <WifiOff className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
+          <WifiOff className='h-4 w-4' />
+          <AlertDescription className='flex items-center justify-between'>
             <div>
               <strong>You're offline</strong>
-              <div className="text-sm mt-1">
+              <div className='text-sm mt-1'>
                 Changes will sync when you reconnect
                 {queueStatus.pending > 0 && (
-                  <span className="ml-2 font-medium">
-                    • {queueStatus.pending} queued
-                  </span>
+                  <span className='ml-2 font-medium'>• {queueStatus.pending} queued</span>
                 )}
               </div>
             </div>
             {showDetailed && queueStatus.pending > 0 && (
               <Button
-                size="sm"
-                variant="outline"
+                size='sm'
+                variant='outline'
                 onClick={() => toast.info('Changes will sync automatically when online')}
-                className="ml-2"
+                className='ml-2'
               >
                 View Queue
               </Button>
@@ -141,30 +139,26 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
         </>
       ) : isSyncing ? (
         <>
-          <RefreshCw className="h-4 w-4 animate-spin" />
+          <RefreshCw className='h-4 w-4 animate-spin' />
           <AlertDescription>
             <strong>Syncing changes...</strong>
-            <span className="ml-2 text-sm">
-              {queueStatus.pending} remaining
-            </span>
+            <span className='ml-2 text-sm'>{queueStatus.pending} remaining</span>
           </AlertDescription>
         </>
       ) : queueStatus.failed > 0 ? (
         <>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
+          <AlertTriangle className='h-4 w-4' />
+          <AlertDescription className='flex items-center justify-between'>
             <div>
               <strong>Sync issues detected</strong>
-              <div className="text-sm mt-1">
-                {queueStatus.failed} changes failed to sync
-              </div>
+              <div className='text-sm mt-1'>{queueStatus.failed} changes failed to sync</div>
             </div>
             <Button
-              size="sm"
-              variant="outline"
+              size='sm'
+              variant='outline'
               onClick={handleManualSync}
               disabled={isSyncing}
-              className="ml-2"
+              className='ml-2'
             >
               Retry
             </Button>
@@ -172,20 +166,13 @@ export function OfflineIndicator({ showDetailed = false, onManualSync }: Offline
         </>
       ) : queueStatus.pending > 0 ? (
         <>
-          <RefreshCw className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
+          <RefreshCw className='h-4 w-4' />
+          <AlertDescription className='flex items-center justify-between'>
             <div>
               <strong>Ready to sync</strong>
-              <div className="text-sm mt-1">
-                {queueStatus.pending} changes pending
-              </div>
+              <div className='text-sm mt-1'>{queueStatus.pending} changes pending</div>
             </div>
-            <Button
-              size="sm"
-              onClick={handleManualSync}
-              disabled={isSyncing}
-              className="ml-2"
-            >
+            <Button size='sm' onClick={handleManualSync} disabled={isSyncing} className='ml-2'>
               Sync Now
             </Button>
           </AlertDescription>

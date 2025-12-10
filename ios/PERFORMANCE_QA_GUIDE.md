@@ -51,14 +51,16 @@ Comprehensive testing and optimization guide for Nestling iOS app.
 ### Option 1: Sentry
 
 1. Add Sentry via SPM:
+
    ```
    https://github.com/getsentry/sentry-cocoa
    ```
 
 2. Configure in `AppDelegate` or `App.init()`:
+
    ```swift
    import Sentry
-   
+
    SentrySDK.start { options in
        options.dsn = "YOUR_SENTRY_DSN"
        options.environment = "production"
@@ -123,6 +125,7 @@ Analytics.shared.log("event_logged", parameters: [
 Create tests for:
 
 - [ ] **Data Migration Logic**
+
   ```swift
   func testMigrationMergesBabiesCorrectly() {
       // Test merging local and remote babies
@@ -130,6 +133,7 @@ Create tests for:
   ```
 
 - [ ] **Sync Conflict Resolution**
+
   ```swift
   func testLastWriteWinsStrategy() {
       // Test conflict resolution
@@ -226,6 +230,7 @@ Create tests for:
 ### Measurement
 
 Use Instruments:
+
 1. **Time Profiler**: Measure launch time
 2. **Allocations**: Check memory usage
 3. **System Trace**: Check frame rates
@@ -242,4 +247,3 @@ Use Instruments:
 - [ ] Performance benchmarks met
 - [ ] Memory leaks fixed
 - [ ] No blocking operations on main thread
-

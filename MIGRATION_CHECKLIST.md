@@ -1,6 +1,7 @@
 # 🔄 Migration from Lovable to Cursor - Final Checklist
 
 ## Pre-Migration (In Lovable)
+
 - [ ] Export project to GitHub
 - [ ] Document all custom configurations
 - [ ] Note any Lovable-specific features being used
@@ -12,6 +13,7 @@
 - [ ] Verify all environment variables are documented
 
 ## Initial Migration Steps
+
 - [ ] Clone repo to local machine: `git clone <repo-url>`
 - [ ] Install dependencies: `npm install`
 - [ ] Verify Node version: `node --version` (should be 18+)
@@ -22,6 +24,7 @@
 - [ ] Fix any failing tests
 
 ## Capacitor Setup
+
 - [ ] Install Capacitor CLI: `npm install --save-dev @capacitor/cli`
 - [ ] Install platform packages: `npm install @capacitor/ios @capacitor/android`
 - [ ] Initialize Capacitor: `npx cap init`
@@ -37,6 +40,7 @@
 - [ ] Update `.gitignore` for Capacitor artifacts
 
 ## iOS Configuration (macOS only)
+
 - [ ] Open Xcode: `npx cap open ios`
 - [ ] Configure signing certificate in Xcode
 - [ ] Update Info.plist with permissions
@@ -50,6 +54,7 @@
 - [ ] Test all native features work
 
 ## Documentation Creation
+
 - [ ] Create `.env.example` file
 - [ ] Create `SECRETS.md` documenting all secrets
 - [ ] Create `DEPLOYMENT.md` with deployment instructions
@@ -64,6 +69,7 @@
 - [ ] Update main `README.md` with iOS and Cursor sections
 
 ## Testing in New Environment
+
 - [ ] Web app works: `npm run dev`
 - [ ] Unit tests pass: `npm run test`
 - [ ] E2E tests pass: `npm run test:e2e`
@@ -76,6 +82,7 @@
 - [ ] Dark mode works
 
 ## Edge Functions Configuration
+
 - [ ] Install Supabase CLI: `brew install supabase/tap/supabase`
 - [ ] Login to Supabase: `supabase login`
 - [ ] Link project: `supabase link --project-ref your-project-id`
@@ -85,6 +92,7 @@
 - [ ] Document AI provider migration strategy
 
 ## Cursor IDE Setup
+
 - [ ] Open project in Cursor
 - [ ] Install recommended extensions (see `.vscode/extensions.json`)
 - [ ] Verify Cursor AI rules are loaded
@@ -94,6 +102,7 @@
 - [ ] Verify TypeScript IntelliSense works
 
 ## Post-Migration Validation
+
 - [ ] All features work identically to Lovable version
 - [ ] Performance is acceptable (Lighthouse > 90)
 - [ ] No console errors in production build
@@ -106,6 +115,7 @@
 - [ ] Documentation is complete and accurate
 
 ## Production Deployment (Optional)
+
 - [ ] Choose hosting platform (Vercel/Netlify/Custom)
 - [ ] Set environment variables in hosting platform
 - [ ] Deploy frontend: `vercel` or `netlify deploy`
@@ -119,28 +129,33 @@
 ## Known Limitations After Migration
 
 ### ⚠️ Lovable AI Features
+
 - Edge functions use `LOVABLE_API_KEY` which only works in Lovable environment
 - Works in development (existing key)
 - For production outside Lovable, plan to replace with OpenAI/Google AI
 - See `supabase/functions/README.md` for migration strategy
 
 ### ⚠️ Auto-Deploy
+
 - Lovable's auto-deploy won't work
 - Setup CI/CD with GitHub Actions
 - See `DEPLOYMENT.md` for manual deployment steps
 
 ### ⚠️ Database Migrations
+
 - Require Supabase CLI: `brew install supabase/tap/supabase`
 - Can't use Lovable's GUI migration tool
 - Use `supabase migration new` and `supabase db push`
 
 ### ⚠️ Edge Function Logs
+
 - View via Supabase CLI: `supabase functions logs ai-assistant`
 - OR via Supabase dashboard (if migrating to own project)
 
 ## Success Criteria
 
 ### ✅ Migration Complete When:
+
 1. **All new files created** - Documentation, configs, scripts ✓
 2. **Capacitor configured** - iOS builds successfully ✓
 3. **Tests pass** - Unit + E2E work in new environment ✓
@@ -151,6 +166,7 @@
 8. **Secrets documented** - Know what needs replacing in production ✓
 
 ### 🎯 Ready for Cursor Development When:
+
 - Developer can clone → install → run without issues
 - All Cursor AI rules configured properly
 - iOS development workflow documented
@@ -160,6 +176,7 @@
 ## Rollback Plan
 
 If migration fails:
+
 1. Revert to Lovable version (still accessible)
 2. Document issues encountered
 3. Fix in local environment
@@ -167,6 +184,7 @@ If migration fails:
 5. Lovable version remains as backup until migration is stable
 
 ## Timeline Estimate
+
 - **Setup Phase:** 2-3 hours (Steps 1-20)
 - **Testing Phase:** 1-2 hours (Steps 21-30)
 - **iOS Configuration:** 1-2 hours (macOS only)
@@ -174,6 +192,7 @@ If migration fails:
 - **Total:** 6-11 hours for complete migration
 
 ## Next Steps After Migration
+
 1. Test thoroughly using `TESTING_CHECKLIST.md`
 2. Setup CI/CD pipeline
 3. Plan AI provider migration (replace Lovable AI)

@@ -92,7 +92,7 @@ class FirebaseAnalytics implements AnalyticsService {
     try {
       logEvent(analyticsInstance, 'page_view', {
         page_title: name,
-        ...properties
+        ...properties,
       });
     } catch (error) {
       console.error('[Analytics] Failed to track page view:', error);
@@ -113,10 +113,10 @@ export function initAnalytics(service: AnalyticsService): void {
 
 /**
  * Track an event.
- * 
+ *
  * @param eventName - Name of the event (e.g., 'event_logged', 'settings_changed')
  * @param properties - Optional event properties
- * 
+ *
  * @example
  * ```ts
  * track('event_logged', {
@@ -132,10 +132,10 @@ export function track(eventName: string, properties?: Record<string, any>): void
 
 /**
  * Identify a user.
- * 
+ *
  * @param userId - User ID
  * @param traits - User traits/properties
- * 
+ *
  * @example
  * ```ts
  * identify(user.id, {
@@ -150,10 +150,10 @@ export function identify(userId: string, traits?: Record<string, any>): void {
 
 /**
  * Track a page view.
- * 
+ *
  * @param name - Page name (e.g., 'home', 'settings')
  * @param properties - Optional page properties
- * 
+ *
  * @example
  * ```ts
  * page('home', {
@@ -167,5 +167,3 @@ export function page(name: string, properties?: Record<string, any>): void {
 
 // Export default instance for advanced usage
 export default analyticsInstance;
-
-

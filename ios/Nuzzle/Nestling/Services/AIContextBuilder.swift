@@ -145,3 +145,4 @@ struct AIContextBuilder {
         return redFlagKeywords.contains { lowercased.contains($0) }
     }
 }
+

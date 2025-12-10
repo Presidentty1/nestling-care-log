@@ -4,11 +4,7 @@ import type { Profile } from '@/lib/types';
 
 class ProfileService {
   async getProfile(userId: string): Promise<Profile | null> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
@@ -30,24 +26,17 @@ class ProfileService {
   }
 
   async deleteProfile(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
+    const { error } = await supabase.from('profiles').delete().eq('id', userId);
 
     if (error) throw error;
   }
 
   async deleteAppSettings(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from('app_settings')
-      .delete()
-      .eq('user_id', userId);
+    const { error } = await supabase.from('app_settings').delete().eq('user_id', userId);
 
     if (error) throw error;
   }
 }
 
 export const profileService = new ProfileService();
-
 
