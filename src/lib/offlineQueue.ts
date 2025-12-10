@@ -311,7 +311,7 @@ class OfflineQueue {
         });
         break;
 
-      case 'merge':
+      case 'merge': {
         // Merge the data and re-queue
         const mergedData = conflictResolution.resolvedData || this.mergeData(conflict.serverData, conflict.operation.data);
         this.enqueue({
@@ -320,6 +320,7 @@ class OfflineQueue {
           conflictStrategy: 'merge'
         });
         break;
+      }
 
       case 'skip':
         // Just remove the conflict without re-queuing

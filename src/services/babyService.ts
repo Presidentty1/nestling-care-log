@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeBabyName, sanitizeTimeZone } from '@/lib/sanitization';
 import { logger } from '@/lib/logger';
-import { DbBaby } from '@/types/db';
+import type { DbBaby } from '@/types/db';
 
 // Alias DbBaby to Baby for backward compatibility
 export type Baby = DbBaby;

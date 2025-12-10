@@ -333,7 +333,7 @@ export default function Onboarding() {
       primaryAction={{
         label: "Start Tracking",
         onClick: handleCreateBaby,
-        loading: loading
+        loading
       }}
       secondaryAction={{
         label: "Back",

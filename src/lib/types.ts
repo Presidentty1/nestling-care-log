@@ -2,7 +2,7 @@
 // REFACTORED: This file now re-exports from standard locations.
 // Prefer using types from '@/types/domain' for new code.
 
-import {
+import type {
   DbProfile,
   DbFamily,
   DbFamilyMember,

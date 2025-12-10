@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from './authService';
-import { NotificationSettings } from '@/lib/types';
+import type { NotificationSettings } from '@/lib/types';
 
 class NotificationSettingsService {
   async getNotificationSettings(babyId: string, userId?: string): Promise<NotificationSettings | null> {

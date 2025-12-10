@@ -1,4 +1,5 @@
-import { stripeService, SubscriptionStatus } from './stripeService';
+import type { SubscriptionStatus } from './stripeService';
+import { stripeService } from './stripeService';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SubscriptionLimits {
@@ -96,15 +97,16 @@ export class SubscriptionService {
 
     try {
       switch (feature) {
-        case 'cryAnalysis':
+        case 'cryAnalysis': {
           const { count: cryCount } = await supabase
             .from('cry_insight_sessions')
             .select('*', { count: 'exact', head: true })
             .eq('created_by', userId)
             .gte('created_at', startDate.toISOString());
           return cryCount || 0;
+        }
 
-        case 'aiAssistant':
+        case 'aiAssistant': {
           // For AI assistant, we need to track conversations
           const { count: chatCount } = await supabase
             .from('ai_conversations')
@@ -112,8 +114,9 @@ export class SubscriptionService {
             .eq('user_id', userId)
             .gte('created_at', startDate.toISOString());
           return chatCount || 0;
+        }
 
-        case 'aiPredictions':
+        case 'aiPredictions': {
           // For nap predictions, count generated predictions
           const { count: predictionCount } = await supabase
             .from('predictions')
@@ -121,6 +124,7 @@ export class SubscriptionService {
             .eq('user_id', userId)
             .gte('created_at', startDate.toISOString());
           return predictionCount || 0;
+        }
 
         default:
           return 0;

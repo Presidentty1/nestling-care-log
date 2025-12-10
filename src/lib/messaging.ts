@@ -57,7 +57,7 @@ export const MESSAGING = {
       title: 'When was the big day?',
       subtitle: 'This helps us provide age-appropriate insights',
       description: 'This helps us track age-appropriate milestones.',
-      example: 'For a 2-month-old, we'll track wake windows and feeding patterns',
+      example: "For a 2-month-old, we'll track wake windows and feeding patterns",
     },
     preferences: {
       title: 'Just a few details',

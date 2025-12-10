@@ -12,7 +12,8 @@ import { ChevronLeft, UserPlus, Trash2, Mail, Clock, Lock, Sparkles } from 'luci
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePro } from '@/hooks/usePro';
-import { familyService, FamilyMember, Invite } from '@/services/familyService';
+import type { FamilyMember, Invite } from '@/services/familyService';
+import { familyService } from '@/services/familyService';
 import { babyService } from '@/services/babyService';
 import { useAuth } from '@/hooks/useAuth';
 

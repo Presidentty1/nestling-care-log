@@ -23,7 +23,7 @@ serve(async (req) => {
     }
 
     // Get or create Stripe customer
-    let customerId = await getOrCreateCustomer(userId);
+    const customerId = await getOrCreateCustomer(userId);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

@@ -1,5 +1,7 @@
-import { DbBaby, DbEvent, DbProfile, DbFamily, DbFamilyMember } from './db';
-import { Baby, EventRecord, Profile, Family, FamilyMember } from './domain';
+import type { DbBaby, DbEvent} from './db';
+import { DbProfile, DbFamily, DbFamilyMember } from './db';
+import type { Baby, EventRecord} from './domain';
+import { Profile, Family, FamilyMember } from './domain';
 
 export const toDomainBaby = (db: DbBaby): Baby => ({
   id: db.id,

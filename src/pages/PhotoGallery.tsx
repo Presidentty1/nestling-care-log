@@ -9,7 +9,8 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { babyService } from '@/services/babyService';
-import { photoService, PhotoItem } from '@/services/photoService';
+import type { PhotoItem } from '@/services/photoService';
+import { photoService } from '@/services/photoService';
 
 export default function PhotoGallery() {
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);

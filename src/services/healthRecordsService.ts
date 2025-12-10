@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from './authService';
-import { HealthRecord, HealthRecordType } from '@/lib/types';
+import type { HealthRecord} from '@/lib/types';
+import { HealthRecordType } from '@/lib/types';
 
 class HealthRecordsService {
   async getHealthRecords(babyId: string): Promise<HealthRecord[]> {

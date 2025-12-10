@@ -7,8 +7,10 @@ import { logger } from '@/lib/logger';
 import { useAppStore } from '@/store/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents';
-import { babyService, Baby } from '@/services/babyService';
-import { eventsService, EventRecord } from '@/services/eventsService';
+import type { Baby } from '@/services/babyService';
+import { babyService } from '@/services/babyService';
+import type { EventRecord } from '@/services/eventsService';
+import { eventsService } from '@/services/eventsService';
 import { napPredictorService } from '@/services/napPredictorService';
 import { reminderService } from '@/services/reminderService';
 import { guestModeService } from '@/services/guestModeService';
@@ -16,9 +18,9 @@ import { streakService } from '@/services/streakService';
 import { achievementService } from '@/services/achievementService';
 import { trialService } from '@/services/trialService';
 import { dataService } from '@/services/dataService';
-import { DailySummary } from '@/types/summary';
+import type { DailySummary } from '@/types/summary';
 import { useLastUsedValues } from '@/hooks/useLastUsedValues';
-import { EventType } from '@/types/domain';
+import type { EventType } from '@/types/domain';
 
 export function useHomeData() {
   const navigate = useNavigate();

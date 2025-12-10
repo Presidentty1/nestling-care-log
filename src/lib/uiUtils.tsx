@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Common UI utilities and patterns
@@ -174,7 +174,7 @@ export const uiUtils = {
    */
   truncate: (text: string, maxLength: number): string => {
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength - 3) + '...';
+    return `${text.substring(0, maxLength - 3)  }...`;
   }
 };
 

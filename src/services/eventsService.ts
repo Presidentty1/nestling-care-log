@@ -6,7 +6,8 @@ import { track } from '@/analytics/analytics';
 import { sanitizeEventNote, sanitizeAmount, sanitizeDuration } from '@/lib/sanitization';
 import { logger } from '@/lib/logger';
 import { dateUtils, validationUtils } from '@/lib/sharedUtils';
-import { DbEvent, DbEventType } from '@/types/db';
+import type { DbEvent} from '@/types/db';
+import { DbEventType } from '@/types/db';
 
 export interface CreateEventData {
   baby_id: string;

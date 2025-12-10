@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Milestone } from '@/lib/types';
+import type { Milestone } from '@/lib/types';
 
 class MilestonesService {
   async getMilestones(babyId: string): Promise<Milestone[]> {

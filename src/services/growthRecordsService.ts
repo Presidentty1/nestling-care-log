@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from './authService';
-import { GrowthRecord } from '@/lib/types';
+import type { GrowthRecord } from '@/lib/types';
 
 class GrowthRecordsService {
   async getGrowthRecords(babyId: string): Promise<GrowthRecord[]> {

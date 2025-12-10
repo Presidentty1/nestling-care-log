@@ -69,7 +69,7 @@ export function triggerConfetti(options: {
     confetti.style.width = '10px';
     confetti.style.height = '10px';
     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.left = `${Math.random() * 100  }%`;
     confetti.style.top = '-10px';
     confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
     confetti.style.opacity = '1';
@@ -82,7 +82,7 @@ export function triggerConfetti(options: {
     // Animate
     setTimeout(() => {
       confetti.style.top = '100vh';
-      confetti.style.left = (parseInt(confetti.style.left) + (Math.random() * 40 - 20)) + '%';
+      confetti.style.left = `${parseInt(confetti.style.left) + (Math.random() * 40 - 20)  }%`;
       confetti.style.opacity = '0';
     }, 10);
     

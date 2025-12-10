@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from './authService';
-import { Profile } from '@/lib/types';
+import type { Profile } from '@/lib/types';
 
 class ProfileService {
   async getProfile(userId: string): Promise<Profile | null> {

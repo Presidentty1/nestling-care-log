@@ -1,4 +1,5 @@
-import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
+import type { Stripe} from '@stripe/stripe-js';
+import { loadStripe, StripeElements } from '@stripe/stripe-js';
 import { supabase } from '@/integrations/supabase/client';
 
 // Initialize Stripe with publishable key
