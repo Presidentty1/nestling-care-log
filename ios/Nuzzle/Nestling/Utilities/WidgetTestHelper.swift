@@ -41,7 +41,7 @@ class WidgetTestHelper {
                 "TodaySummaryWidget",
                 "SleepActivityWidget"
             ],
-            "appGroup": "group.com.nestling.Nestling",
+            "appGroup": "group.com.nestling.app",
             "note": "Use WidgetCenter.shared.reloadAllTimelines() to refresh widgets"
         ]
     }
@@ -73,7 +73,7 @@ class WidgetTestHelper {
     /// - Returns: True if App Groups is properly configured
     static func verifyAppGroups() -> Bool {
         let fileManager = FileManager.default
-        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
+        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
             print("[Widget] ❌ App Groups not configured")
             return false
         }
@@ -85,7 +85,7 @@ class WidgetTestHelper {
     /// Test widget data persistence
     /// - Parameter data: Data to persist
     static func testDataPersistence(data: [String: Any]) {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
             print("[Widget] ❌ Cannot test persistence: App Groups not configured")
             return
         }
@@ -103,7 +103,7 @@ class WidgetTestHelper {
     
     /// Clear widget test data
     static func clearTestData() {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
             return
         }
         
@@ -120,7 +120,7 @@ class WidgetTestHelper {
  Widget Testing Checklist:
  
  ✅ Setup:
- - [ ] App Groups configured in Xcode (group.com.nestling.Nestling)
+ - [ ] App Groups configured in Xcode (group.com.nestling.app)
  - [ ] Widget extension target created
  - [ ] Widgets added to app target
  

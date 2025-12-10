@@ -102,7 +102,7 @@ fi
 if [ -f "Nestling/Entitlements.entitlements" ]; then
     echo "✅ Entitlements file found"
     # Verify App Groups are configured
-    if grep -q "group.com.nestling.Nestling" "Nestling/Entitlements.entitlements"; then
+    if grep -q "group.com.nestling.app" "Nestling/Entitlements.entitlements"; then
         echo "✅ App Groups configured in entitlements"
     else
         echo "⚠️  App Groups not found in entitlements"
