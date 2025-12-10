@@ -104,7 +104,7 @@ export const MESSAGING = {
       description: "AI learns your baby's patterns to predict optimal nap times",
     },
     insights: {
-      title: 'Today's Insights',
+      title: "Today's Insights",
       description: 'Get personalized recommendations based on your data',
     },
     history: {
