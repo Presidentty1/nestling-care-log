@@ -64,7 +64,7 @@ export function InstantAhaModal({ isOpen, onClose, babyAgeInWeeks, eventType }: 
     return {
       title: 'Pattern tracking started',
       prediction: 'Log a few more events',
-      explanation: 'We'll start showing personalized predictions',
+      explanation: "We'll start showing personalized predictions",
       confidence: 'After 3-5 logs',
     };
   };

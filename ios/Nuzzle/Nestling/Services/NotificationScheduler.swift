@@ -5,29 +5,97 @@ class NotificationScheduler {
     static let shared = NotificationScheduler()
     private let center = UNUserNotificationCenter.current()
     
-    private init() {}
+    private init() {
+        registerNotificationCategories()
+    }
+    
+    // MARK: - Categories and Actions
+    
+    /// Register notification categories with actions
+    private func registerNotificationCategories() {
+        // Feed reminder actions
+        let logFeedAction = UNNotificationAction(
+            identifier: "LOG_FEED",
+            title: "Log Feed",
+            options: [.foreground]
+        )
+        let snooze30Action = UNNotificationAction(
+            identifier: "SNOOZE_30",
+            title: "Snooze 30 min",
+            options: []
+        )
+        let feedCategory = UNNotificationCategory(
+            identifier: "FEED_REMINDER",
+            actions: [logFeedAction, snooze30Action],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        // Nap window actions
+        let logSleepAction = UNNotificationAction(
+            identifier: "LOG_SLEEP",
+            title: "Start Sleep",
+            options: [.foreground]
+        )
+        let napCategory = UNNotificationCategory(
+            identifier: "NAP_WINDOW",
+            actions: [logSleepAction, snooze30Action],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        // Diaper reminder actions
+        let logDiaperAction = UNNotificationAction(
+            identifier: "LOG_DIAPER",
+            title: "Log Diaper",
+            options: [.foreground]
+        )
+        let diaperCategory = UNNotificationCategory(
+            identifier: "DIAPER_REMINDER",
+            actions: [logDiaperAction, snooze30Action],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        center.setNotificationCategories([feedCategory, napCategory, diaperCategory])
+    }
     
     // MARK: - Feed Reminders
     
-    func scheduleFeedReminder(hours: Int, enabled: Bool, quietHoursStart: Date? = nil, quietHoursEnd: Date? = nil) {
+    func scheduleFeedReminder(hours: Int, enabled: Bool, lastFeedTime: Date? = nil, quietHoursStart: Date? = nil, quietHoursEnd: Date? = nil) {
         center.removePendingNotificationRequests(withIdentifiers: ["feed_reminder"])
         
         guard enabled else { return }
         
+        // Calculate time since last feed
+        let hoursSinceLastFeed: Int
+        if let lastFeed = lastFeedTime {
+            hoursSinceLastFeed = Calendar.current.dateComponents([.hour], from: lastFeed, to: Date()).hour ?? 0
+        } else {
+            hoursSinceLastFeed = hours
+        }
+        
         let content = UNMutableNotificationContent()
         content.title = "Feed Reminder"
-        content.body = "Time for a feed"
+        // Supportive, non-judgmental language
+        content.body = "It's been about \(hoursSinceLastFeed) hours since the last feed"
         content.sound = .default
         content.categoryIdentifier = "FEED_REMINDER"
+        // Deep link URL
+        content.userInfo = ["deepLink": "nestling://log/feed"]
+        
+        // Track last notification time for deduplication
+        UserDefaults.standard.set(Date(), forKey: "last_feed_notification")
         
         // Schedule recurring reminder every N hours
-        // Note: Quiet hours check happens at notification delivery time (via notification delegate)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(hours * 3600), repeats: true)
         let request = UNNotificationRequest(identifier: "feed_reminder", content: content, trigger: trigger)
         
         center.add(request) { error in
             if let error = error {
-                print("Failed to schedule feed reminder: \(error)")
+                Logger.dataError("Failed to schedule feed reminder: \(error.localizedDescription)")
+            } else {
+                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "feed"])
             }
         }
     }
@@ -56,45 +124,78 @@ class NotificationScheduler {
         
         guard enabled else { return }
         
+        // Deduplication: Check if we sent a nap notification recently
+        if let lastNapNotif = UserDefaults.standard.object(forKey: "last_nap_notification") as? Date {
+            let minutesSince = Calendar.current.dateComponents([.minute], from: lastNapNotif, to: Date()).minute ?? 0
+            if minutesSince < 60 {
+                Logger.dataInfo("Skipping nap notification - sent recently")
+                return
+            }
+        }
+        
         // Schedule alert 15 minutes before predicted nap time
         let alertTime = predictedTime.addingTimeInterval(-15 * 60)
         guard alertTime > Date() else { return }
         
         let content = UNMutableNotificationContent()
-        content.title = "Nap Window Approaching"
-        content.body = "Baby may be ready for a nap soon"
+        content.title = "Nap Window"
+        // Supportive, probabilistic language
+        content.body = "Nap window is starting soon based on your baby's age and patterns"
         content.sound = .default
         content.categoryIdentifier = "NAP_WINDOW"
+        // Deep link URL
+        content.userInfo = ["deepLink": "nestling://log/sleep"]
+        
+        // Track last notification time
+        UserDefaults.standard.set(Date(), forKey: "last_nap_notification")
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: alertTime), repeats: false)
         let request = UNNotificationRequest(identifier: "nap_window_alert", content: content, trigger: trigger)
         
         center.add(request) { error in
             if let error = error {
-                print("Failed to schedule nap window alert: \(error)")
+                Logger.dataError("Failed to schedule nap window alert: \(error.localizedDescription)")
+            } else {
+                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "nap"])
             }
         }
     }
     
     // MARK: - Diaper Reminders
     
-    func scheduleDiaperReminder(hours: Int, enabled: Bool) {
+    func scheduleDiaperReminder(hours: Int, enabled: Bool, lastDiaperTime: Date? = nil) {
         center.removePendingNotificationRequests(withIdentifiers: ["diaper_reminder"])
         
         guard enabled else { return }
         
+        // Calculate time since last diaper
+        let hoursSinceLastDiaper: Int
+        if let lastDiaper = lastDiaperTime {
+            hoursSinceLastDiaper = Calendar.current.dateComponents([.hour], from: lastDiaper, to: Date()).hour ?? 0
+        } else {
+            hoursSinceLastDiaper = hours
+        }
+        
         let content = UNMutableNotificationContent()
         content.title = "Diaper Check"
-        content.body = "Time to check diaper"
+        // Supportive, non-judgmental language
+        content.body = "It's been about \(hoursSinceLastDiaper) hours since the last diaper change"
         content.sound = .default
         content.categoryIdentifier = "DIAPER_REMINDER"
+        // Deep link URL
+        content.userInfo = ["deepLink": "nestling://log/diaper"]
+        
+        // Track last notification time for deduplication
+        UserDefaults.standard.set(Date(), forKey: "last_diaper_notification")
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(hours * 3600), repeats: true)
         let request = UNNotificationRequest(identifier: "diaper_reminder", content: content, trigger: trigger)
         
         center.add(request) { error in
             if let error = error {
-                print("Failed to schedule diaper reminder: \(error)")
+                Logger.dataError("Failed to schedule diaper reminder: \(error.localizedDescription)")
+            } else {
+                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "diaper"])
             }
         }
     }

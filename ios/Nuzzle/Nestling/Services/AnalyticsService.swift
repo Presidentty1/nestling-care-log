@@ -1,5 +1,4 @@
 import Foundation
-import FirebaseAnalytics
 
 /// Analytics event structure
 struct AnalyticsEvent {
@@ -14,239 +13,419 @@ struct AnalyticsEvent {
     }
 }
 
-/// Protocol for analytics services
-protocol AnalyticsService {
-    func logEvent(_ event: String, parameters: [String: Any]?)
-}
-
-/// Shared analytics instance
-actor Analytics {
-    static let shared = Analytics()
-
-    private var service: AnalyticsService = {
-        // Try to initialize Firebase Analytics, fall back to console
-        if let firebaseAnalytics = FirebaseAnalyticsService() {
-            return firebaseAnalytics
-        } else {
-            return ConsoleAnalytics()
-        }
-    }()
-
+/// First-party, privacy-respecting analytics service
+/// No third-party SDKs, no PII, can be disabled by user, aggregate data only
+class AnalyticsService {
+    static let shared = AnalyticsService()
+    
+    private var events: [AnalyticsEvent] = []
+    private let maxEventsInMemory = 1000
+    
+    private var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
+    }
+    
     private init() {}
-
-    func setService(_ service: AnalyticsService) {
-        self.service = service
+    
+    /// Enable/disable analytics (user preference)
+    func setEnabled(_ enabled: Bool) {
+        UserDefaults.standard.set(enabled, forKey: "analytics_enabled")
+        
+        if !enabled {
+            // Clear stored events when disabled
+            events.removeAll()
+        }
     }
     
-    func log(_ event: String, parameters: [String: Any]? = nil) {
-        service.logEvent(event, parameters: parameters)
-    }
-
-    // MARK: - Key Analytics Events
-
-    func logOnboardingCompleted(babyId: String) {
-        log("onboarding_completed", parameters: ["baby_id": babyId])
-    }
-    
-    func logOnboardingGoalSelected(goal: String) {
-        log("onboarding_goal_selected", parameters: ["goal": goal])
-    }
-    
-    func logOnboardingStepViewed(step: String) {
-        log("onboarding_step_viewed", parameters: ["step": step])
-    }
-    
-    func logOnboardingStepSkipped(step: String) {
-        log("onboarding_step_skipped", parameters: ["step": step])
-    }
-    
-    func logOnboardingStarted() {
-        log("onboarding_started", parameters: [:])
-    }
-
-    func logFirstLogCreated(eventType: String, babyId: String) {
-        log("first_log_created", parameters: ["event_type": eventType, "baby_id": babyId])
-    }
-
-    func logPredictionShown(type: String, isPro: Bool, babyId: String) {
-        log("prediction_shown", parameters: ["type": type, "is_pro": isPro, "baby_id": babyId])
-    }
-
-    func logPaywallViewed(source: String) {
-        log("paywall_viewed", parameters: ["source": source])
-    }
-
-    // MARK: - Subscription Events
-
-    func logSubscriptionTrialStarted(plan: String, source: String) {
-        log("subscription_trial_started", parameters: ["plan": plan, "source": source])
-    }
-
-    func logSubscriptionActivated(plan: String, price: String) {
-        log("subscription_activated", parameters: ["plan": plan, "price": price])
-    }
-
-    func logSubscriptionRenewed(plan: String) {
-        log("subscription_renewed", parameters: ["plan": plan])
-    }
-
-    func logSubscriptionCancelled(plan: String, reason: String?) {
-        var params: [String: Any] = ["plan": plan]
-        if let reason = reason {
-            params["reason"] = reason
-        }
-        log("subscription_cancelled", parameters: params)
-    }
-
-    func logSubscriptionPurchased(productId: String, price: String) {
-        log("subscription_purchased", parameters: ["product_id": productId, "price": price])
-    }
-
-    // MARK: - Core Product Usage Events
-
-    func logFeedLogged(babyId: String, quantity: Double?, type: String?) {
-        var params: [String: Any] = ["baby_id": babyId]
-        if let quantity = quantity {
-            params["quantity"] = quantity
-        }
-        if let type = type {
-            params["type"] = type
-        }
-        log("log_feed", parameters: params)
-    }
-
-    func logDiaperLogged(babyId: String, type: String) {
-        log("log_diaper", parameters: ["baby_id": babyId, "type": type])
-    }
-
-    func logSleepStarted(babyId: String) {
-        log("log_sleep_start", parameters: ["baby_id": babyId])
-    }
-
-    func logSleepStopped(babyId: String, durationMinutes: Int) {
-        log("log_sleep_stop", parameters: ["baby_id": babyId, "duration_minutes": durationMinutes])
-    }
-
-    // MARK: - AI Feature Events
-
-    func logNapPredictionRequested(babyId: String, isPro: Bool) {
-        log("ai_nap_prediction_requested", parameters: ["baby_id": babyId, "is_pro": isPro])
-    }
-
-    func logCryAnalysisRequested(babyId: String, isPro: Bool) {
-        log("ai_cry_analysis_requested", parameters: ["baby_id": babyId, "is_pro": isPro])
-    }
-
-    func logAIAssistantOpened(babyId: String, isPro: Bool) {
-        log("ai_assistant_opened", parameters: ["baby_id": babyId, "is_pro": isPro])
-    }
-
-    // MARK: - Legacy/Updated Events
-
-    func logSubscriptionStarted(productId: String, price: String) {
-        // Deprecated: use logSubscriptionPurchased instead
-        logSubscriptionPurchased(productId: productId, price: price)
-    }
-
-    func logCaregiverInviteSent(method: String) {
-        log("caregiver_invite_sent", parameters: ["method": method])
-    }
-
-    func logCaregiverInviteAccepted() {
-        log("caregiver_invite_accepted")
-    }
-}
-
-/// Firebase Analytics implementation
-class FirebaseAnalyticsService: AnalyticsService {
-    private let isEnabled: Bool
-
-    init?() {
-        // Check if Firebase is properly configured
-        guard let _ = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") else {
-            print("[Analytics] Firebase not configured, using console analytics")
-            return nil
-        }
-
-        // Check environment variable
-        let firebaseEnabled = ProcessInfo.processInfo.environment["FIREBASE_ENABLED"] == "true"
-        self.isEnabled = firebaseEnabled
-
-        if isEnabled {
-            print("[Analytics] Firebase Analytics initialized")
-        } else {
-            print("[Analytics] Firebase Analytics disabled via environment")
-        }
-    }
-
-    func logEvent(_ event: String, parameters: [String: Any]?) {
-        guard isEnabled else {
-            // Fallback to console logging
-            if let params = parameters {
-                print("[Analytics] \(event): \(params)")
-            } else {
-                print("[Analytics] \(event)")
-            }
-            return
-        }
-
-        // Convert event name to Firebase-friendly format (alphanumeric + underscore, max 40 chars)
-        let firebaseEventName = event
-            .replacingOccurrences(of: "[^a-zA-Z0-9_]", with: "_", options: .regularExpression)
-            .prefix(40)
-            .description
-
-        // Convert parameters to Firebase-compatible format
-        var firebaseParameters: [String: Any] = [:]
-        if let params = parameters {
-            for (key, value) in params {
-                let firebaseKey = key
-                    .replacingOccurrences(of: "[^a-zA-Z0-9_]", with: "_", options: .regularExpression)
-                    .prefix(40)
-                    .description
-                firebaseParameters[firebaseKey] = value
-            }
-        }
-
-        FirebaseAnalytics.Analytics.logEvent(firebaseEventName, parameters: firebaseParameters.isEmpty ? nil : firebaseParameters)
-    }
-
-    func setUserId(_ userId: String) {
+    /// Track an event with properties (no PII)
+    func track(event: String, properties: [String: Any] = [:]) {
         guard isEnabled else { return }
-        FirebaseAnalytics.Analytics.setUserID(userId)
-    }
-
-    func setUserProperty(_ name: String, value: String) {
-        guard isEnabled else { return }
-        FirebaseAnalytics.Analytics.setUserProperty(value, forName: name)
-    }
-}
-
-/// Console-based analytics (development)
-class ConsoleAnalytics: AnalyticsService {
-    func logEvent(_ event: String, parameters: [String: Any]?) {
-        if let params = parameters {
-            print("[Analytics] \(event): \(params)")
-        } else {
-            print("[Analytics] \(event)")
-        }
-    }
-}
-
-/// Test analytics sink for unit tests
-class TestAnalytics: AnalyticsService {
-    var events: [AnalyticsEvent] = []
-
-    func logEvent(_ event: String, parameters: [String: Any]?) {
-        let analyticsEvent = AnalyticsEvent(
-            name: event,
-            properties: parameters ?? [:]
-        )
+        
+        let analyticsEvent = AnalyticsEvent(name: event, properties: sanitizeProperties(properties))
         events.append(analyticsEvent)
+        
+        // Trim old events to prevent memory growth
+        if events.count > maxEventsInMemory {
+            events.removeFirst(events.count - maxEventsInMemory)
+        }
+        
+        #if DEBUG
+        let propsString = properties.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+        print("[Analytics] \(event) { \(propsString) }")
+        #endif
+        
+        // In production, could batch send to first-party endpoint
+        // For MVP, just log locally for privacy
     }
-
-    func clear() {
-        events.removeAll()
+    
+    /// Sanitize properties to remove PII
+    private func sanitizeProperties(_ properties: [String: Any]) -> [String: Any] {
+        var sanitized = properties
+        
+        // Remove any keys that might contain PII
+        let piiKeys = ["email", "name", "phone", "address", "baby_name"]
+        for key in piiKeys {
+            sanitized.removeValue(forKey: key)
+        }
+        
+        return sanitized
+    }
+    
+    // MARK: - Funnel Tracking
+    
+    /// Onboarding funnel
+    func trackOnboardingStarted() {
+        track(event: "onboarding_started")
+    }
+    
+    func trackOnboardingCompleted(durationSeconds: Int, stepsCompleted: Int) {
+        track(event: "onboarding_completed", properties: [
+            "duration_seconds": durationSeconds,
+            "steps_completed": stepsCompleted
+        ])
+    }
+    
+    func trackOnboardingStepSkipped(stepId: String) {
+        track(event: "onboarding_step_skipped", properties: [
+            "step_id": stepId
+        ])
+    }
+    
+    func trackOnboardingDropoff(stepId: String, timeSpentSeconds: Int) {
+        track(event: "onboarding_dropoff", properties: [
+            "step_id": stepId,
+            "time_spent_seconds": timeSpentSeconds
+        ])
+    }
+    
+    /// First log completion
+    func trackFirstLog(timeFromOnboarding: Int) {
+        track(event: "first_log_completed", properties: [
+            "time_from_onboarding_seconds": timeFromOnboarding
+        ])
+    }
+    
+    /// 7-day retention
+    func track7DayRetention() {
+        track(event: "day_7_retention")
+    }
+    
+    // MARK: - Navigation Events
+    
+    func trackScreenView(screenName: String) {
+        track(event: "screen_view", properties: [
+            "screen_name": screenName
+        ])
+    }
+    
+    func trackNavigation(fromScreen: String, toScreen: String, action: String) {
+        track(event: "navigation", properties: [
+            "from_screen": fromScreen,
+            "to_screen": toScreen,
+            "action": action
+        ])
+    }
+    
+    // MARK: - Core UX Metrics
+    
+    func trackTimeOnScreen(screenName: String, durationSeconds: Int) {
+        track(event: "time_on_screen", properties: [
+            "screen_name": screenName,
+            "duration_seconds": durationSeconds
+        ])
+    }
+    
+    func trackPrimaryActionTaps(actionName: String, tapCount: Int) {
+        track(event: "primary_action_taps", properties: [
+            "action_name": actionName,
+            "tap_count": tapCount
+        ])
+    }
+    
+    func trackUndoAction(actionType: String) {
+        track(event: "undo_action", properties: [
+            "action_type": actionType
+        ])
+    }
+    
+    // MARK: - AI Features
+    
+    func trackAIQuestionSent(questionLength: Int, usedContext: Bool) {
+        track(event: "ai_question_sent", properties: [
+            "question_length": questionLength,
+            "used_context": usedContext
+        ])
+    }
+    
+    func trackAIAnswerShown(containsRedFlag: Bool) {
+        track(event: "ai_answer_shown", properties: [
+            "contains_red_flag_topic": containsRedFlag
+        ])
+    }
+    
+    func trackAIError(errorType: String) {
+        track(event: "ai_error", properties: [
+            "error_type": errorType
+        ])
+    }
+    
+    // MARK: - Cry Analysis
+    
+    func trackCryRecordStarted() {
+        track(event: "cry_record_started")
+    }
+    
+    func trackCryRecordCancelled() {
+        track(event: "cry_record_cancelled")
+    }
+    
+    func trackCryAnalysisCompleted(duration: Int, predictedLabel: String, confidenceBucket: String) {
+        track(event: "cry_analysis_completed", properties: [
+            "duration": duration,
+            "predicted_label": predictedLabel,
+            "confidence_bucket": confidenceBucket
+        ])
+    }
+    
+    func trackCryAnalysisFailed(errorType: String) {
+        track(event: "cry_analysis_failed", properties: [
+            "error_type": errorType
+        ])
+    }
+    
+    // MARK: - Nap Predictions
+    
+    func trackNapSuggestionShown(babyAgeWeeks: Int, hasRecentWake: Bool) {
+        track(event: "nap_suggestion_shown", properties: [
+            "baby_age_weeks": babyAgeWeeks,
+            "has_recent_wake": hasRecentWake
+        ])
+    }
+    
+    func trackNapSuggestionAccepted() {
+        track(event: "nap_suggestion_accepted")
+    }
+    
+    func trackNapSuggestionIgnored() {
+        track(event: "nap_suggestion_ignored")
+    }
+    
+    // MARK: - Notifications
+    
+    func trackNotifTypeEnabled(notifType: String) {
+        track(event: "notif_type_enabled", properties: [
+            "notif_type": notifType
+        ])
+    }
+    
+    func trackNotifFired(notifType: String) {
+        track(event: "notif_fired", properties: [
+            "notif_type": notifType
+        ])
+    }
+    
+    func trackNotifTapOpened(notifType: String) {
+        track(event: "notif_tap_opened", properties: [
+            "notif_type": notifType
+        ])
+    }
+    
+    func trackNotifSnoozed(notifType: String) {
+        track(event: "notif_snoozed", properties: [
+            "notif_type": notifType
+        ])
+    }
+    
+    // MARK: - Caregiver Sharing
+    
+    func trackCaregiverInvited(invitedRole: String) {
+        track(event: "caregiver_invited", properties: [
+            "invited_role": invitedRole
+        ])
+    }
+    
+    func trackCaregiverJoined(role: String) {
+        track(event: "caregiver_joined", properties: [
+            "role": role
+        ])
+    }
+    
+    func trackCaregiverRevoked() {
+        track(event: "caregiver_revoked")
+    }
+    
+    func trackSharedLogCreated(role: String) {
+        track(event: "shared_log_created", properties: [
+            "role": role
+        ])
+    }
+    
+    // MARK: - Sync Events
+    
+    func trackSyncAttempt() {
+        track(event: "sync_attempt")
+    }
+    
+    func trackSyncSuccess() {
+        track(event: "sync_success")
+    }
+    
+    func trackSyncFailure(reason: String) {
+        track(event: "sync_failure", properties: [
+            "reason": reason
+        ])
+    }
+    
+    // MARK: - Timeline/History
+    
+    func trackTimelineViewed(dateOffsetFromToday: Int) {
+        track(event: "timeline_viewed", properties: [
+            "date_offset_from_today": dateOffsetFromToday
+        ])
+    }
+    
+    func trackTimelineEntryOpened(entryType: String) {
+        track(event: "timeline_entry_opened", properties: [
+            "entry_type": entryType
+        ])
+    }
+    
+    // MARK: - Home Dashboard
+    
+    func trackHomeViewed(hasActiveSleep: Bool, hasNapSuggestion: Bool, logsTodayCount: Int) {
+        track(event: "home_viewed", properties: [
+            "has_active_sleep": hasActiveSleep,
+            "has_nap_suggestion": hasNapSuggestion,
+            "logs_today_count": logsTodayCount
+        ])
+    }
+    
+    // MARK: - Accessibility
+    
+    func trackAccessibilityEnabled() {
+        track(event: "accessibility_enabled")
+    }
+    
+    func trackCaregiverModeEnabled(entryPoint: String) {
+        track(event: "caregiver_mode_enabled", properties: [
+            "entry_point": entryPoint
+        ])
+    }
+    
+    func trackCaregiverModeDisabled() {
+        track(event: "caregiver_mode_disabled")
+    }
+    
+    func trackVoiceOverSessionStarted() {
+        track(event: "voiceover_session_started")
+    }
+    
+    // MARK: - Delight Events
+    
+    func trackDelightEvent(type: String) {
+        track(event: "delight_event_triggered", properties: [
+            "type": type
+        ])
+    }
+    
+    // MARK: - Export
+    
+    func trackExportStarted(format: String, dateRangeLengthDays: Int) {
+        track(event: "export_started", properties: [
+            "format": format,
+            "date_range_length_days": dateRangeLengthDays
+        ])
+    }
+    
+    func trackExportCompleted() {
+        track(event: "export_completed")
+    }
+    
+    func trackExportShared() {
+        track(event: "export_shared")
+    }
+    
+    // MARK: - Multiple Babies
+    
+    func trackBabyCreated(babyCountAfterAction: Int) {
+        track(event: "baby_created", properties: [
+            "baby_count_after_action": babyCountAfterAction
+        ])
+    }
+    
+    func trackBabySwitched() {
+        track(event: "baby_switched")
+    }
+    
+    func trackBabyDeleted(babyCountAfterAction: Int) {
+        track(event: "baby_deleted", properties: [
+            "baby_count_after_action": babyCountAfterAction
+        ])
+    }
+    
+    // MARK: - Subscription
+    
+    func trackSubscriptionPurchased(productId: String, price: String) {
+        track(event: "subscription_purchased", properties: [
+            "product_id": productId,
+            "price": price
+        ])
+    }
+    
+    func trackSubscriptionRestored() {
+        track(event: "subscription_restored")
+    }
+    
+    func trackSubscriptionExpired() {
+        track(event: "subscription_expired")
+    }
+    
+    func trackUpgradePromptShown(feature: String, location: String) {
+        track(event: "upgrade_prompt_shown", properties: [
+            "feature": feature,
+            "location": location
+        ])
+    }
+    
+    // MARK: - Analytics Aggregation
+    
+    /// Get event counts for key funnels (for dev dashboard)
+    func getEventCounts() -> [String: Int] {
+        var counts: [String: Int] = [:]
+        
+        for event in events {
+            counts[event.name, default: 0] += 1
+        }
+        
+        return counts
+    }
+    
+    /// Get funnel conversion rates
+    func getFunnelMetrics() -> FunnelMetrics {
+        let onboardingStarted = events.filter { $0.name == "onboarding_started" }.count
+        let onboardingCompleted = events.filter { $0.name == "onboarding_completed" }.count
+        let firstLog = events.filter { $0.name == "first_log_completed" }.count
+        let day7Retention = events.filter { $0.name == "day_7_retention" }.count
+        
+        return FunnelMetrics(
+            onboardingStarted: onboardingStarted,
+            onboardingCompleted: onboardingCompleted,
+            onboardingCompletionRate: onboardingStarted > 0 ? Double(onboardingCompleted) / Double(onboardingStarted) : 0,
+            firstLogCount: firstLog,
+            firstLogRate: onboardingCompleted > 0 ? Double(firstLog) / Double(onboardingCompleted) : 0,
+            day7RetentionCount: day7Retention,
+            day7RetentionRate: firstLog > 0 ? Double(day7Retention) / Double(firstLog) : 0
+        )
     }
 }
 
+/// Funnel metrics for key user journeys
+struct FunnelMetrics {
+    let onboardingStarted: Int
+    let onboardingCompleted: Int
+    let onboardingCompletionRate: Double
+    let firstLogCount: Int
+    let firstLogRate: Double
+    let day7RetentionCount: Int
+    let day7RetentionRate: Double
+}

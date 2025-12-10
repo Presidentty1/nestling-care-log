@@ -8,6 +8,14 @@ struct PrivacyDataView: View {
     @State private var showShareSheet = false
     @State private var csvURL: URL?
     @State private var showImportPicker = false
+    @State private var analyticsEnabled = UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
+    @EnvironmentObject var environment: AppEnvironment
+    @Environment(\.dismiss) var dismiss
+    @State private var showDeleteConfirmation = false
+    @State private var deleteConfirmationText = ""
+    @State private var showShareSheet = false
+    @State private var csvURL: URL?
+    @State private var showImportPicker = false
     
     var body: some View {
         NavigationStack {
@@ -88,6 +96,39 @@ struct PrivacyDataView: View {
                             .padding(.top, .spacingSM)
                         }
                     }
+                    .padding(.horizontal, .spacingMD)
+                    
+                    // Analytics Opt-Out Section
+                    CardView {
+                        VStack(alignment: .leading, spacing: .spacingSM) {
+                            HStack {
+                                Text("Analytics")
+                                    .font(.headline)
+                                    .foregroundColor(.foreground)
+                                
+                                Spacer()
+                                
+                                Toggle("", isOn: $analyticsEnabled)
+                                    .onChange(of: analyticsEnabled) { _, enabled in
+                                        AnalyticsService.shared.setEnabled(enabled)
+                                        Haptics.light()
+                                    }
+                            }
+                            
+                            Text("We collect minimal, privacy-respecting analytics to improve the app. No personal information is tracked. You can turn this off at any time without affecting core app functionality.")
+                                .font(.body)
+                                .foregroundColor(.mutedForeground)
+                        }
+                        .padding(.spacingMD)
+                    }
+                    .padding(.horizontal, .spacingMD)
+                    
+                    // Privacy Explanation Section
+                    InfoBanner(
+                        title: "Your Privacy Matters",
+                        message: "All your data is stored locally on your device. iCloud sync only happens when you explicitly enable family sharing. We never sell your data or use third-party tracking.",
+                        variant: .info
+                    )
                     .padding(.horizontal, .spacingMD)
                     
                     // Delete Section

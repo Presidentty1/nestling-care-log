@@ -1,7 +1,6 @@
 import SwiftUI
 import os.signpost
 import CoreSpotlight
-import FirebaseCore
 
 @main
 struct NuzzleApp: App {
@@ -15,17 +14,10 @@ struct NuzzleApp: App {
     private let launchSignpostID: OSSignpostID
     
     init() {
-        // Initialize Firebase (only if GoogleService-Info.plist exists)
-        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
-           FileManager.default.fileExists(atPath: path) {
-            FirebaseApp.configure()
-            print("✅ Firebase configured successfully")
-        } else {
-            print("⚠️ GoogleService-Info.plist not found - Firebase features will be disabled")
-            print("   To enable Firebase: Add GoogleService-Info.plist to the project")
-        }
-
-        // Initialize crash reporting
+        // Privacy-first: No third-party analytics (Firebase removed)
+        // All analytics are first-party, privacy-respecting, and opt-outable
+        
+        // Initialize crash reporting (first-party only)
         _ = CrashReportingService.shared
 
         // Use DataStoreSelector to choose implementation

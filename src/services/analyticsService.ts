@@ -23,8 +23,24 @@ class AnalyticsService {
     track(event, data);
   }
 
-  trackOnboardingComplete(babyId: string) {
-    this.log('onboarding_completed', { babyId });
+  trackOnboardingStarted() {
+    this.log('onboarding_started');
+  }
+
+  trackOnboardingStepSkipped(stepId: string) {
+    this.log('onboarding_step_skipped', { step_id: stepId });
+  }
+
+  trackOnboardingDropoff(stepId: string, timeSpentSeconds: number) {
+    this.log('onboarding_dropoff', { step_id: stepId, time_spent_seconds: timeSpentSeconds });
+  }
+
+  trackOnboardingComplete(babyId: string, durationSeconds?: number, stepsCompleted?: number) {
+    this.log('onboarding_completed', { 
+      babyId,
+      ...(durationSeconds !== undefined && { duration_seconds: durationSeconds }),
+      ...(stepsCompleted !== undefined && { steps_completed: stepsCompleted })
+    });
   }
 
   trackBabySwitch(babyId: string) {

@@ -21,7 +21,7 @@ export function MilestoneModal({ isOpen, onClose, milestone }: MilestoneModalPro
   const getMilestoneContent = () => {
     if (milestone === 3) {
       return {
-        title: 'You're building a habit! 🎉',
+        title: "You're building a habit! 🎉",
         subtitle: '3 logs completed',
         benefits: [
           {
@@ -40,19 +40,19 @@ export function MilestoneModal({ isOpen, onClose, milestone }: MilestoneModalPro
           {
             icon: Brain,
             title: 'Smart predictions unlocked',
-            description: 'AI now understands your baby's unique patterns and can predict nap times',
+            description: "AI now understands your baby's unique patterns and can predict nap times",
           },
           {
             icon: TrendingUp,
             title: 'Better insights',
-            description: 'You'll start seeing personalized recommendations',
+            description: "You'll start seeing personalized recommendations",
           },
         ],
         cta: 'View predictions',
       };
     } else {
       return {
-        title: 'You're a tracking champion! 🏆',
+        title: "You're a tracking champion! 🏆",
         subtitle: '10 logs completed',
         benefits: [
           {

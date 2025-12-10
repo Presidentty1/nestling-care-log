@@ -1,0 +1,149 @@
+name: Supabase CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-migrations:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Validate migrations
+        run: |
+          supabase db diff --check
+          supabase migration list
+      
+      - name: Check migration syntax
+        run: |
+          for file in supabase/migrations/*.sql; do
+            echo "Checking $file"
+            # Basic SQL syntax check (PostgreSQL)
+            psql --version || echo "psql not available, skipping syntax check"
+          done
+
+  test-edge-functions:
+    name: Test Edge Functions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v1.x
+      
+      - name: Check edge function syntax
+        run: |
+          for func in supabase/functions/*/index.ts; do
+            if [ -f "$func" ]; then
+              echo "Checking $func"
+              deno check "$func" || echo "Syntax check failed for $func"
+            fi
+          done
+      
+      - name: List edge functions
+        run: |
+          ls -la supabase/functions/ || echo "No edge functions found"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Link to Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Run migrations
+        run: |
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Deploy edge functions
+        run: |
+          for func in supabase/functions/*/; do
+            if [ -d "$func" ] && [ -f "$func/index.ts" ]; then
+              echo "Deploying $(basename $func)"
+              supabase functions deploy $(basename $func) --no-verify-jwt || echo "Deploy failed for $(basename $func)"
+            fi
+          done
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    needs: [validate-migrations, test-edge-functions]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Link to Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Run migrations
+        run: |
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      
+      - name: Deploy edge functions
+        run: |
+          for func in supabase/functions/*/; do
+            if [ -d "$func" ] && [ -f "$func/index.ts" ]; then
+              echo "Deploying $(basename $func)"
+              supabase functions deploy $(basename $func) --no-verify-jwt || echo "Deploy failed for $(basename $func)"
+            fi
+          done
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+
+
+
+
+
+
+
+

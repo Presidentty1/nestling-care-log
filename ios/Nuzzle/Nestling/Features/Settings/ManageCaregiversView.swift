@@ -3,6 +3,14 @@ import SwiftUI
 struct ManageCaregiversView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showInviteCaregiver = false
+    @State private var showRevokeConfirm = false
+    @State private var caregiverToRevoke: String?
+    
+    private let relativeDateFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
 
     var body: some View {
         NavigationStack {
@@ -51,12 +59,13 @@ struct ManageCaregiversView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
 
-                    // Current Caregivers Section (placeholder for now)
+                    // Current Caregivers Section
                     VStack(alignment: .leading, spacing: .spacingMD) {
                         Text("Current Access")
                             .font(.headline)
                             .foregroundColor(.foreground)
 
+                        // Owner (you)
                         CardView(variant: .default) {
                             HStack(spacing: .spacingMD) {
                                 Image(systemName: "person.circle.fill")
@@ -87,11 +96,44 @@ struct ManageCaregiversView: View {
                             }
                             .padding(.spacingMD)
                         }
+                        
+                        // Sync status
+                        if CaregiverSyncService.shared.isEnabled {
+                            HStack(spacing: .spacingSM) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.success)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Family sharing enabled")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.foreground)
+                                    
+                                    if let lastSync = CaregiverSyncService.shared.lastSyncTime {
+                                        Text("Last synced: \(lastSync, formatter: relativeDateFormatter)")
+                                            .font(.caption2)
+                                            .foregroundColor(.mutedForeground)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                if CaregiverSyncService.shared.isSyncing {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                        .scaleEffect(0.8)
+                                }
+                            }
+                            .padding(.spacingMD)
+                            .background(Color.success.opacity(0.05))
+                            .cornerRadius(.radiusSM)
+                        }
 
-                        Text("Additional caregiver invites will be available soon.")
-                            .font(.caption)
-                            .foregroundColor(.mutedForeground)
-                            .padding(.horizontal, .spacingMD)
+                        InfoBanner(
+                            title: "Family Sharing",
+                            message: "When you invite a caregiver, logs will sync automatically across all devices via iCloud.",
+                            variant: .info
+                        )
                     }
                 }
                 .padding(.spacing2XL)

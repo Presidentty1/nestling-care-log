@@ -1,0 +1,356 @@
+import SwiftUI
+
+/// AI Assistant chat view
+struct AssistantView: View {
+    @EnvironmentObject var environment: AppEnvironment
+    @StateObject private var viewModel: AssistantViewModel
+    @State private var inputText = ""
+    @State private var isComposing = false
+    @FocusState private var isInputFocused: Bool
+    
+    init() {
+        _viewModel = StateObject(wrappedValue: AssistantViewModel())
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Medical disclaimer banner (sticky at top)
+            MedicalDisclaimer(
+                message: "General guidance only; not a replacement for your pediatrician"
+            )
+            .padding(.spacingMD)
+            .background(Color.surface)
+            
+            // Messages
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: .spacingMD) {
+                        // Welcome message
+                        if viewModel.messages.isEmpty {
+                            welcomeContent
+                        }
+                        
+                        // Message bubbles
+                        ForEach(viewModel.messages) { message in
+                            messageBubble(message)
+                                .id(message.id)
+                        }
+                        
+                        // Loading indicator
+                        if viewModel.isLoading {
+                            HStack(spacing: .spacingSM) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                Text("Thinking...")
+                                    .font(.caption)
+                                    .foregroundColor(.mutedForeground)
+                            }
+                            .padding(.spacingMD)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.spacingMD)
+                }
+                .onChange(of: viewModel.messages.count) { _, _ in
+                    if let lastMessage = viewModel.messages.last {
+                        withAnimation {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+            
+            // Input bar
+            HStack(spacing: .spacingSM) {
+                TextField("Ask a question...", text: $inputText, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .padding(.spacingSM)
+                    .background(Color.surface)
+                    .cornerRadius(.radiusSM)
+                    .focused($isInputFocused)
+                    .disabled(!NetworkMonitor.shared.isConnected)
+                    .accessibilityLabel("Question input")
+                    .accessibilityHint(NetworkMonitor.shared.isConnected ? "Type your question about baby care" : "AI Assistant requires internet connection")
+                
+                Button(action: sendMessage) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(canSend ? .primary : .mutedForeground)
+                }
+                .disabled(!canSend)
+                .accessibilityLabel("Send message")
+                .accessibilityHint("Send your question to the AI assistant")
+            }
+            .padding(.spacingMD)
+            .background(Color.background)
+            
+            // Offline indicator
+            if !NetworkMonitor.shared.isConnected {
+                HStack(spacing: .spacingSM) {
+                    Image(systemName: "wifi.slash")
+                        .font(.caption)
+                    Text("AI Assistant requires internet connection")
+                        .font(.caption)
+                }
+                .foregroundColor(.mutedForeground)
+                .padding(.spacingSM)
+                .frame(maxWidth: .infinity)
+                .background(Color.warning.opacity(0.1))
+            }
+        }
+        .navigationTitle("AI Assistant")
+        .background(Color.background)
+        .onAppear {
+            viewModel.setBaby(environment.currentBaby)
+        }
+    }
+    
+    @ViewBuilder
+    private var welcomeContent: some View {
+        VStack(spacing: .spacingLG) {
+            // Icon
+            Circle()
+                .fill(Color.primary.opacity(0.1))
+                .frame(width: 80, height: 80)
+                .overlay(
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 36))
+                        .foregroundColor(.primary)
+                )
+            
+            // Welcome text
+            VStack(spacing: .spacingSM) {
+                Text("Hi! I'm here to help")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.foreground)
+                
+                Text("Ask me anything about baby care, feeding schedules, sleep tips, or developmental milestones. I'm here to support you.")
+                    .font(.body)
+                    .foregroundColor(.mutedForeground)
+                    .multilineTextAlignment(.center)
+            }
+            
+            // Quick questions
+            VStack(alignment: .leading, spacing: .spacingSM) {
+                Text("Quick questions:")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.mutedForeground)
+                
+                quickQuestionButton("Why is my baby crying?")
+                quickQuestionButton("How much should they eat?")
+                quickQuestionButton("Is this sleep pattern normal?")
+            }
+        }
+        .padding(.spacing2XL)
+    }
+    
+    @ViewBuilder
+    private func quickQuestionButton(_ question: String) -> some View {
+        Button(action: {
+            inputText = question
+            sendMessage()
+        }) {
+            HStack {
+                Text(question)
+                    .font(.body)
+                    .foregroundColor(.foreground)
+                Spacer()
+                Image(systemName: "arrow.up.circle")
+                    .foregroundColor(.primary)
+            }
+            .padding(.spacingMD)
+            .background(Color.surface)
+            .cornerRadius(.radiusMD)
+        }
+    }
+    
+    @ViewBuilder
+    private func messageBubble(_ message: AIMessage) -> some View {
+        HStack(alignment: .top, spacing: .spacingSM) {
+            if message.role == .assistant {
+                // Avatar
+                Circle()
+                    .fill(Color.primary.opacity(0.1))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    )
+            }
+            
+            // Message content
+            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: .spacingSM) {
+                Text(message.content)
+                    .font(.body)
+                    .foregroundColor(message.role == .user ? .white : .foreground)
+                    .padding(.spacingMD)
+                    .background(message.role == .user ? Color.primary : Color.surface)
+                    .cornerRadius(.radiusMD)
+                    .frame(maxWidth: message.role == .user ? .infinity : nil, alignment: message.role == .user ? .trailing : .leading)
+                
+                // Red flag warning
+                if message.role == .assistant && message.containsRedFlag {
+                    HStack(spacing: .spacingSM) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.warning)
+                        
+                        Text("This sounds serious. Please contact your pediatrician immediately.")
+                            .font(.caption)
+                            .foregroundColor(.warning)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.spacingSM)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.warning.opacity(0.1))
+                    .cornerRadius(.radiusSM)
+                }
+            }
+            
+            if message.role == .user {
+                // User avatar
+                Circle()
+                    .fill(Color.mutedForeground.opacity(0.2))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .font(.caption)
+                            .foregroundColor(.mutedForeground)
+                    )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
+    }
+    
+    private var canSend: Bool {
+        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !viewModel.isLoading &&
+        NetworkMonitor.shared.isConnected
+    }
+    
+    private func sendMessage() {
+        let message = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else { return }
+        
+        inputText = ""
+        isInputFocused = false
+        Haptics.light()
+        
+        Task {
+            await viewModel.sendMessage(message, baby: environment.currentBaby, recentEvents: await getRecentEvents())
+        }
+    }
+    
+    private func getRecentEvents() async -> [Event] {
+        guard let baby = environment.currentBaby else { return [] }
+        
+        let twoDaysAgo = Calendar.current.date(byAdding: .day, value: -2, to: Date()) ?? Date()
+        
+        do {
+            return try await environment.dataStore.fetchEvents(for: baby, from: twoDaysAgo, to: Date())
+        } catch {
+            Logger.dataError("Failed to fetch recent events for AI context: \(error.localizedDescription)")
+            return []
+        }
+    }
+}
+
+/// ViewModel for AI Assistant
+@MainActor
+class AssistantViewModel: ObservableObject {
+    @Published var messages: [AIMessage] = []
+    @Published var isLoading = false
+    @Published var error: Error?
+    
+    private var currentBaby: Baby?
+    private var conversationId: UUID?
+    
+    func setBaby(_ baby: Baby?) {
+        self.currentBaby = baby
+        
+        // Load conversation history for this baby
+        if let baby = baby {
+            Task {
+                await loadConversationHistory(for: baby)
+            }
+        }
+    }
+    
+    func sendMessage(_ text: String, baby: Baby?, recentEvents: [Event]) async {
+        guard let baby = baby else { return }
+        
+        // Add user message
+        let userMessage = AIMessage(role: .user, content: text)
+        messages.append(userMessage)
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            // Build prompt with context
+            let prompt = AIContextBuilder.buildPrompt(question: text, baby: baby, recentEvents: recentEvents)
+            
+            // Call AI service
+            let response = try await AIAssistantService.shared.chat(prompt: prompt)
+            
+            // Check for red flags
+            let containsRedFlag = AIContextBuilder.containsRedFlag(text) || AIContextBuilder.containsRedFlag(response)
+            
+            // Add assistant message
+            let assistantMessage = AIMessage(role: .assistant, content: response, containsRedFlag: containsRedFlag)
+            messages.append(assistantMessage)
+            
+            // Save to conversation history
+            await saveConversation(baby: baby)
+            
+            // Track analytics
+            AnalyticsService.shared.track(event: "ai_question_sent", properties: [
+                "question_length": text.count,
+                "used_context": !recentEvents.isEmpty
+            ])
+            
+            AnalyticsService.shared.track(event: "ai_answer_shown", properties: [
+                "contains_red_flag_topic": containsRedFlag
+            ])
+            
+        } catch {
+            self.error = error
+            Logger.dataError("AI assistant error: \(error.localizedDescription)")
+            
+            AnalyticsService.shared.track(event: "ai_error", properties: [
+                "error_type": "network"
+            ])
+            
+            // Add error message
+            let errorMessage = AIMessage(
+                role: .assistant,
+                content: "I'm having trouble connecting right now. Please check your internet connection and try again.",
+                containsRedFlag: false
+            )
+            messages.append(errorMessage)
+        }
+    }
+    
+    private func loadConversationHistory(for baby: Baby) async {
+        // Load from Core Data
+        // For now, start fresh each session
+        messages = []
+        conversationId = UUID()
+    }
+    
+    private func saveConversation(baby: Baby) async {
+        // Save conversation to Core Data
+        // Implementation would store messages persistently
+        Logger.dataInfo("Conversation saved (placeholder)")
+    }
+}
+
+#Preview {
+    NavigationStack {
+        AssistantView()
+            .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
+    }
+}

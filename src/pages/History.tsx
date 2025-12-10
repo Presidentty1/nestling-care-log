@@ -18,6 +18,9 @@ import { DoctorShareModal } from '@/components/DoctorShareModal';
 import { Button } from '@/components/ui/button';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import type { EventType } from '@/types/events';
+import { undoManager } from '@/lib/undoManager';
+import { analyticsService } from '@/services/analyticsService';
+import { track } from '@/analytics/analytics';
 
 export default function History() {
   const { activeBabyId } = useAppStore();
@@ -84,11 +87,75 @@ export default function History() {
 
   const handleDelete = async (eventId: string) => {
     try {
+      // Get event before deleting for undo
+      const eventToDelete = events.find(e => e.id === eventId);
+      if (!eventToDelete) {
+        toast.error('Event not found');
+        return;
+      }
+
+      // Register deletion with undo manager
+      undoManager.registerDeletion(eventToDelete, async () => {
+        // Restore action: recreate the event
+        try {
+          const restoreData: Parameters<typeof eventsService.createEvent>[0] = {
+            baby_id: eventToDelete.baby_id,
+            family_id: eventToDelete.family_id,
+            type: eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time',
+            subtype: eventToDelete.subtype || undefined,
+            amount: eventToDelete.amount || undefined,
+            unit: (eventToDelete.unit as 'ml' | 'oz') || undefined,
+            start_time: eventToDelete.start_time,
+            end_time: eventToDelete.end_time || undefined,
+            duration_min: eventToDelete.duration_min || undefined,
+            duration_sec: eventToDelete.duration_sec || undefined,
+            note: eventToDelete.note || undefined,
+          };
+          await eventsService.createEvent(restoreData);
+          await loadDayData();
+          toast.success('Event restored');
+        } catch (error) {
+          logger.error('Failed to restore event', error, 'History');
+          toast.error('Failed to restore event');
+        }
+      });
+
+      // Delete the event
       await eventsService.deleteEvent(eventId);
-      toast.success('Removed!');
-      loadDayData();
-    } catch (_error) {
+      await loadDayData();
+
+      // Show toast with undo button
+      toast.success('Event deleted', {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            try {
+              await undoManager.undo();
+              analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+              track('undo_action', { action_type: 'event_deleted' });
+            } catch (error) {
+              if (error instanceof Error && error.message.includes('expired')) {
+                toast.error('Undo window has expired');
+              } else {
+                logger.error('Failed to undo deletion', error, 'History');
+                toast.error('Failed to undo');
+              }
+            }
+          },
+        },
+        duration: 7000, // Match undo window
+      });
+
+      // Track analytics
+      analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+      track('event_deleted', {
+        event_type: eventToDelete.type,
+        undo_available: true,
+      });
+    } catch (error) {
+      logger.error('Failed to delete event', error, 'History');
       toast.error("Couldn't remove that. Try again?");
+      undoManager.clear(); // Clear undo if delete failed
     }
   };
 

@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
 import { cn } from '@/lib/utils';
 import { track } from '@/analytics/analytics';
+import { analyticsService } from '@/services/analyticsService';
 import { MESSAGING } from '@/lib/messaging';
 
 export default function Onboarding() {
@@ -29,6 +30,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(0); // 0: Name, 1: DOB, 2: Preferences
   const [onboardingStartTime] = useState(Date.now());
   const [loading, setLoading] = useState(false);
+  const completedRef = useRef(false);
   
   // Form Data
   const [name, setName] = useState('');
@@ -103,9 +105,12 @@ export default function Onboarding() {
       const baby = await dataService.addBaby({ ...babyData, name: sanitizedName });
       setActiveBabyId(baby.id);
       
+      // Mark as completed to prevent dropoff tracking
+      completedRef.current = true;
+      
       // Track onboarding completion
-      const timeSpent = Date.now() - onboardingStartTime;
-      track('onboarding_complete', { steps: 3, timeSpent });
+      const timeSpentSeconds = Math.floor((Date.now() - onboardingStartTime) / 1000);
+      analyticsService.trackOnboardingComplete(baby.id, timeSpentSeconds, 3);
       
       // Store onboarding completion time for first log tracking
       localStorage.setItem('onboardingCompletedAt', Date.now().toString());
@@ -119,6 +124,39 @@ export default function Onboarding() {
       setLoading(false);
     }
   };
+
+  // Track onboarding started on mount
+  useEffect(() => {
+    analyticsService.trackOnboardingStarted();
+  }, []);
+
+  // Track dropoff if user navigates away before completing
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!completedRef.current) {
+        const timeSpent = Math.floor((Date.now() - onboardingStartTime) / 1000);
+        const stepId = step === 0 ? 'name' : step === 1 ? 'dob' : 'preferences';
+        if (timeSpent > 0) {
+          analyticsService.trackOnboardingDropoff(stepId, timeSpent);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Track dropoff on unmount if not completed (e.g., browser back button)
+      if (!completedRef.current) {
+        const timeSpent = Math.floor((Date.now() - onboardingStartTime) / 1000);
+        const stepId = step === 0 ? 'name' : step === 1 ? 'dob' : 'preferences';
+        if (timeSpent > 0) {
+          // Use sendBeacon for reliable tracking on page unload
+          analyticsService.trackOnboardingDropoff(stepId, timeSpent);
+        }
+      }
+    };
+  }, [step, onboardingStartTime]);
 
   // Focus input after mount to prevent keyboard lag
   useEffect(() => {

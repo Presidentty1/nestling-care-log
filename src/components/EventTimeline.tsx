@@ -3,17 +3,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Milk, Moon, Baby as BabyIcon, Trash2, Edit } from 'lucide-react';
 import { formatDistanceToNow, format, isToday } from 'date-fns';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { undoManager } from '@/lib/undoManager';
+import { eventsService } from '@/services/eventsService';
+import { analyticsService } from '@/services/analyticsService';
+import { track } from '@/analytics/analytics';
+import { logger } from '@/lib/logger';
 
 interface EventTimelineProps {
   events: BabyEvent[];
@@ -67,7 +63,79 @@ const eventColors = {
 };
 
 export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const handleDeleteWithUndo = async (eventId: string) => {
+    try {
+      // Get event before deleting for undo
+      const eventToDelete = events.find(e => e.id === eventId);
+      if (!eventToDelete) {
+        toast.error('Event not found');
+        return;
+      }
+
+      // Register deletion with undo manager
+      undoManager.registerDeletion(eventToDelete, async () => {
+        // Restore action: recreate the event
+        try {
+          const restoreData: Parameters<typeof eventsService.createEvent>[0] = {
+            baby_id: eventToDelete.baby_id,
+            family_id: eventToDelete.family_id,
+            type: eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time',
+            subtype: eventToDelete.subtype || undefined,
+            amount: eventToDelete.amount || undefined,
+            unit: (eventToDelete.unit as 'ml' | 'oz') || undefined,
+            start_time: eventToDelete.start_time,
+            end_time: eventToDelete.end_time || undefined,
+            duration_min: eventToDelete.duration_min || undefined,
+            duration_sec: eventToDelete.duration_sec || undefined,
+            note: eventToDelete.note || undefined,
+          };
+          await eventsService.createEvent(restoreData);
+          toast.success('Event restored');
+          // Parent component should refresh via React Query or eventsService subscription
+        } catch (error) {
+          logger.error('Failed to restore event', error, 'EventTimeline');
+          toast.error('Failed to restore event');
+        }
+      });
+
+      // Delete the event
+      await eventsService.deleteEvent(eventId);
+      onDelete(eventId); // Notify parent
+
+      // Show toast with undo button
+      toast.success('Event deleted', {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            try {
+              await undoManager.undo();
+              analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+              track('undo_action', { action_type: 'event_deleted' });
+            } catch (error) {
+              if (error instanceof Error && error.message.includes('expired')) {
+                toast.error('Undo window has expired');
+              } else {
+                logger.error('Failed to undo deletion', error, 'EventTimeline');
+                toast.error('Failed to undo');
+              }
+            }
+          },
+        },
+        duration: 7000, // Match undo window
+      });
+
+      // Track analytics
+      analyticsService.trackEventDeleted(eventId, eventToDelete.type as 'feed' | 'sleep' | 'diaper' | 'tummy_time');
+      track('event_deleted', {
+        event_type: eventToDelete.type,
+        undo_available: true,
+      });
+    } catch (error) {
+      logger.error('Failed to delete event', error, 'EventTimeline');
+      toast.error('Failed to delete event');
+      undoManager.clear(); // Clear undo if delete failed
+    }
+  };
   
   if (events.length === 0) {
     return (
@@ -172,7 +240,7 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setDeleteId(event.id)}
+                                  onClick={() => handleDeleteWithUndo(event.id)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -190,29 +258,6 @@ export function EventTimeline({ events, onEdit, onDelete }: EventTimelineProps) 
         })}
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this event? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (deleteId) {
-                  onDelete(deleteId);
-                  setDeleteId(null);
-                }
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

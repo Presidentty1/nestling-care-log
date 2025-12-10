@@ -18,7 +18,7 @@ export function ProgressionCard({ currentLogs }: ProgressionCardProps) {
     {
       logsRequired: 5,
       title: 'Smart Predictions',
-      description: 'AI learns your baby's unique patterns',
+      description: "AI learns your baby's unique patterns",
       icon: Brain,
       unlocked: currentLogs >= 5,
     },
