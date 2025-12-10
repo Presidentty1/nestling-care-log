@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:swift": "swiftlint --config ios/.swiftlint.yml",
+    "lint:swift": "cd ios && swiftlint lint --config .swiftlint.yml",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

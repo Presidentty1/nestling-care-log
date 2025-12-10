@@ -82,12 +82,9 @@ excluded:
   - '**/*+CoreDataProperties.swift'
   - '**/*+CoreDataClass.swift'
 
-# Included file types
+# Included file types (relative to ios/ directory)
 included:
-  - Sources
-  - ios/Nuzzle
-  - ios/Nestling
-  - ios/Sources
+  - Nuzzle/Nestling
 
 # Reporter configuration
 reporter: 'xcode' # Xcode-compatible output

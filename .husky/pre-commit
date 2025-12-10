@@ -1,11 +1,22 @@
 #!/usr/bin/env sh
 # . "$(dirname -- "$0")/_/husky.sh"
 
+# Ensure swiftlint is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
 # Simplified pre-commit hook - run lint-staged for incremental checks
 npx lint-staged
 
 # Run TypeScript type checking (non-blocking)
 echo "🔷 Running TypeScript type check..."
 npm run type-check || echo "⚠️  Type check had issues, but allowing commit"
+
+# Run SwiftLint if available (optional for iOS development)
+if command -v swiftlint >/dev/null 2>&1; then
+  echo "🐦 Running SwiftLint..."
+  npm run lint:swift || echo "⚠️  SwiftLint had warnings, but allowing commit"
+else
+  echo "⚠️  SwiftLint not installed, skipping Swift code linting"
+fi
 
 echo "Pre-commit checks complete! ✅"
