@@ -50,8 +50,8 @@ class PredictionsEngine {
             let avgNapDuration = napDurations.isEmpty ? 0 : napDurations.reduce(0, +) / Double(napDurations.count)
             
             // Find typical nap times (group by hour of day)
-            _ = Calendar.current
-            _ = sleepEvents.compactMap { event -> Int? in
+            let calendar = Calendar.current
+            let _ = sleepEvents.compactMap { event -> Int? in
                 guard let endTime = event.endTime else { return nil }
                 return calendar.component(.hour, from: endTime)
             }
@@ -153,7 +153,7 @@ class PredictionsEngine {
             } else {
                 predictedTime = lastFeed.startTime.addingTimeInterval(avgInterval * 3600)
                 confidence = 0.75
-                _ = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
+                let timeSinceLastFeed = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
                 let hoursUntilNextFeed = (predictedTime.timeIntervalSinceNow) / 3600.0
                 if hoursUntilNextFeed <= 0 {
                     explanation = "Based on \(baby.name)'s typical \(String(format: "%.1f", avgInterval))-hour feeding pattern, feed is due now."
@@ -166,7 +166,7 @@ class PredictionsEngine {
             predictedTime = FeedSpacingCalculator.nextFeedTime(lastFeed: lastFeed.startTime, baby: baby)
             confidence = FeedSpacingCalculator.confidence(lastFeed: lastFeed.startTime, baby: baby)
             
-            _ = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
+            let timeSinceLastFeed = Date().timeIntervalSince(lastFeed.startTime) / 3600.0
             let hoursUntilNextFeed = (predictedTime.timeIntervalSinceNow) / 3600.0
             
             if hoursUntilNextFeed <= 0 {

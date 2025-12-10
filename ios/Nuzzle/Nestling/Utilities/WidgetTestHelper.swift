@@ -85,7 +85,7 @@ class WidgetTestHelper {
     /// Test widget data persistence
     /// - Parameter data: Data to persist
     static func testDataPersistence(data: [String: Any]) {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
             print("[Widget] ❌ Cannot test persistence: App Groups not configured")
             return
         }
@@ -103,7 +103,7 @@ class WidgetTestHelper {
     
     /// Clear widget test data
     static func clearTestData() {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling") else {
             return
         }
         

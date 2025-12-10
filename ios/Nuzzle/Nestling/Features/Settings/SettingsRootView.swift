@@ -23,6 +23,14 @@ struct SettingsRootView: View {
             return "Free Plan"
         }
     }
+    
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
 
     var body: some View {
         NavigationStack {
@@ -90,6 +98,9 @@ struct SettingsRootView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
+                        Task {
+                            await Analytics.shared.logPaywallViewed(source: "settings")
+                        }
                         showProSubscription = true
                     }
                 }
@@ -320,6 +331,39 @@ struct SettingsRootView: View {
                     }
                 }
                 #endif
+                
+                // Legal & Version footer
+                Section {
+                    HStack(spacing: .spacingMD) {
+                        Button("Privacy Policy") {
+                            if let url = URL(string: "https://nuzzleapp.com/privacy") {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.mutedForeground)
+                        
+                        Button("Terms of Use") {
+                            if let url = URL(string: "https://nuzzleapp.com/terms") {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                    
+                    Text("Nuzzle v\(appVersion) (\(buildNumber))")
+                        .font(.caption2)
+                        .foregroundColor(.mutedForeground)
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                }
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showAIDataSharing) {

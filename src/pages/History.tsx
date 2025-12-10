@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Share } from 'lucide-react';
 import { MobileNav } from '@/components/MobileNav';
 import { DayStrip } from '@/components/history/DayStrip';
 import { DaySummary } from '@/components/history/DaySummary';
@@ -11,15 +8,13 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { TimelineList } from '@/components/today/TimelineList';
 import { useAppStore } from '@/store/appStore';
-import type { EventRecord } from '@/services/eventsService';
-import { eventsService } from '@/services/eventsService';
+import { eventsService, type EventRecord } from '@/services/eventsService';
 import { babyService } from '@/services/babyService';
 import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { startOfDay, endOfDay } from 'date-fns';
 import type { DailySummary } from '@/types/summary';
 import { DoctorShareModal } from '@/components/DoctorShareModal';
-import { Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EventSheet } from '@/components/sheets/EventSheet';
 import type { EventType } from '@/types/events';
@@ -34,24 +29,13 @@ export default function History() {
   const [babySex, setBabySex] = useState<string>('');
   const [babyBirthDate, setBabyBirthDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showDoctorShareModal, setShowDoctorShareModal] = useState(false);
   const [editModalState, setEditModalState] = useState<{ open: boolean; event: EventRecord | null }>({
     open: false,
     event: null,
   });
 
-  useEffect(() => {
-    if (!activeBabyId) return;
-    loadBaby();
-  }, [activeBabyId]);
-
-  useEffect(() => {
-    if (!activeBabyId) return;
-    loadDayData();
-  }, [activeBabyId, selectedDate]);
-
-  const loadBaby = async () => {
+  const loadBaby = useCallback(async () => {
     if (!activeBabyId) return;
     const baby = await babyService.getBaby(activeBabyId);
     if (baby) {
@@ -60,9 +44,9 @@ export default function History() {
       setBabyBirthDate(baby.date_of_birth);
       setFamilyId(baby.family_id); // Set familyId from baby data
     }
-  };
+  }, [activeBabyId]);
 
-  const loadDayData = async () => {
+  const loadDayData = useCallback(async () => {
     if (!activeBabyId) return;
     
     setLoading(true);
@@ -86,14 +70,24 @@ export default function History() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeBabyId, selectedDate]);
+
+  useEffect(() => {
+    if (!activeBabyId) return;
+    loadBaby();
+  }, [activeBabyId, loadBaby]);
+
+  useEffect(() => {
+    if (!activeBabyId) return;
+    loadDayData();
+  }, [activeBabyId, selectedDate, loadDayData]);
 
   const handleDelete = async (eventId: string) => {
     try {
       await eventsService.deleteEvent(eventId);
       toast.success('Removed!');
       loadDayData();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Couldn't remove that. Try again?");
     }
   };
@@ -139,32 +133,11 @@ export default function History() {
           </Button>
         </div>
 
-        {/* Day Strip with Calendar */}
+        {/* Day Strip */}
         <DayStrip 
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
-          onOpenCalendar={() => setIsCalendarOpen(true)}
         />
-
-        {/* Calendar Picker */}
-        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <PopoverTrigger asChild>
-            <div className="hidden" />
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="center">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => {
-                if (date) {
-                  setSelectedDate(date);
-                  setIsCalendarOpen(false);
-                }
-              }}
-              disabled={(date) => date > new Date()}
-            />
-          </PopoverContent>
-        </Popover>
 
         {/* Loading State */}
         {loading && (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,16 +17,18 @@ import { validateBaby } from '@/services/validation';
 import { toast } from 'sonner';
 import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
 import { cn } from '@/lib/utils';
-import { trackOnboardingComplete } from '@/analytics/analytics';
+import { track } from '@/analytics/analytics';
 import { MESSAGING } from '@/lib/messaging';
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const { setActiveBabyId } = useAppStore();
+  const nameInputRef = useRef<HTMLInputElement>(null);
   
   // State - Reduced to 3 steps for faster onboarding
   const [step, setStep] = useState(0); // 0: Name, 1: DOB, 2: Preferences
   const [onboardingStartTime] = useState(Date.now());
+  const [loading, setLoading] = useState(false);
   
   // Form Data
   const [name, setName] = useState('');
@@ -39,7 +41,7 @@ export default function Onboarding() {
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateStep = (currentStep: number): boolean => {
+  const validateStep = useCallback((currentStep: number): boolean => {
     const newErrors: Record<string, string> = {};
     
     if (currentStep === 0) {
@@ -65,7 +67,7 @@ export default function Onboarding() {
     
     setErrors({});
     return true;
-  };
+  }, [name, dob]);
 
   const nextStep = () => {
     if (validateStep(step)) {
@@ -80,6 +82,7 @@ export default function Onboarding() {
   const handleCreateBaby = async () => {
     if (!validateStep(step)) return;
     
+    setLoading(true);
     try {
       const babyData = {
         name: name.trim(),
@@ -92,6 +95,7 @@ export default function Onboarding() {
       const validation = validateBaby(babyData);
       if (!validation.success) {
         toast.error('Please check your input');
+        setLoading(false);
         return;
       }
       
@@ -101,7 +105,7 @@ export default function Onboarding() {
       
       // Track onboarding completion
       const timeSpent = Date.now() - onboardingStartTime;
-      trackOnboardingComplete(3, timeSpent);
+      track('onboarding_complete', { steps: 3, timeSpent });
       
       // Store onboarding completion time for first log tracking
       localStorage.setItem('onboardingCompletedAt', Date.now().toString());
@@ -112,8 +116,44 @@ export default function Onboarding() {
     } catch (error) {
       logger.error('Failed to create baby', error, 'Onboarding');
       toast.error('Could not create profile. Please try again.');
+      setLoading(false);
     }
   };
+
+  // Focus input after mount to prevent keyboard lag
+  useEffect(() => {
+    if (step === 0 && nameInputRef.current) {
+      // Small delay to ensure component is fully rendered
+      const timer = setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
+  // Handle name input - sanitize only on blur
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (errors.name) {
+      setErrors(prev => ({ ...prev, name: '' }));
+    }
+  }, [errors.name]);
+
+  const handleNameBlur = useCallback(() => {
+    const sanitized = sanitizeBabyName(name);
+    if (sanitized !== name) {
+      setName(sanitized);
+    }
+  }, [name]);
+
+  // Memoize radio button handlers
+  const handleSexChange = useCallback((value: string) => {
+    setSex(value as 'm' | 'f' | 'other');
+  }, []);
+
+  const handleUnitsChange = useCallback((value: 'metric' | 'imperial') => {
+    setUnits(value);
+  }, []);
 
   // Step 0: Name (with inline value messaging)
   if (step === 0) {
@@ -138,16 +178,15 @@ export default function Onboarding() {
           <div className="space-y-2">
             <Label htmlFor="name" className="text-base font-semibold">Baby's Name</Label>
             <Input
+              ref={nameInputRef}
               id="name"
               value={name}
-              onChange={(e) => {
-                setName(sanitizeBabyName(e.target.value));
-                if (errors.name) setErrors({ ...errors, name: '' });
-              }}
+              onChange={handleNameChange}
+              onBlur={handleNameBlur}
               placeholder="Enter name"
               className="h-16 text-lg px-4 bg-surface border-2 border-border focus-visible:border-primary transition-colors"
-              autoFocus
               autoComplete="off"
+              inputMode="text"
               maxLength={40}
             />
             {errors.name && (
@@ -276,7 +315,7 @@ export default function Onboarding() {
                   ? "border-primary bg-primary/10 shadow-sm" 
                   : "border-border bg-surface hover:border-primary/40"
               )}
-              onClick={() => setUnits('imperial')}
+              onClick={() => handleUnitsChange('imperial')}
             >
               <div className="font-semibold text-base mb-1.5">Imperial</div>
               <div className="text-sm text-muted-foreground">lb, oz, in</div>
@@ -290,7 +329,7 @@ export default function Onboarding() {
                   ? "border-primary bg-primary/10 shadow-sm" 
                   : "border-border bg-surface hover:border-primary/40"
               )}
-              onClick={() => setUnits('metric')}
+              onClick={() => handleUnitsChange('metric')}
             >
               <div className="font-semibold text-base mb-1.5">Metric</div>
               <div className="text-sm text-muted-foreground">kg, g, cm</div>
@@ -300,7 +339,7 @@ export default function Onboarding() {
 
         <div className="space-y-3">
           <Label className="text-base font-semibold">Sex (Optional)</Label>
-          <RadioGroup value={sex} onValueChange={(v) => setSex(v as any)} className="grid grid-cols-3 gap-3">
+          <RadioGroup value={sex} onValueChange={handleSexChange} className="grid grid-cols-3 gap-3">
             <div>
               <RadioGroupItem value="m" id="male" className="peer sr-only" />
               <Label 

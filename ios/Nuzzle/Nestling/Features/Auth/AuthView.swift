@@ -49,8 +49,8 @@ struct AuthView: View {
                             .foregroundColor(.mutedForeground)
                             .multilineTextAlignment(.center)
                         
-                        // Pricing transparency
-                        Text("Free forever • Premium from $4.99/mo")
+                        // Pricing transparency with trial callout
+                        Text("7-day free trial • Then $5.99/mo")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.eventFeed)
@@ -243,6 +243,30 @@ struct AuthView: View {
                                     .multilineTextAlignment(.center)
                             }
                             .font(.subheadline)
+                            .foregroundColor(.mutedForeground)
+                        }
+                        .padding(.bottom, .spacingSM)
+                        
+                        // Legal links
+                        HStack(spacing: .spacingMD) {
+                            Button("Privacy Policy") {
+                                if let url = URL(string: "https://nuzzleapp.com/privacy") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                            
+                            Text("•")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
+                            
+                            Button("Terms of Use") {
+                                if let url = URL(string: "https://nuzzleapp.com/terms") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .font(.caption2)
                             .foregroundColor(.mutedForeground)
                         }
                         .padding(.bottom, .spacingMD)

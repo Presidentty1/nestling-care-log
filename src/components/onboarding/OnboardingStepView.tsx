@@ -34,15 +34,33 @@ export function OnboardingStepView({
   children
 }: OnboardingStepViewProps) {
   
-  const handlePrimaryClick = async () => {
+  const handlePrimaryClick = () => {
     if (!primaryAction.disabled && !primaryAction.loading) {
-      await Haptics.impact({ style: ImpactStyle.Light });
+      // Defer haptic feedback to avoid blocking UI
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        }, { timeout: 100 });
+      } else {
+        setTimeout(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        }, 0);
+      }
       primaryAction.onClick();
     }
   };
 
-  const handleSecondaryClick = async () => {
-    await Haptics.impact({ style: ImpactStyle.Light });
+  const handleSecondaryClick = () => {
+    // Defer haptic feedback to avoid blocking UI
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        Haptics.impact({ style: ImpactStyle.Light });
+      }, { timeout: 100 });
+    } else {
+      setTimeout(() => {
+        Haptics.impact({ style: ImpactStyle.Light });
+      }, 0);
+    }
     secondaryAction?.onClick();
   };
 

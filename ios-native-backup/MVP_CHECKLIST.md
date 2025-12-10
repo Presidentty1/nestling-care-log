@@ -320,7 +320,7 @@ All core MVP features are **fully implemented** and ready for Xcode project setu
 
 4. **App Groups** (for widgets/extensions)
    - Configure App Groups capability
-   - Set group identifier: `group.com.nestling.app`
+   - Set group identifier: `group.com.nestling.Nestling`
    - Test widget functionality
 
 ### Post-MVP Enhancements

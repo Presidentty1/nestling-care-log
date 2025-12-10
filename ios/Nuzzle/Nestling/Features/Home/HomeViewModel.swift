@@ -554,7 +554,7 @@ class HomeViewModel: ObservableObject {
 
                 // Save last used duration for future reference (but don't use it for quick log timestamp)
                 if let lastUsed = try? await dataStore.getLastUsedValues(for: .tummyTime),
-                   _ = lastUsed.durationMinutes {
+                   let _ = lastUsed.durationMinutes {
                     // Keep existing last used values
                 } else {
                     // Save default duration for future reference

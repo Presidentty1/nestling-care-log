@@ -79,6 +79,11 @@ struct GoalSelectionView: View {
             }
         }
         .background(Color.background)
+        .onAppear {
+            Task {
+                await Analytics.shared.logOnboardingStepViewed(step: "goal_selection")
+            }
+        }
     }
 }
 

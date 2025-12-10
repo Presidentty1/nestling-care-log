@@ -172,6 +172,29 @@ struct HeroNapCard: View {
         return daysSinceBirth < 7 || daysSinceInstall < 7
     }
     
+    private var isPro: Bool {
+        ProSubscriptionService.shared.isProUser
+    }
+    
+    private var predictionSource: String {
+        if isPro {
+            return "Based on \(baby.name)'s patterns"
+        } else {
+            return "Typical for \(ageDescription)"
+        }
+    }
+    
+    private var ageDescription: String {
+        let months = Calendar.current.dateComponents([.month], from: baby.dateOfBirth, to: Date()).month ?? 0
+        if months == 0 {
+            return "newborns"
+        } else if months == 1 {
+            return "1-month-olds"
+        } else {
+            return "\(months)-month-olds"
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingMD) {
             HStack {
@@ -186,7 +209,7 @@ struct HeroNapCard: View {
                 Spacer()
                 
                 // Pro badge for personalized predictions (free users see age-based, Pro see personalized)
-                if ProSubscriptionService.shared.isProUser {
+                if isPro {
                     HStack(spacing: 4) {
                         Image(systemName: "star.fill")
                             .font(.system(size: 10))
@@ -202,13 +225,18 @@ struct HeroNapCard: View {
             }
             
             Text(formatNapWindow(napWindow))
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.foreground)
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
             
             Text(formatTimeUntil(napWindow))
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.foreground)
+            
+            // Source subtitle
+            Text(predictionSource)
+                .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.mutedForeground)
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)

@@ -2,7 +2,28 @@ import SwiftUI
 
 struct FirstLogCard: View {
     let onLog: () -> Void
+    let userGoal: String?
     @State private var pulse = false
+    
+    init(onLog: @escaping () -> Void, userGoal: String? = nil) {
+        self.onLog = onLog
+        self.userGoal = userGoal
+    }
+    
+    private var cardConfig: (title: String, emoji: String, buttonText: String, icon: String) {
+        switch userGoal {
+        case "sleep":
+            return ("Welcome! Let's track your first nap together", "😴", "Log First Nap", "moon.fill")
+        case "feeding":
+            return ("Welcome! Let's track your first feed together", "🍼", "Log First Feed", "drop.fill")
+        case "health":
+            return ("Welcome! Let's log your baby's health", "📊", "Log First Event", "heart.text.square.fill")
+        case "survive":
+            return ("You've got this! Let's log together", "💪", "Start Tracking", "sparkles")
+        default:
+            return ("Welcome! Let's track your first feed together", "🍼", "Log First Feed", "drop.fill")
+        }
+    }
     
     var body: some View {
         Button(action: {
@@ -17,13 +38,13 @@ struct FirstLogCard: View {
                         .frame(width: 80, height: 80)
                         .scaleEffect(pulse ? 1.1 : 1.0)
                     
-                    Image(systemName: "sparkles")
+                    Image(systemName: cardConfig.icon)
                         .font(.system(size: 36))
                         .foregroundColor(.primary)
                 }
                 
                 VStack(spacing: .spacingSM) {
-                    Text("Welcome! Let's track your first feed together 🍼")
+                    Text("\(cardConfig.title) \(cardConfig.emoji)")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.foreground)
                         .multilineTextAlignment(.center)
@@ -35,7 +56,7 @@ struct FirstLogCard: View {
                 
                 // Action button
                 HStack {
-                    Text("Log First Feed")
+                    Text(cardConfig.buttonText)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                     

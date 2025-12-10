@@ -146,7 +146,7 @@ ios/
 ### Optional (Post-MVP)
 
 1. **App Groups** (for widgets/extensions)
-   - Add capability: `group.com.nestling.app`
+   - Add capability: `group.com.nestling.Nestling`
    - Required for widgets, Live Activities
 
 2. **Core Data model** (already exists, just needs linking)

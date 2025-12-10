@@ -1,16 +1,19 @@
-import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
-import { format, subDays, isSameDay, isToday, isFuture } from 'date-fns';
+import { format, subDays, isSameDay, isToday, isFuture, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface DayStripProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
-  onOpenCalendar: () => void;
+  onOpenCalendar?: () => void;
 }
 
-export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStripProps) {
-  const days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
+export function DayStrip({ selectedDate, onDateSelect }: DayStripProps) {
+  // Generate 7 days: 6 days ago to today (left to right, oldest to newest)
+  const today = startOfDay(new Date());
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const day = subDays(today, 6 - i);
+    return startOfDay(day);
+  });
 
   return (
     <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
@@ -18,7 +21,10 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
         {days.map((day) => {
           const isSelected = isSameDay(day, selectedDate);
           const isDisabled = isFuture(day);
-          const today = isToday(day);
+          const isTodayDate = isToday(day);
+          
+          // Show month abbreviation if it's the first day or if month changes
+          const showMonth = day.getDate() === 1 || (days.indexOf(day) > 0 && day.getMonth() !== days[days.indexOf(day) - 1]?.getMonth());
 
           return (
             <button
@@ -31,7 +37,7 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
                 isSelected && 'border-primary bg-primary/10 shadow-sm',
                 !isSelected && 'border-border bg-surface hover:border-primary/40',
                 isDisabled && 'opacity-40 cursor-not-allowed',
-                today && !isSelected && 'border-primary/30 bg-primary/5'
+                isTodayDate && !isSelected && 'border-primary/30 bg-primary/5'
               )}
             >
               <span className={cn(
@@ -46,22 +52,21 @@ export function DayStrip({ selectedDate, onDateSelect, onOpenCalendar }: DayStri
               )}>
                 {format(day, 'd')}
               </span>
-              {today && (
+              {showMonth && (
+                <span className={cn(
+                  'text-[9px] font-medium mt-0.5',
+                  isSelected ? 'text-primary' : 'text-muted-foreground'
+                )}>
+                  {format(day, 'MMM')}
+                </span>
+              )}
+              {isTodayDate && !showMonth && (
                 <span className="text-[9px] font-semibold text-primary mt-0.5">Today</span>
               )}
             </button>
           );
         })}
       </div>
-
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onOpenCalendar}
-        className="shrink-0 h-[72px] w-[72px] rounded-2xl border-2"
-      >
-        <Calendar className="h-6 w-6" />
-      </Button>
     </div>
   );
 }

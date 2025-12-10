@@ -18,6 +18,7 @@ struct HomeContentView: View {
         ScrollView {
             VStack(spacing: .spacingXL) {
                 babySelectorSection
+                trialBannerSection
                 firstLogSection
                 statusTilesSection
                 
@@ -63,31 +64,53 @@ struct HomeContentView: View {
             BabySelectorView(baby: baby, babies: environment.babies) { selectedBaby in
                 onBabySelected(selectedBaby)
             }
-            .padding(.horizontal, .spacingMD)
+            .padding(.horizontal, CGFloat.spacingMD)
+        }
+    }
+    
+    @ViewBuilder
+    private var trialBannerSection: some View {
+        // Show trial banner if user is in trial and not Pro
+        if let daysRemaining = ProSubscriptionService.shared.trialDaysRemaining,
+           daysRemaining > 0,
+           !ProSubscriptionService.shared.isProUser {
+            TrialBannerView(daysRemaining: daysRemaining) {
+                Task {
+                    await Analytics.shared.logPaywallViewed(source: "trial_banner_home")
+                }
+                showProSubscription = true
+            }
+            .padding(.horizontal, CGFloat.spacingMD)
         }
     }
     
     @ViewBuilder
     private var firstLogSection: some View {
         if !viewModel.hasAnyEvents {
-            FirstLogCard {
-                print("🔵 HomeContentView: First log card tapped")
-                showFeedForm = true
-            }
-            .padding(.horizontal, .spacingMD)
+            FirstLogCard(
+                onLog: {
+                    print("🔵 HomeContentView: First log card tapped")
+                    showFeedForm = true
+                },
+                userGoal: viewModel.userGoal
+            )
+            .padding(.horizontal, CGFloat.spacingMD)
         } else if shouldShowTasksChecklist {
             // Phase 3: Show tasks checklist after first log
             FirstTasksChecklistCard(
                 hasLoggedFeed: hasLoggedFeedEvent,
                 hasLoggedSleep: hasLoggedSleepEvent,
                 onExploreAI: {
+                    Task {
+                        await Analytics.shared.logPaywallViewed(source: "first_tasks_checklist")
+                    }
                     showProSubscription = true
                 },
                 onDismiss: {
                     UserDefaults.standard.set(true, forKey: "hasDissmissedTasksChecklist")
                 }
             )
-            .padding(.horizontal, .spacingMD)
+            .padding(.horizontal, CGFloat.spacingMD)
         }
     }
     
@@ -123,7 +146,7 @@ struct HomeContentView: View {
     private var guidanceStripSection: some View {
         if let baby = environment.currentBaby {
             GuidanceStripView(dataStore: environment.dataStore, baby: baby)
-                .padding(.horizontal, .spacingMD)
+                .padding(.horizontal, CGFloat.spacingMD)
         }
     }
     
@@ -132,13 +155,13 @@ struct HomeContentView: View {
         if let topRecommendation = viewModel.recommendations.first {
             FeatureGate.check(.todaysInsight, accessible: {
                 TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, .spacingMD)
+                    .padding(.horizontal, CGFloat.spacingMD)
                     .onTapGesture {
                         Haptics.light()
                     }
             }, paywall: {
                 TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, .spacingMD)
+                    .padding(.horizontal, CGFloat.spacingMD)
                     .blur(radius: 4)
                     .overlay(
                         Color.background.opacity(0.3)
@@ -146,14 +169,20 @@ struct HomeContentView: View {
                                 VStack {
                                     Spacer()
                                     PrimaryButton("Upgrade to Pro", icon: "star.fill") {
+                                        Task {
+                                            await Analytics.shared.logPaywallViewed(source: "todays_insight_card")
+                                        }
                                         showProSubscription = true
                                     }
-                                    .padding(.horizontal, .spacingMD)
+                                    .padding(.horizontal, CGFloat.spacingMD)
                                     Spacer()
                                 }
                             )
                     )
                     .onTapGesture {
+                        Task {
+                            await Analytics.shared.logPaywallViewed(source: "todays_insight_card_tap")
+                        }
                         showProSubscription = true
                     }
             })
@@ -164,7 +193,7 @@ struct HomeContentView: View {
     private var streaksSection: some View {
         if viewModel.currentStreak > 0 || viewModel.longestStreak > 0 {
             StreaksView(currentStreak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
-                .padding(.horizontal, .spacingMD)
+                .padding(.horizontal, CGFloat.spacingMD)
         }
     }
     
@@ -200,7 +229,7 @@ struct HomeContentView: View {
                 showCryRecorder = true
             }
         )
-        .padding(.horizontal, .spacingMD)
+        .padding(.horizontal, CGFloat.spacingMD)
     }
     
     @ViewBuilder
@@ -221,11 +250,9 @@ struct HomeContentView: View {
                 )
                 .frame(height: 200)
             } else {
-                // Example data banner (Epic 1 AC7)
-                if viewModel.filteredEvents.count > 0 && viewModel.baby.createdAt > Date().addingTimeInterval(-86400) {
-                    ExampleDataBanner()
-                        .padding(.horizontal, .spacingMD)
-                }
+                // Progress indicator banner - shows until user has 6+ events
+                ExampleDataBanner(eventCount: viewModel.events.count)
+                    .padding(.horizontal, CGFloat.spacingMD)
                 
                 // Filter chips
                 FilterChipsView(
@@ -274,8 +301,61 @@ struct HomeContentView: View {
                         }
                     }
                 )
-                .padding(.horizontal, .spacingMD)
+                .padding(.horizontal, CGFloat.spacingMD)
             }
+        }
+    }
+}
+
+// MARK: - Local Components (Temporary until file added to project)
+
+struct TrialBannerView: View {
+    let daysRemaining: Int
+    let onUpgrade: () -> Void
+
+    var body: some View {
+        Button(action: onUpgrade) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Pro Trial: \(daysRemaining) days left")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text(message)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                
+                Spacer()
+                
+                Text("Upgrade")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white)
+                    .cornerRadius(8)
+            }
+            .padding()
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.primary, Color.primary.opacity(0.8)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(12)
+            .shadow(color: Color.primary.opacity(0.3), radius: 8, x: 0, y: 4)
+        }
+    }
+
+    private var message: String {
+        if daysRemaining <= 1 {
+            return "Upgrade now to keep all features"
+        } else {
+            return "Join 1,200+ parents who upgraded"
         }
     }
 }

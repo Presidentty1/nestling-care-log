@@ -99,6 +99,52 @@ class NotificationScheduler {
         }
     }
     
+    // MARK: - Trial Reminders
+    
+    /// Schedule notification for Day 5 of trial (2 days before expiration)
+    func scheduleTrialWarningNotification(trialStartDate: Date) {
+        center.removePendingNotificationRequests(withIdentifiers: ["trial_warning_day5"])
+        
+        // Calculate Day 5 (2 days before trial ends on Day 7)
+        let day5Date = Calendar.current.date(byAdding: .day, value: 5, to: trialStartDate)!
+        
+        // Schedule for 10 AM on Day 5
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: day5Date)
+        components.hour = 10
+        components.minute = 0
+        
+        guard let notificationDate = Calendar.current.date(from: components),
+              notificationDate > Date() else {
+            print("[Notifications] Trial warning date is in the past, skipping")
+            return
+        }
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Your trial ends in 2 days"
+        content.body = "Upgrade now to keep tracking your baby's patterns and get personalized insights"
+        content.sound = .default
+        content.categoryIdentifier = "TRIAL_WARNING"
+        
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate),
+            repeats: false
+        )
+        let request = UNNotificationRequest(identifier: "trial_warning_day5", content: content, trigger: trigger)
+        
+        center.add(request) { error in
+            if let error = error {
+                print("[Notifications] Failed to schedule trial warning: \(error)")
+            } else {
+                print("[Notifications] Scheduled trial warning for \(notificationDate)")
+            }
+        }
+    }
+    
+    /// Cancel trial warning notification
+    func cancelTrialWarningNotification() {
+        center.removePendingNotificationRequests(withIdentifiers: ["trial_warning_day5"])
+    }
+    
     // MARK: - Quiet Hours
     
     func isWithinQuietHours(start: Date?, end: Date?) -> Bool {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, differenceInMonths } from 'date-fns';
 import type { EventType } from '@/types/events';
@@ -12,8 +12,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { eventsService } from '@/services/eventsService';
-import type { EventRecord } from '@/services/eventsService';
+import { eventsService, type EventRecord } from '@/services/eventsService';
 import { logger } from '@/lib/logger';
 import { SafeComponentBoundary, DataComponentBoundary } from '@/components/errorBoundaries/ComponentErrorBoundary';
 import { toast } from 'sonner';
@@ -36,8 +35,8 @@ import { ProgressionCard } from '@/components/ProgressionCard';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useAppStore } from '@/store/appStore';
 import { useFeatureDiscovery } from '@/hooks/useFeatureDiscovery';
-import { trackFirstLog, trackDailyEngagement } from '@/analytics/analytics';
-import { MESSAGING } from '@/lib/messaging';
+import { track } from '@/analytics/analytics';
+import type { MESSAGING } from '@/lib/messaging';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -189,7 +188,7 @@ export default function Home() {
       const hasTrackedFirstLog = localStorage.getItem('hasTrackedFirstLog');
       if (onboardingCompletedAt && !hasTrackedFirstLog) {
         const timeFromOnboarding = Date.now() - parseInt(onboardingCompletedAt);
-        trackFirstLog(timeFromOnboarding);
+        track('first_log', { timeFromOnboarding });
         localStorage.setItem('hasTrackedFirstLog', 'true');
         
         // Show instant aha moment instead of just celebration
@@ -254,6 +253,22 @@ export default function Home() {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  // Memoize active sleep timer calculation
+  const activeSleepTimer = useMemo(() => {
+    const activeSleep = events.find(e => e.type === 'sleep' && !e.end_time);
+    if (activeSleep) {
+      return {
+        startTime: new Date(activeSleep.start_time),
+        isRunning: true
+      };
+    }
+    return null;
+  }, [events]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -265,13 +280,10 @@ export default function Home() {
     );
   }
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5 w-full">
+    <div className="h-screen bg-background overflow-hidden flex flex-col safe-area-inset">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-2xl mx-auto px-4 pt-4 pb-4 space-y-5 w-full">
         {/* Page Title */}
         <h1 className="font-display text-left mb-6">Home</h1>
 
@@ -318,16 +330,7 @@ export default function Home() {
               events={events}
               napWindow={napWindow}
               summary={summary}
-              activeSleepTimer={(() => {
-                const activeSleep = events.find(e => e.type === 'sleep' && !e.end_time);
-                if (activeSleep) {
-                  return {
-                    startTime: new Date(activeSleep.start_time),
-                    isRunning: true
-                  };
-                }
-                return null;
-              })()}
+              activeSleepTimer={activeSleepTimer}
             />
           </DataComponentBoundary>
         )}
@@ -466,6 +469,7 @@ export default function Home() {
         <p className="text-xs text-center text-muted-foreground py-4 px-6">
           This app is not medical advice. Consult your pediatrician for guidance.
         </p>
+        </div>
       </div>
 
       <FloatingActionButtonRadial />

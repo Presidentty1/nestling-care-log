@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var showProSubscription = false
     @State private var showFabMenu = false
     @State private var showTutorial = false
+    @State private var hasCheckedTrialExpiration = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -159,6 +160,13 @@ struct HomeView: View {
             }
             .task {
                 await initializeViewModel()
+                await checkAndShowTrialExpiredPaywall()
+            }
+            .onAppear {
+                // Check trial status whenever Home appears
+                Task {
+                    await checkAndShowTrialExpiredPaywall()
+                }
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
                 if let baby = environment.currentBaby {
@@ -389,6 +397,31 @@ struct HomeView: View {
             showDiaperForm = true
         case .tummyTime:
             showTummyForm = true
+        }
+    }
+    
+    /// Check if trial has expired and show paywall
+    private func checkAndShowTrialExpiredPaywall() async {
+        // Only check once per app launch
+        guard !hasCheckedTrialExpiration else { return }
+        hasCheckedTrialExpiration = true
+        
+        let proService = ProSubscriptionService.shared
+        
+        // If trial has ended (0 days remaining) and user is not Pro, show paywall
+        if let daysRemaining = proService.trialDaysRemaining,
+           daysRemaining <= 0,
+           !proService.isProUser {
+            
+            // Delay slightly to let Home render first
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            
+            await MainActor.run {
+                showProSubscription = true
+            }
+            
+            // Analytics: Trial ended paywall shown
+            await Analytics.shared.logPaywallViewed(source: "trial_ended")
         }
     }
 }

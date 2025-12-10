@@ -36,7 +36,7 @@ class NowNextViewModel: ObservableObject {
     
     private func loadCurrentState() async {
         do {
-            if try await dataStore.getActiveSleep(for: baby) {
+            if let _ = try await dataStore.getActiveSleep(for: baby) {
                 await MainActor.run {
                     nowStateText = "Asleep"
                 }

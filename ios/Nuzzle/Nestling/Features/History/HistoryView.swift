@@ -28,9 +28,9 @@ struct HistoryView: View {
             if isEmpty {
                 VStack(spacing: .spacingMD) {
                     EmptyStateView(
-                        icon: "magnifyingglass",
-                        title: noSearch && allFilter ? "No events logged" : "No matching events",
-                        message: noSearch && allFilter ? "Logs are created from Home. Tap 'Home' to start logging." : "Try adjusting your search or filter",
+                        icon: noSearch && allFilter ? "calendar" : "magnifyingglass",
+                        title: noSearch && allFilter ? "Your baby's story starts here 💙" : "No matching events",
+                        message: noSearch && allFilter ? "Logs are created from Home. Tap 'Home' to start logging." : "Try searching for 'bottle', 'nap', or a time",
                         actionTitle: noSearch && allFilter ? "Go to Home" : nil,
                         action: noSearch && allFilter ? {
                             // Switch to Home tab
@@ -211,6 +211,7 @@ struct HistoryView: View {
                     set: { viewModel?.searchText = $0 }
                 ),
                 placement: .navigationBarDrawer(displayMode: .automatic),
+                prompt: "Search notes, times, amounts...",
                 suggestions: {
                     ForEach(viewModel?.searchSuggestions ?? [], id: \.self) { suggestion in
                         Text(suggestion)
