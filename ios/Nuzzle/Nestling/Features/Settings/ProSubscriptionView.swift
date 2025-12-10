@@ -133,6 +133,8 @@ struct ProSubscriptionView: View {
             ScrollView {
                 VStack(spacing: .spacingLG) {
                     headerView
+                    // UX-07: Add explicit "Why?" bullets to Paywall
+                    whyProSection
                     planComparisonView
                     featuresListView
                     pricingView
@@ -204,6 +206,44 @@ struct ProSubscriptionView: View {
             }
         }
         .padding(.top, .spacingXL)
+    }
+    
+    // UX-07: Explicit "Why Pro?" section with key benefits
+    private var whyProSection: some View {
+        VStack(alignment: .leading, spacing: .spacingSM) {
+            Text("Why upgrade?")
+                .font(.headline)
+                .foregroundColor(.foreground)
+            
+            VStack(alignment: .leading, spacing: .spacingXS) {
+                WhyBulletPoint(icon: "brain.head.profile", text: "AI Naps: Personalized predictions from your baby's patterns")
+                WhyBulletPoint(icon: "waveform", text: "Cry Analysis: Understand what your baby's cries might mean")
+                WhyBulletPoint(icon: "person.2.fill", text: "Sync: Share logs with partner and caregivers in real-time")
+            }
+        }
+        .padding(.spacingMD)
+        .background(Color.surface)
+        .cornerRadius(.radiusMD)
+        .padding(.horizontal, .spacingMD)
+    }
+    
+    private struct WhyBulletPoint: View {
+        let icon: String
+        let text: String
+        
+        var body: some View {
+            HStack(alignment: .top, spacing: .spacingSM) {
+                Image(systemName: icon)
+                    .foregroundColor(.primary)
+                    .font(.system(size: 16))
+                    .frame(width: 20)
+                
+                Text(text)
+                    .font(.subheadline)
+                    .foregroundColor(.foreground)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
     
     private var planComparisonView: some View {

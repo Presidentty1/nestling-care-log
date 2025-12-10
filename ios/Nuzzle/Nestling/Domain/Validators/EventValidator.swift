@@ -76,8 +76,15 @@ struct EventValidator {
                 throw EventValidationError.zeroAmount
             }
             
+            // UX-01: Validate minimum
             if amount < AppConstants.minimumFeedAmountML {
                 throw EventValidationError.zeroAmount // Will show minimum message
+            }
+            
+            // UX-01: Validate maximum to prevent unrealistic values like "118 oz"
+            let maxML = (unit == "oz") ? AppConstants.maximumFeedAmountOZ * AppConstants.mlPerOz : AppConstants.maximumFeedAmountML
+            if amount > maxML {
+                throw EventValidationError.invalidDateRange // Reuse error type, will show max message
             }
         }
     }

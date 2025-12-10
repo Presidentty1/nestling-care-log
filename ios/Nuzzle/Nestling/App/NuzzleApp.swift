@@ -32,6 +32,14 @@ struct NuzzleApp: App {
         let dataStore = DataStoreSelector.create()
         _environment = StateObject(wrappedValue: AppEnvironment(dataStore: dataStore))
 
+        // Track app install date for AI learning messaging
+        if UserDefaults.standard.object(forKey: "app_install_date") == nil {
+            UserDefaults.standard.set(Date(), forKey: "app_install_date")
+        }
+        
+        // Set up notification delegate for quiet hours filtering
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        
         // Start launch signpost
         launchSignpostID = SignpostLogger.beginInterval("AppLaunch", log: SignpostLogger.ui)
     }
@@ -122,6 +130,8 @@ struct NuzzleApp: App {
                 } else {
                     ContentView()
                         .environmentObject(environment)
+                        .environmentObject(ThemeManager.shared)
+                        .nightModeOverlay(themeManager: ThemeManager.shared)
                         .appPrivacy(enabled: PrivacyManager.shared.isAppPrivacyEnabled)
                         .onAppear {
                             // End launch signpost when ContentView appears

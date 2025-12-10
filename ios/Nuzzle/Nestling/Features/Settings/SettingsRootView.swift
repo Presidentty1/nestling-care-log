@@ -2,10 +2,12 @@ import SwiftUI
 
 struct SettingsRootView: View {
     @EnvironmentObject var environment: AppEnvironment
+    @ObservedObject private var themeManager = ThemeManager.shared
     @State private var showAIDataSharing = false
     @State private var showPrivacyData = false
     @State private var showManageBabies = false
     @State private var showManageCaregivers = false
+    @State private var showAcceptInvite = false
     @State private var showAuth = false
     @State private var showProSubscription = false
 
@@ -55,6 +57,18 @@ struct SettingsRootView: View {
                 Section("Notifications & Reminders") {
                     NavigationLink("Notification Settings") {
                         NotificationSettingsView()
+                    }
+                }
+                
+                Section("Display") {
+                    Toggle("Night Mode", isOn: $themeManager.nightModeEnabled) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Night Mode")
+                                .font(.body)
+                            Text("Red-tinted display for low-light logging")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
+                        }
                     }
                 }
                 
@@ -177,7 +191,17 @@ struct SettingsRootView: View {
                     
                     Button(action: { showManageCaregivers = true }) {
                         HStack {
-                            Text("Manage Caregivers")
+                            Text("Invite Caregiver")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.mutedForeground)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    Button(action: { showAcceptInvite = true }) {
+                        HStack {
+                            Text("Accept Invite")
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.mutedForeground)
@@ -303,6 +327,12 @@ struct SettingsRootView: View {
             }
             .sheet(isPresented: $showPrivacyData) {
                 PrivacyDataView()
+            }
+            .sheet(isPresented: $showManageCaregivers) {
+                InviteCaregiverView()
+            }
+            .sheet(isPresented: $showAcceptInvite) {
+                AcceptInviteView()
             }
             .sheet(isPresented: $showManageBabies) {
                 ManageBabiesView()

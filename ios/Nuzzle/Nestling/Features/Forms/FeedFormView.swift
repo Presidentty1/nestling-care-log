@@ -66,10 +66,25 @@ struct FeedFormView: View {
                         }
                         
                         if !viewModel.isValid && (viewModel.feedType == .bottle || viewModel.feedType == .pumping) {
-                            Text("Minimum \(Int(AppConstants.minimumFeedAmountML))ml required")
+                            // UX-01: Show validation error with min/max limits
+                            let amountValue = Double(viewModel.amount) ?? 0
+                            let amountML = viewModel.unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
+                            let maxML = viewModel.unit == .ml ? AppConstants.maximumFeedAmountML : AppConstants.maximumFeedAmountOZ * AppConstants.mlPerOz
+                            
+                            let errorMessage: String
+                            if amountML < AppConstants.minimumFeedAmountML {
+                                errorMessage = "Minimum \(Int(AppConstants.minimumFeedAmountML))ml required"
+                            } else if amountML > maxML {
+                                let maxDisplay = viewModel.unit == .ml ? "\(Int(AppConstants.maximumFeedAmountML))ml" : "\(Int(AppConstants.maximumFeedAmountOZ))oz"
+                                errorMessage = "Maximum \(maxDisplay) allowed"
+                            } else {
+                                errorMessage = "Invalid amount"
+                            }
+                            
+                            Text(errorMessage)
                                 .font(.caption)
                                 .foregroundColor(.destructive)
-                                .accessibilityLabel("Validation error: Minimum \(Int(AppConstants.minimumFeedAmountML)) milliliters required")
+                                .accessibilityLabel("Validation error: \(errorMessage)")
                         }
                     }
                 }

@@ -126,22 +126,33 @@ class ProSubscriptionService: ObservableObject {
                 if case .verified(let transaction) = result {
                     if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
                         // Check if this is an introductory offer (trial)
-                        if #available(iOS 17.2, *), let offerType = transaction.offer?.type, offerType == .introductory {
-                            // Calculate remaining trial days
-                            if _ = transaction.expirationDate {
+                        // For StoreKit 2, trials are detected by checking if purchase date is recent
+                        // and expiration date exists (for subscriptions with trials)
+                        if let expirationDate = transaction.expirationDate {
+                            let purchaseDate = transaction.originalPurchaseDate
+                            let daysSincePurchase = Calendar.current.dateComponents([.day], from: purchaseDate, to: Date()).day ?? 0
+                            
+                            // If subscription is within first 7 days and not expired, it's likely a trial
+                            if daysSincePurchase <= trialDurationDays && expirationDate > Date() {
                                 let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
                                 if daysRemaining > 0 {
-                                    trialDaysRemaining = daysRemaining
-                                    // During trial, user has Pro access
-                                    isProUser = true
-                                    subscriptionStatus = .subscribed
+                                    await MainActor.run {
+                                        trialDaysRemaining = daysRemaining
+                                        // During trial, user has Pro access
+                                        isProUser = true
+                                        subscriptionStatus = .subscribed
+                                    }
 
                                     // Analytics: trial started (if this is the first time we detect it)
-                                    Task {
-                                        await Analytics.shared.logSubscriptionTrialStarted(
-                                            plan: transaction.productID.contains("yearly") ? "yearly" : "monthly",
-                                            source: "storekit_introductory_offer"
-                                        )
+                                    let hasLoggedTrial = UserDefaults.standard.bool(forKey: "trial_started_logged_\(transaction.productID)")
+                                    if !hasLoggedTrial {
+                                        UserDefaults.standard.set(true, forKey: "trial_started_logged_\(transaction.productID)")
+                                        Task {
+                                            await Analytics.shared.logSubscriptionTrialStarted(
+                                                plan: transaction.productID.contains("yearly") ? "yearly" : "monthly",
+                                                source: "storekit_introductory_offer"
+                                            )
+                                        }
                                     }
                                     return
                                 }
@@ -152,10 +163,14 @@ class ProSubscriptionService: ObservableObject {
             }
 
             // No active trial found
-            trialDaysRemaining = nil
+            await MainActor.run {
+                trialDaysRemaining = nil
+            }
         } catch {
             print("[Pro] Failed to check trial status: \(error)")
-            trialDaysRemaining = nil
+            await MainActor.run {
+                trialDaysRemaining = nil
+            }
         }
     }
     
@@ -258,14 +273,37 @@ class ProSubscriptionService: ObservableObject {
             for await result in Transaction.currentEntitlements {
                 if case .verified(let transaction) = result {
                     if transaction.productID == monthlyProductID || transaction.productID == yearlyProductID {
-                        subscriptionStatus = .subscribed
-                        isProUser = true
-
                         // Check expiration
-                        if _ = transaction.expirationDate,
-                           expirationDate < Date() {
-                            subscriptionStatus = .expired
-                            isProUser = false
+                        if let expirationDate = transaction.expirationDate {
+                            if expirationDate < Date() {
+                                // Subscription expired
+                                await MainActor.run {
+                                    subscriptionStatus = .expired
+                                    isProUser = false
+                                }
+                            } else {
+                                // Subscription is active
+                                await MainActor.run {
+                                    subscriptionStatus = .subscribed
+                                    isProUser = true
+                                }
+                                
+                                // Check if this is a trial (first 7 days)
+                                let purchaseDate = transaction.originalPurchaseDate
+                                let daysSincePurchase = Calendar.current.dateComponents([.day], from: purchaseDate, to: Date()).day ?? 0
+                                if daysSincePurchase <= trialDurationDays {
+                                    let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
+                                    await MainActor.run {
+                                        trialDaysRemaining = max(0, daysRemaining)
+                                    }
+                                }
+                            }
+                        } else {
+                            // No expiration date - assume active subscription
+                            await MainActor.run {
+                                subscriptionStatus = .subscribed
+                                isProUser = true
+                            }
                         }
 
                         return
@@ -277,14 +315,18 @@ class ProSubscriptionService: ObservableObject {
             await checkTrialStatus()
 
             // If no trial and no subscription, user is not Pro
-            if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
-                subscriptionStatus = .notSubscribed
-                isProUser = false
+            await MainActor.run {
+                if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
+                    subscriptionStatus = .notSubscribed
+                    isProUser = false
+                }
             }
         } catch {
             print("[Pro] Failed to check subscription: \(error)")
-            subscriptionStatus = .notSubscribed
-            isProUser = false
+            await MainActor.run {
+                subscriptionStatus = .notSubscribed
+                isProUser = false
+            }
         }
     }
     

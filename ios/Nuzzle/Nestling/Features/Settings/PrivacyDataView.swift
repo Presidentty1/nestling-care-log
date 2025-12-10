@@ -20,7 +20,7 @@ struct PrivacyDataView: View {
                                 .font(.headline)
                                 .foregroundColor(.foreground)
                             
-                            Text("Export your events as CSV or JSON. The file can be shared or saved to Files.")
+                            Text("Export your events as CSV, JSON, or PDF. The file can be shared or saved to Files.")
                                 .font(.body)
                                 .foregroundColor(.mutedForeground)
                             
@@ -31,6 +31,10 @@ struct PrivacyDataView: View {
                                 
                                 SecondaryButton("Export JSON", icon: "doc.text") {
                                     exportToJSON()
+                                }
+                                
+                                SecondaryButton("Export PDF", icon: "doc.fill") {
+                                    exportToPDF()
                                 }
                             }
                             .padding(.top, .spacingSM)

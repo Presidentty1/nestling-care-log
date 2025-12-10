@@ -105,7 +105,9 @@ class FeedFormViewModel: ObservableObject {
         } else {
             let amountValue = Double(amount) ?? 0
             let amountML = unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
-            isValid = amountML >= AppConstants.minimumFeedAmountML
+            let maxML = unit == .ml ? AppConstants.maximumFeedAmountML : AppConstants.maximumFeedAmountOZ * AppConstants.mlPerOz
+            // UX-01: Validate both minimum and maximum to prevent unrealistic values
+            isValid = amountML >= AppConstants.minimumFeedAmountML && amountML <= maxML
         }
     }
     

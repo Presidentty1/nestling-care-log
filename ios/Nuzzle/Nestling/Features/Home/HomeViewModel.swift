@@ -38,17 +38,17 @@ class HomeViewModel: ObservableObject {
     
     /// Determines whether to show nap prediction prominently based on user goal
     var shouldPrioritizeSleep: Bool {
-        userGoal == "Track Sleep" || userGoal == "All of the Above"
+        userGoal == "sleep" || userGoal == "Track Sleep" || userGoal == "All of the Above"
     }
     
     /// Determines whether to show feeding insights prominently based on user goal
     var shouldPrioritizeFeeding: Bool {
-        userGoal == "Monitor Feeding" || userGoal == "All of the Above"
+        userGoal == "feeding" || userGoal == "Monitor Feeding" || userGoal == "All of the Above"
     }
     
     /// Returns true if user selected "Just Survive" - simplify UI
     var shouldSimplifyUI: Bool {
-        userGoal == "Just Survive"
+        userGoal == "survive" || userGoal == "Just Survive"
     }
     
     private let dataStore: DataStore
@@ -77,7 +77,15 @@ class HomeViewModel: ObservableObject {
     
     var nextNapWindow: NapWindow? {
         // Use NapPredictorService for consistent nap predictions
-        NapPredictorService.predictNextNapWindow(for: baby, lastSleep: lastSleep)
+        // For Pro users, pass historical events for personalized predictions
+        let isPro = ProSubscriptionService.shared.isProUser
+        let historicalEvents = isPro ? events.filter { $0.type == .sleep } : nil
+        return NapPredictorService.predictNextNapWindow(
+            for: baby,
+            lastSleep: lastSleep,
+            historicalSleepEvents: historicalEvents,
+            isProUser: isPro
+        )
     }
     
     var nextFeedSuggestion: Date? {

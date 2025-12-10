@@ -3,14 +3,30 @@ import Combine
 
 /// Manages the app's theme preferences and provides the effective color scheme
 class ThemeManager: ObservableObject {
+    static let shared = ThemeManager()
+    
     /// Storage key for theme preference
     private static let themePreferenceKey = "app_theme_preference"
+    /// Storage key for night mode (red tint)
+    private static let nightModeKey = "app_night_mode_enabled"
+    
+    private init() {}
 
     /// User's theme preference: "light", "dark", or nil for system
     @AppStorage(ThemeManager.themePreferenceKey)
     var themePreference: String? {
         didSet {
             // Trigger UI updates with animation
+            withAnimation(.easeInOut(duration: 0.3)) {
+                objectWillChange.send()
+            }
+        }
+    }
+    
+    /// Night Mode (red tint) for low-light usage
+    @AppStorage(ThemeManager.nightModeKey)
+    var nightModeEnabled: Bool = false {
+        didSet {
             withAnimation(.easeInOut(duration: 0.3)) {
                 objectWillChange.send()
             }

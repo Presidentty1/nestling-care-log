@@ -85,7 +85,7 @@ struct BabySetupView: View {
                     }
                     
                     Section {
-                        Picker("Sex", selection: $coordinator.sex) {
+                        Picker("Gender", selection: $coordinator.sex) {
                             Text("Not specified").tag(nil as Sex?)
                             Text("Girl").tag(Sex.female as Sex?)
                             Text("Boy").tag(Sex.male as Sex?)
@@ -94,7 +94,8 @@ struct BabySetupView: View {
                         }
                         .font(.system(size: 17, weight: .regular))
                     } header: {
-                        Text("Sex (Optional)")
+                        // UX-05: Change "Sex" to "Gender" to soften the medical feel
+                        Text("Gender (Optional)")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.foreground)
                     }

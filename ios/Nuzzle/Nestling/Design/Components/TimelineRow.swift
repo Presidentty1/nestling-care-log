@@ -133,6 +133,12 @@ struct TimelineRow: View {
             RoundedRectangle(cornerRadius: .radiusMD)
                 .stroke(Color.cardBorder, lineWidth: 1)
         )
+        // UX-06: Make entire row tappable to edit (not just menu button)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            Haptics.light()
+            onEdit()
+        }
         .contextMenu {
             Button(action: {
                 Haptics.light()
@@ -215,19 +221,62 @@ struct TimelineRow: View {
         switch event.type {
         case .feed:
             if let amount = event.amount, let unit = event.unit {
-                return "\(Int(amount)) \(unit)"
+                // Amounts are stored in ml internally
+                // Validate amount is reasonable (prevent display of corrupted data)
+                let maxML = AppConstants.maximumFeedAmountML
+                if amount > maxML * 10 {
+                    // Likely corrupted data - show generic message
+                    return event.subtype?.capitalized ?? "Feed"
+                }
+                
+                let displayAmount: Double
+                let displayUnit: String
+                
+                if unit == "oz" {
+                    // User entered oz, but amount is stored in ml - convert back to oz for display
+                    displayAmount = amount / AppConstants.mlPerOz
+                    displayUnit = "oz"
+                    
+                    // Clamp to reasonable oz values
+                    let clampedAmount = min(displayAmount, AppConstants.maximumFeedAmountOZ)
+                    
+                    // Format appropriately
+                    if clampedAmount >= 10 {
+                        return "\(Int(clampedAmount)) \(displayUnit)"
+                    } else if clampedAmount >= 1 {
+                        return String(format: "%.1f \(displayUnit)", clampedAmount)
+                    } else {
+                        return String(format: "%.2f \(displayUnit)", clampedAmount)
+                    }
+                } else {
+                    // User entered ml, amount is already in ml
+                    displayAmount = amount
+                    displayUnit = "ml"
+                    
+                    // Clamp to reasonable ml values
+                    let clampedAmount = min(displayAmount, maxML)
+                    
+                    // Format appropriately
+                    if clampedAmount >= 100 {
+                        return "\(Int(clampedAmount)) \(displayUnit)"
+                    } else if clampedAmount >= 10 {
+                        return String(format: "%.1f \(displayUnit)", clampedAmount)
+                    } else {
+                        return String(format: "%.2f \(displayUnit)", clampedAmount)
+                    }
+                }
             }
             return event.subtype?.capitalized ?? ""
         case .diaper:
             return event.subtype?.capitalized ?? ""
-            case .sleep:
-                if let duration = event.durationMinutes {
-                    if duration < 1 {
-                        return "Just now" // Don't show "0 min" for instant sleeps
-                    }
-                    return "\(duration) min"
+        case .sleep:
+            if let duration = event.durationMinutes {
+                if duration < 1 {
+                    return "Just now" // Don't show "0 min" for instant sleeps
                 }
-                return event.subtype ?? ""
+                return "\(duration) min"
+            }
+            return event.subtype ?? ""
         case .tummyTime:
             if let duration = event.durationMinutes {
                 return "\(duration) min"
@@ -249,16 +298,20 @@ struct TimelineRow: View {
         switch event.type {
         case .feed:
             if let amount = event.amount, let unit = event.unit {
-                let displayAmount: Int
+                let displayAmount: Double
                 let displayUnit: String
                 if unit == "oz" {
-                    displayAmount = Int(amount / 30.0)
+                    displayAmount = amount / AppConstants.mlPerOz
                     displayUnit = "ounces"
                 } else {
-                    displayAmount = Int(amount)
+                    displayAmount = amount
                     displayUnit = "milliliters"
                 }
-                label += ", \(displayAmount) \(displayUnit)"
+                // Clamp to reasonable values
+                let maxML = AppConstants.maximumFeedAmountML
+                let maxOZ = AppConstants.maximumFeedAmountOZ
+                let clampedAmount = min(displayAmount, unit == "oz" ? maxOZ : maxML)
+                label += ", \(Int(clampedAmount)) \(displayUnit)"
             }
         case .diaper:
             if let subtype = event.subtype {

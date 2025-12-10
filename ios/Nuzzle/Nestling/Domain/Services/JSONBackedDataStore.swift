@@ -291,6 +291,23 @@ class JSONBackedDataStore: DataStore {
             queue.async(flags: .barrier) {
                 self.appSettings = settings
                 self.saveToDisk()
+                
+                // Also store quiet hours in UserDefaults for quick access by NotificationDelegate
+                if let quietStart = settings.quietHoursStart {
+                    UserDefaults.standard.set(quietStart, forKey: "quietHoursStart")
+                } else {
+                    UserDefaults.standard.removeObject(forKey: "quietHoursStart")
+                }
+                if let quietEnd = settings.quietHoursEnd {
+                    UserDefaults.standard.set(quietEnd, forKey: "quietHoursEnd")
+                } else {
+                    UserDefaults.standard.removeObject(forKey: "quietHoursEnd")
+                }
+                UserDefaults.standard.set(settings.remindersPaused, forKey: "remindersPaused")
+                
+                // Notify that settings changed
+                NotificationCenter.default.post(name: NSNotification.Name("AppSettingsDidChange"), object: nil)
+                
                 continuation.resume()
             }
         }

@@ -50,12 +50,49 @@ class HistoryViewModel: ObservableObject {
                     return true
                 }
                 
-                // Search for type keywords
-                if query.contains("feed") && event.type == .feed { return true }
-                if query.contains("diaper") && event.type == .diaper { return true }
-                if query.contains("nap") && event.type == .sleep { return true }
-                if query.contains("sleep") && event.type == .sleep { return true }
-                if query.contains("tummy") && event.type == .tummyTime { return true }
+                // Natural language queries
+                let naturalLanguagePatterns: [(pattern: String, type: EventType?)] = [
+                    ("feed", .feed),
+                    ("bottle", .feed),
+                    ("breast", .feed),
+                    ("nurse", .feed),
+                    ("diaper", .diaper),
+                    ("poop", .diaper),
+                    ("poo", .diaper),
+                    ("wet", .diaper),
+                    ("dirty", .diaper),
+                    ("nap", .sleep),
+                    ("sleep", .sleep),
+                    ("bedtime", .sleep),
+                    ("tummy", .tummyTime),
+                    ("tummy time", .tummyTime)
+                ]
+                
+                for (pattern, eventType) in naturalLanguagePatterns {
+                    if query.contains(pattern) {
+                        if let eventType = eventType, event.type == eventType {
+                            return true
+                        }
+                    }
+                }
+                
+                // Search for "last" queries (e.g., "last poop", "last feed")
+                if query.contains("last") {
+                    // Sort by most recent and return first match
+                    let sortedEvents = filtered.sorted { $0.startTime > $1.startTime }
+                    if let firstMatch = sortedEvents.first(where: { event in
+                        for (pattern, eventType) in naturalLanguagePatterns {
+                            if query.contains(pattern) {
+                                if let eventType = eventType, event.type == eventType {
+                                    return true
+                                }
+                            }
+                        }
+                        return false
+                    }) {
+                        return event.id == firstMatch.id
+                    }
+                }
                 
                 // Search for time tokens (e.g., "8:30", "pm")
                 let timeFormatter = DateFormatter()

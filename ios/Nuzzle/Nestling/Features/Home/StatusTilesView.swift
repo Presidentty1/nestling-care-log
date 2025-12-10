@@ -11,6 +11,9 @@ struct StatusTilesView: View {
     
     var body: some View {
         VStack(spacing: .spacingMD) {
+            // UX-04: Current State Indicator - Explicit "Awake / Asleep" badge
+            CurrentStateBadge(activeSleep: activeSleep)
+            
             // Hero Card: Next Nap or Active Sleep
             if let napWindow = nextNapWindow {
                 HeroNapCard(napWindow: napWindow, baby: baby)
@@ -41,14 +44,52 @@ struct StatusTilesView: View {
     }
     
     private func formatFeedValue(_ event: Event?) -> String {
-        guard let event = event else { return timeBasedPrompt() }
+        guard let event = event else { return feedPrompt() }
         if let amount = event.amount, let unit = event.unit {
+            // Amounts are stored in ml internally (from FeedFormViewModel.save())
+            // The unit field indicates what the user entered, but amount is always in ml
             let displayAmount: Double
+            let displayUnit: String
+            
+            // Validate amount is reasonable (prevent display of corrupted data)
+            let maxML = AppConstants.maximumFeedAmountML
+            if amount > maxML * 10 {
+                // Likely corrupted data - show generic message
+                return "See details"
+            }
+            
             if unit == "oz" {
-                displayAmount = amount / 30.0
-                return "\(Int(displayAmount)) oz"
+                // User entered oz, but amount is stored in ml - convert back to oz for display
+                displayAmount = amount / AppConstants.mlPerOz
+                displayUnit = "oz"
+                
+                // Clamp to reasonable oz values
+                let clampedAmount = min(displayAmount, AppConstants.maximumFeedAmountOZ)
+                
+                // Format appropriately
+                if clampedAmount >= 10 {
+                    return "\(Int(clampedAmount)) \(displayUnit)"
+                } else if clampedAmount >= 1 {
+                    return String(format: "%.1f \(displayUnit)", clampedAmount)
+                } else {
+                    return String(format: "%.2f \(displayUnit)", clampedAmount)
+                }
             } else {
-                return "\(Int(amount)) ml"
+                // User entered ml, amount is already in ml
+                displayAmount = amount
+                displayUnit = "ml"
+                
+                // Clamp to reasonable ml values
+                let clampedAmount = min(displayAmount, maxML)
+                
+                // Format appropriately
+                if clampedAmount >= 100 {
+                    return "\(Int(clampedAmount)) \(displayUnit)"
+                } else if clampedAmount >= 10 {
+                    return String(format: "%.1f \(displayUnit)", clampedAmount)
+                } else {
+                    return String(format: "%.2f \(displayUnit)", clampedAmount)
+                }
             }
         } else if let subtype = event.subtype {
             return subtype.capitalized
@@ -57,19 +98,16 @@ struct StatusTilesView: View {
     }
     
     private func formatDiaperValue(_ event: Event?) -> String {
-        guard let event = event else { return timeBasedPrompt() }
+        guard let event = event else { return diaperPrompt() }
         return event.subtype?.capitalized ?? "Logged"
     }
     
-    private func timeBasedPrompt() -> String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 6..<11: return "Ready?"
-        case 11..<15: return "Time to log?"
-        case 15..<18: return "Track it?"
-        case 18..<22: return "Log dinner?"
-        default: return "Ready to track"
-        }
+    private func feedPrompt() -> String {
+        return "Log feed"
+    }
+    
+    private func diaperPrompt() -> String {
+        return "Log diaper"
     }
     
     private func formatSleepStatus(_ activeSleep: Event?) -> String {
@@ -123,6 +161,16 @@ struct StatusTilesView: View {
 struct HeroNapCard: View {
     let napWindow: NapWindow
     let baby: Baby
+    @State private var feedbackSubmitted: Bool = false
+    @State private var feedbackValue: Bool? = nil // true = helpful, false = not helpful
+    
+    private var shouldShowAILearningMessage: Bool {
+        // Show learning message if baby is less than 7 days old or app was installed less than 7 days ago
+        let daysSinceBirth = Calendar.current.dateComponents([.day], from: baby.dateOfBirth, to: Date()).day ?? 0
+        let appInstallDate = UserDefaults.standard.object(forKey: "app_install_date") as? Date ?? Date()
+        let daysSinceInstall = Calendar.current.dateComponents([.day], from: appInstallDate, to: Date()).day ?? 0
+        return daysSinceBirth < 7 || daysSinceInstall < 7
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingMD) {
@@ -136,15 +184,93 @@ struct HeroNapCard: View {
                     .foregroundColor(.mutedForeground)
                 
                 Spacer()
+                
+                // Pro badge for personalized predictions (free users see age-based, Pro see personalized)
+                if ProSubscriptionService.shared.isProUser {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                        Text("Pro")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.success)
+                    .cornerRadius(8)
+                }
             }
             
             Text(formatNapWindow(napWindow))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.foreground)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
             
             Text(formatTimeUntil(napWindow))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.mutedForeground)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            // AI Learning Phase Message (show for first week)
+            if shouldShowAILearningMessage {
+                HStack(spacing: .spacingXS) {
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 12))
+                        .foregroundColor(.mutedForeground)
+                    Text("Nuzzle's AI will learn \(baby.name)'s unique patterns over the first week")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.mutedForeground)
+                }
+                .padding(.top, .spacingXS)
+            }
+            
+            // UX-08: Add Thumb Up/Down feedback buttons for predictions
+            if !feedbackSubmitted {
+                HStack(spacing: .spacingMD) {
+                    Text("Was this helpful?")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(.mutedForeground)
+                    
+                    Button(action: {
+                        Haptics.light()
+                        feedbackValue = true
+                        submitFeedback(helpful: true)
+                    }) {
+                        Image(systemName: "hand.thumbsup.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.mutedForeground)
+                            .padding(.spacingXS)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusSM)
+                    }
+                    
+                    Button(action: {
+                        Haptics.light()
+                        feedbackValue = false
+                        submitFeedback(helpful: false)
+                    }) {
+                        Image(systemName: "hand.thumbsdown.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.mutedForeground)
+                            .padding(.spacingXS)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusSM)
+                    }
+                }
+                .padding(.top, .spacingXS)
+            } else {
+                HStack(spacing: .spacingXS) {
+                    Image(systemName: feedbackValue == true ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.mutedForeground)
+                    Text("Thanks for your feedback!")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.mutedForeground)
+                }
+                .padding(.top, .spacingXS)
+            }
         }
         .padding(.spacingLG)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -155,6 +281,16 @@ struct HeroNapCard: View {
                 .stroke(Color.cardBorder, lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+    
+    // UX-08: Submit feedback (stores locally for now, can be connected to backend later)
+    private func submitFeedback(helpful: Bool) {
+        feedbackSubmitted = true
+        // Store feedback locally (can be synced to backend later)
+        let key = "nap_prediction_feedback_\(napWindow.start.timeIntervalSince1970)"
+        UserDefaults.standard.set(helpful, forKey: key)
+        // TODO: Sync to analytics/backend
+        print("📊 Nap prediction feedback: \(helpful ? "Helpful" : "Not helpful")")
     }
     
     private func formatNapWindow(_ window: NapWindow) -> String {
@@ -231,14 +367,9 @@ struct ActiveSleepHeroCard: View {
     }
     
     private func formatSleepDuration(_ sleep: Event) -> String {
-        let duration = Date().timeIntervalSince(sleep.startTime)
-        let hours = Int(duration / 3600)
-        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
-            return "\(minutes) min"
-        }
+        // Use DateUtils for consistent formatting
+        let durationMinutes = Int(Date().timeIntervalSince(sleep.startTime) / 60)
+        return DateUtils.formatDuration(minutes: durationMinutes)
     }
 }
 
@@ -260,15 +391,25 @@ struct SatelliteCard: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.mutedForeground)
             
-            Text(value)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.foreground)
-                .lineLimit(1)
-            
+            // UX-02: Make relative time the PRIMARY display (bold, large)
             if let timeAgo = timeAgo {
                 Text(timeAgo)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.foreground)
+                    .lineLimit(1)
+            } else {
+                Text(value)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.foreground)
+                    .lineLimit(1)
+            }
+            
+            // UX-02: Show value (amount/type) as secondary info
+            if timeAgo != nil {
+                Text(value)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.mutedForeground.opacity(0.8))
+                    .lineLimit(1)
             }
         }
         .padding(.spacingMD)
@@ -280,6 +421,49 @@ struct SatelliteCard: View {
             RoundedRectangle(cornerRadius: .radiusMD)
                 .stroke(Color.cardBorder, lineWidth: 1)
         )
+    }
+}
+
+/// UX-04: Current State Badge - Shows explicit "Awake / Asleep" status
+struct CurrentStateBadge: View {
+    let activeSleep: Event?
+    
+    var body: some View {
+        HStack(spacing: .spacingSM) {
+            Image(systemName: activeSleep != nil ? "moon.zzz.fill" : "sun.max.fill")
+                .font(.system(size: 16))
+                .foregroundColor(activeSleep != nil ? .eventSleep : .eventDiaper)
+            
+            Text(activeSleep != nil ? "Asleep" : "Awake")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.foreground)
+            
+            if let sleep = activeSleep {
+                Text("• \(formatSleepDuration(sleep))")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(.mutedForeground)
+            }
+        }
+        .padding(.horizontal, .spacingMD)
+        .padding(.vertical, .spacingSM)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.surface)
+        .cornerRadius(.radiusSM)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusSM)
+                .stroke(activeSleep != nil ? Color.eventSleep.opacity(0.3) : Color.cardBorder, lineWidth: 1)
+        )
+    }
+    
+    private func formatSleepDuration(_ sleep: Event) -> String {
+        let duration = Date().timeIntervalSince(sleep.startTime)
+        let hours = Int(duration / 3600)
+        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
     }
 }
 
@@ -351,3 +535,4 @@ struct StatusTile: View {
     .padding()
     .background(Color.background)
 }
+

@@ -3,11 +3,46 @@ import UIKit
 
 struct InviteCaregiverView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var environment: AppEnvironment
     @State private var email = ""
     @State private var showShareSheet = false
     @State private var toast: ToastMessage? = nil
     @State private var isSendingEmail = false
-    @State private var inviteLink = "https://nuzzle.app/invite/family123" // Placeholder
+    @State private var inviteCode: String = ""
+    @State private var inviteLink: String = ""
+    
+    private func generateInviteCode() -> String {
+        // Generate a unique 6-character invite code
+        let characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" // Exclude confusing chars
+        var code = ""
+        for _ in 0..<6 {
+            if let randomChar = characters.randomElement() {
+                code.append(randomChar)
+            }
+        }
+        return code
+    }
+    
+    private func generateInviteLink() -> String {
+        // Generate invite link with code
+        if let baby = environment.currentBaby {
+            // Use baby ID as part of the invite for uniqueness
+            let babyIdShort = String(baby.id.uuidString.prefix(8))
+            return "https://nuzzle.app/invite/\(inviteCode)?baby=\(babyIdShort)"
+        }
+        return "https://nuzzle.app/invite/\(inviteCode)"
+    }
+    
+    private func initializeInvite() {
+        if inviteCode.isEmpty {
+            inviteCode = generateInviteCode()
+            // Store invite code for this baby
+            if let baby = environment.currentBaby {
+                InviteCodeService.shared.storeInviteCode(inviteCode, for: baby.id)
+            }
+        }
+        inviteLink = generateInviteLink()
+    }
 
     private func sendInviteEmail() {
         guard !email.isEmpty else {
@@ -33,13 +68,14 @@ struct InviteCaregiverView: View {
 
         I've invited you to join our baby tracking app to help care for our little one together.
 
-        Click this link to get started: \(inviteLink)
+        Invite Code: \(inviteCode)
+        Or click this link: \(inviteLink)
 
         The app helps us stay coordinated with feeding, sleeping, diaper changes, and more.
 
         Looking forward to having you on the team!
 
-        Sent from Nestling (Nuzzle)
+        Sent from Nuzzle
         """
 
         let codedBody = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? body
@@ -132,26 +168,66 @@ struct InviteCaregiverView: View {
                                     }
                                 }
 
-                                HStack {
-                                    Text(inviteLink)
+                                // Invite Code Display
+                                VStack(alignment: .leading, spacing: .spacingXS) {
+                                    Text("Invite Code")
                                         .font(.caption)
                                         .foregroundColor(.mutedForeground)
-                                        .lineLimit(1)
-                                        .truncationMode(.middle)
-
-                                    Spacer()
-
-                                    Button(action: {
-                                        UIPasteboard.general.string = inviteLink
-                                        toast = ToastMessage(message: "Invite link copied to clipboard", type: .success)
-                                    }) {
-                                        Image(systemName: "doc.on.doc")
+                                    
+                                    HStack {
+                                        Text(inviteCode.isEmpty ? "Generating..." : inviteCode)
+                                            .font(.system(size: 24, weight: .bold, design: .monospaced))
                                             .foregroundColor(.primary)
+                                            .padding(.spacingSM)
+                                            .frame(maxWidth: .infinity)
+                                            .background(Color.surface)
+                                            .cornerRadius(.radiusMD)
+                                        
+                                        Button(action: {
+                                            UIPasteboard.general.string = inviteCode
+                                            toast = ToastMessage(message: "Invite code copied", type: .success)
+                                            Haptics.light()
+                                        }) {
+                                            Image(systemName: "doc.on.doc")
+                                                .foregroundColor(.primary)
+                                                .padding(.spacingSM)
+                                        }
                                     }
+                                }
+                                
+                                Divider()
+                                
+                                // Invite Link Display
+                                VStack(alignment: .leading, spacing: .spacingXS) {
+                                    Text("Or share this link")
+                                        .font(.caption)
+                                        .foregroundColor(.mutedForeground)
+                                    
+                                    HStack {
+                                        Text(inviteLink)
+                                            .font(.caption)
+                                            .foregroundColor(.mutedForeground)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
 
-                                    Button(action: { showShareSheet = true }) {
-                                        Image(systemName: "square.and.arrow.up")
-                                            .foregroundColor(.primary)
+                                        Spacer()
+
+                                        Button(action: {
+                                            UIPasteboard.general.string = inviteLink
+                                            toast = ToastMessage(message: "Invite link copied", type: .success)
+                                            Haptics.light()
+                                        }) {
+                                            Image(systemName: "doc.on.doc")
+                                                .foregroundColor(.primary)
+                                        }
+
+                                        Button(action: { 
+                                            showShareSheet = true
+                                            Haptics.light()
+                                        }) {
+                                            Image(systemName: "square.and.arrow.up")
+                                                .foregroundColor(.primary)
+                                        }
                                     }
                                 }
                             }
@@ -183,6 +259,9 @@ struct InviteCaregiverView: View {
                 ShareSheet(items: [inviteLink])
             }
             .toast($toast)
+            .onAppear {
+                initializeInvite()
+            }
         }
     }
 }

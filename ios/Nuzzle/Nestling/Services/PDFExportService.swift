@@ -48,7 +48,22 @@ class PDFExportService {
                 let infoText = "\(baby.name) • \(dateFormatter.string(from: dateRange.start)) - \(dateFormatter.string(from: dateRange.end))"
                 let info = NSAttributedString(string: infoText, attributes: infoAttributes)
                 info.draw(at: CGPoint(x: 72, y: yPosition))
-                yPosition += 60
+                yPosition += 40
+                
+                // Summary Statistics
+                let summary = calculateSummary(events: events)
+                let summaryText = "Summary: \(summary.feedCount) feeds • \(summary.diaperCount) diapers • \(summary.sleepHours)h sleep • \(summary.tummyTimeMinutes)m tummy time"
+                let summaryAttr = NSAttributedString(string: summaryText, attributes: infoAttributes)
+                summaryAttr.draw(at: CGPoint(x: 72, y: yPosition))
+                yPosition += 40
+                
+                // Divider line
+                let divider = UIBezierPath()
+                divider.move(to: CGPoint(x: 72, y: yPosition))
+                divider.addLine(to: CGPoint(x: pageWidth - 72, y: yPosition))
+                UIColor.separator.setStroke()
+                divider.stroke()
+                yPosition += 30
                 
                 // Events
                 let eventAttributes: [NSAttributedString.Key: Any] = [
@@ -89,6 +104,33 @@ class PDFExportService {
             print("Failed to generate PDF: \(error)")
             return nil
         }
+    }
+    
+    private static func calculateSummary(events: [Event]) -> (feedCount: Int, diaperCount: Int, sleepHours: Double, tummyTimeMinutes: Int) {
+        var feedCount = 0
+        var diaperCount = 0
+        var totalSleepMinutes = 0
+        var tummyTimeMinutes = 0
+        
+        for event in events {
+            switch event.type {
+            case .feed:
+                feedCount += 1
+            case .diaper:
+                diaperCount += 1
+            case .sleep:
+                if let duration = event.durationMinutes {
+                    totalSleepMinutes += duration
+                }
+            case .tummyTime:
+                if let duration = event.durationMinutes {
+                    tummyTimeMinutes += duration
+                }
+            }
+        }
+        
+        let sleepHours = Double(totalSleepMinutes) / 60.0
+        return (feedCount, diaperCount, sleepHours, tummyTimeMinutes)
     }
 }
 

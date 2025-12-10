@@ -24,10 +24,15 @@ struct SymbolEffects {
         if reduceMotion {
             return AnyView(view)
         } else {
-            if let value = value {
-                return AnyView(view.symbolEffect(.bounce, value: value))
+            if #available(iOS 18, *) {
+                if let value = value {
+                    return AnyView(view.symbolEffect(.bounce, value: value))
+                } else {
+                    return AnyView(view.symbolEffect(.bounce))
+                }
             } else {
-                return AnyView(view.symbolEffect(.bounce))
+                // Fallback for iOS 17: use scale effect animation
+                return AnyView(view)
             }
         }
     }
@@ -52,12 +57,16 @@ extension View {
         if UIAccessibility.isReduceMotionEnabled {
             return AnyView(self)
         } else {
-            if let value = value {
-                return AnyView(self.symbolEffect(.bounce, value: value))
+            if #available(iOS 18, *) {
+                if let value = value {
+                    return AnyView(self.symbolEffect(.bounce, value: value))
+                } else {
+                    return AnyView(self.symbolEffect(.bounce))
+                }
             } else {
-                return AnyView(self.symbolEffect(.bounce))
+                // Fallback for iOS 17: no effect
+                return AnyView(self)
             }
         }
     }
 }
-

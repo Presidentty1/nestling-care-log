@@ -12,7 +12,7 @@ enum OnboardingStep {
 class OnboardingCoordinator: ObservableObject {
     @Published var currentStep: OnboardingStep = .welcome
     @Published var babyName: String = ""
-    @Published var dateOfBirth: Date = Date()
+    @Published var dateOfBirth: Date = Date().addingTimeInterval(-60 * 24 * 60 * 60) // Default to 60 days ago (typical newborn age)
     @Published var sex: Sex?
     @Published var selectedGoal: String? // Epic 1 AC1.2
     @Published var preferredUnit: String = detectSmartDefaultUnit()

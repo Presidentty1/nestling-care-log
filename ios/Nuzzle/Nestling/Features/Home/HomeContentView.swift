@@ -20,33 +20,33 @@ struct HomeContentView: View {
                 babySelectorSection
                 firstLogSection
                 statusTilesSection
+                
+                // UX-03: Quick Actions always appear early (above fold) for fast logging
+                quickActionsSection
+                
                 guidanceStripSection
                 
                 // Dynamic Layout (Epic 7 AC7.2) - Enhanced with goal-based personalization
+                // Note: Quick Actions moved above to ensure visibility without scroll
                 if viewModel.shouldSimplifyUI {
-                    // "Just Survive" mode: Quick actions first, minimal insights
-                    quickActionsSection
+                    // "Just Survive" mode: Minimal insights
                     streaksSection
                 } else if viewModel.shouldPrioritizeSleep {
-                    // "Track Sleep" goal: Show nap insights first
+                    // "Track Sleep" goal: Show nap insights
                     insightSection
                     streaksSection
-                    quickActionsSection
                 } else if viewModel.shouldPrioritizeFeeding {
-                    // "Monitor Feeding" goal: Show feeding insights first
+                    // "Monitor Feeding" goal: Show feeding insights
                     insightSection
-                    quickActionsSection
                     streaksSection
                 } else if viewModel.timeOfDay == .morning || viewModel.timeOfDay == .day {
-                    // Default day: Actions first
-                    quickActionsSection
+                    // Default day: Insights after actions
                     insightSection
                     streaksSection
                 } else {
-                    // Default evening/night: Insights/Summary first
+                    // Default evening/night: Insights/Summary
                     insightSection
                     streaksSection
-                    quickActionsSection
                 }
                 
                 timelineContent(for: viewModel)
