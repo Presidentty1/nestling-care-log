@@ -67,24 +67,27 @@ struct FeedFormView: View {
                         
                         if !viewModel.isValid && (viewModel.feedType == .bottle || viewModel.feedType == .pumping) {
                             // UX-01: Show validation error with min/max limits
-                            let amountValue = Double(viewModel.amount) ?? 0
-                            let amountML = viewModel.unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
-                            let maxML = viewModel.unit == .ml ? AppConstants.maximumFeedAmountML : AppConstants.maximumFeedAmountOZ * AppConstants.mlPerOz
-                            
-                            let errorMessage: String
-                            if amountML < AppConstants.minimumFeedAmountML {
-                                errorMessage = "Minimum \(Int(AppConstants.minimumFeedAmountML))ml required"
-                            } else if amountML > maxML {
-                                let maxDisplay = viewModel.unit == .ml ? "\(Int(AppConstants.maximumFeedAmountML))ml" : "\(Int(AppConstants.maximumFeedAmountOZ))oz"
-                                errorMessage = "Maximum \(maxDisplay) allowed"
-                            } else {
-                                errorMessage = "Invalid amount"
+                            Group {
+                                let amountValue = Double(viewModel.amount) ?? 0
+                                let amountML = viewModel.unit == .ml ? amountValue : amountValue * AppConstants.mlPerOz
+                                let maxML = viewModel.unit == .ml ? AppConstants.maximumFeedAmountML : AppConstants.maximumFeedAmountOZ * AppConstants.mlPerOz
+                                
+                                let errorMessage: String = {
+                                    if amountML < AppConstants.minimumFeedAmountML {
+                                        return "Minimum \(Int(AppConstants.minimumFeedAmountML))ml required"
+                                    } else if amountML > maxML {
+                                        let maxDisplay = viewModel.unit == .ml ? "\(Int(AppConstants.maximumFeedAmountML))ml" : "\(Int(AppConstants.maximumFeedAmountOZ))oz"
+                                        return "Maximum \(maxDisplay) allowed"
+                                    } else {
+                                        return "Invalid amount"
+                                    }
+                                }()
+                                
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundColor(.destructive)
+                                    .accessibilityLabel("Validation error: \(errorMessage)")
                             }
-                            
-                            Text(errorMessage)
-                                .font(.caption)
-                                .foregroundColor(.destructive)
-                                .accessibilityLabel("Validation error: \(errorMessage)")
                         }
                     }
                 }

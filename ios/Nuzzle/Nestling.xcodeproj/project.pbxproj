@@ -148,6 +148,7 @@
 		852A3E3AD84B1066319B9EF5 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3E806BCF16FE787AC46C38 /* DeveloperSettingsView.swift */; };
 		8635FF6B51D4EABFFC595C84 /* CryClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DA4F0163813A8CE8DE1655 /* CryClassifier.swift */; };
 		89CCC63D84C94DC1C747CBDB /* MotionModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA70692A37B44803D8D97BAA /* MotionModifiers.swift */; };
+		8A1B2C3D4E5F6A7B8C9D0E1F /* NightModeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */; };
 		8D191A6AEFDB97E53F98C57E /* PDFExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3015AFBF3D1B63B5F9EE6D83 /* PDFExportService.swift */; };
 		8DA5A5202DDBF42A7149C025 /* ExampleDataBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD1A27EE8122170033E2806 /* ExampleDataBanner.swift */; };
 		9095F3A064BEF36392E42274 /* Prediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FB2727DCC76A1E5C27467F /* Prediction.swift */; };
@@ -1531,6 +1532,7 @@
 		E99BE044B81B538B13FF9E46 /* NavigationCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NavigationCoordinator.swift; sourceTree = "<group>"; };
 		E9AF2B7AA2E1374F0B4E357C /* UndoManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		EA70692A37B44803D8D97BAA /* MotionModifiers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MotionModifiers.swift; sourceTree = "<group>"; };
+		9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NightModeOverlay.swift; sourceTree = "<group>"; };
 		EA73F2027DBD810792E4D87C /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		EABA0AA4E8E9884CF641CEB5 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		EABD3ED1921F6291B1F23C8A /* ScenarioSeeder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScenarioSeeder.swift; sourceTree = "<group>"; };
@@ -2295,6 +2297,7 @@
 				89868BB004A68767696E6268 /* LoadingStateView.swift */,
 				5D861C97B3FA28D97EEAA5AC /* MedicalDisclaimer.swift */,
 				EA70692A37B44803D8D97BAA /* MotionModifiers.swift */,
+				9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */,
 				7E18C9BBBC59F3193697A320 /* OnboardingContainer.swift */,
 				B7414A407D6BB9A6585B0065 /* OnboardingProgressDots.swift */,
 				8504C78B748E1B9D52194B85 /* PhotoPickerView.swift */,
@@ -3484,6 +3487,7 @@
 				FD6ADBBFAB734D7F1C5A5D05 /* LoadingStateView.swift in Sources */,
 				D9B6EEFCB87ED47030C595C3 /* MedicalDisclaimer.swift in Sources */,
 				89CCC63D84C94DC1C747CBDB /* MotionModifiers.swift in Sources */,
+				8A1B2C3D4E5F6A7B8C9D0E1F /* NightModeOverlay.swift in Sources */,
 				1BAF5638B31ADA1DBA067A04 /* OnboardingContainer.swift in Sources */,
 				728C54F4D120A0B32C69BF35 /* OnboardingProgressDots.swift in Sources */,
 				BC117D46B513727C9B6C71E6 /* PhotoPickerView.swift in Sources */,
