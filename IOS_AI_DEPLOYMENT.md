@@ -130,4 +130,3 @@ Run the migrations from `supabase/migrations/` directory.
 - Database schema in place
 
 The iOS app is now ready for production with fully functional AI features! 🎉
-

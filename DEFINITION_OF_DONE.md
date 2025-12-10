@@ -3,6 +3,7 @@
 Scope: iOS SwiftUI app in `ios/Nuzzle/Nestling.xcodeproj`. Update this checklist after each feature or AC sweep.
 
 ## Current Status
+
 - Functional ACs: in progress (CloudKit event upload/download + LWW merge added)
 - UX/UI ACs: in progress (a11y/polish audit still pending)
 - Performance metrics: not instrumented (TTFP, log-save latency)
@@ -16,6 +17,7 @@ Scope: iOS SwiftUI app in `ios/Nuzzle/Nestling.xcodeproj`. Update this checklist
 - Tests: xcodebuild test failed (missing test host path); needs fix and rerun
 
 ## Checklist
+
 - [ ] Functional AC met
 - [ ] UX / UI AC met
 - [ ] Performance metrics captured (TTFP, time-to-log-save)

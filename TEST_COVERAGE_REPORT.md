@@ -189,4 +189,3 @@ xcodebuild test -scheme Nestling -destination 'platform=iOS Simulator,name=iPhon
 - Load testing for sync operations
 
 This comprehensive test suite ensures the reliability and quality of all implemented epics, with coverage for unit logic, integration flows, and user interface validation.
-

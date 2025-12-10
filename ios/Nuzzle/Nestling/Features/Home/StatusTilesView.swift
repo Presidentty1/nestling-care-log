@@ -17,8 +17,14 @@ struct StatusTilesView: View {
             // Hero Card: Next Nap or Active Sleep
             if let napWindow = nextNapWindow {
                 HeroNapCard(napWindow: napWindow, baby: baby)
+                    .onTapGesture {
+                        logCardTap("nap")
+                    }
             } else if let sleep = activeSleep {
                 ActiveSleepHeroCard(activeSleep: sleep)
+                    .onTapGesture {
+                        logCardTap("sleep_active")
+                    }
             }
             
             // Satellite Cards: Feed & Diaper (side by side)
@@ -30,6 +36,9 @@ struct StatusTilesView: View {
                     value: formatFeedValue(lastFeed),
                     timeAgo: lastFeed.map { DateUtils.formatRelativeTime($0.startTime) }
                 )
+                .onTapGesture {
+                    logCardTap("feed")
+                }
                 
                 SatelliteCard(
                     icon: "drop.circle.fill",
@@ -38,9 +47,18 @@ struct StatusTilesView: View {
                     value: formatDiaperValue(lastDiaper),
                     timeAgo: lastDiaper.map { DateUtils.formatRelativeTime($0.startTime) }
                 )
+                .onTapGesture {
+                    logCardTap("diaper")
+                }
             }
         }
         .padding(.horizontal, .spacingMD)
+    }
+
+    private func logCardTap(_ type: String) {
+        Task {
+            await Analytics.shared.log("home_card_tap", parameters: ["card_type": type])
+        }
     }
     
     private func formatFeedValue(_ event: Event?) -> String {
@@ -391,7 +409,11 @@ struct ActiveSleepHeroCard: View {
             RoundedRectangle(cornerRadius: .radiusLG)
                 .stroke(Color.eventSleep.opacity(0.3), lineWidth: 1.5)
         )
-        .shadow(color: Color.eventSleep.opacity(0.1), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.eventSleep.opacity(0.18), radius: 10, x: 0, y: 6)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusLG)
+                .fill(Color.eventSleep.opacity(0.05))
+        )
     }
     
     private func formatSleepDuration(_ sleep: Event) -> String {

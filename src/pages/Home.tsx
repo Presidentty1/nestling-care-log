@@ -410,7 +410,11 @@ export default function Home() {
     () =>
       events
         .filter(e => e.type === 'sleep' && e.end_time)
-        .sort((a, b) => new Date(b.end_time || b.start_time).getTime() - new Date(a.end_time || a.start_time).getTime())[0],
+        .sort(
+          (a, b) =>
+            new Date(b.end_time || b.start_time).getTime() -
+            new Date(a.end_time || a.start_time).getTime()
+        )[0],
     [events]
   );
 
@@ -427,7 +431,9 @@ export default function Home() {
     return formatDistanceToNow(new Date(iso), { addSuffix: true });
   };
 
-  const feedStatus = lastFeed ? timeSince(lastFeed.end_time || lastFeed.start_time) : 'No feeds yet';
+  const feedStatus = lastFeed
+    ? timeSince(lastFeed.end_time || lastFeed.start_time)
+    : 'No feeds yet';
   const feedDetail = lastFeed
     ? [
         lastFeed.amount ? `${lastFeed.amount}${lastFeed.unit || ''}` : null,
@@ -440,7 +446,9 @@ export default function Home() {
   const diaperStatus = lastDiaper
     ? timeSince(lastDiaper.end_time || lastDiaper.start_time)
     : 'No diapers yet';
-  const diaperDetail = lastDiaper?.subtype ? `Last was ${lastDiaper.subtype}` : 'Log the next change';
+  const diaperDetail = lastDiaper?.subtype
+    ? `Last was ${lastDiaper.subtype}`
+    : 'Log the next change';
 
   const tummyStatus = lastTummyTime
     ? timeSince(lastTummyTime.end_time || lastTummyTime.start_time)
@@ -458,7 +466,9 @@ export default function Home() {
   }, [activeSleepTimer?.isRunning, lastCompletedSleep?.end_time, lastCompletedSleep?.start_time]);
 
   const timeUntilNap =
-    napWindow && napWindow.start > new Date() ? differenceInMinutes(napWindow.start, new Date()) : null;
+    napWindow && napWindow.start > new Date()
+      ? differenceInMinutes(napWindow.start, new Date())
+      : null;
 
   const napWindowLabel =
     napWindow && napWindow.start && napWindow.end
@@ -466,9 +476,7 @@ export default function Home() {
       : null;
 
   const sleepStatus = activeSleepTimer?.isRunning
-    ? `Sleeping • ${formatMinutes(
-        differenceInMinutes(new Date(), activeSleepTimer.startTime)
-      )}`
+    ? `Sleeping • ${formatMinutes(differenceInMinutes(new Date(), activeSleepTimer.startTime))}`
     : awakeMinutes !== null
       ? `Awake • ${formatMinutes(awakeMinutes)}`
       : 'No sleep logged yet';
@@ -559,7 +567,11 @@ export default function Home() {
                 label='Sleep'
                 status={sleepStatus}
                 detail={sleepDetail}
-                hint={activeSleepTimer ? 'Tap to end sleep • Long-press for details' : 'Tap to start sleep'}
+                hint={
+                  activeSleepTimer
+                    ? 'Tap to end sleep • Long-press for details'
+                    : 'Tap to start sleep'
+                }
                 icon={Moon}
                 accent='sleep'
                 isActive={!!activeSleepTimer}

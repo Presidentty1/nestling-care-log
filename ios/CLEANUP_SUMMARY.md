@@ -60,6 +60,7 @@ This document summarizes the cleanup and consolidation of the iOS project struct
 ### Native iOS Resources
 
 The active project includes all necessary native iOS resources:
+
 - ✅ `Assets.xcassets/` - App icons and colors
 - ✅ `Info.plist` - App configuration and privacy descriptions
 - ✅ `Nestling.entitlements` - App groups for widget sharing
@@ -68,17 +69,18 @@ The active project includes all necessary native iOS resources:
 
 ## Key Differences: Sources vs Nuzzle/Nestling
 
-| Feature | `ios/Sources-archive/` (Archived) | `ios/Nuzzle/Nestling/` (Active) |
-|---------|-----------------------------------|----------------------------------|
-| **Data Persistence** | SwiftData (@Model) | CoreData (NSManagedObject) |
-| **Native Resources** | ❌ None | ✅ All included |
-| **Xcode Project** | ❌ Not integrated | ✅ Fully integrated |
-| **App Store Ready** | ❌ No | ✅ Yes |
-| **Status** | Experimental/Archived | Production |
+| Feature              | `ios/Sources-archive/` (Archived) | `ios/Nuzzle/Nestling/` (Active) |
+| -------------------- | --------------------------------- | ------------------------------- |
+| **Data Persistence** | SwiftData (@Model)                | CoreData (NSManagedObject)      |
+| **Native Resources** | ❌ None                           | ✅ All included                 |
+| **Xcode Project**    | ❌ Not integrated                 | ✅ Fully integrated             |
+| **App Store Ready**  | ❌ No                             | ✅ Yes                          |
+| **Status**           | Experimental/Archived             | Production                      |
 
 ## Why CoreData Over SwiftData?
 
 For a native iOS app, CoreData was chosen because:
+
 1. **Maturity**: Battle-tested, industry standard
 2. **Tooling**: Better Xcode integration and debugging
 3. **Control**: More control over migrations and performance

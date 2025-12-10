@@ -97,4 +97,3 @@ class FeatureAccessService {
 
 export const featureAccessService = new FeatureAccessService();
 export default featureAccessService;
-

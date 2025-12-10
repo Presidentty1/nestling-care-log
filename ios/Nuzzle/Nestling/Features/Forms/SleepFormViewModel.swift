@@ -16,6 +16,7 @@ class SleepFormViewModel: ObservableObject {
     @Published var isValid: Bool = false
     @Published var isSaving: Bool = false
     @Published var showDiscardPrompt: Bool = false
+    @Published var hasChanges: Bool = false
     
     private let dataStore: DataStore
     private let baby: Baby
@@ -23,6 +24,7 @@ class SleepFormViewModel: ObservableObject {
     var timer: Timer?
     
     private let minimumTimerSeconds = 10 // Prompt to discard if stopped before this
+    private var initialSnapshot: Snapshot?
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore
@@ -36,6 +38,7 @@ class SleepFormViewModel: ObservableObject {
         }
         
         validate()
+        captureInitialSnapshot()
     }
     
     private func loadFromEvent(_ event: Event) {
@@ -57,6 +60,9 @@ class SleepFormViewModel: ObservableObject {
                     self.timerStartTime = activeSleep.startTime
                     self.startTime = activeSleep.startTime
                     startTimer()
+                    if self.initialSnapshot == nil {
+                        self.captureInitialSnapshot()
+                    }
                 }
             }
         }
@@ -182,6 +188,8 @@ class SleepFormViewModel: ObservableObject {
             }
             isValid = endTime != nil && endTime! > startTime
         }
+        
+        updateHasChanges()
     }
     
     func save() async throws {
@@ -204,6 +212,21 @@ class SleepFormViewModel: ObservableObject {
         
         // Domain-level validation
         try EventValidator.validateSleep(startTime: startTime, endTime: finalEndTime)
+        
+        // Check for overlaps with other sleep events
+        let dayStart = Calendar.current.startOfDay(for: startTime)
+        let dayEnd = Calendar.current.date(byAdding: .day, value: 1, to: dayStart) ?? finalEndTime
+        let existingSleeps = try await dataStore.fetchEvents(for: baby, from: dayStart, to: dayEnd)
+        if let conflict = EventValidator.firstOverlappingSleep(
+            startTime: startTime,
+            endTime: finalEndTime,
+            existingEvents: existingSleeps,
+            excludingId: editingEvent?.id
+        ) {
+            validationError = "Overlaps with sleep starting at \(DateUtils.formatTime(conflict.startTime)). Adjust times to continue."
+            isValid = false
+            throw FormError.validationFailed
+        }
         
         // If starting a new sleep (not editing), auto-end any existing active sleep
         if editingEvent == nil {
@@ -261,6 +284,38 @@ class SleepFormViewModel: ObservableObject {
     
     deinit {
         timer?.invalidate()
+    }
+
+    private func captureInitialSnapshot() {
+        initialSnapshot = Snapshot(
+            startTime: startTime,
+            endTime: endTime,
+            subtype: subtype,
+            note: note,
+            photosCount: photos.count
+        )
+        updateHasChanges()
+    }
+
+    private func updateHasChanges() {
+        guard let initial = initialSnapshot else {
+            hasChanges = true
+            return
+        }
+        let changed = initial.startTime != startTime ||
+            initial.endTime != endTime ||
+            initial.subtype != subtype ||
+            initial.note != note ||
+            initial.photosCount != photos.count
+        hasChanges = changed
+    }
+
+    private struct Snapshot {
+        let startTime: Date
+        let endTime: Date?
+        let subtype: SleepSubtype
+        let note: String
+        let photosCount: Int
     }
 }
 

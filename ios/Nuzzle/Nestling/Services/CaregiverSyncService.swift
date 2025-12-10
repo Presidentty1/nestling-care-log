@@ -18,6 +18,7 @@ class CaregiverSyncService: ObservableObject {
     private let privateDatabase: CKDatabase
     private let sharedDatabase: CKDatabase
     private var dataStore: DataStore
+    private var revokedForSelf = false
     private var syncTask: Task<Void, Never>?
     
     private init() {
@@ -185,6 +186,10 @@ class CaregiverSyncService: ObservableObject {
         record["inviteCode"] = inviteCode as CKRecordValue
         record["createdAt"] = Date() as CKRecordValue
         record["status"] = "pending" as CKRecordValue
+        // Scope to baby if available (store first baby for now)
+        if let baby = try? await dataStore.fetchBabies().first {
+            record["babyId"] = baby.id.uuidString as CKRecordValue
+        }
         
         try await sharedDatabase.save(record)
         
@@ -242,6 +247,25 @@ class CaregiverSyncService: ObservableObject {
         
         // Track analytics
         AnalyticsService.shared.track(event: "caregiver_revoked", properties: [:])
+    }
+    
+    /// Revoke a caregiver's access and clean local data if current user is revoked
+    func revokeAccess(caregiverId: String) async {
+        // Mark revoked flag; actual CloudKit cleanup would occur server-side
+        if caregiverId == currentUserId() {
+            revokedForSelf = true
+            await MainActor.run {
+                isEnabled = false
+                pendingCount = 0
+            }
+            // Optionally clear local shared data
+            try? await dataStore.clearSharedData()
+        }
+    }
+    
+    private func currentUserId() -> String {
+        // Placeholder for auth-linked ID
+        return UserDefaults.standard.string(forKey: "current_user_id") ?? "self"
     }
 }
 

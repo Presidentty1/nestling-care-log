@@ -7,6 +7,7 @@ struct CryRecorderView: View {
     @State private var showSaveConfirmation = false
     @StateObject private var proService = ProSubscriptionService.shared
     @State private var showProSubscription = false
+    @State private var showFirstUseExplainer = false
     
     init(dataStore: DataStore, baby: Baby) {
         _viewModel = StateObject(wrappedValue: CryRecorderViewModel(dataStore: dataStore, baby: baby))
@@ -16,6 +17,14 @@ struct CryRecorderView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: .spacingLG) {
+                    if showFirstUseExplainer {
+                        InfoBanner(
+                            title: "How Cry Insights works",
+                            message: "Record a short clip and we’ll suggest a likely need. Audio stays on-device and is deleted after analysis. This is guidance only, not medical advice."
+                        )
+                        .padding(.horizontal, .spacingMD)
+                    }
+                    
                     // Medical Disclaimer
                     MedicalDisclaimer(variant: .ai)
                         .padding(.horizontal, .spacingMD)
@@ -85,6 +94,13 @@ struct CryRecorderView: View {
             }
             .sheet(isPresented: $showProSubscription) {
                 ProSubscriptionView()
+            }
+            .onAppear {
+                let hasSeen = UserDefaults.standard.bool(forKey: "cry_insights_seen_explainer")
+                if !hasSeen {
+                    showFirstUseExplainer = true
+                    UserDefaults.standard.set(true, forKey: "cry_insights_seen_explainer")
+                }
             }
         }
     }
@@ -246,6 +262,22 @@ struct CryRecorderView: View {
                                             message: "Nuzzle gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional.",
                                             variant: .warning
                                         )
+                                        
+                                        // Allow override of the label
+                                        VStack(alignment: .leading, spacing: .spacingSM) {
+                                            Text("Adjust the label if it doesn't look right")
+                                                .font(.caption)
+                                                .foregroundColor(.mutedForeground)
+                                            Picker("Need", selection: Binding(
+                                                get: { viewModel.overrideLabel ?? classification },
+                                                set: { viewModel.overrideLabel = $0 }
+                                            )) {
+                                                ForEach(CryClassification.allCases, id: \.self) { label in
+                                                    Text(label.displayName).tag(label)
+                                                }
+                                            }
+                                            .pickerStyle(.segmented)
+                                        }
                                         
                                         Text(viewModel.explanation)
                                             .font(.caption)

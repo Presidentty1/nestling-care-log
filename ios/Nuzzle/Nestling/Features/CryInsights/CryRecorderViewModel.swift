@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import Combine
+import UIKit
 
 enum CryRecorderState: Equatable {
     case idle
@@ -18,6 +19,7 @@ class CryRecorderViewModel: ObservableObject {
     @Published var classification: CryClassification?
     @Published var confidence: Double = 0.0
     @Published var explanation: String = ""
+    @Published var overrideLabel: CryClassification?
     @Published var showPermissionAlert = false
     @Published var permissionDenied = false
     @Published var errorMessage: String?
@@ -50,6 +52,19 @@ class CryRecorderViewModel: ObservableObject {
         }
         audioService.$recordingDuration.assign(to: &$recordingDuration)
         audioService.$averagePower.assign(to: &$averagePower)
+
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.willResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            if self.isRecording {
+                self.stopRecording()
+            } else if self.isProcessing {
+                self.discardRecording()
+            }
+        }
     }
 
     func checkQuota() async {
@@ -161,6 +176,7 @@ class CryRecorderViewModel: ObservableObject {
         
         // Start processing
         state = .processing
+        startTimeoutGuard()
         analyzeRecording()
     }
     
@@ -209,6 +225,7 @@ class CryRecorderViewModel: ObservableObject {
                 classification = result.classification
                 confidence = result.confidence
                 explanation = result.explanation
+                overrideLabel = result.classification
                 state = .result
             }
         }
@@ -220,12 +237,13 @@ class CryRecorderViewModel: ObservableObject {
         // Create an event note with the classification
         // Note: Using .feed as placeholder since EventType doesn't have .other
         // The note field contains the actual cry insight information
+        let chosenLabel = overrideLabel ?? classification
         let event = Event(
             babyId: baby.id,
             type: .feed,
             subtype: "cry_insight",
             startTime: Date(),
-            note: "Cry analysis: \(classification.displayName) (confidence: \(Int(confidence * 100))%). \(explanation)"
+            note: "Cry analysis: \(chosenLabel.displayName) (confidence: \(Int(confidence * 100))%). Source: \(overrideLabel == classification ? "AI" : "Manual override"). \(explanation)"
         )
         
         try await dataStore.addEvent(event)
@@ -247,6 +265,16 @@ class CryRecorderViewModel: ObservableObject {
     func retry() {
         discardRecording()
         startRecording()
+    }
+
+    private func startTimeoutGuard() {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 8_000_000_000) // 8 seconds
+            if self.isProcessing {
+                self.state = .error("Analysis is taking longer than expected. Please retry.")
+                self.audioService.deleteRecording()
+            }
+        }
     }
 }
 

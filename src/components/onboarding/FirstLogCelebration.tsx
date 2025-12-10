@@ -103,4 +103,3 @@ export function FirstLogCelebration({ isOpen, onClose }: FirstLogCelebrationProp
     </Dialog>
   );
 }
-

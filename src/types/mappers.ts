@@ -63,4 +63,3 @@ export const toDbEvent = (domain: Partial<EventRecord>): Partial<DbEvent> => {
   if (domain.note) db.note = domain.note;
   return db;
 };
-

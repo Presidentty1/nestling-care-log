@@ -75,4 +75,3 @@ class PatternInsightsService {
 }
 
 export const patternInsightsService = new PatternInsightsService();
-

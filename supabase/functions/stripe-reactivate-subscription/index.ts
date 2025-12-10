@@ -50,4 +50,3 @@ serve(async req => {
     });
   }
 });
-

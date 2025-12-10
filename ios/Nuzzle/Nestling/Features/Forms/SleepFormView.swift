@@ -6,6 +6,7 @@ struct SleepFormView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var showToast: ToastMessage?
     @State private var showAdvancedOptions = false
+    @State private var showDiscardChangesAlert = false
     
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
@@ -121,11 +122,16 @@ struct SleepFormView: View {
             }
             .navigationTitle(viewModel.editingEvent != nil ? "Edit Sleep" : "New Sleep")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(viewModel.hasChanges)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        viewModel.timer?.invalidate()
-                        dismiss()
+                        if viewModel.hasChanges {
+                            showDiscardChangesAlert = true
+                        } else {
+                            viewModel.timer?.invalidate()
+                            dismiss()
+                        }
                     }
                 }
                 
@@ -157,6 +163,15 @@ struct SleepFormView: View {
                 }
             }
             .toast($showToast)
+            .alert("Discard changes?", isPresented: $showDiscardChangesAlert) {
+                Button("Discard", role: .destructive) {
+                    viewModel.timer?.invalidate()
+                    dismiss()
+                }
+                Button("Keep Editing", role: .cancel) { }
+            } message: {
+                Text("You have unsaved changes. Do you want to discard them?")
+            }
         }
     }
 }

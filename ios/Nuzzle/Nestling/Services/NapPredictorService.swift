@@ -42,7 +42,7 @@ struct NapPredictorService {
         
         let reason: String
         if windowEnd < now {
-            reason = "Based on age (\(ageInWeeks) weeks), a nap may be due soon. These suggestions are based on common sleep ranges for this age. They are not medical advice."
+            reason = "Based on age (\(ageInWeeks) weeks), a nap may be due soon. These suggestions are based on common sleep ranges for this age. They are not medical advice. Baby may be overtired—offer a calm wind-down."
         } else {
             reason = "Based on age (\(ageInWeeks) weeks) and last wake time. These suggestions are based on patterns from your logs and common sleep ranges for this age. They are not medical advice."
         }
@@ -69,11 +69,18 @@ struct NapPredictorService {
         isProUser: Bool = false
     ) -> NapWindow? {
         let lastWakeTime: Date
+        let lastSleepDurationMinutes: Int?
         if let sleep = lastSleep, let endTime = sleep.endTime {
             lastWakeTime = endTime
+            if let duration = sleep.durationMinutes {
+                lastSleepDurationMinutes = duration
+            } else {
+                lastSleepDurationMinutes = Int(endTime.timeIntervalSince(sleep.startTime) / 60)
+            }
         } else {
             // If no sleep logged, use current time (will suggest nap soon based on age)
             lastWakeTime = Date()
+            lastSleepDurationMinutes = nil
         }
         
         // For Pro users with historical data, use personalized predictions
@@ -86,7 +93,21 @@ struct NapPredictorService {
         }
         
         // Free tier or no historical data: use age-based prediction
-        return predictNextNapWindow(for: baby, lastWakeTime: lastWakeTime)
+        var window = predictNextNapWindow(for: baby, lastWakeTime: lastWakeTime)
+        
+        // If previous nap was very short (<30m), gently shorten the wake window suggestion
+        if let duration = lastSleepDurationMinutes, duration < 30, let napWindow = window {
+            let shortenedStart = napWindow.start.addingTimeInterval(-10 * 60)
+            let shortenedEnd = napWindow.end.addingTimeInterval(-15 * 60)
+            window = NapWindow(
+                start: shortenedStart,
+                end: shortenedEnd,
+                confidence: napWindow.confidence * 0.95,
+                reason: napWindow.reason + " Last nap was short, so we suggest trying a bit earlier."
+            )
+        }
+        
+        return window
     }
     
     /// Personalized prediction using historical sleep patterns (Pro feature)
@@ -100,6 +121,10 @@ struct NapPredictorService {
         let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: Date()) ?? Date()
         let recentSleepEvents = historicalEvents
             .filter { $0.type == .sleep && $0.endTime != nil && $0.startTime >= twoWeeksAgo }
+            .filter { event in
+                let duration = event.durationMinutes ?? Int((event.endTime ?? event.startTime).timeIntervalSince(event.startTime) / 60)
+                return duration >= 20 && duration <= 600 // ignore outliers and micro-naps
+            }
             .sorted { ($0.endTime ?? $0.startTime) > ($1.endTime ?? $1.startTime) }
         
         guard !recentSleepEvents.isEmpty else {
@@ -164,11 +189,13 @@ struct NapPredictorService {
             reason = "Based on age and recent sleep patterns. As we learn more about \(baby.name)'s patterns, predictions will become more accurate. They are not medical advice."
         }
         
+        let overtiredSuffix = windowEnd < now ? " Baby may be overtired—try a short wind-down and lower-stimulation environment." : ""
+        
         return NapWindow(
             start: finalWindowStart,
             end: finalWindowEnd,
             confidence: confidence,
-            reason: reason
+            reason: reason + overtiredSuffix
         )
     }
 }

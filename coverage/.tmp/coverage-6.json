@@ -1,1 +1,831 @@
-{"result":[{"scriptId":"1189","url":"file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/setup.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":2412,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":2412,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":378,"endOffset":386,"count":0}],"isBlockCoverage":false},{"functionName":"","ranges":[{"startOffset":429,"endOffset":437,"count":0}],"isBlockCoverage":false},{"functionName":"","ranges":[{"startOffset":486,"endOffset":587,"count":0}],"isBlockCoverage":false}],"startOffset":209},{"scriptId":"1363","url":"file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/lib/dateUtils.test.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":25413,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":25413,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":515,"endOffset":10108,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":578,"endOffset":1504,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":663,"endOffset":940,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1022,"endOffset":1496,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1561,"endOffset":2451,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1642,"endOffset":2020,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2098,"endOffset":2443,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2503,"endOffset":2895,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2595,"endOffset":2887,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2949,"endOffset":3354,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3043,"endOffset":3346,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3418,"endOffset":4626,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3511,"endOffset":3763,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3833,"endOffset":4065,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4142,"endOffset":4285,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4367,"endOffset":4618,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4690,"endOffset":5345,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4783,"endOffset":5035,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":5105,"endOffset":5337,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":5403,"endOffset":6430,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":5484,"endOffset":5817,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":5887,"endOffset":6210,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":6290,"endOffset":6422,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":6341,"endOffset":6400,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":6486,"endOffset":7512,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":6559,"endOffset":6772,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":6840,"endOffset":7045,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":7112,"endOffset":7504,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":7566,"endOffset":8576,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":7649,"endOffset":7871,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":7940,"endOffset":8169,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":8241,"endOffset":8568,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":8639,"endOffset":10104,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":8719,"endOffset":8979,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":8888,"endOffset":8953,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":9053,"endOffset":9347,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":9222,"endOffset":9287,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":9429,"endOffset":9740,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":9619,"endOffset":9684,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":9817,"endOffset":10096,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":10005,"endOffset":10070,"count":1}],"isBlockCoverage":true}],"startOffset":209},{"scriptId":"1364","url":"file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/dateUtils.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":12972,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":12972,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":246,"endOffset":289,"count":35},{"startOffset":279,"endOffset":287,"count":0}],"isBlockCoverage":true},{"functionName":"isValidISODate","ranges":[{"startOffset":641,"endOffset":845,"count":6},{"startOffset":681,"endOffset":714,"count":4},{"startOffset":716,"endOffset":729,"count":2},{"startOffset":729,"endOffset":811,"count":4},{"startOffset":811,"endOffset":838,"count":3}],"isBlockCoverage":true},{"functionName":"isValidDate","ranges":[{"startOffset":930,"endOffset":1071,"count":18},{"startOffset":970,"endOffset":1003,"count":16},{"startOffset":1005,"endOffset":1018,"count":2},{"startOffset":1018,"endOffset":1070,"count":16}],"isBlockCoverage":true},{"functionName":"nowISO","ranges":[{"startOffset":1137,"endOffset":1165,"count":1}],"isBlockCoverage":true},{"functionName":"todayISO","ranges":[{"startOffset":1235,"endOffset":1277,"count":1}],"isBlockCoverage":true},{"functionName":"getDurationMinutes","ranges":[{"startOffset":1367,"endOffset":1778,"count":4},{"startOffset":1435,"endOffset":1452,"count":2},{"startOffset":1453,"endOffset":1460,"count":2},{"startOffset":1510,"endOffset":1525,"count":2},{"startOffset":1526,"endOffset":1531,"count":2},{"startOffset":1593,"endOffset":1641,"count":3},{"startOffset":1643,"endOffset":1676,"count":0},{"startOffset":1676,"endOffset":1777,"count":3}],"isBlockCoverage":true},{"functionName":"getDurationSeconds","ranges":[{"startOffset":1868,"endOffset":2279,"count":2},{"startOffset":1936,"endOffset":1953,"count":1},{"startOffset":1954,"endOffset":1961,"count":1},{"startOffset":2011,"endOffset":2026,"count":1},{"startOffset":2027,"endOffset":2032,"count":1},{"startOffset":2144,"endOffset":2177,"count":0}],"isBlockCoverage":true},{"functionName":"getDayBounds","ranges":[{"startOffset":2357,"endOffset":2755,"count":3},{"startOffset":2416,"endOffset":2432,"count":2},{"startOffset":2433,"endOffset":2439,"count":1},{"startOffset":2500,"endOffset":2565,"count":0},{"startOffset":2565,"endOffset":2754,"count":2}],"isBlockCoverage":true},{"functionName":"isInFuture","ranges":[{"startOffset":2845,"endOffset":3110,"count":4},{"startOffset":2926,"endOffset":2942,"count":0}],"isBlockCoverage":true},{"functionName":"isTooOld","ranges":[{"startOffset":3181,"endOffset":3401,"count":4},{"startOffset":3258,"endOffset":3274,"count":0}],"isBlockCoverage":true},{"functionName":"validateDateRange","ranges":[{"startOffset":3484,"endOffset":4022,"count":4},{"startOffset":3552,"endOffset":3569,"count":0},{"startOffset":3627,"endOffset":3642,"count":0},{"startOffset":3683,"endOffset":3763,"count":1},{"startOffset":3763,"endOffset":3940,"count":3},{"startOffset":3940,"endOffset":4016,"count":1}],"isBlockCoverage":true}],"startOffset":209}]}
+{
+  "result": [
+    {
+      "scriptId": "1189",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/setup.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 2412, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 2412, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 378, "endOffset": 386, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 429, "endOffset": 437, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 486, "endOffset": 587, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1363",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/services/eventsService.test.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 34107, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 34107, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 444, "endOffset": 625, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 683, "endOffset": 741, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 790, "endOffset": 979, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1286, "endOffset": 13442, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1333, "endOffset": 1394, "count": 11 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1437, "endOffset": 1500, "count": 11 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1557, "endOffset": 4664, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 1643, "endOffset": 3314, "count": 1 },
+            { "startOffset": 3148, "endOffset": 3313, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3389, "endOffset": 3968, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 4047, "endOffset": 4656, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 4725, "endOffset": 7743, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 4810, "endOffset": 6554, "count": 1 },
+            { "startOffset": 6368, "endOffset": 6553, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 6644, "endOffset": 7735, "count": 1 },
+            { "startOffset": 7659, "endOffset": 7734, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 7800, "endOffset": 10601, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 7878, "endOffset": 9464, "count": 1 },
+            { "startOffset": 9193, "endOffset": 9463, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 9535, "endOffset": 10593, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 10658, "endOffset": 12610, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 10740, "endOffset": 11666, "count": 1 },
+            { "startOffset": 11475, "endOffset": 11665, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 11737, "endOffset": 12602, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 12665, "endOffset": 13438, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 12745, "endOffset": 12986, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13084, "endOffset": 13430, "count": 1 }],
+          "isBlockCoverage": true
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1364",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/services/eventsService.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 100227, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 100227, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 250, "endOffset": 297, "count": 11 },
+            { "startOffset": 287, "endOffset": 295, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "_define_property",
+          "ranges": [
+            { "startOffset": 1081, "endOffset": 1380, "count": 5 },
+            { "startOffset": 1146, "endOffset": 1322, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "subscribe",
+          "ranges": [{ "startOffset": 1413, "endOffset": 1584, "count": 2 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1489, "endOffset": 1577, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1546, "endOffset": 1565, "count": 2 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "emit",
+          "ranges": [{ "startOffset": 1589, "endOffset": 1683, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "withTimeout",
+          "ranges": [{ "startOffset": 1688, "endOffset": 1993, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "withRetry",
+          "ranges": [{ "startOffset": 1998, "endOffset": 3330, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isNonRetryableError",
+          "ranges": [{ "startOffset": 3335, "endOffset": 4099, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "ensureAuthenticated",
+          "ranges": [
+            { "startOffset": 4104, "endOffset": 4741, "count": 5 },
+            { "startOffset": 4270, "endOffset": 4473, "count": 1 },
+            { "startOffset": 4473, "endOffset": 4498, "count": 4 },
+            { "startOffset": 4498, "endOffset": 4567, "count": 0 },
+            { "startOffset": 4578, "endOffset": 4735, "count": 1 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "validateEventData",
+          "ranges": [
+            { "startOffset": 4746, "endOffset": 5141, "count": 2 },
+            { "startOffset": 4974, "endOffset": 5068, "count": 0 },
+            { "startOffset": 5070, "endOffset": 5135, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "createEvent",
+          "ranges": [
+            { "startOffset": 5146, "endOffset": 9624, "count": 3 },
+            { "startOffset": 5268, "endOffset": 5421, "count": 2 },
+            { "startOffset": 5421, "endOffset": 5477, "count": 0 },
+            { "startOffset": 5478, "endOffset": 5489, "count": 0 },
+            { "startOffset": 5553, "endOffset": 5608, "count": 0 },
+            { "startOffset": 5609, "endOffset": 5620, "count": 0 },
+            { "startOffset": 5664, "endOffset": 5691, "count": 0 },
+            { "startOffset": 5693, "endOffset": 5991, "count": 0 },
+            { "startOffset": 5993, "endOffset": 7065, "count": 0 },
+            { "startOffset": 7066, "endOffset": 7079, "count": 0 },
+            { "startOffset": 7634, "endOffset": 7708, "count": 0 },
+            { "startOffset": 7710, "endOffset": 8736, "count": 0 },
+            { "startOffset": 8986, "endOffset": 9063, "count": 0 },
+            { "startOffset": 9156, "endOffset": 9240, "count": 0 },
+            { "startOffset": 9330, "endOffset": 9440, "count": 0 },
+            { "startOffset": 9494, "endOffset": 9582, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 7239, "endOffset": 7617, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "updateEvent",
+          "ranges": [
+            { "startOffset": 9629, "endOffset": 15921, "count": 2 },
+            { "startOffset": 9749, "endOffset": 9827, "count": 0 },
+            { "startOffset": 10173, "endOffset": 11516, "count": 0 },
+            { "startOffset": 11518, "endOffset": 14206, "count": 0 },
+            { "startOffset": 14208, "endOffset": 15135, "count": 0 },
+            { "startOffset": 15453, "endOffset": 15537, "count": 0 },
+            { "startOffset": 15627, "endOffset": 15737, "count": 0 },
+            { "startOffset": 15791, "endOffset": 15879, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13439, "endOffset": 14115, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "deleteEvent",
+          "ranges": [
+            { "startOffset": 15926, "endOffset": 18546, "count": 2 },
+            { "startOffset": 16037, "endOffset": 16115, "count": 0 },
+            { "startOffset": 16378, "endOffset": 17989, "count": 0 },
+            { "startOffset": 18252, "endOffset": 18362, "count": 0 },
+            { "startOffset": 18416, "endOffset": 18504, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 16938, "endOffset": 17257, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getEvent",
+          "ranges": [{ "startOffset": 18551, "endOffset": 20575, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidEventRecord",
+          "ranges": [{ "startOffset": 20580, "endOffset": 21010, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getTodayEvents",
+          "ranges": [{ "startOffset": 21015, "endOffset": 21133, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getEventsByDate",
+          "ranges": [{ "startOffset": 21138, "endOffset": 24317, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getEventsByRange",
+          "ranges": [{ "startOffset": 24322, "endOffset": 27872, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getLastEventByType",
+          "ranges": [{ "startOffset": 27877, "endOffset": 30683, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "calculateSummary",
+          "ranges": [{ "startOffset": 30735, "endOffset": 34346, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "EventsService",
+          "ranges": [{ "startOffset": 34351, "endOffset": 34683, "count": 1 }],
+          "isBlockCoverage": true
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1667",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/sanitization.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 18700, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 18700, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 254, "endOffset": 305, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 356, "endOffset": 410, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 453, "endOffset": 499, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 546, "endOffset": 596, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 644, "endOffset": 695, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 740, "endOffset": 788, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 835, "endOffset": 885, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 932, "endOffset": 982, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1024, "endOffset": 1069, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1116, "endOffset": 1166, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1213, "endOffset": 1263, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeTextInput",
+          "ranges": [{ "startOffset": 1430, "endOffset": 2428, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeNumericInput",
+          "ranges": [{ "startOffset": 2465, "endOffset": 3224, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidEmail",
+          "ranges": [{ "startOffset": 3260, "endOffset": 3387, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeBabyName",
+          "ranges": [{ "startOffset": 3434, "endOffset": 3592, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeEventNote",
+          "ranges": [{ "startOffset": 3627, "endOffset": 3816, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeAmount",
+          "ranges": [{ "startOffset": 3869, "endOffset": 4017, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeDuration",
+          "ranges": [{ "startOffset": 4069, "endOffset": 4225, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeTimeZone",
+          "ranges": [{ "startOffset": 4270, "endOffset": 4862, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeUrl",
+          "ranges": [{ "startOffset": 4890, "endOffset": 5190, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "sanitizeFileName",
+          "ranges": [{ "startOffset": 5224, "endOffset": 5461, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "validateFormData",
+          "ranges": [{ "startOffset": 5508, "endOffset": 6169, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1668",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/sharedUtils.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 1982, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 1982, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 246, "endOffset": 311, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 357, "endOffset": 428, "count": 2 },
+            { "startOffset": 418, "endOffset": 426, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 469, "endOffset": 535, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 573, "endOffset": 636, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1669",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/dateUtils.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 12972, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 12972, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 246, "endOffset": 289, "count": 6 },
+            { "startOffset": 279, "endOffset": 287, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidISODate",
+          "ranges": [
+            { "startOffset": 641, "endOffset": 845, "count": 2 },
+            { "startOffset": 716, "endOffset": 729, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidDate",
+          "ranges": [{ "startOffset": 930, "endOffset": 1071, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "nowISO",
+          "ranges": [{ "startOffset": 1137, "endOffset": 1165, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "todayISO",
+          "ranges": [{ "startOffset": 1235, "endOffset": 1277, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getDurationMinutes",
+          "ranges": [{ "startOffset": 1367, "endOffset": 1778, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getDurationSeconds",
+          "ranges": [{ "startOffset": 1868, "endOffset": 2279, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getDayBounds",
+          "ranges": [{ "startOffset": 2357, "endOffset": 2755, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isInFuture",
+          "ranges": [
+            { "startOffset": 2845, "endOffset": 3110, "count": 2 },
+            { "startOffset": 2943, "endOffset": 2949, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isTooOld",
+          "ranges": [
+            { "startOffset": 3181, "endOffset": 3401, "count": 2 },
+            { "startOffset": 3275, "endOffset": 3281, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "validateDateRange",
+          "ranges": [{ "startOffset": 3484, "endOffset": 4022, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1670",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/validationUtils.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 20024, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 20024, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 252, "endOffset": 301, "count": 2 },
+            { "startOffset": 291, "endOffset": 299, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidUUID",
+          "ranges": [
+            { "startOffset": 569, "endOffset": 778, "count": 3 },
+            { "startOffset": 620, "endOffset": 633, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidEmail",
+          "ranges": [{ "startOffset": 836, "endOffset": 1032, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidBabyName",
+          "ranges": [{ "startOffset": 1090, "endOffset": 1298, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidEventType",
+          "ranges": [{ "startOffset": 1358, "endOffset": 1543, "count": 2 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidDiaperSubtype",
+          "ranges": [{ "startOffset": 1611, "endOffset": 1779, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidFeedingSide",
+          "ranges": [{ "startOffset": 1843, "endOffset": 2000, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "isValidFeedingStyle",
+          "ranges": [{ "startOffset": 2066, "endOffset": 2230, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidSex",
+          "ranges": [{ "startOffset": 2283, "endOffset": 2432, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidAmount",
+          "ranges": [{ "startOffset": 2491, "endOffset": 2583, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidDuration",
+          "ranges": [{ "startOffset": 2646, "endOffset": 2770, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "isValidBabyAge",
+          "ranges": [{ "startOffset": 2838, "endOffset": 3287, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "validateEvent",
+          "ranges": [
+            { "startOffset": 3354, "endOffset": 5364, "count": 2 },
+            { "startOffset": 3419, "endOffset": 3465, "count": 1 },
+            { "startOffset": 3756, "endOffset": 3824, "count": 0 },
+            { "startOffset": 3926, "endOffset": 3994, "count": 0 },
+            { "startOffset": 4118, "endOffset": 4200, "count": 0 },
+            { "startOffset": 4278, "endOffset": 4363, "count": 0 },
+            { "startOffset": 4403, "endOffset": 4736, "count": 0 },
+            { "startOffset": 4802, "endOffset": 4849, "count": 0 },
+            { "startOffset": 4851, "endOffset": 4932, "count": 0 },
+            { "startOffset": 4970, "endOffset": 4986, "count": 0 },
+            { "startOffset": 4987, "endOffset": 5042, "count": 0 },
+            { "startOffset": 5044, "endOffset": 5106, "count": 0 },
+            { "startOffset": 5156, "endOffset": 5206, "count": 1 },
+            { "startOffset": 5208, "endOffset": 5268, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "validateBaby",
+          "ranges": [{ "startOffset": 5429, "endOffset": 6222, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1671",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/errorUtils.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 13470, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 13470, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 247, "endOffset": 291, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getUserFriendlyMessage",
+          "ranges": [{ "startOffset": 513, "endOffset": 2270, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "shouldRetry",
+          "ranges": [{ "startOffset": 2350, "endOffset": 3513, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "processError",
+          "ranges": [{ "startOffset": 3608, "endOffset": 4157, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "createToastErrorHandler",
+          "ranges": [{ "startOffset": 4246, "endOffset": 4500, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1672",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/src/lib/uiUtils.tsx",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 22894, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 22894, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 244, "endOffset": 285, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "LoadingSpinner",
+          "ranges": [{ "startOffset": 506, "endOffset": 1070, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "EmptyState",
+          "ranges": [{ "startOffset": 1134, "endOffset": 3187, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "ErrorState",
+          "ranges": [{ "startOffset": 3251, "endOffset": 6722, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "SuccessState",
+          "ranges": [{ "startOffset": 6790, "endOffset": 8829, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "formatAmount",
+          "ranges": [{ "startOffset": 9939, "endOffset": 10098, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "formatDuration",
+          "ranges": [{ "startOffset": 10176, "endOffset": 10492, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "getEventTypeColor",
+          "ranges": [{ "startOffset": 10569, "endOffset": 10971, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "truncate",
+          "ranges": [{ "startOffset": 11030, "endOffset": 11164, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    }
+  ]
+}

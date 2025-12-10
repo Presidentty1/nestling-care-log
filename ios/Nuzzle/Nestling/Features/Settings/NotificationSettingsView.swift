@@ -14,6 +14,8 @@ struct NotificationSettingsView: View {
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
     @State private var remindersPaused = false
     @State private var showPermissionAlert = false
+    @State private var nextScheduledText: String = "Not scheduled"
+    @State private var nextScheduledText: String = "Not scheduled"
     
     var body: some View {
         Form {
@@ -97,6 +99,17 @@ struct NotificationSettingsView: View {
                 }
             }
             
+            Section("Schedule Info") {
+                HStack {
+                    Text("Next scheduled reminder")
+                    Spacer()
+                    Text(nextScheduledText)
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+            
             Section("Permissions") {
                 HStack {
                     Text("Notification Permission")
@@ -133,6 +146,7 @@ struct NotificationSettingsView: View {
         .navigationTitle("Notification Settings")
         .onAppear {
             loadSettings()
+            updateNextScheduledText()
         }
         .onChange(of: feedReminderEnabled) { _, _ in saveSettings() }
         .onChange(of: feedReminderHours) { _, _ in saveSettings() }
@@ -154,6 +168,37 @@ struct NotificationSettingsView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Please enable notifications in Settings to receive reminders.")
+        }
+    }
+    
+    private func updateNextScheduledText() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let calendarDates: [Date] = requests.compactMap { request in
+                if let trigger = request.trigger as? UNCalendarNotificationTrigger {
+                    return trigger.nextTriggerDate()
+                }
+                return nil
+            }
+            let intervalDates: [Date] = requests.compactMap { request in
+                if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger {
+                    return Date().addingTimeInterval(trigger.timeInterval)
+                }
+                return nil
+            }
+            let all = (calendarDates + intervalDates).sorted()
+            guard let next = all.first else {
+                DispatchQueue.main.async {
+                    self.nextScheduledText = "Not scheduled"
+                }
+                return
+            }
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            formatter.dateStyle = .short
+            let text = formatter.string(from: next)
+            DispatchQueue.main.async {
+                self.nextScheduledText = text
+            }
         }
     }
     
@@ -207,6 +252,7 @@ struct NotificationSettingsView: View {
         if let end = settings.quietHoursEnd {
             quietHoursEnd = end
         }
+        ReminderService.shared.updateQuietHours(start: settings.quietHoursStart, end: settings.quietHoursEnd)
     }
     
     private func saveSettings() {
@@ -223,10 +269,12 @@ struct NotificationSettingsView: View {
             await ReminderService.shared.updatePausedState(remindersPaused)
             settings.quietHoursStart = quietHoursEnabled ? quietHoursStart : nil
             settings.quietHoursEnd = quietHoursEnabled ? quietHoursEnd : nil
+            ReminderService.shared.updateQuietHours(start: settings.quietHoursStart, end: settings.quietHoursEnd)
             
             try? await environment.dataStore.saveAppSettings(settings)
             await MainActor.run {
                 environment.appSettings = settings
+                updateNextScheduledText()
             }
             
             // Schedule notifications via ReminderService

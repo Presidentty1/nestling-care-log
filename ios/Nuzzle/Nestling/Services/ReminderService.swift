@@ -9,6 +9,8 @@ class ReminderService {
     
     var authorizationStatus: UNAuthorizationStatus = .notDetermined
     var remindersPaused = false
+    var quietHoursStart: Date?
+    var quietHoursEnd: Date?
     
     private let notificationCenter = UNUserNotificationCenter.current()
     
@@ -60,11 +62,20 @@ class ReminderService {
         }
     }
     
+    func updateQuietHours(start: Date?, end: Date?) {
+        quietHoursStart = start
+        quietHoursEnd = end
+    }
+    
     // MARK: - Feed Reminders
     
     func scheduleFeedReminder(babyId: UUID, hoursSinceLastFeed: Double, reminderHours: Int) async {
         guard authorizationStatus == .authorized else { return }
         guard !remindersPaused else { return }
+        guard !isQuietHours(Date(), start: quietHoursStart, end: quietHoursEnd) else { return }
+        
+        // Stagger if another reminder is already queued within 5 minutes
+        let triggerTime: TimeInterval = hasPendingWithin(minutes: 5) ? 5 * 60 : 60
         
         // Cancel existing feed reminder
         cancelFeedReminder(babyId: babyId)
@@ -75,7 +86,7 @@ class ReminderService {
         // Remind immediately (already past threshold)
         let content = UNMutableNotificationContent()
         content.title = "Feed Reminder"
-        content.body = "It's been \(Int(hoursSinceLastFeed)) hours since last feed"
+        content.body = "It's been \(Int(hoursSinceLastFeed)) hours since last feed for \(babyName(for: babyId))"
         content.sound = .default
         content.categoryIdentifier = "FEED_REMINDER"
         content.userInfo = [
@@ -83,7 +94,7 @@ class ReminderService {
             "babyId": babyId.uuidString
         ]
         
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: triggerTime, repeats: false)
         let request = UNNotificationRequest(
             identifier: "feed_reminder_\(babyId.uuidString)",
             content: content,
@@ -104,6 +115,7 @@ class ReminderService {
     func scheduleNapWindowReminder(babyId: UUID, windowStart: Date, windowEnd: Date, reminderAtMidpoint: Bool = false) async {
         guard authorizationStatus == .authorized else { return }
         guard !remindersPaused else { return }
+        guard !isQuietHours(windowStart, start: quietHoursStart, end: quietHoursEnd) else { return }
         
         // Cancel existing nap reminders
         cancelNapWindowReminders(babyId: babyId)
@@ -114,7 +126,7 @@ class ReminderService {
         // Reminder at window start
         let startContent = UNMutableNotificationContent()
         startContent.title = "Nap Window"
-        startContent.body = "It's time for your baby's next nap window"
+        startContent.body = "It's time for \(babyName(for: babyId))'s next nap window"
         startContent.sound = .default
         startContent.categoryIdentifier = "NAP_REMINDER"
         startContent.userInfo = [
@@ -141,10 +153,12 @@ class ReminderService {
         if reminderAtMidpoint {
             let midpoint = Date(timeIntervalSince1970: (windowStart.timeIntervalSince1970 + windowEnd.timeIntervalSince1970) / 2)
             guard midpoint > now else { return }
+            guard !isQuietHours(midpoint, start: quietHoursStart, end: quietHoursEnd) else { return }
+            let triggerDelay: TimeInterval = hasPendingWithin(minutes: 5) ? 5 * 60 : 60
             
             let midpointContent = UNMutableNotificationContent()
             midpointContent.title = "Nap Window"
-            midpointContent.body = "Your baby's nap window is halfway through"
+            midpointContent.body = "\(babyName(for: babyId))'s nap window is halfway through"
             midpointContent.sound = .default
             midpointContent.categoryIdentifier = "NAP_REMINDER"
             midpointContent.userInfo = [
@@ -152,10 +166,7 @@ class ReminderService {
                 "babyId": babyId.uuidString
             ]
             
-            let midpointTrigger = UNCalendarNotificationTrigger(
-                dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: midpoint),
-                repeats: false
-            )
+            let midpointTrigger = UNTimeIntervalNotificationTrigger(timeInterval: triggerDelay, repeats: false)
             
             let midpointRequest = UNNotificationRequest(
                 identifier: "nap_window_midpoint_\(babyId.uuidString)",
@@ -181,6 +192,9 @@ class ReminderService {
     func scheduleDiaperReminder(babyId: UUID, hoursSinceLastDiaper: Double, reminderHours: Int) async {
         guard authorizationStatus == .authorized else { return }
         guard !remindersPaused else { return }
+        guard !isQuietHours(Date(), start: quietHoursStart, end: quietHoursEnd) else { return }
+        
+        let triggerTime: TimeInterval = hasPendingWithin(minutes: 5) ? 5 * 60 : 60
         
         // Cancel existing diaper reminder
         cancelDiaperReminder(babyId: babyId)
@@ -191,7 +205,7 @@ class ReminderService {
         // Remind immediately (already past threshold)
         let content = UNMutableNotificationContent()
         content.title = "Diaper Check"
-        content.body = "It's been \(Int(hoursSinceLastDiaper)) hours since last diaper change"
+        content.body = "It's been \(Int(hoursSinceLastDiaper)) hours since \(babyName(for: babyId))'s last diaper change"
         content.sound = .default
         content.categoryIdentifier = "DIAPER_REMINDER"
         content.userInfo = [
@@ -199,7 +213,7 @@ class ReminderService {
             "babyId": babyId.uuidString
         ]
         
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: triggerTime, repeats: false)
         let request = UNNotificationRequest(
             identifier: "diaper_reminder_\(babyId.uuidString)",
             content: content,
@@ -239,6 +253,33 @@ class ReminderService {
     
     func shouldSendReminder(_ date: Date, quietHoursStart: Date?, quietHoursEnd: Date?) -> Bool {
         return !isQuietHours(date, start: quietHoursStart, end: quietHoursEnd)
+    }
+    
+    private func babyName(for babyId: UUID) -> String {
+        // Placeholder: real implementation could cache baby profiles
+        return "your baby"
+    }
+
+    private func hasPendingWithin(minutes: Int) -> Bool {
+        let threshold = Double(minutes * 60)
+        var found = false
+        let semaphore = DispatchSemaphore(value: 0)
+        notificationCenter.getPendingNotificationRequests { requests in
+            let now = Date()
+            found = requests.contains { request in
+                if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger {
+                    return trigger.timeInterval < threshold
+                }
+                if let trigger = request.trigger as? UNCalendarNotificationTrigger,
+                   let next = trigger.nextTriggerDate() {
+                    return next.timeIntervalSince(now) < threshold
+                }
+                return false
+            }
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .now() + 1)
+        return found
     }
     
     // MARK: - Cancel All

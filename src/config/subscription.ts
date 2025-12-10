@@ -35,4 +35,3 @@ export const FEATURES = {
 
 export type SubscriptionTier = 'free' | 'premium';
 export type BillingInterval = 'month' | 'year';
-

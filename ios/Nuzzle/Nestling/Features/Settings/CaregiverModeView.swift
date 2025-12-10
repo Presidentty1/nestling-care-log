@@ -3,6 +3,7 @@ import SwiftUI
 struct CaregiverModeView: View {
     @EnvironmentObject var environment: AppEnvironment
     @State private var isEnabled: Bool = false
+    @State private var showPrompt = false
     
     var body: some View {
         Form {
@@ -26,6 +27,20 @@ struct CaregiverModeView: View {
         .navigationTitle("Caregiver Mode")
         .onAppear {
             isEnabled = environment.isCaregiverMode
+            if UIAccessibility.isVoiceOverRunning || UIApplication.shared.preferredContentSizeCategory.isAccessibilityCategory {
+                showPrompt = true
+            }
+        }
+        .alert("Enable Caregiver Mode?", isPresented: $showPrompt) {
+            Button("Enable") {
+                isEnabled = true
+                environment.setCaregiverMode(true)
+            }
+            Button("Not now", role: .cancel) {
+                showPrompt = false
+            }
+        } message: {
+            Text("We noticed accessibility features are on. Turn on Caregiver Mode for larger targets and simplified layouts.")
         }
     }
 }

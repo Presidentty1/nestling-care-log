@@ -7,6 +7,7 @@ struct NapPredictionCard: View {
     let onTap: () -> Void
     
     @State private var isPulsing = false
+    @State private var showInfo = false
     
     var body: some View {
         CardView(variant: .default) {
@@ -41,6 +42,15 @@ struct NapPredictionCard: View {
                     .foregroundColor(.foreground)
                 
                 Spacer()
+                
+                Button {
+                    showInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .foregroundColor(.mutedForeground)
+                }
+                .accessibilityLabel("How predictions work")
+                .buttonStyle(.plain)
                 
                 // Suggestion badge
                 Text("Suggestion")
@@ -102,6 +112,23 @@ struct NapPredictionCard: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Next nap suggestion: \(timeWindowText(window)). \(window.reason)")
         .accessibilityHint("Tap for more details about nap predictions")
+        .sheet(isPresented: $showInfo) {
+            VStack(alignment: .leading, spacing: .spacingMD) {
+                Text("How nap predictions work")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                Text("We look at age-based wake windows and your recent sleep logs. Short naps can shorten the next wake window. Suggestions are gentle guidance, not medical advice.")
+                    .font(.body)
+                Text("If the window has passed, we’ll gently note that baby may be overtired and suggest winding down soon.")
+                    .font(.body)
+                Button("Close") {
+                    showInfo = false
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .presentationDetents([.medium])
+        }
     }
     
     @ViewBuilder

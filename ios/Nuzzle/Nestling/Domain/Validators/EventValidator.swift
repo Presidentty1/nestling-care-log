@@ -102,5 +102,25 @@ struct EventValidator {
             }
         }
     }
+
+    /// Return the first overlapping sleep (if any) for the given interval.
+    /// This is a pure helper so callers can choose whether to block or prompt.
+    static func firstOverlappingSleep(
+        startTime: Date,
+        endTime: Date,
+        existingEvents: [Event],
+        excludingId: UUID? = nil
+    ) -> Event? {
+        existingEvents
+            .filter { $0.type == .sleep }
+            .filter { event in
+                if let excludingId, event.id == excludingId { return false }
+                guard let otherEnd = event.endTime ?? event.startTime.addingTimeInterval(60) else { return false }
+                // Overlap if intervals intersect (inclusive)
+                return startTime < otherEnd && endTime > event.startTime
+            }
+            .sorted { $0.startTime < $1.startTime }
+            .first
+    }
 }
 

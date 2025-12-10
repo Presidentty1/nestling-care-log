@@ -107,4 +107,3 @@ async function getOrCreateCustomer(userId: string): Promise<string> {
 
   return customer.id;
 }
-

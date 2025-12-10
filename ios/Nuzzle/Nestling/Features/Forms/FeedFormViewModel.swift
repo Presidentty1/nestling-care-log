@@ -6,7 +6,11 @@ import UIKit
 class FeedFormViewModel: ObservableObject {
     @Published var feedType: FeedSubtype = .bottle
     @Published var amount: String = ""
-    @Published var unit: UnitType = .ml
+    @Published var unit: UnitType = .ml {
+        didSet {
+            convertAmount(from: oldValue, to: unit)
+        }
+    }
     @Published var side: Side = .left
     @Published var note: String = ""
     @Published var photos: [UIImage] = []
@@ -14,10 +18,12 @@ class FeedFormViewModel: ObservableObject {
     @Published var isValid: Bool = false
     @Published var errorMessage: String?
     @Published var isSaving: Bool = false
+    @Published var hasChanges: Bool = false
     
     private let dataStore: DataStore
     private let baby: Baby
     let editingEvent: Event?
+    private var initialSnapshot: Snapshot?
     
     init(dataStore: DataStore, baby: Baby, editingEvent: Event? = nil) {
         self.dataStore = dataStore
@@ -31,6 +37,7 @@ class FeedFormViewModel: ObservableObject {
         }
         
         validate()
+        captureInitialSnapshot()
     }
     
     private func loadFromEvent(_ event: Event) {
@@ -99,6 +106,14 @@ class FeedFormViewModel: ObservableObject {
         }
     }
     
+    private func convertAmount(from oldUnit: UnitType, to newUnit: UnitType) {
+        guard oldUnit != newUnit else { return }
+        guard let value = Double(amount) else { return }
+        let amountInML = oldUnit == .ml ? value : value * AppConstants.mlPerOz
+        let converted = newUnit == .ml ? amountInML : amountInML / AppConstants.mlPerOz
+        amount = converted >= 10 ? String(format: "%.0f", converted) : String(format: "%.2f", converted)
+    }
+    
     func validate() {
         if feedType == .breast || feedType == .other {
             isValid = true
@@ -109,6 +124,8 @@ class FeedFormViewModel: ObservableObject {
             // UX-01: Validate both minimum and maximum to prevent unrealistic values
             isValid = amountML >= AppConstants.minimumFeedAmountML && amountML <= maxML
         }
+        
+        updateHasChanges()
     }
     
     func save() async throws {
@@ -209,6 +226,44 @@ class FeedFormViewModel: ObservableObject {
         } catch {
             print("Failed to check first event: \(error.localizedDescription)")
         }
+    }
+
+    private func captureInitialSnapshot() {
+        initialSnapshot = Snapshot(
+            feedType: feedType,
+            amount: amount,
+            unit: unit,
+            side: side,
+            note: note,
+            startTime: startTime,
+            photosCount: photos.count
+        )
+        updateHasChanges()
+    }
+
+    private func updateHasChanges() {
+        guard let initial = initialSnapshot else {
+            hasChanges = true
+            return
+        }
+        let changed = initial.feedType != feedType ||
+            initial.amount != amount ||
+            initial.unit != unit ||
+            initial.side != side ||
+            initial.note != note ||
+            initial.startTime != startTime ||
+            initial.photosCount != photos.count
+        hasChanges = changed
+    }
+
+    private struct Snapshot {
+        let feedType: FeedSubtype
+        let amount: String
+        let unit: UnitType
+        let side: Side
+        let note: String
+        let startTime: Date
+        let photosCount: Int
     }
 }
 

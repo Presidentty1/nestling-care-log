@@ -30,4 +30,3 @@ export function WelcomeCard({ onLogFirstEvent }: WelcomeCardProps) {
     </Card>
   );
 }
-

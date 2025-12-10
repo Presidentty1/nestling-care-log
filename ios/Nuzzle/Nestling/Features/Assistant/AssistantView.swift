@@ -7,6 +7,7 @@ struct AssistantView: View {
     @State private var inputText = ""
     @State private var isComposing = false
     @FocusState private var isInputFocused: Bool
+    @State private var showClearConfirm = false
     
     init() {
         _viewModel = StateObject(wrappedValue: AssistantViewModel())
@@ -111,6 +112,22 @@ struct AssistantView: View {
         .background(Color.background)
         .onAppear {
             viewModel.setBaby(environment.currentBaby)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Clear") {
+                    showClearConfirm = true
+                }
+                .disabled(viewModel.messages.isEmpty)
+            }
+        }
+        .alert("Clear this conversation?", isPresented: $showClearConfirm) {
+            Button("Clear", role: .destructive) {
+                viewModel.clearConversation()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This removes the current chat history on this device.")
         }
     }
     
@@ -223,6 +240,21 @@ struct AssistantView: View {
                             .font(.caption2)
                             .foregroundColor(.mutedForeground)
                             .frame(maxWidth: .infinity, alignment: .leading)
+
+                    HStack(spacing: .spacingSM) {
+                        Button {
+                            viewModel.recordFeedback(for: message.id, helpful: true)
+                        } label: {
+                            Label("Helpful", systemImage: "hand.thumbsup")
+                        }
+                        Button {
+                            viewModel.recordFeedback(for: message.id, helpful: false)
+                        } label: {
+                            Label("Not helpful", systemImage: "hand.thumbsdown")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
                     }
             }
             
@@ -283,6 +315,8 @@ class AssistantViewModel: ObservableObject {
     
     private var currentBaby: Baby?
     private var conversationId: UUID?
+    private let storage = UserDefaults.standard
+    private let sensitiveKeywords = ["fever", "vaccine", "medicine", "dosage", "sids", "pain", "emergency", "911"]
     
     func setBaby(_ baby: Baby?) {
         self.currentBaby = baby
@@ -297,26 +331,51 @@ class AssistantViewModel: ObservableObject {
     
     func sendMessage(_ text: String, baby: Baby?, recentEvents: [Event]) async {
         guard let baby = baby else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         
         // Add user message
-        let userMessage = AIMessage(role: .user, content: text)
+        let userMessage = AIMessage(role: .user, content: trimmed)
         messages.append(userMessage)
+        
+        // Lightweight moderation before sending to backend
+        if containsSensitiveContent(trimmed) {
+            let caution = AIMessage(
+                role: .assistant,
+                content: "I’m here for general guidance and can’t provide medical advice. For urgent or sensitive health questions, please contact a pediatric professional.",
+                containsRedFlag: true
+            )
+            messages.append(caution)
+            await saveConversation(baby: baby)
+            return
+        }
         
         isLoading = true
         defer { isLoading = false }
         
         do {
             // Build prompt with context
-            let prompt = AIContextBuilder.buildPrompt(question: text, baby: baby, recentEvents: recentEvents)
+            let prompt = AIContextBuilder.buildPrompt(question: trimmed, baby: baby, recentEvents: recentEvents)
             
             // Call AI service
             let response = try await AIAssistantService.shared.chat(prompt: prompt)
+            var responseContent = response
             
             // Check for red flags
-            let containsRedFlag = AIContextBuilder.containsRedFlag(text) || AIContextBuilder.containsRedFlag(response)
+            let containsRedFlag = AIContextBuilder.containsRedFlag(trimmed) || AIContextBuilder.containsRedFlag(response)
+            
+            // Add light citation to recent logs if available
+            if let recent = recentEvents.first {
+                let formatter = DateFormatter()
+                formatter.timeStyle = .short
+                formatter.dateStyle = .short
+                let type = recent.type.displayName
+                let timeString = formatter.string(from: recent.startTime)
+                responseContent += "\n\nBased on recent logs, last \(type.lowercased()) was \(timeString)."
+            }
             
             // Add assistant message
-            let assistantMessage = AIMessage(role: .assistant, content: response, containsRedFlag: containsRedFlag)
+            let assistantMessage = AIMessage(role: .assistant, content: responseContent, containsRedFlag: containsRedFlag)
             messages.append(assistantMessage)
             
             // Save to conversation history
@@ -324,7 +383,7 @@ class AssistantViewModel: ObservableObject {
             
             // Track analytics
             AnalyticsService.shared.track(event: "ai_question_sent", properties: [
-                "question_length": text.count,
+                "question_length": trimmed.count,
                 "used_context": !recentEvents.isEmpty
             ])
             
@@ -351,16 +410,44 @@ class AssistantViewModel: ObservableObject {
     }
     
     private func loadConversationHistory(for baby: Baby) async {
-        // Load from Core Data
-        // For now, start fresh each session
-        messages = []
+        let key = conversationStorageKey(for: baby.id)
+        if let data = storage.data(forKey: key),
+           let saved = try? JSONDecoder().decode([AIMessage].self, from: data) {
+            messages = saved
+        } else {
+            messages = []
+        }
         conversationId = UUID()
     }
     
     private func saveConversation(baby: Baby) async {
-        // Save conversation to Core Data
-        // Implementation would store messages persistently
-        Logger.dataInfo("Conversation saved (placeholder)")
+        let key = conversationStorageKey(for: baby.id)
+        if let data = try? JSONEncoder().encode(messages) {
+            storage.set(data, forKey: key)
+        }
+    }
+    
+    func clearConversation() {
+        messages = []
+        if let baby = currentBaby {
+            storage.removeObject(forKey: conversationStorageKey(for: baby.id))
+        }
+    }
+    
+    func recordFeedback(for messageId: UUID, helpful: Bool) {
+        AnalyticsService.shared.track(event: "ai_message_feedback", properties: [
+            "message_id": messageId.uuidString,
+            "helpful": helpful
+        ])
+    }
+    
+    private func conversationStorageKey(for babyId: UUID) -> String {
+        "ai_conversation_\(babyId.uuidString)"
+    }
+    
+    private func containsSensitiveContent(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        return sensitiveKeywords.contains { lower.contains($0) }
     }
 }
 

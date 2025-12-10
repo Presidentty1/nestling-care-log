@@ -25,4 +25,3 @@ open ios/App/App.xcworkspace
 I attempted to open the project, but without the `pod install` step, Xcode may show a broken or empty project. The commands above fix the dependencies (Capacitor, etc.) so the app can build.
 
 Your old native files are safely backed up in `ios-native-backup/`.
-

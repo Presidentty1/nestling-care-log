@@ -168,4 +168,3 @@ export interface DbNotificationSettings {
   created_at: string;
   updated_at: string;
 }
-

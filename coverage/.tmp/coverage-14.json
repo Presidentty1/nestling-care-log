@@ -1,1 +1,58 @@
-{"result":[{"scriptId":"1189","url":"file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/setup.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":2412,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":2412,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":378,"endOffset":386,"count":0}],"isBlockCoverage":false},{"functionName":"","ranges":[{"startOffset":429,"endOffset":437,"count":0}],"isBlockCoverage":false},{"functionName":"","ranges":[{"startOffset":486,"endOffset":587,"count":0}],"isBlockCoverage":false}],"startOffset":209},{"scriptId":"1363","url":"file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/e2e/history.spec.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":10159,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":10159,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":402,"endOffset":3494,"count":0}],"isBlockCoverage":false}],"startOffset":209}]}
+{
+  "result": [
+    {
+      "scriptId": "1189",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/setup.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 2412, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 2412, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 378, "endOffset": 386, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 429, "endOffset": 437, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 486, "endOffset": 587, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    },
+    {
+      "scriptId": "1363",
+      "url": "file:///Users/tyhorton/Coding%20Projects/nestling-care-log/tests/e2e/caregiver-mode.spec.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 9786, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 9786, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 402, "endOffset": 3317, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ],
+      "startOffset": 209
+    }
+  ]
+}

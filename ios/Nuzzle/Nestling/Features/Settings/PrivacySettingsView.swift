@@ -5,6 +5,8 @@ struct PrivacySettingsView: View {
     @StateObject private var privacyManager = PrivacyManager.shared
     @State private var showFaceIDAlert = false
     @State private var isAuthenticating = false
+    private let privacyPolicyURL = URL(string: "https://example.com/privacy")!
+    private let termsURL = URL(string: "https://example.com/terms")!
     
     var body: some View {
         Form {
@@ -50,6 +52,22 @@ struct PrivacySettingsView: View {
                 Text("Simplified interface with larger touch targets and fewer options for easier use.")
                     .font(.caption)
                     .foregroundColor(.mutedForeground)
+            }
+
+            Section("Data & Storage") {
+                Label("Storage", systemImage: "lock.doc")
+                Text("Logs are stored locally and synced via iCloud when enabled. AI features only send short text context when you consent; cry audio stays on-device and is deleted after analysis.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+                Label("Retention", systemImage: "clock.arrow.circlepath")
+                Text("Audio recordings are deleted after analysis. Data deletion from Settings removes local and cloud copies where applicable.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+            }
+            
+            Section("Policies") {
+                Link("Privacy Policy", destination: privacyPolicyURL)
+                Link("Terms of Use", destination: termsURL)
             }
         }
         .navigationTitle("Privacy & Security")

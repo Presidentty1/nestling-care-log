@@ -116,6 +116,7 @@ The app uses **CoreData** for local persistence with automatic fallback:
 - **Development**: `InMemoryDataStore` - In-memory mock data for testing
 
 The `DataStoreSelector` automatically chooses the best available implementation. CoreData provides:
+
 - Native iOS persistence
 - Efficient querying and relationships
 - Background context support

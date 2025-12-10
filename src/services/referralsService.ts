@@ -53,4 +53,3 @@ class ReferralsService {
 }
 
 export const referralsService = new ReferralsService();
-

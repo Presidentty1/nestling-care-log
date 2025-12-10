@@ -54,4 +54,3 @@ class CryLogsService {
 }
 
 export const cryLogsService = new CryLogsService();
-

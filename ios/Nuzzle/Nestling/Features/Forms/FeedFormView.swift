@@ -7,6 +7,7 @@ struct FeedFormView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var environment: AppEnvironment
     @State private var showToast: ToastMessage?
+    @State private var showDiscardChangesAlert = false
     
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
@@ -106,10 +107,15 @@ struct FeedFormView: View {
             }
             .navigationTitle(viewModel.editingEvent != nil ? "Edit Feed" : "New Feed")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(viewModel.hasChanges)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        dismiss()
+                        if viewModel.hasChanges {
+                            showDiscardChangesAlert = true
+                        } else {
+                            dismiss()
+                        }
                     }
                 }
                 
@@ -139,6 +145,14 @@ struct FeedFormView: View {
                 }
             }
             .toast($showToast)
+            .alert("Discard changes?", isPresented: $showDiscardChangesAlert) {
+                Button("Discard", role: .destructive) {
+                    dismiss()
+                }
+                Button("Keep Editing", role: .cancel) { }
+            } message: {
+                Text("You have unsaved changes. Do you want to discard them?")
+            }
         }
     }
 }

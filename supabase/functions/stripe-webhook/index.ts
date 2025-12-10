@@ -180,4 +180,3 @@ async function getUserIdFromCustomerId(customerId: string): Promise<string | nul
 
   return data?.user_id || null;
 }
-

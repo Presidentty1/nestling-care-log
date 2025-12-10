@@ -258,4 +258,3 @@ You need screenshots for:
 - Product IDs `com.nestling.pro.monthly` and `com.nestling.pro.yearly` are preserved
 - All URLs should point to `nuzzle.app` domain
 - All email addresses should use `@nuzzle.app`
-

@@ -5,6 +5,7 @@ struct ManageCaregiversView: View {
     @State private var showInviteCaregiver = false
     @State private var showRevokeConfirm = false
     @State private var caregiverToRevoke: String?
+    @State private var invites: [String] = []
     
     private let relativeDateFormatter: RelativeDateTimeFormatter = {
         let formatter = RelativeDateTimeFormatter()
@@ -134,6 +135,28 @@ struct ManageCaregiversView: View {
                             message: "When you invite a caregiver, logs will sync automatically across all devices via iCloud.",
                             variant: .info
                         )
+
+                        if !invites.isEmpty {
+                            VStack(alignment: .leading, spacing: .spacingSM) {
+                                Text("Pending Invites")
+                                    .font(.headline)
+                                ForEach(invites, id: \.self) { invite in
+                                    HStack {
+                                        Text(invite)
+                                            .foregroundColor(.foreground)
+                                        Spacer()
+                                        Button("Revoke") {
+                                            caregiverToRevoke = invite
+                                            showRevokeConfirm = true
+                                        }
+                                        .buttonStyle(.bordered)
+                                    }
+                                }
+                            }
+                            .padding(.spacingMD)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusSM)
+                        }
                     }
                 }
                 .padding(.spacing2XL)
@@ -149,6 +172,22 @@ struct ManageCaregiversView: View {
             }
             .sheet(isPresented: $showInviteCaregiver) {
                 InviteCaregiverView()
+            }
+            .alert("Revoke access?", isPresented: $showRevokeConfirm) {
+                Button("Revoke", role: .destructive) {
+                    Task {
+                        if let target = caregiverToRevoke {
+                            await CaregiverSyncService.shared.revokeAccess(caregiverId: target)
+                            invites.removeAll { $0 == target }
+                        }
+                        caregiverToRevoke = nil
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    caregiverToRevoke = nil
+                }
+            } message: {
+                Text("This caregiver will lose access to shared data.")
             }
         }
     }
