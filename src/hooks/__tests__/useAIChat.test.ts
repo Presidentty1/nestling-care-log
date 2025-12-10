@@ -66,11 +66,9 @@ describe('useAIChat', () => {
     jest.clearAllMocks();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+  };
 
   describe('initialization', () => {
     it('should initialize with empty messages when no conversation exists', () => {
