@@ -50,8 +50,8 @@ This document summarizes the cleanup and consolidation of the iOS project struct
 - **Xcode Project**: `ios/Nuzzle/Nestling.xcodeproj`
 - **Source Code**: `ios/Nuzzle/Nestling/`
 - **Data Persistence**: CoreData (`.xcdatamodeld`)
-- **App Entry Point**: `NuzzleApp.swift` (@main)
-- **Bundle ID**: `com.nuzzle.Nuzzle`
+- **App Entry Point**: `NestlingApp.swift` (@main)
+- **Bundle ID**: `com.nestling.app`
 
 ### Archived
 
