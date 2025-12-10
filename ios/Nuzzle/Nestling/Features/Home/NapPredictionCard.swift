@@ -223,3 +223,4 @@ struct NapPredictionCard: View {
     .background(Color.background)
 }
 
+

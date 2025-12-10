@@ -117,3 +117,4 @@ final class CoreFlowsTests: XCTestCase {
         XCTAssertNotNil(updated.nextNapWindow)
     }
 }
+

@@ -18,3 +18,4 @@ final class LegacyNestlingUITestsLaunchTests: XCTestCase {
         XCTAssertTrue(app.state == .runningForeground || app.state == .runningBackground)
     }
 }
+

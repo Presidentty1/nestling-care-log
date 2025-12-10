@@ -12,3 +12,4 @@ final class LegacyNuzzleUITests: XCTestCase {
         XCTAssertTrue(true)
     }
 }
+

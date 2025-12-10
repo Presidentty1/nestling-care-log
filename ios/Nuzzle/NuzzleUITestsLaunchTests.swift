@@ -18,3 +18,4 @@ final class LegacyNuzzleUITestsLaunchTests: XCTestCase {
         XCTAssertTrue(app.state == .runningForeground || app.state == .runningBackground)
     }
 }
+

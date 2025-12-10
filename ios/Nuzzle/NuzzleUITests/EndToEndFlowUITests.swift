@@ -53,3 +53,4 @@ final class EndToEndFlowUITests: XCTestCase {
         XCTAssertTrue(feedButton.exists || sleepButton.exists, "Quick log targets should be present for notification deep links.")
     }
 }
+

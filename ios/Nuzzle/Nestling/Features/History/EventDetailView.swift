@@ -259,3 +259,4 @@ struct EventDetailView: View {
     )
 }
 
+
