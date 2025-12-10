@@ -19,7 +19,7 @@ Widgets require App Groups to share data between the app and widget extension.
 2. Go to **Signing & Capabilities**
 3. Click **+ Capability**
 4. Add **App Groups**
-5. Create group: `group.com.nestling.app`
+5. Create group: `group.com.nestling.Nestling`
 6. Repeat for **NestlingWidgets** target (same group ID)
 
 ### Step 2: Update DataStore to Use App Groups
@@ -28,7 +28,7 @@ The `JSONBackedDataStore` should save data to the App Groups container:
 
 ```swift
 private var appGroupURL: URL? {
-    FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")
+    FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling")
 }
 
 private var dataFileURL: URL {
@@ -127,7 +127,7 @@ let verified = WidgetTestHelper.verifyAppGroups()
 
 **Fix**:
 1. Verify App Groups capability added to both targets
-2. Check group ID matches: `group.com.nestling.app`
+2. Check group ID matches: `group.com.nestling.Nestling`
 3. Verify DataStore saves to App Groups container
 4. Reload widget timeline
 

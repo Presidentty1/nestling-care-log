@@ -32,7 +32,7 @@ struct WelcomeView: View {
                 }
                 .padding(.top, .spacingSM)
                 
-                Text("Free forever • Premium from $4.99/mo")
+                Text("Start your 7-day free trial • Then $5.99/mo")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.mutedForeground.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -68,6 +68,11 @@ struct WelcomeView: View {
             .padding(.bottom, .spacing2XL)
         }
         .background(Color.background)
+        .onAppear {
+            Task {
+                await Analytics.shared.logOnboardingStepViewed(step: "welcome")
+            }
+        }
     }
 }
 

@@ -198,6 +198,10 @@
 		D6547BCB33E56AA2AF51F796 /* NuzzleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8570289909E4AB711B2841DE /* NuzzleApp.swift */; };
 		D6623D9B9B519200B1BA860E /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2ABA5E142B74A1C2513C4C /* QuickActionButton.swift */; };
 		D6B0C6CC8AD3FC0E93EEAC25 /* SignpostLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1884A1C3B6B6E69429737 /* SignpostLogger.swift */; };
+		D751252E2EE4EECB00DA47FE /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 443034374137433231464338 /* FirebaseCore */; };
+		D751252F2EE4EECB00DA47FE /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 433844374331334433353441 /* FirebaseAnalytics */; };
+		D75125302EE4EECB00DA47FE /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 374244463533463544394532 /* Supabase */; };
+		D75125312EE4EECB00DA47FE /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 434139453330433035364437 /* Sentry */; };
 		D9B6EEFCB87ED47030C595C3 /* MedicalDisclaimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D861C97B3FA28D97EEAA5AC /* MedicalDisclaimer.swift */; };
 		DA07B2DCF99BE04997C1D219 /* SleepActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA22724153D0DFC7B743CE /* SleepActivityView.swift */; };
 		DB7E91AFCE6CA17BF7554DAD /* DiagnosticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F230CD7C604607428395D1 /* DiagnosticsService.swift */; };
@@ -1643,6 +1647,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D75125312EE4EECB00DA47FE /* Sentry in Frameworks */,
+				D75125302EE4EECB00DA47FE /* Supabase in Frameworks */,
+				D751252F2EE4EECB00DA47FE /* FirebaseAnalytics in Frameworks */,
+				D751252E2EE4EECB00DA47FE /* FirebaseCore in Frameworks */,
 				236A8EBDDD568F8FC6D2C2A1 /* Speech.framework in Frameworks */,
 				457C099E6FB5594DB4C82347 /* PhotosUI.framework in Frameworks */,
 			);
@@ -2313,7 +2321,6 @@
 				69D4AB89D80AC98C11415D9E /* SharedWidgetData.swift */,
 				C0F7BDCE574BBF535F35C435 /* SharedWidgetData.swift */,
 			);
-			name = Widgets;
 			path = Widgets;
 			sourceTree = "<group>";
 		};

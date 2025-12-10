@@ -126,6 +126,17 @@ struct ProSubscriptionView: View {
     private var isTrialActive: Bool {
         proService.trialDaysRemaining != nil && proService.trialDaysRemaining! > 0
     }
+    
+    private var subscribeButtonText: String {
+        if isTrialActive {
+            // User is in trial - emphasize continuing access
+            let selectedProduct = proService.getProducts().first(where: { $0.id == selectedProductID })
+            let price = selectedProduct?.displayPrice ?? "$5.99/mo"
+            return "Continue my Pro access • \(price) after trial"
+        } else {
+            return "Subscribe"
+        }
+    }
 
     
     var body: some View {
@@ -164,18 +175,20 @@ struct ProSubscriptionView: View {
     
     private var headerView: some View {
         VStack(spacing: .spacingSM) {
-            Image(systemName: "star.fill")
+            Image(systemName: "lightbulb.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.primary)
             
-            Text("Unlock Nuzzle Pro")
+            Text("Get Daily Personalized Insights")
                 .font(.largeTitle)
                 .fontWeight(.bold)
+                .multilineTextAlignment(.center)
 
-            Text("Less chaos. Smarter naps. Clear picture of your baby's day.")
+            Text("AI-powered recommendations based on your baby's unique patterns, not generic schedules.")
                 .font(.subheadline)
                 .foregroundColor(.mutedForeground)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, .spacingMD)
 
             if isTrialActive {
                 HStack(spacing: .spacingXS) {
@@ -221,7 +234,7 @@ struct ProSubscriptionView: View {
                         .foregroundColor(.foreground)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        BulletPoint("Up to 100 events")
+                        BulletPoint("7 days full access")
                         BulletPoint("Basic nap suggestions by age")
                         BulletPoint("Today Status overview")
                         BulletPoint("History & search")
@@ -376,7 +389,7 @@ struct ProSubscriptionView: View {
     private var actionButtons: some View {
         VStack(spacing: .spacingMD) {
             PrimaryButton(
-                "Subscribe",
+                subscribeButtonText,
                 icon: "star.fill"
             ) {
                 guard let productID = selectedProductID else {
@@ -551,7 +564,7 @@ struct TrialOptionCard: View {
                         .font(.headline)
                         .foregroundColor(.success)
 
-                    Text("Then $4.99/mo")
+                    Text("Then $5.99/mo")
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
                 }
@@ -606,8 +619,9 @@ struct SubscriptionOptionCard: View {
                             Text("7-day free trial")
                                 .font(.caption)
                                 .foregroundColor(.primary)
-                            Text("Best value")
+                            Text("Save $32/year")
                                 .font(.caption)
+                                .fontWeight(.semibold)
                                 .foregroundColor(.success)
                         }
                     }

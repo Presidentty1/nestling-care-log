@@ -119,7 +119,7 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        _ = try await getCurrentFamilyId()
+        let familyId = try await getCurrentFamilyId()
         let babyDTO = BabyDTO.from(baby, familyId: familyId)
         let babyData = try jsonEncoder.encode(babyDTO)
         _ = try JSONSerialization.jsonObject(with: babyData) as? [String: Any] ?? [:]
@@ -138,7 +138,7 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        _ = try await getCurrentFamilyId()
+        let familyId = try await getCurrentFamilyId()
         var babyDTO = BabyDTO.from(baby, familyId: familyId)
         babyDTO = BabyDTO(
             id: babyDTO.id,
@@ -226,8 +226,8 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        _ = try await getCurrentFamilyId()
-        _ = try await getCurrentUserId()
+        let familyId = try await getCurrentFamilyId()
+        let userId = try await getCurrentUserId()
         let eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
         let eventData = try jsonEncoder.encode(eventDTO)
         _ = try JSONSerialization.jsonObject(with: eventData) as? [String: Any] ?? [:]
@@ -249,8 +249,8 @@ class RemoteDataStore: DataStore {
             throw DataStoreError.authenticationRequired
         }
         
-        _ = try await getCurrentFamilyId()
-        _ = try await getCurrentUserId()
+        let familyId = try await getCurrentFamilyId()
+        let userId = try await getCurrentUserId()
         var eventDTO = EventDTO.from(event, familyId: familyId, userId: userId)
         
         // Update timestamp

@@ -51,6 +51,18 @@ actor Analytics {
     func logOnboardingGoalSelected(goal: String) {
         log("onboarding_goal_selected", parameters: ["goal": goal])
     }
+    
+    func logOnboardingStepViewed(step: String) {
+        log("onboarding_step_viewed", parameters: ["step": step])
+    }
+    
+    func logOnboardingStepSkipped(step: String) {
+        log("onboarding_step_skipped", parameters: ["step": step])
+    }
+    
+    func logOnboardingStarted() {
+        log("onboarding_started", parameters: [:])
+    }
 
     func logFirstLogCreated(eventType: String, babyId: String) {
         log("first_log_created", parameters: ["event_type": eventType, "baby_id": babyId])

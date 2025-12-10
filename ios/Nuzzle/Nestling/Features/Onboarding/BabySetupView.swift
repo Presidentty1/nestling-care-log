@@ -133,11 +133,23 @@ struct BabySetupView: View {
                     }
                     .disabled(coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid)
                     .padding(.horizontal, .spacingMD)
+                    
+                    Button("Skip") {
+                        Haptics.light()
+                        coordinator.skip()
+                    }
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(.mutedForeground)
                 }
                 .padding(.bottom, .spacing2XL)
             }
         }
         .background(Color.background)
+        .onAppear {
+            Task {
+                await Analytics.shared.logOnboardingStepViewed(step: "baby_setup")
+            }
+        }
         .alert("Name Required", isPresented: $showError) {
             Button("OK") { }
         } message: {

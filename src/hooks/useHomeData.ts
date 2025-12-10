@@ -221,7 +221,7 @@ export function useHomeData() {
   };
 
   const handleEventAdded = (event: EventRecord) => {
-    // Save last used values
+    // Immediate UI updates (synchronous)
     if (event) {
        const values: any = {};
        if (event.type === 'feed') {
@@ -241,47 +241,72 @@ export function useHomeData() {
       setHasShownConfetti(true);
     }
 
+    // Refresh events immediately for UI responsiveness
+    refreshEvents();
+
+    // Defer non-critical operations to idle time
+    const scheduleIdleTask = (callback: () => void) => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(callback, { timeout: 2000 });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(callback, 100);
+      }
+    };
+
+    // Defer celebration toast (non-blocking)
     if (!hasShownFirstLogCelebration && activeBabyId) {
-      const hasFeeds = events.some(e => e.type === 'feed');
-      const hasNaps = events.some(e => e.type === 'sleep');
-      if (events.length >= 2 && hasFeeds && hasNaps) {
-        setTimeout(() => {
+      scheduleIdleTask(() => {
+        const hasFeeds = events.some(e => e.type === 'feed');
+        const hasNaps = events.some(e => e.type === 'sleep');
+        if (events.length >= 2 && hasFeeds && hasNaps) {
           toast.success('Great! With feeds + naps logged, we can now predict your next nap.');
           setHasShownFirstLogCelebration(true);
           localStorage.setItem(`first_log_celebration_${activeBabyId}`, 'true');
-        }, 1000);
-      }
+        }
+      });
     }
 
+    // Defer guest mode operations
     if (guestMode) {
-      guestModeService.incrementGuestEventCount().then(count => {
-        if (count >= 3) setShowGuestBanner(true);
+      scheduleIdleTask(() => {
+        guestModeService.incrementGuestEventCount().then(count => {
+          if (count >= 3) setShowGuestBanner(true);
+        });
       });
     }
     
+    // Defer streak and achievement operations (non-critical for UI)
     if (activeBabyId) {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      streakService.markEventLogged(activeBabyId, today, event.type).then(() => {
-        streakService.updateStreak(activeBabyId).then(streak => {
+      scheduleIdleTask(() => {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        // Batch streak operations
+        streakService.markEventLogged(activeBabyId, today, event.type).then(() => {
+          return streakService.updateStreak(activeBabyId);
+        }).then(streak => {
           setStreakDays(streak.currentStreak);
-          achievementService.checkAndUnlockAchievements(activeBabyId, {
-            streakDays: streak.currentStreak,
-            eventType: event.type,
-            eventTime: new Date(event.start_time),
-          }).then(newAchievements => {
-            newAchievements.forEach(achievement => {
-              toast.success(`Achievement unlocked: ${achievement.title}!`);
+          // Defer achievement check further
+          scheduleIdleTask(() => {
+            achievementService.checkAndUnlockAchievements(activeBabyId, {
+              streakDays: streak.currentStreak,
+              eventType: event.type,
+              eventTime: new Date(event.start_time),
+            }).then(newAchievements => {
+              newAchievements.forEach(achievement => {
+                toast.success(`Achievement unlocked: ${achievement.title}!`);
+              });
             });
           });
         });
-      });
-      
-      streakService.shouldShowAffirmation(activeBabyId).then(should => {
-        if (should) setShowAffirmation(true);
+        
+        // Defer affirmation check
+        scheduleIdleTask(() => {
+          streakService.shouldShowAffirmation(activeBabyId).then(should => {
+            if (should) setShowAffirmation(true);
+          });
+        });
       });
     }
-    
-    refreshEvents();
   };
 
   return {

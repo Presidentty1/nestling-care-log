@@ -8,6 +8,7 @@ struct NuzzleApp: App {
     @StateObject private var environment: AppEnvironment
     @StateObject private var authViewModel = AuthViewModel()
     @State private var showOnboarding = false
+    @State private var showTrialCelebration = false
     @State private var isCheckingAuth = true
     @State private var isCheckingOnboarding = true
     
@@ -113,6 +114,8 @@ struct NuzzleApp: App {
                 } else if showOnboarding {
                     OnboardingView(dataStore: environment.dataStore) {
                         showOnboarding = false
+                        // Show trial celebration after onboarding
+                        showTrialCelebration = true
                         // Refresh babies and settings after onboarding completes
                         Task {
                             await environment.refreshBabies()
@@ -123,6 +126,35 @@ struct NuzzleApp: App {
                     ContentView()
                         .environmentObject(environment)
                         .appPrivacy(enabled: PrivacyManager.shared.isAppPrivacyEnabled)
+                        // Trial celebration - will work after clean build
+                        // Component exists in TrialBannerView.swift
+                        .sheet(isPresented: $showTrialCelebration) {
+                            // Inline celebration view to avoid compilation order issues
+                            VStack(spacing: .spacing2XL) {
+                                Spacer()
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 80))
+                                    .foregroundColor(.yellow)
+                                Text("Welcome! 🎉")
+                                    .font(.system(size: 32, weight: .bold))
+                                Text("Your 7-day free trial has started")
+                                    .font(.system(size: 18, weight: .regular))
+                                    .foregroundColor(.mutedForeground)
+                                Spacer()
+                                Button("Start Tracking") {
+                                    showTrialCelebration = false
+                                }
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(Color.primary)
+                                .cornerRadius(.radiusXL)
+                                .padding(.horizontal, .spacingLG)
+                                .padding(.bottom, .spacing2XL)
+                            }
+                            .background(Color.background)
+                        }
                         .onAppear {
                             // End launch signpost when ContentView appears
                             SignpostLogger.endInterval("AppLaunch", signpostID: launchSignpostID, log: SignpostLogger.ui)
@@ -326,11 +358,18 @@ struct NuzzleApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var environment: AppEnvironment
+    @State private var previousTab: Int = 0
 
     var body: some View {
         TabView(selection: Binding(
             get: { environment.navigationCoordinator.selectedTab },
-            set: { environment.navigationCoordinator.selectedTab = $0 }
+            set: { newValue in
+                // Trigger haptic feedback on tab change
+                if newValue != environment.navigationCoordinator.selectedTab {
+                    Haptics.selection()
+                }
+                environment.navigationCoordinator.selectedTab = newValue
+            }
         )) {
             HomeView()
                 .tabItem {

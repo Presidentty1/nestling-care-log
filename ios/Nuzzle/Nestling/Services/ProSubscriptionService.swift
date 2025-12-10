@@ -74,15 +74,24 @@ class ProSubscriptionService: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var trialDaysRemaining: Int? = nil
     @Published var freeTierLimits: [ProFeature: Int] = [:]
+    @Published var productLoadError: String? = nil
+    
+    // 7-day time-based trial (starts on first app launch)
+    private let trialDurationDays = 7
+    private var trialStartDate: Date? {
+        get {
+            UserDefaults.standard.object(forKey: "trial_start_date") as? Date
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "trial_start_date")
+        }
+    }
 
     // Product IDs (configure in App Store Connect)
     // TODO: Update bundle identifier from com.nestling.* to com.nuzzle.* when ready
     // Note: Product IDs remain unchanged for StoreKit continuity with existing subscriptions
     private let monthlyProductID = "com.nestling.pro.monthly"
     private let yearlyProductID = "com.nestling.pro.yearly"
-
-    // Trial configuration - handled by StoreKit introductory offers
-    private let trialDurationDays = 7
 
     private var products: [Product] = []
     private var currentSubscription: Product?
@@ -91,6 +100,7 @@ class ProSubscriptionService: ObservableObject {
     
     private init() {
         initializeFreeTierLimits()
+        initializeTimeBasedTrial()
         
         // Restore dev mode if it was previously enabled
         if UserDefaults.standard.bool(forKey: "dev_pro_mode_enabled") {
@@ -106,6 +116,49 @@ class ProSubscriptionService: ObservableObject {
                 await loadProducts()
                 await checkSubscriptionStatus()
                 startTransactionListener()
+            }
+        }
+    }
+    
+    /// Initialize 7-day time-based trial on first launch
+    private func initializeTimeBasedTrial() {
+        // Start trial on first app launch
+        if trialStartDate == nil {
+            trialStartDate = Date()
+            print("[Pro] Started 7-day trial at \(Date())")
+            
+            // Schedule Day 5 warning notification
+            NotificationScheduler.shared.scheduleTrialWarningNotification(trialStartDate: Date())
+        }
+        
+        // Calculate remaining days
+        updateTrialDaysRemaining()
+    }
+    
+    /// Update trial days remaining based on start date
+    private func updateTrialDaysRemaining() {
+        guard let startDate = trialStartDate else {
+            trialDaysRemaining = nil
+            return
+        }
+        
+        let calendar = Calendar.current
+        let endDate = calendar.date(byAdding: .day, value: trialDurationDays, to: startDate)!
+        let daysRemaining = calendar.dateComponents([.day], from: Date(), to: endDate).day ?? 0
+        
+        if daysRemaining > 0 {
+            trialDaysRemaining = daysRemaining
+            // During trial, user has Pro access
+            if !isProUser && subscriptionStatus != .subscribed {
+                isProUser = true
+                print("[Pro] Time-based trial active: \(daysRemaining) days remaining")
+            }
+        } else {
+            trialDaysRemaining = 0
+            // Trial ended, revoke Pro access if no subscription
+            if subscriptionStatus != .subscribed {
+                isProUser = false
+                print("[Pro] Time-based trial expired")
             }
         }
     }
@@ -128,7 +181,7 @@ class ProSubscriptionService: ObservableObject {
                         // Check if this is an introductory offer (trial)
                         if #available(iOS 17.2, *), let offerType = transaction.offer?.type, offerType == .introductory {
                             // Calculate remaining trial days
-                            if _ = transaction.expirationDate {
+                            if let expirationDate = transaction.expirationDate {
                                 let daysRemaining = Calendar.current.dateComponents([.day], from: Date(), to: expirationDate).day ?? 0
                                 if daysRemaining > 0 {
                                     trialDaysRemaining = daysRemaining
@@ -192,7 +245,7 @@ class ProSubscriptionService: ObservableObject {
 
                 // Check if this is a new activation or renewal
                 let originalPurchaseDate = transaction.originalPurchaseDate
-                if _ = transaction.expirationDate {
+                if let _ = transaction.expirationDate {
                     let timeSincePurchase = Date().timeIntervalSince(originalPurchaseDate)
                     let isRenewal = timeSincePurchase > 86400 // More than 1 day since original purchase
 
@@ -241,13 +294,20 @@ class ProSubscriptionService: ObservableObject {
     /// Load available products from App Store
     func loadProducts() async {
         isLoading = true
+        productLoadError = nil
         defer { isLoading = false }
         
         do {
             products = try await Product.products(for: [monthlyProductID, yearlyProductID])
             print("[Pro] Loaded \(products.count) products")
+            
+            if products.isEmpty {
+                productLoadError = "No subscription products found. Please check your internet connection and try again."
+                print("[Pro] Warning: Product array is empty")
+            }
         } catch {
-            print("[Pro] Failed to load products: \(error)")
+            productLoadError = "Unable to load subscription options. Please check your internet connection and try again."
+            print("[Pro] Failed to load products: \(error.localizedDescription)")
         }
     }
     
@@ -262,7 +322,7 @@ class ProSubscriptionService: ObservableObject {
                         isProUser = true
 
                         // Check expiration
-                        if _ = transaction.expirationDate,
+                        if let expirationDate = transaction.expirationDate,
                            expirationDate < Date() {
                             subscriptionStatus = .expired
                             isProUser = false
@@ -273,18 +333,22 @@ class ProSubscriptionService: ObservableObject {
                 }
             }
 
-            // No active subscription - check trial status
-            await checkTrialStatus()
+            // No active subscription - check time-based trial
+            updateTrialDaysRemaining()
 
-            // If no trial and no subscription, user is not Pro
+            // If trial expired and no subscription, user is not Pro
             if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
                 subscriptionStatus = .notSubscribed
                 isProUser = false
             }
         } catch {
             print("[Pro] Failed to check subscription: \(error)")
-            subscriptionStatus = .notSubscribed
-            isProUser = false
+            // Even if subscription check fails, honor the time-based trial
+            updateTrialDaysRemaining()
+            if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
+                subscriptionStatus = .notSubscribed
+                isProUser = false
+            }
         }
     }
     
@@ -490,8 +554,8 @@ extension ProSubscriptionService {
  
  1. App Store Connect:
     - Create subscription group "Pro"
-    - Add monthly subscription ($4.99/month)
-    - Add yearly subscription ($49.99/year, save 17%)
+    - Add monthly subscription ($5.99/month)
+    - Add yearly subscription ($39.99/year, save $32)
     - Configure subscription levels and benefits
  
  2. Xcode:

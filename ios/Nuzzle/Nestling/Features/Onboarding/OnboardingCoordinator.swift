@@ -55,19 +55,23 @@ class OnboardingCoordinator: ObservableObject {
         case .babyEssentials:
             currentStep = .goalSelection
         case .goalSelection:
-            currentStep = .complete
+            // Skip the "complete" screen - go straight to app (Epic 1 AC1: ≤3 screens)
+            completeOnboarding()
         case .complete:
             completeOnboarding()
         }
     }
     
     func skip() {
-        // Allow skipping goal selection and complete screens
-        if currentStep == .goalSelection || currentStep == .complete {
-            completeOnboarding()
-        } else {
-            next()
+        // Log skip event
+        Task {
+            let stepName = currentStep == .welcome ? "welcome" :
+                          currentStep == .babyEssentials ? "baby_setup" :
+                          currentStep == .goalSelection ? "goal_selection" : "unknown"
+            await Analytics.shared.logOnboardingStepSkipped(step: stepName)
         }
+        // Allow skipping any step - go straight to app
+        completeOnboarding()
     }
     
     func completeOnboarding() {

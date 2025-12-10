@@ -71,7 +71,7 @@ Xcode creates some files we already have:
    - **Supported Destinations**: iPhone, iPad
 3. **Signing & Capabilities** tab:
    - Select your team
-   - Add capability: **App Groups** → `group.com.nestling.app`
+   - Add capability: **App Groups** → `group.com.nestling.Nestling`
    - Add capability: **Push Notifications** (for future)
 4. **Info** tab:
    - Replace `Info.plist` with the one from `ios/Nestling/Info.plist`
@@ -138,19 +138,19 @@ For **Nestling** target:
 For **NestlingWidgets** target:
 - **Swift Language Version**: Swift 5.9
 - **iOS Deployment Target**: 17.0
-- **App Groups**: `group.com.nestling.app`
+- **App Groups**: `group.com.nestling.Nestling`
 
 For **NestlingIntents** target:
 - **Swift Language Version**: Swift 5.9
 - **iOS Deployment Target**: 17.0
-- **App Groups**: `group.com.nestling.app`
+- **App Groups**: `group.com.nestling.Nestling`
 
 ### Step 11: Add Entitlements
 
 1. For **Nestling** target:
    - Add `ios/Nestling/Entitlements.entitlements` file
    - In target settings → **Signing & Capabilities** → ensure entitlements file is set
-   - **Add Capability**: App Groups → `group.com.nestling.app` (for widgets/extensions)
+   - **Add Capability**: App Groups → `group.com.nestling.Nestling` (for widgets/extensions)
 
 ### Step 12: Configure Info.plist
 
@@ -259,6 +259,6 @@ After project setup is complete:
 
 ### Missing App Groups
 - **Solution**: Widgets/extensions require App Groups
-- **Fix**: Target → Signing & Capabilities → + Capability → App Groups → `group.com.nestling.app`
+- **Fix**: Target → Signing & Capabilities → + Capability → App Groups → `group.com.nestling.Nestling`
 - **Note**: Optional for MVP, required for widgets
 

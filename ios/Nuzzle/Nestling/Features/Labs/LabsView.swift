@@ -6,6 +6,7 @@ struct LabsView: View {
     @State private var showProSubscription = false
     @State private var showCryInsightsOnboarding = false
     @State private var showCryInsights = false
+    @State private var selectedComingSoon: ComingSoonFeature?
     
     var body: some View {
         NavigationStack {
@@ -30,6 +31,9 @@ struct LabsView: View {
                         if ProSubscriptionService.shared.isProUser {
                             showPredictions = true
                         } else {
+                            Task {
+                                await Analytics.shared.logPaywallViewed(source: "labs_smart_predictions")
+                            }
                             showProSubscription = true
                         }
                     }
@@ -51,6 +55,25 @@ struct LabsView: View {
                         }
                     }
                     .padding(.horizontal, .spacingMD)
+                    
+                    // Divider
+                    Divider()
+                        .padding(.vertical, .spacingSM)
+                    
+                    Text("Coming Soon")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.mutedForeground)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, .spacingMD)
+                    
+                    // Coming Soon Features
+                    ForEach(ComingSoonFeature.allCases, id: \.self) { feature in
+                        ComingSoonCard(feature: feature) {
+                            selectedComingSoon = feature
+                        }
+                        .padding(.horizontal, .spacingMD)
+                    }
                 }
                 .padding(.vertical, .spacingMD)
             }
@@ -91,6 +114,168 @@ struct LabsView: View {
                     CryRecorderView(dataStore: environment.dataStore, baby: baby)
                 } else {
                     Text("No baby selected")
+                }
+            }
+            .sheet(item: $selectedComingSoon) { feature in
+                ComingSoonDetailView(feature: feature)
+            }
+            .sheet(isPresented: $showProSubscription) {
+                ProSubscriptionView()
+            }
+        }
+    }
+}
+
+// MARK: - Coming Soon Features
+
+enum ComingSoonFeature: String, CaseIterable, Identifiable {
+    case sleepConsultant = "Sleep Consultant AI"
+    case growthCharts = "Growth & Development Charts"
+    case smartPhotoMemories = "Smart Photo Memories"
+    
+    var id: String { rawValue }
+    
+    var description: String {
+        switch self {
+        case .sleepConsultant:
+            return "Chat with an AI sleep consultant trained on pediatric sleep science"
+        case .growthCharts:
+            return "Track weight, height, and head circumference with WHO percentile charts"
+        case .smartPhotoMemories:
+            return "Automatically organize photos by milestone and create monthly recaps"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .sleepConsultant: return "message.fill"
+        case .growthCharts: return "chart.line.uptrend.xyaxis"
+        case .smartPhotoMemories: return "photo.on.rectangle.angled"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .sleepConsultant: return .eventSleep
+        case .growthCharts: return .eventFeed
+        case .smartPhotoMemories: return .eventTummy
+        }
+    }
+}
+
+struct ComingSoonCard: View {
+    let feature: ComingSoonFeature
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: .spacingMD) {
+                Image(systemName: feature.icon)
+                    .font(.title3)
+                    .foregroundColor(feature.color)
+                    .frame(width: 40)
+                    .opacity(0.5)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: .spacingXS) {
+                        Text(feature.rawValue)
+                            .font(.headline)
+                            .foregroundColor(.mutedForeground)
+                        
+                        Text("Soon")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.mutedForeground)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.surface)
+                            .cornerRadius(6)
+                            .opacity(0.7)
+                    }
+                    
+                    Text(feature.description)
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .opacity(0.8)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.mutedForeground)
+                    .opacity(0.5)
+            }
+            .padding(.spacingMD)
+            .background(Color.surface.opacity(0.5))
+            .cornerRadius(.radiusMD)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusMD)
+                    .stroke(Color.cardBorder.opacity(0.5), lineWidth: 1)
+                    .opacity(0.5)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct ComingSoonDetailView: View {
+    let feature: ComingSoonFeature
+    @Environment(\.dismiss) var dismiss
+    @State private var notifyMe = false
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: .spacingXL) {
+                Spacer()
+                
+                Image(systemName: feature.icon)
+                    .font(.system(size: 70))
+                    .foregroundColor(feature.color)
+                    .opacity(0.7)
+                
+                VStack(spacing: .spacingMD) {
+                    Text(feature.rawValue)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.foreground)
+                    
+                    Text(feature.description)
+                        .font(.body)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .spacingLG)
+                }
+                
+                VStack(spacing: .spacingSM) {
+                    Toggle("Notify me when available", isOn: $notifyMe)
+                        .padding(.spacingMD)
+                        .background(Color.surface)
+                        .cornerRadius(.radiusMD)
+                    
+                    Text("We'll send you a notification when this feature launches")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, .spacingLG)
+                
+                Spacer()
+                
+                PrimaryButton("Got it") {
+                    dismiss()
+                }
+                .padding(.horizontal, .spacingLG)
+                .padding(.bottom, .spacing2XL)
+            }
+            .background(Color.background)
+            .navigationTitle("Coming Soon")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("✕") {
+                        dismiss()
+                    }
+                    .foregroundColor(.mutedForeground)
                 }
             }
         }

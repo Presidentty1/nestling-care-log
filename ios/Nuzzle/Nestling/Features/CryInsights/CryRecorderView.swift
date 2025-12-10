@@ -163,6 +163,9 @@ struct CryRecorderView: View {
                                     // Show upgrade button if quota exceeded
                                     if message.contains("weekly limit") || message.contains("quota") {
                                         PrimaryButton("Upgrade to Pro", icon: "star.fill") {
+                                            Task {
+                                                await Analytics.shared.logPaywallViewed(source: "cry_insights_quota_exceeded")
+                                            }
                                             showProSubscription = true
                                         }
                                     } else {
@@ -350,6 +353,9 @@ struct CryRecorderView: View {
                                                 .multilineTextAlignment(.center)
                                             
                                             PrimaryButton("Upgrade to Pro", icon: "star.fill") {
+                                                Task {
+                                                    await Analytics.shared.logPaywallViewed(source: "cry_insights_3_free_limit")
+                                                }
                                                 showProSubscription = true
                                             }
                                             
@@ -413,6 +419,9 @@ struct CryRecorderView: View {
                                             .multilineTextAlignment(.center)
 
                                         PrimaryButton("Upgrade to Pro", icon: "star.fill") {
+                                            Task {
+                                                await Analytics.shared.logPaywallViewed(source: "cry_insights_weekly_limit")
+                                            }
                                             showProSubscription = true
                                         }
 

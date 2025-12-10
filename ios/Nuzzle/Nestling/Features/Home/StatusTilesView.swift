@@ -124,6 +124,29 @@ struct HeroNapCard: View {
     let napWindow: NapWindow
     let baby: Baby
     
+    private var isPro: Bool {
+        ProSubscriptionService.shared.isProUser
+    }
+    
+    private var predictionSource: String {
+        if isPro {
+            return "Based on \(baby.name)'s patterns"
+        } else {
+            return "Typical for \(ageDescription)"
+        }
+    }
+    
+    private var ageDescription: String {
+        let months = Calendar.current.dateComponents([.month], from: baby.dateOfBirth, to: Date()).month ?? 0
+        if months == 0 {
+            return "newborns"
+        } else if months == 1 {
+            return "1-month-olds"
+        } else {
+            return "\(months)-month-olds"
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingMD) {
             HStack {
@@ -136,14 +159,34 @@ struct HeroNapCard: View {
                     .foregroundColor(.mutedForeground)
                 
                 Spacer()
+                
+                // Pro badge
+                if isPro {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                        Text("Pro")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.primary)
+                    .cornerRadius(6)
+                }
             }
             
             Text(formatNapWindow(napWindow))
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.foreground)
             
             Text(formatTimeUntil(napWindow))
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.foreground)
+            
+            // Source subtitle
+            Text(predictionSource)
+                .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.mutedForeground)
         }
         .padding(.spacingLG)

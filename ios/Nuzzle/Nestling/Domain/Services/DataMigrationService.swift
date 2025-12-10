@@ -43,7 +43,7 @@ class DataMigrationService {
         // Migrate predictions
         for baby in babies {
             for predictionType in PredictionType.allCases {
-                if _ = try? await jsonStore.fetchPredictions(for: baby, type: predictionType) {
+                if let _ = try? await jsonStore.fetchPredictions(for: baby, type: predictionType) {
                     // Save prediction via Core Data
                     let _ = try await coreDataStore.generatePrediction(for: baby, type: predictionType)
                 }
