@@ -18,6 +18,7 @@ class HomeViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var activeSleep: Event?
     @Published var searchText: String = ""
+    @Published var debouncedSearchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
     @Published var hasAnyEvents: Bool = true // Epic 2 AC2.1
     @Published var userGoal: String? // User's selected goal from onboarding
@@ -55,6 +56,7 @@ class HomeViewModel: ObservableObject {
     let baby: Baby // Made internal so HomeView can check if baby changed
     private var isLoadingTask: Task<Void, Never>?
     private let showToast: (String, String) -> Void // (message, type)
+    private var cancellables = Set<AnyCancellable>()
     
     // Today Status data
     var lastFeed: Event? {
@@ -110,8 +112,8 @@ class HomeViewModel: ObservableObject {
         }
         
         // Apply search text
-        if !searchText.isEmpty {
-            let query = searchText.lowercased()
+        if !debouncedSearchText.isEmpty {
+            let query = debouncedSearchText.lowercased()
             filtered = filtered.filter { event in
                 // Search in type name
                 if event.type.displayName.lowercased().contains(query) {
@@ -173,6 +175,11 @@ class HomeViewModel: ObservableObject {
             await loadTodayEvents()
         }
         checkActiveSleep()
+        
+        // Debounce search text to improve performance
+        $searchText
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .assign(to: &$debouncedSearchText)
     }
     
     func loadUserGoal() async {
@@ -324,6 +331,11 @@ class HomeViewModel: ObservableObject {
                     await restoreActiveSleep()
                     await MainActor.run {
                         checkActiveSleep()
+        
+        // Debounce search text to improve performance
+        $searchText
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .assign(to: &$debouncedSearchText)
                     }
                 }
                 
