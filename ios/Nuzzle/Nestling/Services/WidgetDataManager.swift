@@ -5,8 +5,7 @@ import WidgetKit
 class WidgetDataManager {
     static let shared = WidgetDataManager()
 
-    // TODO: Update app group ID from group.com.nestling.Nestling to group.com.nuzzle.Nuzzle when ready
-    private let appGroupId = "group.com.nestling.Nestling"
+    private let appGroupId = "group.com.nestling.app.shared"
 
     private init() {}
 
