@@ -12,7 +12,6 @@ class InMemoryDataStore: DataStore {
     private var activeSleep: [UUID: Event] = [:] // babyId -> active sleep event
     private var lastUsedValues: [EventType: LastUsedValues] = [:]
     
-    // TODO: Update dispatch queue label from com.nestling.* to com.nuzzle.* when ready
     private let queue = DispatchQueue(label: "com.nestling.datastore", attributes: .concurrent)
     
     // MARK: - Initialization

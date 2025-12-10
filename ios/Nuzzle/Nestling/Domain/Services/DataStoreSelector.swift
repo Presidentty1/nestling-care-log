@@ -29,11 +29,9 @@ class DataStoreSelector {
         // Default: Use Core Data if available, fallback to JSON
         // Check if CoreData store file exists without triggering lazy initialization
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        // TODO: Update database filename from Nestling.sqlite to Nuzzle.sqlite when ready
         let coreDataURL = documentsPath.appendingPathComponent("Nestling.sqlite")
-        // TODO: Update app group ID from group.com.nestling.Nestling to group.com.nuzzle.Nuzzle when ready
-        // Note: Must match the App Group ID used in CoreDataStack and widgets
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.Nestling")?
+        // App Group container (must match widgets/intents capabilities)
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app.shared")?
             .appendingPathComponent("Nestling.sqlite")
         
         // Check both possible locations
@@ -84,7 +82,6 @@ class CloudKitSyncService: ObservableObject {
     private let daysBackToSync = 30
     
     private init() {
-        // TODO: Update container identifier from com.nestling to com.nuzzle when ready
         let containerID = "iCloud.com.nestling.app"
         self.container = CKContainer(identifier: containerID)
         self.privateDatabase = container.privateCloudDatabase

@@ -184,7 +184,7 @@ class AuthViewModel: ObservableObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "supabase_session",
-            kSecAttrService as String: "com.nuzzle.Nuzzle",
+            kSecAttrService as String: "com.nestling.app",
             kSecValueData as String: sessionData,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
@@ -204,7 +204,7 @@ class AuthViewModel: ObservableObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "supabase_session",
-            kSecAttrService as String: "com.nuzzle.Nuzzle",
+            kSecAttrService as String: "com.nestling.app",
             kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -228,7 +228,7 @@ class AuthViewModel: ObservableObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: "supabase_session",
-            kSecAttrService as String: "com.nuzzle.Nuzzle"
+            kSecAttrService as String: "com.nestling.app"
         ]
 
         let status = SecItemDelete(query as CFDictionary)

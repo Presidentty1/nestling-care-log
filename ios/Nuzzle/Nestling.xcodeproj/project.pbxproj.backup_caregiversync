@@ -3746,7 +3746,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.Nuzzle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3768,7 +3768,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3789,7 +3789,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3831,7 +3831,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.Nuzzle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3913,7 +3913,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3988,7 +3988,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

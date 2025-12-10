@@ -201,7 +201,7 @@
 		D2E2CFF132A5213AB2F13A4A /* OnboardingDefaultsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A44ECF2D9263D44A0DD11 /* OnboardingDefaultsHelper.swift */; };
 		D4CA44F3992D1D2485EC359A /* PredictionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91806C0CC1D81D94FA7C2C2E /* PredictionsView.swift */; };
 		D529646C1EBB5202C5E41DDA /* BabyEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEBA6F25E9C00802165C096 /* BabyEntity+CoreDataClass.swift */; };
-		D6547BCB33E56AA2AF51F796 /* NuzzleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8570289909E4AB711B2841DE /* NuzzleApp.swift */; };
+		D6547BCB33E56AA2AF51F796 /* NestlingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8570289909E4AB711B2841DE /* NestlingApp.swift */; };
 		D6623D9B9B519200B1BA860E /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2ABA5E142B74A1C2513C4C /* QuickActionButton.swift */; };
 		D6B0C6CC8AD3FC0E93EEAC25 /* SignpostLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D1884A1C3B6B6E69429737 /* SignpostLogger.swift */; };
 		D751252E2EE4EECB00DA47FE /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 443034374137433231464338 /* FirebaseCore */; };
@@ -298,7 +298,7 @@
 		074DF7F3BE1BE88E02583318 /* TodaysInsightCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodaysInsightCard.swift; sourceTree = "<group>"; };
 		07740A0E6C3A47001A4B86E7 /* AppSettingsEntity+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AppSettingsEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
 		07AA989849B56733C298CA36 /* CoreDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
-		07AB04291DB5F6E384CBB2EC /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		07AB04291DB5F6E384CBB2EC /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		07BE39356A83CDEED00CBB78 /* NotificationScheduler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		07F3A671050A80A0D2E658EF /* NuzzleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NuzzleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		080AE1FF538680B37B8718BF /* PrivacyDataView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyDataView.swift; sourceTree = "<group>"; };
@@ -334,7 +334,7 @@
 		0DCBC5F722B2350CB236C0B1 /* DiaperFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperFormView.swift; sourceTree = "<group>"; };
 		0DE2E6523F17447EFEB18C74 /* LastUsedValuesEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "LastUsedValuesEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		0E18E3416F66CE21FCECDD49 /* EventTypeFilter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTypeFilter.swift; sourceTree = "<group>"; };
-		0E363F99B74736FF90908311 /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		0E363F99B74736FF90908311 /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		0E587573ED57415AEE0AA03C /* PrivacyDataView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyDataView.swift; sourceTree = "<group>"; };
 		0E773D40553BF62D1A36AFD4 /* SymbolEffects.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SymbolEffects.swift; sourceTree = "<group>"; };
 		0E8A8C37AB839D17FF054053 /* SettingsRootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
@@ -453,7 +453,7 @@
 		20524A9CF7211DCC817FFEC5 /* Haptics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		20893D9249206FC841220ABE /* DiaperFormViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperFormViewModel.swift; sourceTree = "<group>"; };
 		2096C019F46641A410CE3A1B /* BabySetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySetupView.swift; sourceTree = "<group>"; };
-		20A63693E6A7D0D1D5DADD4B /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		20A63693E6A7D0D1D5DADD4B /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		20A8FB81B98DC77E450B0E54 /* AccessibilityHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccessibilityHelpers.swift; sourceTree = "<group>"; };
 		20DE9F6B90541055974BD4CA /* SignpostLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SignpostLogger.swift; sourceTree = "<group>"; };
 		20EADF245BAD56A6BF3BB0A8 /* CoreDataStack.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
@@ -561,7 +561,7 @@
 		34010ADE8227F423D5B6F513 /* PersonalizedRecommendationsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersonalizedRecommendationsService.swift; sourceTree = "<group>"; };
 		342497279062995EFCEB2813 /* PhotoStorageService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhotoStorageService.swift; sourceTree = "<group>"; };
 		342C8BE30EE6C8FEA4649C1F /* TodayStatusHeroCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayStatusHeroCard.swift; sourceTree = "<group>"; };
-		34CA4C94B87C18D5F4E5E01D /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		34CA4C94B87C18D5F4E5E01D /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		34FFF054ECC6BC7522FE90FE /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = "<group>"; };
 		3544B064E8D8FE1E2A759306 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		358E44BDA502177466041745 /* ManageCaregiversView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageCaregiversView.swift; sourceTree = "<group>"; };
@@ -587,7 +587,7 @@
 		3ACD608852BACCEEA4CDD03F /* SleepActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepActivityView.swift; sourceTree = "<group>"; };
 		3AEE889380FF234A1960F033 /* DataMigrationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DataMigrationView.swift; sourceTree = "<group>"; };
 		3AF7C7D9A283AAC0CBDA571C /* DataStoreSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DataStoreSelector.swift; sourceTree = "<group>"; };
-		3B02643DFC9628E3FC126AD5 /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		3B02643DFC9628E3FC126AD5 /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		3B2F22749BAB66D918CCBB7F /* AppSettingsMO+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AppSettingsMO+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B30170E110E42EEAC2225B5 /* LastUsedValuesEntity+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "LastUsedValuesEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B5A9DCA0699841D0E741CE0 /* BabyEntity+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "BabyEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -612,7 +612,7 @@
 		3EDB5A9DD5B74CDA6AC81853 /* PredictionMO+CoreDataProperties.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "PredictionMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3EE3BE4A4D55F790CDD76C35 /* AIConsentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConsentView.swift; sourceTree = "<group>"; };
 		3F0283667BBE35AE2AC7F298 /* SmartDefaultsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmartDefaultsService.swift; sourceTree = "<group>"; };
-		3F4F658C21CAEFB0E29C5DDC /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		3F4F658C21CAEFB0E29C5DDC /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		3F6C49AB4C0DA04F6BBCE1E5 /* OnboardingCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinator.swift; sourceTree = "<group>"; };
 		3FAF938E769FE24166874BBD /* OnboardingProgressIndicatorEnhanced.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingProgressIndicatorEnhanced.swift; sourceTree = "<group>"; };
 		400145891DC5D310DF163034 /* DiagnosticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiagnosticsService.swift; sourceTree = "<group>"; };
@@ -988,7 +988,7 @@
 		850837DCD57EFC3244013560 /* CryClassifier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CryClassifier.swift; sourceTree = "<group>"; };
 		850B560348D061A1C2A21137 /* CoreDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
 		850C81CBA06C724C0ABD8BFB /* MonthlyCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyCalendarView.swift; sourceTree = "<group>"; };
-		8570289909E4AB711B2841DE /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		8570289909E4AB711B2841DE /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		85A1B55501EA18A2D759F0A6 /* AIFeatureOnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIFeatureOnboardingView.swift; sourceTree = "<group>"; };
 		85D17FF13357AF47A8F48C54 /* RemindersStatusBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemindersStatusBadge.swift; sourceTree = "<group>"; };
 		85D2A38D3F3783D1397F2965 /* NapWindow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NapWindow.swift; sourceTree = "<group>"; };
@@ -1081,7 +1081,7 @@
 		9A403A0FC888452F9A1424A8 /* Badge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		9A4A623B39ED6DA94F032E8B /* Last7DaysTrendsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Last7DaysTrendsView.swift; sourceTree = "<group>"; };
 		9AD4E1501C9A92690D10C0E0 /* CoreDataDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataDataStore.swift; sourceTree = "<group>"; };
-		9AD93F00868DD5214E622EFC /* NuzzleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NuzzleApp.swift; sourceTree = "<group>"; };
+		9AD93F00868DD5214E622EFC /* NestlingApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingApp.swift; sourceTree = "<group>"; };
 		9B0C1D2E3F4A5B6C7D8E9F0A /* NightModeOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NightModeOverlay.swift; sourceTree = "<group>"; };
 		9B21A3EEE5FB2E82FA819B90 /* TodayPatternsCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayPatternsCard.swift; sourceTree = "<group>"; };
 		9B8235574CC353BDE756CE4A /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -1918,28 +1918,28 @@
 			children = (
 				A31156B128853D207B070C59 /* AppEnvironment.swift */,
 				64CF330448CD4A50627F7437 /* DesignSystem.swift */,
-				0E363F99B74736FF90908311 /* NuzzleApp.swift */,
+				0E363F99B74736FF90908311 /* NestlingApp.swift */,
 				6F905695BBF53024B1E26B43 /* AppEnvironment.swift */,
 				A148CDD4D9A926F80FB8A195 /* DesignSystem.swift */,
-				07AB04291DB5F6E384CBB2EC /* NuzzleApp.swift */,
+				07AB04291DB5F6E384CBB2EC /* NestlingApp.swift */,
 				D3433F4D8EAEF4DBD809E1AA /* AppEnvironment.swift */,
 				C81816BCF3511DDC32CD21AC /* DesignSystem.swift */,
-				20A63693E6A7D0D1D5DADD4B /* NuzzleApp.swift */,
+				20A63693E6A7D0D1D5DADD4B /* NestlingApp.swift */,
 				0ED330FCDD51B994EF57595A /* AppEnvironment.swift */,
 				EC8F53FC4067DAC1716F028C /* DesignSystem.swift */,
-				9AD93F00868DD5214E622EFC /* NuzzleApp.swift */,
+				9AD93F00868DD5214E622EFC /* NestlingApp.swift */,
 				9408489717404A564694C9BD /* AppEnvironment.swift */,
 				86BB55B4B7D79D5DC3646414 /* DesignSystem.swift */,
-				3B02643DFC9628E3FC126AD5 /* NuzzleApp.swift */,
+				3B02643DFC9628E3FC126AD5 /* NestlingApp.swift */,
 				158088E1902F72D415884E2F /* AppEnvironment.swift */,
 				A83DDB1F5E6EDA0E9648395C /* DesignSystem.swift */,
-				34CA4C94B87C18D5F4E5E01D /* NuzzleApp.swift */,
+				34CA4C94B87C18D5F4E5E01D /* NestlingApp.swift */,
 				0AE4A7D9A883A886D4229BEA /* AppEnvironment.swift */,
 				CA7D72733C5E52CCB427E354 /* DesignSystem.swift */,
-				3F4F658C21CAEFB0E29C5DDC /* NuzzleApp.swift */,
+				3F4F658C21CAEFB0E29C5DDC /* NestlingApp.swift */,
 				EFCE3E9BA6C6A3255DAE8790 /* AppEnvironment.swift */,
 				D4F1B9E4745C1E948CE9A956 /* DesignSystem.swift */,
-				8570289909E4AB711B2841DE /* NuzzleApp.swift */,
+				8570289909E4AB711B2841DE /* NestlingApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -3479,7 +3479,7 @@
 				23157350BB2814AD3C4A0A54 /* OnboardingProgressIndicatorEnhanced.swift in Sources */,
 				4D9E72545DC3BA15E7578C3C /* AppEnvironment.swift in Sources */,
 				5586B075DCA85163D7F85FA6 /* DesignSystem.swift in Sources */,
-				D6547BCB33E56AA2AF51F796 /* NuzzleApp.swift in Sources */,
+				D6547BCB33E56AA2AF51F796 /* NestlingApp.swift in Sources */,
 				4A83E8CAC1BA1D5A0E46ED85 /* AccessibilityHelpers.swift in Sources */,
 				AF0F34C875D26F96BD8E36C8 /* ActivityFeedView.swift in Sources */,
 				4E83C9A9E91DCAEDF5AFE228 /* BabyAvatar.swift in Sources */,
@@ -3747,7 +3747,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.Nuzzle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3769,7 +3769,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3790,7 +3790,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3832,7 +3832,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.Nuzzle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3914,7 +3914,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3989,7 +3989,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nuzzle.NuzzleUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

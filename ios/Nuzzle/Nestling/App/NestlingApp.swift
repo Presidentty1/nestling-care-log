@@ -3,7 +3,7 @@ import os.signpost
 import CoreSpotlight
 
 @main
-struct NuzzleApp: App {
+struct NestlingApp: App {
     @StateObject private var environment: AppEnvironment
     @StateObject private var authViewModel = AuthViewModel()
     @State private var showOnboarding = false
@@ -282,7 +282,6 @@ struct NuzzleApp: App {
     
     /// Handle Spotlight search result tap
     private func handleSpotlightActivity(_ userActivity: NSUserActivity) {
-        // TODO: Update Spotlight domain identifier from com.nestling.events to com.nuzzle.events when ready
         guard let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
               identifier.hasPrefix("com.nestling.events.") else {
             return

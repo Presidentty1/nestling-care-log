@@ -10,7 +10,6 @@ class JSONBackedDataStore: DataStore {
     private var activeSleep: [UUID: Event] = [:]
     private var lastUsedValues: [EventType: LastUsedValues] = [:]
     
-    // TODO: Update dispatch queue label from com.nestling.* to com.nuzzle.* when ready
     private let queue = DispatchQueue(label: "com.nestling.jsonstore", attributes: .concurrent)
     private let fileManager = FileManager.default
     
