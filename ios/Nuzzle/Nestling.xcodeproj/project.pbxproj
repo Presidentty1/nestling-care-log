@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		62EC8A7597F7E79AFDC7E2B3 /* CaregiverSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */; };
-		D12B7512CDED4D9E542F04CC /* TrialBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */; };
 		00DD022BB745243508B30128 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7AEE12597766D7CA40E492C /* Haptics.swift */; };
 		02A5F8302AABE4DF18A6E28A /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0206CEB3041C28184B563A98 /* CrashReportingService.swift */; };
 		02AD1970D365F5945B2E10BC /* TimelineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F82D9077D12DA207488E /* TimelineRow.swift */; };
@@ -116,6 +114,7 @@
 		60C37EC7A349AD745D09C96D /* CelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C708E0FA2249A5D38492E6D /* CelebrationView.swift */; };
 		624DBED462562AD396DF54EF /* LastUsedValuesMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BF20CBFEC0A8DE504618C9 /* LastUsedValuesMO+CoreDataProperties.swift */; };
 		627886A0A498A58244941E18 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAA899FF8ED770FA910588E /* CardView.swift */; };
+		62EC8A7597F7E79AFDC7E2B3 /* CaregiverSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */; };
 		646530BE9D40B5118B48346C /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D9E33DC4419B9895DABDED /* Badge.swift */; };
 		64EFDC5820FFA49E9E580816 /* NextFeedSuggestionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DB5E1264D2A3ECEDFF23BC /* NextFeedSuggestionCard.swift */; };
 		658F3E4088343C544F3E9E7F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95A1F65749D6D66614288911 /* Event.swift */; };
@@ -197,6 +196,7 @@
 		CD463F3DDD7A81034A41253D /* FeedFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDCF0279200C4B902A4A44FC /* FeedFormView.swift */; };
 		CE5A3CB749ADB0D2B4142811 /* UpgradePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5504C1574C95BE2555921466 /* UpgradePromptView.swift */; };
 		D0B6AC50C8E71BC0A803A7CB /* WidgetTestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9332CF2D239155F514A8EE79 /* WidgetTestHelper.swift */; };
+		D12B7512CDED4D9E542F04CC /* TrialBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */; };
 		D29BBD89623E8C985FD4E2E5 /* InMemoryDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01C402574E5EBFE89BE2D37 /* InMemoryDataStore.swift */; };
 		D2E2CFF132A5213AB2F13A4A /* OnboardingDefaultsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A44ECF2D9263D44A0DD11 /* OnboardingDefaultsHelper.swift */; };
 		D4CA44F3992D1D2485EC359A /* PredictionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91806C0CC1D81D94FA7C2C2E /* PredictionsView.swift */; };
@@ -252,8 +252,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverSyncService.swift; sourceTree = "<group>"; };
-		4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrialBannerView.swift; sourceTree = "<group>"; };
 		001AD0E1A9B0C8DD3FE24A7A /* ReviewPromptManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewPromptManager.swift; sourceTree = "<group>"; };
 		0025C6434BC0FE04842531F4 /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		003AF7BCAB6C61C9DFF0424A /* ProSubscriptionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProSubscriptionView.swift; sourceTree = "<group>"; };
@@ -500,6 +498,7 @@
 		2978720ADC128D3EA4999A51 /* InMemoryDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InMemoryDataStore.swift; sourceTree = "<group>"; };
 		29A7AB85454A75637D77F88E /* AuthView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		29B5C1ADDD77EE6EFA8E9228 /* PrivacyDataView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyDataView.swift; sourceTree = "<group>"; };
+		29CA31D0632D821607BE1FF4 /* CaregiverSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverSyncService.swift; sourceTree = "<group>"; };
 		29EEEFA5774E5C0789213409 /* CrashReportingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CrashReportingService.swift; sourceTree = "<group>"; };
 		2A105C4D3E4929B9AA765B64 /* DateUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateUtils.swift; sourceTree = "<group>"; };
 		2A6B89CBDFC65CC5E6EB7F09 /* PredictionsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictionsViewModel.swift; sourceTree = "<group>"; };
@@ -675,6 +674,7 @@
 		4A9C2029FDF66482E1DC80D5 /* TimelineRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimelineRow.swift; sourceTree = "<group>"; };
 		4AF5469265315696D64E8417 /* SettingsRootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		4AF67692480B87092048F5B6 /* ProTrialView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProTrialView.swift; sourceTree = "<group>"; };
+		4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrialBannerView.swift; sourceTree = "<group>"; };
 		4B77221E7170E02FCF1523EC /* LoadingStateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoadingStateView.swift; sourceTree = "<group>"; };
 		4BA42A01A60CD8A10E2824D1 /* SleepActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepActivityAttributes.swift; sourceTree = "<group>"; };
 		4BC75A8E2DFDFA6B2631C9E6 /* LoadingStateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoadingStateView.swift; sourceTree = "<group>"; };
@@ -1763,7 +1763,6 @@
 				9FC274CF4F455FD227D6085F /* JSONBackedDataStore.swift */,
 				64C6292CAF8D0D2879619CA7 /* RemoteDataStore.swift */,
 				F30F71627AA087D26BD229FF /* RemoteDataStoreDTOs.swift */,
-
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -2323,7 +2322,6 @@
 				5A172A1E4692409A37CE3A3D /* UpgradePromptView.swift */,
 				C64F78832AFF7B63C3DC5775 /* VoiceInputView.swift */,
 				4B4984FFE9F7DD2475A2F3A7 /* TrialBannerView.swift */,
-
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -3446,7 +3444,6 @@
 				0E499BB23AB4D773684D91FD /* FreeTierUsageCard.swift in Resources */,
 				C3EDE7E35FB1ACC751DF0E89 /* UpgradePromptBanner.swift in Resources */,
 				BF0D5970DB9A5705090382F0 /* FirstTasksChecklistCard.swift in Resources */,
-
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3747,7 +3744,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3769,7 +3766,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.devTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3790,7 +3787,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.devTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3807,7 +3804,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Nestling/Nestling.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Nestling/Nestling.dev.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9BS3VKTM6N;
@@ -3832,7 +3829,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3914,7 +3911,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.devUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -3989,7 +3986,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.appUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.devUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

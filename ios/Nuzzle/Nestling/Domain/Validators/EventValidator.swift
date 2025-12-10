@@ -115,7 +115,7 @@ struct EventValidator {
             .filter { $0.type == .sleep }
             .filter { event in
                 if let excludingId, event.id == excludingId { return false }
-                guard let otherEnd = event.endTime ?? event.startTime.addingTimeInterval(60) else { return false }
+                let otherEnd = event.endTime ?? event.startTime.addingTimeInterval(60)
                 // Overlap if intervals intersect (inclusive)
                 return startTime < otherEnd && endTime > event.startTime
             }

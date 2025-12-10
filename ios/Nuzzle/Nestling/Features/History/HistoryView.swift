@@ -78,7 +78,7 @@ struct HistoryView: View {
                                         }
                                     )
                                     // Auto-dismiss after 3 seconds (reduced from 7)
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                         if showToast?.id == toastId {
                                             showToast = nil
                                         }

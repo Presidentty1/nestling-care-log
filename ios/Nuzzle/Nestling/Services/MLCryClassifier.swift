@@ -19,7 +19,7 @@ import AVFoundation
 /// - Classification probabilities: [hungry: 0.7, tired: 0.2, discomfort: 0.1]
 /// - Confidence: Overall confidence score
 
-enum CryClassification: String, Codable {
+enum CryClassification: String, Codable, CaseIterable {
     case hungry
     case tired
     case discomfort

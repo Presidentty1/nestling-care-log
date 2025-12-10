@@ -48,3 +48,25 @@ struct LastUsedValues: Codable {
     var durationMinutes: Int?
 }
 
+extension DataStore {
+    /// Remove all locally persisted domain data. Useful when access is revoked or during logout.
+    /// Default implementation wipes babies, their events, and resets settings to defaults.
+    func clearSharedData() async throws {
+        let babies = try await fetchBabies()
+        for baby in babies {
+            let events = try await fetchEvents(
+                for: baby,
+                from: .distantPast,
+                to: Date()
+            )
+            for event in events {
+                try? await deleteEvent(event)
+            }
+            try? await deleteBaby(baby)
+        }
+        
+        // Reset settings to defaults after data removal
+        try? await saveAppSettings(AppSettings.default())
+    }
+}
+

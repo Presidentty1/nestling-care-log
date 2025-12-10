@@ -84,7 +84,7 @@ export function useAuth() {
   const signOut = async () => {
     try {
       await authService.signOut();
-      navigate('/auth');
+      navigate('/home');
       return { error: null };
     } catch (error) {
       return { error };

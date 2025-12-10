@@ -3,6 +3,7 @@ import SwiftUI
 /// Status tiles view showing Last Feed, Last Diaper, Sleep Status, and Next Nap
 /// Matches North Star dashboard layout requirements
 struct StatusTilesView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let lastFeed: Event?
     let lastDiaper: Event?
     let activeSleep: Event?
@@ -11,48 +12,70 @@ struct StatusTilesView: View {
     
     var body: some View {
         VStack(spacing: .spacingMD) {
-            // UX-04: Current State Indicator - Explicit "Awake / Asleep" badge
             CurrentStateBadge(activeSleep: activeSleep)
             
-            // Hero Card: Next Nap or Active Sleep
-            if let napWindow = nextNapWindow {
-                HeroNapCard(napWindow: napWindow, baby: baby)
-                    .onTapGesture {
-                        logCardTap("nap")
-                    }
-            } else if let sleep = activeSleep {
-                ActiveSleepHeroCard(activeSleep: sleep)
-                    .onTapGesture {
-                        logCardTap("sleep_active")
-                    }
-            }
-            
-            // Satellite Cards: Feed & Diaper (side by side)
-            HStack(spacing: .spacingMD) {
-                SatelliteCard(
-                    icon: "drop.fill",
-                    iconColor: .eventFeed,
-                    title: "Last Feed",
-                    value: formatFeedValue(lastFeed),
-                    timeAgo: lastFeed.map { DateUtils.formatRelativeTime($0.startTime) }
-                )
-                .onTapGesture {
-                    logCardTap("feed")
+            if isWideLayout {
+                HStack(spacing: .spacingMD) {
+                    heroCard
+                    satelliteCards
                 }
-                
-                SatelliteCard(
-                    icon: "drop.circle.fill",
-                    iconColor: .eventDiaper,
-                    title: "Last Diaper",
-                    value: formatDiaperValue(lastDiaper),
-                    timeAgo: lastDiaper.map { DateUtils.formatRelativeTime($0.startTime) }
-                )
-                .onTapGesture {
-                    logCardTap("diaper")
-                }
+            } else {
+                heroCard
+                satelliteCards
             }
         }
         .padding(.horizontal, .spacingMD)
+    }
+    
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    @ViewBuilder
+    private var heroCard: some View {
+        if let napWindow = nextNapWindow {
+            HeroNapCard(napWindow: napWindow, baby: baby)
+                .onTapGesture {
+                    logCardTap("nap")
+                }
+                .accessibilityHint("Shows the next suggested nap window.")
+        } else if let sleep = activeSleep {
+            ActiveSleepHeroCard(activeSleep: sleep)
+                .onTapGesture {
+                    logCardTap("sleep_active")
+                }
+                .accessibilityHint("Shows how long the current sleep has been running.")
+        } else {
+            EmptyView()
+        }
+    }
+    
+    private var satelliteCards: some View {
+        HStack(spacing: .spacingMD) {
+            SatelliteCard(
+                icon: "drop.fill",
+                iconColor: .eventFeed,
+                title: "Last Feed",
+                value: formatFeedValue(lastFeed),
+                timeAgo: lastFeed.map { DateUtils.formatRelativeTime($0.startTime) }
+            )
+            .onTapGesture {
+                logCardTap("feed")
+            }
+            .accessibilityHint("Shows when the last feed was logged.")
+            
+            SatelliteCard(
+                icon: "drop.circle.fill",
+                iconColor: .eventDiaper,
+                title: "Last Diaper",
+                value: formatDiaperValue(lastDiaper),
+                timeAgo: lastDiaper.map { DateUtils.formatRelativeTime($0.startTime) }
+            )
+            .onTapGesture {
+                logCardTap("diaper")
+            }
+            .accessibilityHint("Shows when the last diaper was logged.")
+        }
     }
 
     private func logCardTap(_ type: String) {

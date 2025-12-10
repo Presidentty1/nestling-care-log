@@ -35,15 +35,15 @@ import { ConflictResolutionModal } from '@/components/ConflictResolutionModal';
 import { reportWebVitals } from '@/hooks/usePerformance';
 import * as Sentry from '@sentry/react';
 
-// Initialize Sentry for web app
-// Only initialize if DSN is provided and we're not in Capacitor (Capacitor has its own Sentry plugin)
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
+
+const initializeSentry = () => {
+  if (!sentryDsn || sentryDsn === 'https://your-sentry-dsn@sentry.io/project-id') return;
+  if (typeof window !== 'undefined' && (window as any).Capacitor) return;
+
   try {
-    // Build integrations array conditionally (some may not be available in all environments)
     const integrations = [];
 
-    // Only add browser tracing if available (not in Capacitor native)
     if (typeof Sentry.browserTracingIntegration === 'function') {
       integrations.push(
         Sentry.browserTracingIntegration({
@@ -52,7 +52,6 @@ if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
       );
     }
 
-    // Only add replay if available
     if (typeof Sentry.replayIntegration === 'function') {
       integrations.push(
         Sentry.replayIntegration({
@@ -66,16 +65,9 @@ if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
       dsn: sentryDsn,
       environment: import.meta.env.MODE || 'development',
       release: import.meta.env.VITE_APP_VERSION || '1.0.0',
-
-      // Performance monitoring
       tracesSampleRate: 1.0,
-
-      // Integrations (only add if available)
       integrations,
-
-      // Capture more context
       beforeSend: event => {
-        // Add user context if available
         try {
           const user = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
           if (user?.user?.id) {
@@ -88,7 +80,6 @@ if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
           // Ignore parsing errors
         }
 
-        // Add app context
         event.tags = {
           ...event.tags,
           app_version: import.meta.env.VITE_APP_VERSION || '1.0.0',
@@ -99,30 +90,23 @@ if (sentryDsn && sentryDsn !== 'https://your-sentry-dsn@sentry.io/project-id') {
       },
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
-
-      // Configure breadcrumbs
       maxBreadcrumbs: 100,
-
-      // Release health
       enableTracing: true,
     });
   } catch (error) {
-    // Silently fail Sentry initialization if it errors (e.g., in Capacitor)
     console.warn('Sentry initialization failed:', error);
   }
-}
+};
 
 // Initialize performance monitoring
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   // Defer web vitals reporting to avoid blocking initial load
   setTimeout(() => {
     reportWebVitals();
-  }, 100);
+  }, 3000);
 }
 
-// Core pages (eager loaded for fast initial load)
-import Landing from './pages/Landing';
-import Auth from './pages/Auth';
+// Core pages
 import Onboarding from './pages/Onboarding';
 import Home from './pages/Home';
 import History from './pages/History';
@@ -130,6 +114,7 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
 // Settings pages (lazy loaded for better performance)
+const Landing = lazy(() => import('./pages/Landing'));
 const ManageBabiesPage = lazy(() => import('./pages/Settings/ManageBabies'));
 const NotificationSettingsPage = lazy(() => import('./pages/Settings/NotificationSettings'));
 const ManageCaregiversPage = lazy(() => import('./pages/Settings/ManageCaregivers'));
@@ -190,18 +175,16 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
-    return <Navigate to='/auth' replace />;
-  }
-
   return <>{children}</>;
 }
 
 function AppContent() {
   const { activeBabyId, caregiverMode } = useAppStore();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [showConflictModal, setShowConflictModal] = useState(false);
+  const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
 
   // Track page views
   useEffect(() => {
@@ -221,6 +204,41 @@ function AppContent() {
     };
   }, [activeBabyId]);
 
+  // Automatically sign in with dev account to skip the login screen
+  useEffect(() => {
+    if (authLoading || autoLoginAttempted || user) return;
+    let cancelled = false;
+
+    const autoLogin = async () => {
+      try {
+        let { error } = await signIn('dev@nestling.app', 'devpass123');
+
+        if (error?.message?.includes('Invalid login credentials')) {
+          const signUpResult = await signUp('dev@nestling.app', 'devpass123', 'Dev User');
+          error = signUpResult.error;
+        }
+
+        if (error && !cancelled) {
+          console.warn('Auto-login failed:', error.message);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn('Auto-login threw an error:', err);
+        }
+      } finally {
+        if (!cancelled) {
+          setAutoLoginAttempted(true);
+        }
+      }
+    };
+
+    autoLogin();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, autoLoginAttempted, signIn, signUp, user]);
+
   const handleGoHome = () => {
     navigate('/home');
   };
@@ -231,9 +249,16 @@ function AppContent() {
         <NotificationBanner />
         <Routes>
           {/* Root and auth routes */}
-          <Route path='/' element={<Landing />} />
-          <Route path='/auth' element={<Auth />} />
-
+          <Route path='/' element={<Navigate to='/home' replace />} />
+          <Route path='/auth' element={<Navigate to='/home' replace />} />
+          <Route
+            path='/landing'
+            element={
+              <SuspenseWrapper>
+                <Landing />
+              </SuspenseWrapper>
+            }
+          />
           {/* Onboarding flow with specific error boundary */}
           <Route
             path='/onboarding'
@@ -629,16 +654,29 @@ function AppContent() {
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const scheduleInit = () => initializeSentry();
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(scheduleInit, { timeout: 2000 });
+    } else {
+      setTimeout(scheduleInit, 500);
+    }
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

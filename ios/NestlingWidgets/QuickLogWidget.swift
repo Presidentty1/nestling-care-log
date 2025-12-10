@@ -232,3 +232,4 @@ struct LogEventIntent: AppIntent {
 
 
 
+

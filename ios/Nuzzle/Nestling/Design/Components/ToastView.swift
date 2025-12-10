@@ -9,6 +9,15 @@ enum ToastType {
 struct ToastView: View {
     let message: String
     let type: ToastType
+    let actionTitle: String?
+    let action: (() -> Void)?
+    
+    init(message: String, type: ToastType, actionTitle: String? = nil, action: (() -> Void)? = nil) {
+        self.message = message
+        self.type = type
+        self.actionTitle = actionTitle
+        self.action = action
+    }
     
     var body: some View {
         HStack(spacing: .spacingSM) {
@@ -18,6 +27,30 @@ struct ToastView: View {
             Text(message)
                 .font(.body)
                 .foregroundColor(.foreground)
+                .lineLimit(2)
+                .minimumScaleFactor(0.9)
+            
+            if let actionTitle, let action {
+                Spacer(minLength: .spacingSM)
+                Button(action: {
+                    Haptics.medium()
+                    action()
+                }) {
+                    Text(actionTitle)
+                        .font(.callout.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, .spacingSM)
+                        .padding(.vertical, .spacingXS)
+                        .background(Color.surface.opacity(0.9))
+                        .cornerRadius(.radiusSM)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: .radiusSM)
+                                .stroke(Color.cardBorder, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(actionTitle) action")
+            }
         }
         .padding(.spacingMD)
         .background(Color.surface)
@@ -54,7 +87,12 @@ struct ToastModifier: ViewModifier {
                     if let toast = toast {
                         VStack {
                             Spacer()
-                            ToastView(message: toast.message, type: toast.type)
+                            ToastView(
+                                message: toast.message,
+                                type: toast.type,
+                                actionTitle: toast.undoAction != nil ? "Undo" : nil,
+                                action: toast.undoAction
+                            )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
                         .animation(.spring(response: 0.3), value: toast.id)

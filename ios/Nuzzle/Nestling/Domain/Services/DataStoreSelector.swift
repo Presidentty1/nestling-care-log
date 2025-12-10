@@ -9,6 +9,14 @@ enum DataStoreType {
     case coreData
 }
 
+private let appGroupId: String = {
+#if DEBUG
+    return "group.com.nestling.app.dev"
+#else
+    return "group.com.nestling.app"
+#endif
+}()
+
 /// Factory for selecting DataStore implementation.
 /// Can be configured via environment variable or build setting.
 class DataStoreSelector {
@@ -31,7 +39,7 @@ class DataStoreSelector {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let coreDataURL = documentsPath.appendingPathComponent("Nestling.sqlite")
         // App Group container (must match widgets/intents capabilities)
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId)?
             .appendingPathComponent("Nestling.sqlite")
         
         // Check both possible locations

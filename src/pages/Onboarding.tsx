@@ -31,6 +31,8 @@ export default function Onboarding() {
   const [onboardingStartTime] = useState(Date.now());
   const [loading, setLoading] = useState(false);
   const completedRef = useRef(false);
+  const submissionRef = useRef(false);
+  const stepRef = useRef(0);
 
   // Form Data
   const [name, setName] = useState('');
@@ -85,8 +87,10 @@ export default function Onboarding() {
   };
 
   const handleCreateBaby = async () => {
+    if (submissionRef.current || completedRef.current) return;
     if (!validateStep(step)) return;
 
+    submissionRef.current = true;
     setLoading(true);
     try {
       const babyData = {
@@ -124,21 +128,27 @@ export default function Onboarding() {
     } catch (error) {
       logger.error('Failed to create baby', error, 'Onboarding');
       toast.error('Could not create profile. Please try again.');
-      setLoading(false);
+    } finally {
+      if (!completedRef.current) {
+        submissionRef.current = false;
+        setLoading(false);
+      }
     }
   };
 
   // Track onboarding started on mount
   useEffect(() => {
-    analyticsService.trackOnboardingStarted();
-  }, []);
+    stepRef.current = step;
+  }, [step]);
 
-  // Track dropoff if user navigates away before completing
   useEffect(() => {
+    analyticsService.trackOnboardingStarted();
+
     const handleBeforeUnload = () => {
       if (!completedRef.current) {
         const timeSpent = Math.floor((Date.now() - onboardingStartTime) / 1000);
-        const stepId = step === 0 ? 'name' : step === 1 ? 'dob' : 'preferences';
+        const stepId =
+          stepRef.current === 0 ? 'name' : stepRef.current === 1 ? 'dob' : 'preferences';
         if (timeSpent > 0) {
           analyticsService.trackOnboardingDropoff(stepId, timeSpent);
         }
@@ -152,25 +162,15 @@ export default function Onboarding() {
       // Track dropoff on unmount if not completed (e.g., browser back button)
       if (!completedRef.current) {
         const timeSpent = Math.floor((Date.now() - onboardingStartTime) / 1000);
-        const stepId = step === 0 ? 'name' : step === 1 ? 'dob' : 'preferences';
+        const stepId =
+          stepRef.current === 0 ? 'name' : stepRef.current === 1 ? 'dob' : 'preferences';
         if (timeSpent > 0) {
           // Use sendBeacon for reliable tracking on page unload
           analyticsService.trackOnboardingDropoff(stepId, timeSpent);
         }
       }
     };
-  }, [step, onboardingStartTime]);
-
-  // Focus input after mount to prevent keyboard lag
-  useEffect(() => {
-    if (step === 0 && nameInputRef.current) {
-      // Small delay to ensure component is fully rendered
-      const timer = setTimeout(() => {
-        nameInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [step]);
+  }, [onboardingStartTime]);
 
   // Handle name input - sanitize only on blur
   const handleNameChange = useCallback(

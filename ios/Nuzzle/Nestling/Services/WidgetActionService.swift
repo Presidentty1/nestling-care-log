@@ -5,7 +5,13 @@ import Foundation
 class WidgetActionService {
     static let shared = WidgetActionService()
     
-    private let appGroupID = "group.com.nestling.app"
+    private let appGroupID: String = {
+        #if DEBUG
+        return "group.com.nestling.app.dev"
+        #else
+        return "group.com.nestling.app"
+        #endif
+    }()
     private let userDefaults: UserDefaults?
     
     private init() {

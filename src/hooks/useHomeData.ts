@@ -61,11 +61,22 @@ export function useHomeData() {
 
   // Load Baby Specific Data
   useEffect(() => {
-    if (activeBabyId) {
-      loadBabyData();
-      loadStreakData();
-      checkTrialStatus();
-    }
+    if (!activeBabyId) return;
+    let cancelled = false;
+    setLoading(true);
+
+    const loadContext = async () => {
+      await Promise.allSettled([loadBabyData(), loadStreakData(), checkTrialStatus()]);
+      if (!cancelled) {
+        setLoading(false);
+      }
+    };
+
+    loadContext();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeBabyId]);
 
   // Subscribe to events
@@ -117,28 +128,31 @@ export function useHomeData() {
       setBabies(babyList);
 
       if (babyList.length === 0) {
-        // Auto-provision logic
-        try {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          if (session) {
-            const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const response = await supabase.functions.invoke('bootstrap-user', {
-              body: { babyName: 'Demo Baby', dateOfBirth: demoBirthdate, timezone },
-            });
-            if (!response.error) {
-              const { babyId } = response.data as any;
-              setActiveBabyId(babyId);
-              localStorage.setItem('activeBabyId', babyId);
-              setLoading(false);
-              return;
+        // Auto-provision logic (skip in dev to avoid extra network)
+        if (!import.meta.env.DEV) {
+          try {
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+            if (session) {
+              const demoBirthdate = format(subDays(new Date(), 60), 'yyyy-MM-dd');
+              const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              const response = await supabase.functions.invoke('bootstrap-user', {
+                body: { babyName: 'Demo Baby', dateOfBirth: demoBirthdate, timezone },
+              });
+              if (!response.error) {
+                const { babyId } = response.data as any;
+                setActiveBabyId(babyId);
+                localStorage.setItem('activeBabyId', babyId);
+                setLoading(false);
+                return;
+              }
             }
+          } catch (e) {
+            logger.error('Auto-provision error', e, 'useHomeData');
           }
-        } catch (e) {
-          logger.error('Auto-provision error', e, 'useHomeData');
         }
+        setLoading(false);
         navigate('/onboarding');
         return;
       }

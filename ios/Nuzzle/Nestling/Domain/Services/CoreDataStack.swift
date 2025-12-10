@@ -3,6 +3,13 @@ import Foundation
 
 class CoreDataStack {
     static let shared = CoreDataStack()
+    private let appGroupId: String = {
+        #if DEBUG
+        return "group.com.nestling.app.dev"
+        #else
+        return "group.com.nestling.app"
+        #endif
+    }()
     
     private var storeLoadSemaphore: DispatchSemaphore?
     private var storeLoadError: Error?
@@ -14,7 +21,7 @@ class CoreDataStack {
         
         // Configure for App Groups (shared with widgets)
         // Note: Must match the App Group ID used in widgets (group.com.nestling.app)
-        let storeURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app")?
+        let storeURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId)?
             .appendingPathComponent("Nestling.sqlite")
         
         let defaultURL = container.persistentStoreDescriptions.first?.url ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("Nestling.sqlite")

@@ -15,6 +15,13 @@ import WidgetKit
 /// ```
 
 class WidgetTestHelper {
+    private static let appGroupId: String = {
+        #if DEBUG
+        return "group.com.nestling.app.dev"
+        #else
+        return "group.com.nestling.app"
+        #endif
+    }()
     /// Reload all widget timelines
     static func reloadAllWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
@@ -41,7 +48,7 @@ class WidgetTestHelper {
                 "TodaySummaryWidget",
                 "SleepActivityWidget"
             ],
-            "appGroup": "group.com.nestling.app",
+            "appGroup": appGroupId,
             "note": "Use WidgetCenter.shared.reloadAllTimelines() to refresh widgets"
         ]
     }
@@ -73,7 +80,7 @@ class WidgetTestHelper {
     /// - Returns: True if App Groups is properly configured
     static func verifyAppGroups() -> Bool {
         let fileManager = FileManager.default
-        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
             print("[Widget] ❌ App Groups not configured")
             return false
         }
@@ -85,7 +92,7 @@ class WidgetTestHelper {
     /// Test widget data persistence
     /// - Parameter data: Data to persist
     static func testDataPersistence(data: [String: Any]) {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
             print("[Widget] ❌ Cannot test persistence: App Groups not configured")
             return
         }
@@ -103,7 +110,7 @@ class WidgetTestHelper {
     
     /// Clear widget test data
     static func clearTestData() {
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.nestling.app") else {
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
             return
         }
         

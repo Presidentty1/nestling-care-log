@@ -13,16 +13,14 @@ class CloudKitSyncService: ObservableObject {
     @Published private(set) var syncError: Error?
     @Published private(set) var isEnabled = false
     
-    private let container: CKContainer
-    private let privateDatabase: CKDatabase
+    private let containerID = "iCloud.com.nestling.app"
+    private lazy var container: CKContainer = CKContainer(identifier: containerID)
+    private lazy var privateDatabase: CKDatabase = container.privateCloudDatabase
     private var dataStore: DataStore
     private let eventRecordType = "Event"
     private let daysBackToSync = 30
     
     private init() {
-        let containerID = "iCloud.com.nestling.app"
-        self.container = CKContainer(identifier: containerID)
-        self.privateDatabase = container.privateCloudDatabase
         self.dataStore = DataStoreSelector.create()
         
         // Check if sync is enabled
@@ -33,19 +31,29 @@ class CloudKitSyncService: ObservableObject {
     
     /// Enable CloudKit sync (user must explicitly enable for multi-caregiver)
     func enable() async throws {
-        // Check CloudKit account status
-        let status = try await container.accountStatus()
+        do {
+            // Check CloudKit account status (lazy container init happens here)
+            let status = try await container.accountStatus()
         
-        guard status == .available else {
-            let message = cloudKitErrorMessage(for: status)
-            throw NSError(domain: "CloudKitSync", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+            guard status == .available else {
+                let message = cloudKitErrorMessage(for: status)
+                throw NSError(domain: "CloudKitSync", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+            }
+        
+            isEnabled = true
+            UserDefaults.standard.set(true, forKey: "cloudkit_sync_enabled")
+        
+            // Trigger initial sync
+            await syncAll()
+        } catch {
+            // Surface entitlement/container issues without crashing
+            let wrapped = NSError(
+                domain: "CloudKitSync",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "CloudKit unavailable. Check iCloud entitlements and container. \(error.localizedDescription)"]
+            )
+            throw wrapped
         }
-        
-        isEnabled = true
-        UserDefaults.standard.set(true, forKey: "cloudkit_sync_enabled")
-        
-        // Trigger initial sync
-        await syncAll()
     }
     
     /// Disable CloudKit sync
@@ -295,5 +303,6 @@ class CloudKitSyncService: ObservableObject {
         }
     }
 }
+
 
 

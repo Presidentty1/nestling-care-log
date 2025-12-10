@@ -1,6 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { track } from '@/analytics/analytics';
 
+const isDev = import.meta.env.DEV;
+
 interface PerformanceMetrics {
   renderCount: number;
   averageRenderTime: number;
@@ -32,7 +34,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
     }
 
     // Track performance metrics if enabled and component is slow
-    if (trackMetrics && renderTime > 16) {
+    if (trackMetrics && isDev && renderTime > 16) {
       // 16ms = 60fps
       track('component_slow_render', {
         component: componentName,
@@ -41,7 +43,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
       });
     }
 
-    if (renderTime > 16) {
+    if (renderTime > 16 && isDev) {
       // More than one frame (16ms at 60fps)
       console.warn(`[Performance] ${componentName} render took ${renderTime.toFixed(2)}ms`);
     }
@@ -77,7 +79,7 @@ export function usePerformance(componentName: string, trackMetrics = false) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (trackMetrics && renderCount.current > 0) {
+      if (trackMetrics && isDev && renderCount.current > 0) {
         const metrics = getMetrics();
         track('component_unmount', {
           component: componentName,

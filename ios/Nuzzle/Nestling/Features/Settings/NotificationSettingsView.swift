@@ -15,7 +15,6 @@ struct NotificationSettingsView: View {
     @State private var remindersPaused = false
     @State private var showPermissionAlert = false
     @State private var nextScheduledText: String = "Not scheduled"
-    @State private var nextScheduledText: String = "Not scheduled"
     
     var body: some View {
         Form {

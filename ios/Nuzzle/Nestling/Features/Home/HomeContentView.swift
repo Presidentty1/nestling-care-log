@@ -1,8 +1,16 @@
 import SwiftUI
 
+struct FeatureTooltip {
+    let title: String
+    let message: String
+    let icon: String
+    let preferenceKey: String
+}
+
 struct HomeContentView: View {
     @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject var environment: AppEnvironment
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Binding var showFeedForm: Bool
     @Binding var showSleepForm: Bool
     @Binding var showDiaperForm: Bool
@@ -14,38 +22,33 @@ struct HomeContentView: View {
     let onBabySelected: (Baby) -> Void
     let onEventEdited: (Event) -> Void
     
+    @State private var showFeatureTooltip = false
+    @State private var activeTooltip: FeatureTooltip?
+    
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: .spacingXL) {
                 babySelectorSection
                 trialBannerSection
                 firstLogSection
+                
+                // Above-the-fold essentials
                 statusTilesSection
-                
-                // UX-03: Quick Actions always appear early (above fold) for fast logging
                 quickActionsSection
-                
+                dailySummarySection
                 guidanceStripSection
                 
-                // Dynamic Layout (Epic 7 AC7.2) - Enhanced with goal-based personalization
-                // Note: Quick Actions moved above to ensure visibility without scroll
+                // Goal-based insights
                 if viewModel.shouldSimplifyUI {
-                    // "Just Survive" mode: Minimal insights
                     streaksSection
-                } else if viewModel.shouldPrioritizeSleep {
-                    // "Track Sleep" goal: Show nap insights
-                    insightSection
-                    streaksSection
-                } else if viewModel.shouldPrioritizeFeeding {
-                    // "Monitor Feeding" goal: Show feeding insights
-                    insightSection
-                    streaksSection
-                } else if viewModel.timeOfDay == .morning || viewModel.timeOfDay == .day {
-                    // Default day: Insights after actions
+                } else if viewModel.shouldPrioritizeSleep || viewModel.shouldPrioritizeFeeding || viewModel.timeOfDay == .morning || viewModel.timeOfDay == .day {
                     insightSection
                     streaksSection
                 } else {
-                    // Default evening/night: Insights/Summary
                     insightSection
                     streaksSection
                 }
@@ -55,7 +58,31 @@ struct HomeContentView: View {
             .padding(.bottom, .spacingXL)
             .frame(maxWidth: .infinity)
         }
+        .overlay(alignment: .bottom) {
+            if showFeatureTooltip, let activeTooltip {
+                HomeFeatureTooltipView(config: activeTooltip) {
+                    showFeatureTooltip = false
+                }
+                .padding(.horizontal, .spacingMD)
+                .padding(.bottom, .spacingLG)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
         .frame(maxWidth: .infinity)
+        .onChange(of: viewModel.events.count) { _, newCount in
+            // Show progressive tooltip after first few logs
+            if newCount >= 3 && !UserDefaults.standard.bool(forKey: "hasSeenFeatureTooltip_ai") {
+                activeTooltip = FeatureTooltip(
+                    title: "Try nap predictions",
+                    message: "See suggested windows after a few logs.",
+                    icon: "sparkles",
+                    preferenceKey: "hasSeenFeatureTooltip_ai"
+                )
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    showFeatureTooltip = true
+                }
+            }
+        }
     }
     
     @ViewBuilder
@@ -143,6 +170,7 @@ struct HomeContentView: View {
                 baby: baby
             )
             .padding(.top, CGFloat.spacingMD)
+            .accessibilityHint("Current status cards. Double tap to view details.")
         }
     }
     
@@ -234,6 +262,16 @@ struct HomeContentView: View {
             }
         )
         .padding(.horizontal, CGFloat.spacingMD)
+        .accessibilityLabel("Quick log actions")
+        .accessibilityHint("Double tap to start logging. Long press for details.")
+    }
+    
+    @ViewBuilder
+    private var dailySummarySection: some View {
+        if let summary = viewModel.summary {
+            HomeDailySummaryCard(summary: summary, isCollapsedByDefault: true)
+                .padding(.horizontal, .spacingMD)
+        }
     }
     
     @ViewBuilder
@@ -247,12 +285,42 @@ struct HomeContentView: View {
             let allFilter = viewModel.selectedFilter == .all
             
             if isEmpty {
-                EmptyStateView(
-                    icon: noSearch && allFilter ? "calendar" : "magnifyingglass",
-                    title: noSearch && allFilter ? "No events logged today" : "No matching events",
-                    message: noSearch && allFilter ? "Start logging events to see them here" : "Try adjusting your search or filter"
-                )
-                .frame(height: 200)
+                VStack(spacing: .spacingMD) {
+                    EmptyStateView(
+                        icon: noSearch && allFilter ? "calendar.badge.plus" : "magnifyingglass",
+                        title: noSearch && allFilter ? "Let’s log your first feed" : "No matching events",
+                        message: noSearch && allFilter ? "Quick actions can save a new feed, sleep, or diaper in two taps." : "Try a different filter or clear your search.",
+                        variant: noSearch && allFilter ? .welcome : .search,
+                        actionTitle: noSearch && allFilter ? "Open Quick Log" : "Clear Filters",
+                        action: {
+                            if noSearch && allFilter {
+                                showFeedForm = true
+                            } else {
+                                viewModel.selectedFilter = .all
+                                viewModel.searchText = ""
+                            }
+                        },
+                        secondaryActionTitle: noSearch && allFilter ? "Start Sleep Timer" : nil,
+                        secondaryAction: noSearch && allFilter ? {
+                            viewModel.quickLogSleep()
+                        } : nil
+                    )
+                    .frame(height: 220)
+                    
+                    if viewModel.events.isEmpty {
+                        HomeFeatureTooltipView(
+                            config: FeatureTooltip(
+                                title: greetingTitle,
+                                message: "Use Quick Actions to get to the aha moment faster.",
+                                icon: "hand.tap",
+                                preferenceKey: "hasSeenFeatureTooltip_quickLog"
+                            )
+                        ) {
+                            UserDefaults.standard.set(true, forKey: "hasSeenFeatureTooltip_quickLog")
+                        }
+                        .padding(.horizontal, .spacingMD)
+                    }
+                }
             } else {
                 // Progress indicator banner - shows until user has 6+ events
                 ExampleDataBanner(eventCount: viewModel.events.count)
@@ -273,7 +341,6 @@ struct HomeContentView: View {
                     onEdit: onEventEdited,
                     onDelete: { event in
                         viewModel.deleteEvent(event)
-                        // Show undo toast
                         let toastId = UUID()
                         showToast = ToastMessage(
                             id: toastId,
@@ -290,8 +357,7 @@ struct HomeContentView: View {
                                 }
                             }
                         )
-                        // Auto-dismiss after 7 seconds
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                             if showToast?.id == toastId {
                                 showToast = nil
                             }
@@ -308,5 +374,170 @@ struct HomeContentView: View {
                 .padding(.horizontal, .spacingMD)
             }
         }
+    }
+    
+    private var greetingTitle: String {
+        switch viewModel.timeOfDay {
+        case .morning: return "Good morning! Ready to start?"
+        case .day: return "Let’s keep the day on track"
+        case .evening: return "Evening check-in"
+        case .night: return "Late night logging made easy"
+        }
+    }
+}
+
+// MARK: - Supporting Views (scoped here to ensure target membership)
+
+struct HomeFeatureTooltipView: View {
+    let config: FeatureTooltip
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: .spacingMD) {
+            ZStack {
+                Circle()
+                    .fill(Color.primary.opacity(0.12))
+                    .frame(width: 36, height: 36)
+                Image(systemName: config.icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            .accessibilityHidden(true)
+            
+            VStack(alignment: .leading, spacing: .spacingXS) {
+                Text(config.title)
+                    .font(.headline)
+                    .foregroundColor(.foreground)
+                Text(config.message)
+                    .font(.subheadline)
+                    .foregroundColor(.mutedForeground)
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                HStack(spacing: .spacingSM) {
+                    Button {
+                        Haptics.light()
+                        UserDefaults.standard.set(true, forKey: config.preferenceKey)
+                        onDismiss()
+                    } label: {
+                        Text("Got it")
+                            .font(.callout.weight(.semibold))
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, .spacingSM)
+                            .padding(.vertical, .spacingXS)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusSM)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusSM)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
+                    }
+                    
+                    Button {
+                        Haptics.selection()
+                        UserDefaults.standard.set(true, forKey: config.preferenceKey)
+                        onDismiss()
+                    } label: {
+                        Text("Remind later")
+                            .font(.callout)
+                            .foregroundColor(.mutedForeground)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(.spacingMD)
+        .background(Color.elevated)
+        .cornerRadius(.radiusMD)
+        .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(config.title). \(config.message)")
+        .accessibilityHint("Dismiss or learn later")
+    }
+}
+
+struct HomeDailySummaryCard: View {
+    let summary: DaySummary
+    let isCollapsedByDefault: Bool
+    @State private var isCollapsed: Bool
+    
+    init(summary: DaySummary, isCollapsedByDefault: Bool = false) {
+        self.summary = summary
+        self.isCollapsedByDefault = isCollapsedByDefault
+        _isCollapsed = State(initialValue: isCollapsedByDefault)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: .spacingSM) {
+            HStack {
+                Label("Today", systemImage: "chart.bar.fill")
+                    .font(.headline)
+                    .foregroundColor(.foreground)
+                Spacer()
+                Button(action: toggle) {
+                    Image(systemName: isCollapsed ? "chevron.down" : "chevron.up")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .frame(width: 32, height: 32)
+                        .background(Color.surface.opacity(0.9))
+                        .cornerRadius(.radiusSM)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: .radiusSM)
+                                .stroke(Color.cardBorder, lineWidth: 1)
+                        )
+                }
+                .accessibilityLabel(isCollapsed ? "Expand daily summary" : "Collapse daily summary")
+            }
+            
+            if !isCollapsed {
+                HStack(spacing: .spacingMD) {
+                    summaryTile(title: "Feeds", value: "\(summary.feedCount)", icon: "drop.fill", color: .eventFeed)
+                    summaryTile(title: "Diapers", value: "\(summary.diaperCount)", icon: "drop.circle.fill", color: .eventDiaper)
+                    summaryTile(title: "Sleep", value: summary.sleepDisplay, icon: "moon.fill", color: .eventSleep)
+                    summaryTile(title: "Tummy", value: "\(summary.tummyTimeCount)", icon: "figure.child", color: .eventTummy)
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .padding(.spacingMD)
+        .background(Color.surface)
+        .cornerRadius(.radiusLG)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusLG)
+                .stroke(Color.cardBorder, lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Daily summary of logged events")
+    }
+    
+    private func summaryTile(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: .spacingXS) {
+            HStack(spacing: .spacingXS) {
+                Image(systemName: icon)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(color)
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+            }
+            Text(value)
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.foreground)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.spacingSM)
+        .background(Color.elevated)
+        .cornerRadius(.radiusMD)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusMD)
+                .stroke(Color.cardBorder, lineWidth: 1)
+        )
+    }
+    
+    private func toggle() {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+            isCollapsed.toggle()
+        }
+        Haptics.selection()
     }
 }
