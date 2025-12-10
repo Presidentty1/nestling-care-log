@@ -1,7 +1,5 @@
 import Foundation
 
-import Foundation
-
 struct DateUtils {
     /// Calendar instance for date operations (uses current timezone)
     private static var calendar: Calendar {
@@ -10,23 +8,33 @@ struct DateUtils {
         return cal
     }
     
-    /// Format time as "2:30 PM" (respects locale and 12/24h setting)
-    static func formatTime(_ date: Date) -> String {
+    /// Cached DateFormatter for time formatting (performance optimization)
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         formatter.timeZone = TimeZone.current
         formatter.locale = Locale.current
-        return formatter.string(from: date)
-    }
+        return formatter
+    }()
     
-    /// Format date as "Nov 15, 2024" (respects locale)
-    static func formatDate(_ date: Date) -> String {
+    /// Cached DateFormatter for date formatting (performance optimization)
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         formatter.timeZone = TimeZone.current
         formatter.locale = Locale.current
-        return formatter.string(from: date)
+        return formatter
+    }()
+    
+    /// Format time as "2:30 PM" (respects locale and 12/24h setting)
+    static func formatTime(_ date: Date) -> String {
+        timeFormatter.string(from: date)
+    }
+    
+    /// Format date as "Nov 15, 2024" (respects locale)
+    static func formatDate(_ date: Date) -> String {
+        dateFormatter.string(from: date)
     }
     
     /// Format relative time: "2h ago", "5m ago", "Just now"
@@ -172,4 +180,3 @@ struct DateUtils {
         return date.addingTimeInterval(TimeInterval(offset))
     }
 }
-
