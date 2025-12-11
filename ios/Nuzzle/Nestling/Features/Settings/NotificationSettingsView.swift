@@ -40,6 +40,7 @@ struct NotificationSettingsView: View {
                         if enabled && permissionStatus != .authorized && !remindersPaused {
                             requestPermission()
                         }
+                        trackNotifToggle(type: "feed_reminder", enabled: enabled)
                     }
                 
                 if feedReminderEnabled {
@@ -60,6 +61,7 @@ struct NotificationSettingsView: View {
                         if enabled && permissionStatus != .authorized && !remindersPaused {
                             requestPermission()
                         }
+                        trackNotifToggle(type: "nap_window", enabled: enabled)
                     }
                 
                 if napWindowAlertEnabled && permissionStatus != .authorized {
@@ -76,6 +78,7 @@ struct NotificationSettingsView: View {
                         if enabled && permissionStatus != .authorized && !remindersPaused {
                             requestPermission()
                         }
+                        trackNotifToggle(type: "diaper_reminder", enabled: enabled)
                     }
                 
                 if diaperReminderEnabled {
@@ -283,6 +286,13 @@ struct NotificationSettingsView: View {
                 // For now, just save settings - reminders will be checked/scheduled when events change
             }
         }
+    }
+    
+    private func trackNotifToggle(type: String, enabled: Bool) {
+        AnalyticsService.shared.track(event: "notif_type_enabled", properties: [
+            "notif_type": type,
+            "enabled": enabled
+        ])
     }
 }
 

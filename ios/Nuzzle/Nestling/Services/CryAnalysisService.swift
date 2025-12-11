@@ -180,6 +180,7 @@ class CryAnalysisService {
             "context": context
         ]
         
+        let start = Date()
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
         // Make request with timeout
@@ -195,6 +196,8 @@ class CryAnalysisService {
         
         // Parse response
         let result = try JSONDecoder().decode(CryAnalysisResult.self, from: data)
+        let durationMs = Int(Date().timeIntervalSince(start) * 1000)
+        AnalyticsService.shared.trackAIResponseLatency(durationMs: durationMs, context: "cry_analysis")
         return result
     }
     

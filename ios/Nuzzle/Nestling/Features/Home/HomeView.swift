@@ -11,9 +11,11 @@ struct HomeView: View {
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
     @State private var showProSubscription = false
+    @State private var showAssistant = false
     @State private var showFabMenu = false
     @State private var showTutorial = false
     @State private var hasCheckedTrialExpiration = false
+    @State private var showCaregiverWelcome = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -138,10 +140,18 @@ struct HomeView: View {
                     CryRecorderView(dataStore: environment.dataStore, baby: baby)
                 }
             }
+            .sheet(isPresented: $showAssistant) {
+                AssistantSheetView()
+            }
             .sheet(isPresented: $showProSubscription) {
                 ProSubscriptionView()
             }
             .toast($showToast)
+            .sheet(isPresented: $showCaregiverWelcome) {
+                CaregiverWelcomeSheet {
+                    showCaregiverWelcome = false
+                }
+            }
     }
     
     private var baseNavigationView: some View {
@@ -171,6 +181,8 @@ struct HomeView: View {
                 Task {
                     await checkAndShowTrialExpiredPaywall()
                 }
+                checkCaregiverWelcome()
+                checkConflictNotice()
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
                 if let baby = environment.currentBaby {
@@ -195,6 +207,7 @@ struct HomeView: View {
                 showDiaperForm: $showDiaperForm,
                 showTummyForm: $showTummyForm,
                 showCryRecorder: $showCryRecorder,
+                showAssistant: $showAssistant,
                 editingEvent: $editingEvent,
                 showToast: $showToast,
                 showProSubscription: $showProSubscription,
@@ -235,6 +248,23 @@ struct HomeView: View {
             get: { viewModel?.searchText ?? "" },
             set: { viewModel?.searchText = $0 }
         )
+    }
+    
+    private func checkCaregiverWelcome() {
+        if UserDefaults.standard.bool(forKey: "shouldShowCaregiverWelcome") {
+            showCaregiverWelcome = true
+            UserDefaults.standard.set(false, forKey: "shouldShowCaregiverWelcome")
+        }
+    }
+    
+    private func checkConflictNotice() {
+        if UserDefaults.standard.bool(forKey: "shouldShowConflictResolutionNotice") {
+            UserDefaults.standard.set(false, forKey: "shouldShowConflictResolutionNotice")
+            showToast = ToastMessage(
+                message: "Updated from another device",
+                type: .info
+            )
+        }
     }
     
     @ViewBuilder
@@ -538,6 +568,7 @@ struct QuickActionsSection: View {
     let onOpenDiaperForm: () -> Void
     let onOpenTummyForm: () -> Void
     let onCryAnalysis: () -> Void
+    let onAskQuestion: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -545,7 +576,7 @@ struct QuickActionsSection: View {
                 .font(.title)
                 .foregroundColor(.foreground)
             
-            // Balanced 2x2 Grid - Most-used actions
+            // Balanced grid of quick actions
             VStack(spacing: .spacingMD) {
                 HStack(spacing: .spacingMD) {
                     QuickActionButton(
@@ -581,6 +612,34 @@ struct QuickActionsSection: View {
                         color: .eventTummy,
                         action: onTummyTime,
                         longPressAction: onOpenTummyForm
+                    )
+                }
+                
+                HStack(spacing: .spacingMD) {
+                    QuickActionButton(
+                        title: "Analyze Cry",
+                        icon: "waveform",
+                        color: .eventSleep,
+                        action: onCryAnalysis,
+                        longPressAction: onCryAnalysis
+                    )
+                    .overlay(alignment: .topTrailing) {
+                        Text("Beta")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundColor(.eventSleep)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(Color.eventSleep.opacity(0.12))
+                            .cornerRadius(.radiusSM)
+                            .padding(6)
+                    }
+                    
+                    QuickActionButton(
+                        title: "Ask a Question",
+                        icon: "questionmark.bubble.fill",
+                        color: .primary,
+                        action: onAskQuestion,
+                        longPressAction: onAskQuestion
                     )
                 }
             }
@@ -625,9 +684,110 @@ struct TimelineSection: View {
 // The implementation has been moved to its own file for better maintainability and dynamic layout support.
 
 
+// MARK: - Caregiver Welcome Sheet
+
+private struct CaregiverWelcomeSheet: View {
+    var onDismiss: () -> Void
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: .spacingLG) {
+                Image(systemName: "person.2.fill")
+                    .font(.system(size: 48, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .padding(.top, .spacingXL)
+                
+                VStack(spacing: .spacingSM) {
+                    Text("Welcome to shared care")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("You can now log and view events for this baby. Changes you make will be visible to the family.")
+                        .font(.body)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .spacingMD)
+                }
+                
+                VStack(alignment: .leading, spacing: .spacingSM) {
+                    Label("See the full history and log new events", systemImage: "list.bullet")
+                        .font(.body)
+                        .foregroundColor(.foreground)
+                    Label("Notifications respect quiet hours", systemImage: "moon.fill")
+                        .font(.body)
+                        .foregroundColor(.foreground)
+                    Label("You can leave anytime from Settings", systemImage: "gearshape.fill")
+                        .font(.body)
+                        .foregroundColor(.foreground)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, .spacingLG)
+                
+                Spacer()
+                
+                Button(action: onDismiss) {
+                    Text("Got it")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.primary)
+                        .foregroundColor(.white)
+                        .cornerRadius(.radiusMD)
+                }
+                .padding(.horizontal, .spacingLG)
+                .padding(.bottom, .spacingXL)
+            }
+            .background(Color.background)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close", action: onDismiss)
+                }
+            }
+        }
+    }
+}
+
 #Preview {
     HomeView()
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
+}
+
+// MARK: - Assistant fallback if not linked in target
+
+struct AssistantSheetView: View {
+    var body: some View {
+        NavigationStack {
+            if let assistant = makeAssistantView() {
+                assistant
+            } else {
+                VStack(spacing: .spacingMD) {
+                    Image(systemName: "questionmark.bubble")
+                        .font(.largeTitle)
+                        .foregroundColor(.primary)
+                    Text("AI Assistant is not available in this build.")
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .spacingMD)
+                    Text("Try again after syncing or enable the Assistant target.")
+                        .font(.subheadline)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .spacingMD)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.background)
+            }
+        }
+    }
+    
+    /// Attempts to instantiate AssistantView if it's linked in this target.
+    /// TODO: Import and use AssistantView directly when properly added to target
+    private func makeAssistantView() -> AnyView? {
+        // For now, return nil so fallback view is shown
+        // When AssistantView is properly added to target, import it and return: AnyView(AssistantView())
+        return nil
+    }
 }
 
 // MARK: - Sync Status Pill

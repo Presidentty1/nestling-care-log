@@ -1,5 +1,15 @@
 import SwiftUI
+import Combine
 
+/// HomeContentView - Smart Summary + Timeline Layout
+///
+/// Implements a glanceable home experience:
+/// - Greeting: Contextual, supportive message
+/// - Summary Cards: Horizontal scroll of last feed, diaper, sleep, next nap
+/// - Quick Actions: ≤2-tap logging for feed, sleep, diaper, tummy, cry analysis, Q&A
+/// - Timeline: Simple chronological list of today's events
+///
+/// Design goals: answer "What's happening now?" and "What should I do next?" with minimal cognitive load.
 struct FeatureTooltip {
     let title: String
     let message: String
@@ -16,12 +26,14 @@ struct HomeContentView: View {
     @Binding var showDiaperForm: Bool
     @Binding var showTummyForm: Bool
     @Binding var showCryRecorder: Bool
+    @Binding var showAssistant: Bool
     @Binding var editingEvent: Event?
     @Binding var showToast: ToastMessage?
     @Binding var showProSubscription: Bool
     let onBabySelected: (Baby) -> Void
     let onEventEdited: (Event) -> Void
     
+    @State private var showBabySwitcher = false
     @State private var showFeatureTooltip = false
     @State private var activeTooltip: FeatureTooltip?
     
@@ -29,34 +41,85 @@ struct HomeContentView: View {
         horizontalSizeClass == .regular
     }
     
+    private var currentBaby: Baby? {
+        environment.currentBaby
+    }
+    
+    private var ageDescription: String {
+        guard let baby = currentBaby else { return "" }
+        return DateUtils.formatBabyAge(dateOfBirth: baby.dateOfBirth)
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: .spacingXL) {
-                babySelectorSection
-                trialBannerSection
-                firstLogSection
-                
-                // Above-the-fold essentials
-                statusTilesSection
-                quickActionsSection
-                dailySummarySection
-                guidanceStripSection
-                
-                // Goal-based insights
-                if viewModel.shouldSimplifyUI {
-                    streaksSection
-                } else if viewModel.shouldPrioritizeSleep || viewModel.shouldPrioritizeFeeding || viewModel.timeOfDay == .morning || viewModel.timeOfDay == .day {
-                    insightSection
-                    streaksSection
-                } else {
-                    insightSection
-                    streaksSection
+                if let baby = currentBaby {
+                    HomeTopBar(
+                        baby: baby,
+                        ageDescription: ageDescription,
+                        onSettingsTapped: {
+                            // TODO: Navigate to settings tab/screen when available
+                            print("Settings tapped")
+                        },
+                        onBabyTapped: environment.babies.count > 1 ? { showBabySwitcher = true } : nil
+                    )
+                    .padding(.top, .spacingSM)
                 }
                 
+                HomeGreeting(timeOfDay: viewModel.timeOfDay)
+                
+                if let active = viewModel.activeSleep {
+                    OngoingTimerBanner(
+                        event: active,
+                        onStop: { viewModel.quickLogSleep() },
+                        onEdit: {
+                            editingEvent = active
+                            showSleepForm = true
+                        }
+                    )
+                    .padding(.horizontal, .spacingMD)
+                }
+                
+                if let baby = currentBaby {
+                    HomeSummaryCarousel(
+                        lastFeed: viewModel.lastFeed,
+                        lastDiaper: viewModel.lastDiaper,
+                        activeSleep: viewModel.activeSleep,
+                        lastSleep: viewModel.lastSleep,
+                        nextNapWindow: viewModel.nextNapWindow,
+                        baby: baby,
+                        onFeedTapped: { showFeedForm = true },
+                        onDiaperTapped: { showDiaperForm = true },
+                        onSleepTapped: {
+                            if viewModel.activeSleep != nil {
+                                viewModel.quickLogSleep()
+                            } else {
+                                showSleepForm = true
+                            }
+                        },
+                        onNapTapped: {
+                            // TODO: Show nap prediction detail sheet
+                        }
+                    )
+                }
+                
+                quickActionsSection
+                
+                todayHeader
                 timelineContent(for: viewModel)
             }
             .padding(.bottom, .spacingXL)
             .frame(maxWidth: .infinity)
+        }
+        .confirmationDialog("Choose baby", isPresented: $showBabySwitcher) {
+            if let current = currentBaby {
+                ForEach(environment.babies) { baby in
+                    Button(baby.name) {
+                        onBabySelected(baby)
+                    }
+                    .disabled(baby.id == current.id)
+                }
+            }
         }
         .overlay(alignment: .bottom) {
             if showFeatureTooltip, let activeTooltip {
@@ -82,150 +145,6 @@ struct HomeContentView: View {
                     showFeatureTooltip = true
                 }
             }
-        }
-    }
-    
-    @ViewBuilder
-    private var babySelectorSection: some View {
-        if environment.babies.count > 1, let baby = environment.currentBaby {
-            BabySelectorView(baby: baby, babies: environment.babies) { selectedBaby in
-                onBabySelected(selectedBaby)
-            }
-            .padding(.horizontal, .spacingMD)
-        }
-    }
-    
-    @ViewBuilder
-    private var trialBannerSection: some View {
-        // Show trial banner if user is in trial and not Pro
-        if let daysRemaining = ProSubscriptionService.shared.trialDaysRemaining,
-           daysRemaining > 0,
-           !ProSubscriptionService.shared.isProUser {
-            // Note: TrialBannerView must be included in the Nuzzle target in Xcode
-            // If you see a "cannot find 'TrialBannerView' in scope" error,
-            // ensure ios/Nuzzle/Nestling/Design/Components/TrialBannerView.swift
-            // is checked in the Target Membership for the Nuzzle target
-            TrialBannerView(daysRemaining: daysRemaining) {
-                Task {
-                    await Analytics.shared.logPaywallViewed(source: "trial_banner_home")
-                }
-                showProSubscription = true
-            }
-            .padding(.horizontal, .spacingMD)
-        }
-    }
-    
-    @ViewBuilder
-    private var firstLogSection: some View {
-        if !viewModel.hasAnyEvents {
-            FirstLogCard(
-                onLog: {
-                    print("🔵 HomeContentView: First log card tapped")
-                    showFeedForm = true
-                },
-                userGoal: viewModel.userGoal
-            )
-            .padding(.horizontal, .spacingMD)
-        } else if shouldShowTasksChecklist {
-            // Phase 3: Show tasks checklist after first log
-            FirstTasksChecklistCard(
-                hasLoggedFeed: hasLoggedFeedEvent,
-                hasLoggedSleep: hasLoggedSleepEvent,
-                onExploreAI: {
-                    Task {
-                        await Analytics.shared.logPaywallViewed(source: "first_tasks_checklist")
-                    }
-                    showProSubscription = true
-                },
-                onDismiss: {
-                    UserDefaults.standard.set(true, forKey: "hasDissmissedTasksChecklist")
-                }
-            )
-            .padding(.horizontal, .spacingMD)
-        }
-    }
-    
-    private var hasLoggedFeedEvent: Bool {
-        viewModel.events.contains { $0.type == .feed }
-    }
-    
-    private var hasLoggedSleepEvent: Bool {
-        viewModel.events.contains { $0.type == .sleep }
-    }
-    
-    private var shouldShowTasksChecklist: Bool {
-        let hasDismissed = UserDefaults.standard.bool(forKey: "hasDissmissedTasksChecklist")
-        let hasCompletedAll = hasLoggedFeedEvent && hasLoggedSleepEvent
-        return !hasDismissed && !hasCompletedAll && viewModel.hasAnyEvents
-    }
-    
-    @ViewBuilder
-    private var statusTilesSection: some View {
-        if let baby = environment.currentBaby {
-            StatusTilesView(
-                lastFeed: viewModel.lastFeed,
-                lastDiaper: viewModel.lastDiaper,
-                activeSleep: viewModel.activeSleep,
-                nextNapWindow: viewModel.nextNapWindow,
-                baby: baby
-            )
-            .padding(.top, CGFloat.spacingMD)
-            .accessibilityHint("Current status cards. Double tap to view details.")
-        }
-    }
-    
-    @ViewBuilder
-    private var guidanceStripSection: some View {
-        if let baby = environment.currentBaby {
-            GuidanceStripView(dataStore: environment.dataStore, baby: baby)
-                .padding(.horizontal, .spacingMD)
-        }
-    }
-    
-    @ViewBuilder
-    private var insightSection: some View {
-        if let topRecommendation = viewModel.recommendations.first {
-            FeatureGate.check(.todaysInsight, accessible: {
-                TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, .spacingMD)
-                    .onTapGesture {
-                        Haptics.light()
-                    }
-            }, paywall: {
-                TodaysInsightCard(recommendation: topRecommendation)
-                    .padding(.horizontal, .spacingMD)
-                    .blur(radius: 4)
-                    .overlay(
-                        Color.background.opacity(0.3)
-                            .overlay(
-                                VStack {
-                                    Spacer()
-                                    PrimaryButton("Upgrade to Pro", icon: "star.fill") {
-                                        Task {
-                                            await Analytics.shared.logPaywallViewed(source: "todays_insight_card")
-                                        }
-                                        showProSubscription = true
-                                    }
-                                    .padding(.horizontal, .spacingMD)
-                                    Spacer()
-                                }
-                            )
-                    )
-                    .onTapGesture {
-                        Task {
-                            await Analytics.shared.logPaywallViewed(source: "todays_insight_card_tap")
-                        }
-                        showProSubscription = true
-                    }
-            })
-        }
-    }
-    
-    @ViewBuilder
-    private var streaksSection: some View {
-        if viewModel.currentStreak > 0 || viewModel.longestStreak > 0 {
-            StreaksView(currentStreak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
-                .padding(.horizontal, .spacingMD)
         }
     }
     
@@ -259,6 +178,9 @@ struct HomeContentView: View {
             },
             onCryAnalysis: {
                 showCryRecorder = true
+            },
+            onAskQuestion: {
+                showAssistant = true
             }
         )
         .padding(.horizontal, CGFloat.spacingMD)
@@ -266,12 +188,14 @@ struct HomeContentView: View {
         .accessibilityHint("Double tap to start logging. Long press for details.")
     }
     
-    @ViewBuilder
-    private var dailySummarySection: some View {
-        if let summary = viewModel.summary {
-            HomeDailySummaryCard(summary: summary, isCollapsedByDefault: true)
-                .padding(.horizontal, .spacingMD)
+    private var todayHeader: some View {
+        HStack {
+            Text("Today")
+                .font(.title2.weight(.semibold))
+                .foregroundColor(.foreground)
+            Spacer()
         }
+        .padding(.horizontal, .spacingMD)
     }
     
     @ViewBuilder
@@ -452,6 +376,432 @@ struct HomeFeatureTooltipView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(config.title). \(config.message)")
         .accessibilityHint("Dismiss or learn later")
+    }
+}
+
+// MARK: - Inline Components (kept here to ensure target membership)
+
+/// Top bar for the Home tab showing baby name/age, brand mark, and settings.
+/// Supports tapping the baby area to switch babies when applicable.
+struct HomeTopBar: View {
+    let baby: Baby
+    let ageDescription: String
+    let onSettingsTapped: () -> Void
+    let onBabyTapped: (() -> Void)?
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: .spacingMD) {
+            Button(action: {
+                onBabyTapped?()
+            }) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(baby.name)
+                        .font(.headline)
+                        .foregroundColor(.foreground)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Text(ageDescription)
+                        .font(.subheadline)
+                        .foregroundColor(.mutedForeground)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(baby.name), \(ageDescription)")
+            .accessibilityHint("Double tap to switch baby")
+            
+            Image("AppIconSmall")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+                .accessibilityHidden(true)
+            
+            Button(action: onSettingsTapped) {
+                Image(systemName: "gearshape.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: .radiusSM))
+            }
+            .accessibilityLabel("Open settings")
+            .accessibilityHint("Shows app settings and profile")
+        }
+        .padding(.horizontal, .spacingMD)
+        .padding(.vertical, .spacingSM)
+        .background(Color.background.opacity(0.001))
+    }
+}
+
+/// Lightweight, supportive greeting for the Home tab.
+struct HomeGreeting: View {
+    let timeOfDay: HomeViewModel.TimeOfDay
+    
+    private var message: String {
+        switch timeOfDay {
+        case .morning:
+            return "Good morning, you’ve got this."
+        case .day:
+            return "Keeping things steady."
+        case .evening:
+            return "Evening wind-down time."
+        case .night:
+            return "Late night? I’m here to help."
+        }
+    }
+    
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: .spacingSM) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(message)
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(.foreground)
+                    .multilineTextAlignment(.leading)
+                Text("Quickly see what’s next and log in two taps.")
+                    .font(.subheadline)
+                    .foregroundColor(.mutedForeground)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, .spacingMD)
+    }
+}
+
+/// Horizontal summary cards for quick glance status on Home.
+struct HomeSummaryCarousel: View {
+    let lastFeed: Event?
+    let lastDiaper: Event?
+    let activeSleep: Event?
+    let lastSleep: Event?
+    let nextNapWindow: NapWindow?
+    let baby: Baby?
+    
+    var onFeedTapped: (() -> Void)?
+    var onDiaperTapped: (() -> Void)?
+    var onSleepTapped: (() -> Void)?
+    var onNapTapped: (() -> Void)?
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: .spacingMD) {
+                feedCard
+                diaperCard
+                sleepCard
+                nextNapCard
+            }
+            .padding(.horizontal, .spacingMD)
+            .padding(.vertical, .spacingSM)
+        }
+    }
+    
+    private var feedCard: some View {
+        HomeSummaryCard(
+            icon: "baby.bottle.fill",
+            iconColor: .eventFeed,
+            title: "Last Feed",
+            primaryText: lastFeed.map { DateUtils.formatDetailedRelativeTime($0.startTime) } ?? "No feeds yet",
+            secondaryText: formatFeedDetail(lastFeed),
+            onTap: onFeedTapped
+        )
+        .accessibilityLabel(lastFeedAccessibilityLabel)
+        .accessibilityHint("Double tap to view feed details")
+    }
+    
+    private var lastFeedAccessibilityLabel: String {
+        if let event = lastFeed {
+            let time = DateUtils.formatDetailedRelativeTime(event.startTime)
+            let detail = formatFeedDetail(event)
+            return "Last feed, \(time). \(detail)"
+        }
+        return "No feeds logged yet"
+    }
+    
+    private var diaperCard: some View {
+        HomeSummaryCard(
+            icon: "drop.circle.fill",
+            iconColor: .eventDiaper,
+            title: "Last Diaper",
+            primaryText: lastDiaper.map { DateUtils.formatDetailedRelativeTime($0.startTime) } ?? "No diapers yet",
+            secondaryText: lastDiaper?.subtype?.capitalized ?? "Try logging one",
+            onTap: onDiaperTapped
+        )
+        .accessibilityLabel(lastDiaperAccessibilityLabel)
+        .accessibilityHint("Double tap to view diaper history")
+    }
+    
+    private var lastDiaperAccessibilityLabel: String {
+        if let event = lastDiaper {
+            let time = DateUtils.formatDetailedRelativeTime(event.startTime)
+            let detail = event.subtype?.capitalized ?? "Diaper"
+            return "Last diaper, \(time). \(detail)"
+        }
+        return "No diapers logged yet"
+    }
+    
+    @ViewBuilder
+    private var sleepCard: some View {
+        if let active = activeSleep {
+            HomeSummaryCard(
+                icon: "moon.zzz.fill",
+                iconColor: .eventSleep,
+                title: "Sleeping",
+                primaryText: formatActiveDuration(active),
+                secondaryText: "Started \(DateUtils.formatDetailedRelativeTime(active.startTime))",
+                isEmphasized: true,
+                onTap: onSleepTapped
+            )
+            .accessibilityLabel("Sleeping, \(formatActiveDuration(active)) so far")
+            .accessibilityHint("Double tap to open sleep details")
+        } else {
+            HomeSummaryCard(
+                icon: "moon.zzz.fill",
+                iconColor: .eventSleep,
+                title: "Last Nap",
+                primaryText: lastSleep.flatMap { $0.endTime }.map { DateUtils.formatDetailedRelativeTime($0) } ?? "No naps yet",
+                secondaryText: formatSleepDetail(lastSleep),
+                onTap: onSleepTapped
+            )
+            .accessibilityLabel(lastSleepAccessibilityLabel)
+            .accessibilityHint("Double tap to open sleep details")
+        }
+    }
+    
+    private var lastSleepAccessibilityLabel: String {
+        if let active = activeSleep {
+            return "Sleeping, \(formatActiveDuration(active)) so far"
+        }
+        if let sleep = lastSleep, let end = sleep.endTime {
+            return "Last nap ended \(DateUtils.formatDetailedRelativeTime(end))"
+        }
+        return "No sleep logged yet"
+    }
+    
+    private var nextNapCard: some View {
+        HomeSummaryCard(
+            icon: "alarm.fill",
+            iconColor: .eventSleep,
+            title: "Next Nap",
+            primaryText: formatNextNapPrimary(nextNapWindow),
+            secondaryText: nextNapWindow?.reason ?? "Learning your baby’s rhythm",
+            onTap: onNapTapped
+        )
+        .accessibilityLabel(nextNapAccessibilityLabel)
+        .accessibilityHint("Double tap to view nap prediction details")
+    }
+    
+    private var nextNapAccessibilityLabel: String {
+        if let window = nextNapWindow {
+            return "Next nap around \(formatWindowRange(window))"
+        }
+        return "Next nap prediction unavailable yet"
+    }
+    
+    // MARK: - Formatting Helpers
+    
+    private func formatFeedDetail(_ event: Event?) -> String {
+        guard let event else { return "Tap to log a feed" }
+        if let amount = event.amount, let unit = event.unit {
+            let roundedAmount: String
+            if amount >= 100 {
+                roundedAmount = "\(Int(amount))"
+            } else if amount >= 10 {
+                roundedAmount = String(format: "%.1f", amount)
+            } else {
+                roundedAmount = String(format: "%.2f", amount)
+            }
+            return "\(roundedAmount) \(unit)"
+        }
+        if let subtype = event.subtype {
+            return subtype.capitalized
+        }
+        return "Logged"
+    }
+    
+    private func formatSleepDetail(_ event: Event?) -> String {
+        guard let event, let duration = event.durationMinutes else { return "Tap to log sleep" }
+        return "Nap • \(DateUtils.formatDuration(minutes: duration))"
+    }
+    
+    private func formatActiveDuration(_ event: Event) -> String {
+        let minutes = Int(Date().timeIntervalSince(event.startTime) / 60)
+        return DateUtils.formatDuration(minutes: max(minutes, 1))
+    }
+    
+    private func formatNextNapPrimary(_ window: NapWindow?) -> String {
+        guard let window else { return "Learning schedule" }
+        let now = Date()
+        if window.start > now {
+            let minutes = Int(window.start.timeIntervalSince(now) / 60)
+            if minutes <= 0 {
+                return "Soon"
+            } else if minutes < 90 {
+                return "in ~\(minutes)m"
+            } else {
+                let hours = minutes / 60
+                let mins = minutes % 60
+                return mins == 0 ? "in ~\(hours)h" : "in ~\(hours)h \(mins)m"
+            }
+        } else if window.end > now {
+            return "Window open"
+        } else {
+            return "Try winding down"
+        }
+    }
+    
+    private func formatWindowRange(_ window: NapWindow) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return "\(formatter.string(from: window.start)) – \(formatter.string(from: window.end))"
+    }
+}
+
+private struct HomeSummaryCard: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let primaryText: String
+    let secondaryText: String?
+    var isEmphasized: Bool = false
+    var onTap: (() -> Void)?
+    
+    var body: some View {
+        Button(action: {
+            onTap?()
+            Haptics.selection()
+        }) {
+            VStack(alignment: .leading, spacing: .spacingSM) {
+                HStack(spacing: .spacingXS) {
+                    Image(systemName: icon)
+                        .font(.headline)
+                        .foregroundColor(iconColor)
+                        .accessibilityHidden(true)
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.mutedForeground)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Spacer(minLength: 0)
+                }
+                
+                Text(primaryText)
+                    .font(isEmphasized ? .title3.weight(.bold) : .title3.weight(.semibold))
+                    .foregroundColor(.foreground)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                
+                if let secondaryText, !secondaryText.isEmpty {
+                    Text(secondaryText)
+                        .font(.footnote)
+                        .foregroundColor(.mutedForeground)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .padding(.spacingMD)
+            .frame(width: 220, alignment: .leading)
+            .background(Color.surface)
+            .cornerRadius(.radiusLG)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusLG)
+                    .stroke(Color.cardBorder, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Sticky banner that surfaces an active session (sleep/feed) with live timer.
+struct OngoingTimerBanner: View {
+    let event: Event
+    let onStop: () -> Void
+    var onEdit: (() -> Void)?
+    
+    @State private var now: Date = Date()
+    private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    
+    private var elapsedDescription: String {
+        let minutes = Int(now.timeIntervalSince(event.startTime) / 60)
+        return DateUtils.formatDuration(minutes: max(minutes, 1))
+    }
+    
+    private var isSleep: Bool {
+        event.type == .sleep
+    }
+    
+    var body: some View {
+        HStack(spacing: .spacingMD) {
+            ZStack {
+                Circle()
+                    .fill((isSleep ? Color.eventSleep : Color.eventFeed).opacity(0.16))
+                    .frame(width: 44, height: 44)
+                Image(systemName: isSleep ? "moon.zzz.fill" : "timer")
+                    .foregroundColor(isSleep ? .eventSleep : .eventFeed)
+                    .font(.headline)
+            }
+            .accessibilityHidden(true)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isSleep ? "Sleeping" : "Ongoing")
+                    .font(.headline)
+                    .foregroundColor(.foreground)
+                Text("\(elapsedDescription) so far")
+                    .font(.subheadline)
+                    .foregroundColor(.mutedForeground)
+                    .lineLimit(1)
+            }
+            
+            Spacer(minLength: 0)
+            
+            HStack(spacing: .spacingSM) {
+                if let onEdit {
+                    Button("Edit") {
+                        Haptics.selection()
+                        onEdit()
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.surface)
+                    .cornerRadius(.radiusSM)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: .radiusSM)
+                            .stroke(Color.cardBorder, lineWidth: 1)
+                    )
+                }
+                
+                Button("Stop") {
+                    Haptics.light()
+                    onStop()
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background((isSleep ? Color.eventSleep : Color.eventFeed))
+                .cornerRadius(.radiusMD)
+                .accessibilityLabel("Stop timer")
+                .accessibilityHint("Stops the current session")
+            }
+        }
+        .padding(.spacingMD)
+        .background(Color.elevated)
+        .cornerRadius(.radiusLG)
+        .overlay(
+            RoundedRectangle(cornerRadius: .radiusLG)
+                .stroke(Color.cardBorder, lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 6)
+        .onReceive(timer) { newDate in
+            now = newDate
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(isSleep ? "Sleeping" : "Ongoing"), \(elapsedDescription) elapsed")
     }
 }
 

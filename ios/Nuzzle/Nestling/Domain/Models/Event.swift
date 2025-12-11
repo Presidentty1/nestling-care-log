@@ -13,6 +13,7 @@ struct Event: Identifiable, Codable, Equatable {
     let side: String?
     let note: String?
     let photoUrls: [String]? // URLs to stored photos
+    let createdBy: UUID?
     let createdAt: Date
     var updatedAt: Date
     
@@ -28,6 +29,7 @@ struct Event: Identifiable, Codable, Equatable {
         side: String? = nil,
         note: String? = nil,
         photoUrls: [String]? = nil,
+        createdBy: UUID? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -42,6 +44,7 @@ struct Event: Identifiable, Codable, Equatable {
         self.side = side
         self.note = note
         self.photoUrls = photoUrls
+        self.createdBy = createdBy
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

@@ -22,7 +22,10 @@ class AnalyticsService {
     private let maxEventsInMemory = 1000
     
     private var isEnabled: Bool {
-        UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
+        if let value = UserDefaults.standard.object(forKey: "analyticsEnabled") as? Bool {
+            return value
+        }
+        return UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
     }
     
     private init() {}
@@ -30,6 +33,7 @@ class AnalyticsService {
     /// Enable/disable analytics (user preference)
     func setEnabled(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, forKey: "analytics_enabled")
+        UserDefaults.standard.set(enabled, forKey: "analyticsEnabled")
         
         if !enabled {
             // Clear stored events when disabled
@@ -133,6 +137,29 @@ class AnalyticsService {
             "screen_name": screenName,
             "duration_seconds": durationSeconds
         ])
+    }
+    
+    func trackTimeToInteractive(durationMs: Int) {
+        track(event: "time_to_interactive", properties: [
+            "duration_ms": durationMs
+        ])
+    }
+    
+    func trackLogSaveLatency(eventType: String, durationMs: Int) {
+        track(event: "log_save_latency_ms", properties: [
+            "event_type": eventType,
+            "duration_ms": durationMs
+        ])
+    }
+    
+    func trackAIResponseLatency(durationMs: Int, context: String? = nil) {
+        var props: [String: Any] = [
+            "duration_ms": durationMs
+        ]
+        if let context {
+            props["context"] = context
+        }
+        track(event: "ai_response_latency_ms", properties: props)
     }
     
     func trackPrimaryActionTaps(actionName: String, tapCount: Int) {

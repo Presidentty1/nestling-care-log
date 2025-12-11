@@ -6,6 +6,10 @@ struct MilestoneCelebrationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showConfetti = false
     
+    private var celebrationsEnabled: Bool {
+        UserDefaults.standard.object(forKey: "celebrationsEnabled") as? Bool ?? true
+    }
+    
     enum Milestone {
         case firstLog
         case threeDays
@@ -104,11 +108,15 @@ struct MilestoneCelebrationView: View {
         .background(Color.background)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                showConfetti = true
+                if celebrationsEnabled {
+                    showConfetti = true
+                }
             }
             
             // Trigger haptic celebration
-            Haptics.success()
+            if celebrationsEnabled {
+                Haptics.success()
+            }
         }
     }
 }

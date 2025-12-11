@@ -296,9 +296,11 @@ class CloudKitSyncService: ObservableObject {
         // Last write wins
         if localTimestamp > remoteTimestamp {
             Logger.dataInfo("Conflict resolved: keeping local version")
+            UserDefaults.standard.set(true, forKey: "shouldShowConflictResolutionNotice")
             return local
         } else {
             Logger.dataInfo("Conflict resolved: keeping remote version")
+            UserDefaults.standard.set(true, forKey: "shouldShowConflictResolutionNotice")
             return remote
         }
     }

@@ -12,6 +12,7 @@ struct NestlingApp: App {
     @State private var isCheckingOnboarding = true
     
     private let launchSignpostID: OSSignpostID
+    private let launchStartTime: Date
     
     init() {
         // Privacy-first: No third-party analytics (Firebase removed)
@@ -29,12 +30,14 @@ struct NestlingApp: App {
         if UserDefaults.standard.object(forKey: "app_install_date") == nil {
             UserDefaults.standard.set(Date(), forKey: "app_install_date")
         }
+        UserDefaults.standard.set(false, forKey: "voiceover_session_tracked")
         
         // Set up notification delegate for quiet hours filtering
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         
         // Start launch signpost
         launchSignpostID = SignpostLogger.beginInterval("AppLaunch", log: SignpostLogger.ui)
+        launchStartTime = Date()
     }
     
     var body: some Scene {
@@ -146,6 +149,16 @@ struct NestlingApp: App {
                     }
                     .onAppear {
                         SignpostLogger.endInterval("AppLaunch", signpostID: launchSignpostID, log: SignpostLogger.ui)
+                        let ttiMs = Date().timeIntervalSince(launchStartTime) * 1000
+                        AnalyticsService.shared.trackTimeToInteractive(durationMs: Int(ttiMs))
+                        let voiceOverRunning = UIAccessibility.isVoiceOverRunning
+                        AnalyticsService.shared.track(event: "accessibility_enabled", properties: [
+                            "voiceover_running": voiceOverRunning
+                        ])
+                        if voiceOverRunning && !UserDefaults.standard.bool(forKey: "voiceover_session_tracked") {
+                            AnalyticsService.shared.track(event: "voiceover_session_started")
+                            UserDefaults.standard.set(true, forKey: "voiceover_session_tracked")
+                        }
                         processWidgetActions()
                     }
                     .onOpenURL { url in

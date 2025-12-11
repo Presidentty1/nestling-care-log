@@ -49,6 +49,7 @@ class DiaperFormViewModel: ObservableObject {
     
     func save() async throws {
         guard !isSaving else { return }
+        let saveStart = Date()
         
         isSaving = true
         defer { isSaving = false }
@@ -78,6 +79,9 @@ class DiaperFormViewModel: ObservableObject {
         } else {
             try await dataStore.addEvent(eventData)
         }
+        
+        let durationMs = Int(Date().timeIntervalSince(saveStart) * 1000)
+        AnalyticsService.shared.trackLogSaveLatency(eventType: "diaper", durationMs: durationMs)
         
         // Save last used values
         let lastUsed = LastUsedValues(subtype: subtype.rawValue)

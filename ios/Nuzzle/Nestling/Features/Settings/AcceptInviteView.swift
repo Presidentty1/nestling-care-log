@@ -121,6 +121,7 @@ struct AcceptInviteView: View {
                     if babies.contains(where: { $0.id == babyId }) {
                         await MainActor.run {
                             isProcessing = false
+                            UserDefaults.standard.set(true, forKey: "shouldShowCaregiverWelcome")
                             showSuccess = true
                         }
                     } else {

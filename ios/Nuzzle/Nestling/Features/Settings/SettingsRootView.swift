@@ -89,6 +89,31 @@ struct SettingsRootView: View {
                     }
                 }
                 
+                Section("Feedback") {
+                    Toggle(isOn: Binding(
+                        get: { environment.appSettings.celebrationsEnabled },
+                        set: { newValue in
+                            Task {
+                                var settings = environment.appSettings
+                                settings.celebrationsEnabled = newValue
+                                try? await environment.dataStore.saveAppSettings(settings)
+                                await MainActor.run {
+                                    environment.appSettings = settings
+                                    UserDefaults.standard.set(newValue, forKey: "celebrationsEnabled")
+                                }
+                            }
+                        }
+                    )) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Celebration Effects")
+                                .font(.body)
+                            Text("Toggle confetti and celebratory haptics")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
+                        }
+                    }
+                }
+                
                 Section("Subscription") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -178,6 +203,30 @@ struct SettingsRootView: View {
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.mutedForeground)
                                 .font(.caption)
+                        }
+                    }
+                    
+                    Toggle(isOn: Binding(
+                        get: { environment.appSettings.analyticsEnabled },
+                        set: { newValue in
+                            Task {
+                                var settings = environment.appSettings
+                                settings.analyticsEnabled = newValue
+                                try? await environment.dataStore.saveAppSettings(settings)
+                                await MainActor.run {
+                                    environment.appSettings = settings
+                                    UserDefaults.standard.set(newValue, forKey: "analyticsEnabled")
+                                    AnalyticsService.shared.setEnabled(newValue)
+                                }
+                            }
+                        }
+                    )) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Allow Analytics")
+                                .font(.body)
+                            Text("Share anonymized usage data to improve the app")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
                         }
                     }
                     

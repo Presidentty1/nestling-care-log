@@ -4,6 +4,10 @@ struct ReadyToGoView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
     @State private var showConfetti = false
     
+    private var celebrationsEnabled: Bool {
+        UserDefaults.standard.object(forKey: "celebrationsEnabled") as? Bool ?? true
+    }
+    
     var body: some View {
         VStack(spacing: .spacing2XL) {
             Spacer()
@@ -67,7 +71,9 @@ struct ReadyToGoView: View {
         .background(Color.background)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                showConfetti = true
+                if celebrationsEnabled {
+                    showConfetti = true
+                }
             }
         }
     }

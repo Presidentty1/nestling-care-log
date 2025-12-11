@@ -133,6 +133,8 @@ class FeedFormViewModel: ObservableObject {
             return // Prevent double-submission
         }
         
+        let saveStart = Date()
+        
         validate()
         guard isValid else {
             throw FormError.validationFailed
@@ -197,6 +199,9 @@ class FeedFormViewModel: ObservableObject {
             // Check if this is the first event ever logged (Epic 1 bug fix)
             await checkAndCelebrateFirstEvent()
         }
+        
+        let durationMs = Int(Date().timeIntervalSince(saveStart) * 1000)
+        AnalyticsService.shared.trackLogSaveLatency(eventType: "feed", durationMs: durationMs)
         
         // Save last used values
         let lastUsed = LastUsedValues(

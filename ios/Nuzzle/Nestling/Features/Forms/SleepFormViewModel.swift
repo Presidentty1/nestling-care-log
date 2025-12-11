@@ -195,6 +195,7 @@ class SleepFormViewModel: ObservableObject {
     func save() async throws {
         guard !isSaving else { return }
         
+        let saveStart = Date()
         validate()
         guard isValid else {
             throw FormError.validationFailed
@@ -280,6 +281,9 @@ class SleepFormViewModel: ObservableObject {
         } else {
             try await dataStore.addEvent(eventData)
         }
+        
+        let durationMs = Int(Date().timeIntervalSince(saveStart) * 1000)
+        AnalyticsService.shared.trackLogSaveLatency(eventType: "sleep", durationMs: durationMs)
     }
     
     deinit {

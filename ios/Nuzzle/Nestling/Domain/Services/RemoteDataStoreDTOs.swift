@@ -146,6 +146,7 @@ struct EventDTO: Codable {
             unit: unit,
             side: side,
             note: note,
+            createdBy: createdBy,
             createdAt: createdAt,
             updatedAt: updatedAt
         )

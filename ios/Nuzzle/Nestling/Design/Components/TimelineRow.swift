@@ -54,6 +54,12 @@ struct TimelineRow: View {
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.mutedForeground)
                     .lineLimit(nil)
+                
+                if let attribution = attributionText() {
+                    Text(attribution)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.mutedForeground.opacity(0.9))
+                }
             }
 
             // Photo thumbnails (if any)
@@ -283,6 +289,20 @@ struct TimelineRow: View {
             }
             return ""
         }
+    }
+    
+    private func attributionText() -> String? {
+        guard let createdBy = event.createdBy else {
+            return nil
+        }
+        
+        if let currentIdString = UserDefaults.standard.string(forKey: "current_user_id"),
+           let currentId = UUID(uuidString: currentIdString),
+           currentId == createdBy {
+            return "Logged by you"
+        }
+        
+        return "Logged by caregiver"
     }
     
     private func formatTime(_ date: Date) -> String {

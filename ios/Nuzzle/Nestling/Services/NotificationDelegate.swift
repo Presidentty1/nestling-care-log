@@ -49,6 +49,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
             // Suppress notification during quiet hours
             completionHandler([])
         } else {
+            trackNotificationEvent(name: "notif_fired", notification: notification)
             // Show notification with banner and sound
             completionHandler([.banner, .sound, .badge])
         }
@@ -60,6 +61,12 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
+        let notification = response.notification
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+            trackNotificationEvent(name: "notif_tap_opened", notification: notification)
+        } else if response.actionIdentifier.lowercased().contains("snooze") {
+            trackNotificationEvent(name: "notif_snoozed", notification: notification)
+        }
         // Handle notification interaction
         completionHandler()
     }
@@ -81,6 +88,14 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         }
         
         return NotificationScheduler.shared.isWithinQuietHours(start: start, end: end)
+    }
+    
+    private func trackNotificationEvent(name: String, notification: UNNotification) {
+        let userInfo = notification.request.content.userInfo
+        let notifType = userInfo["type"] as? String ?? "unknown"
+        AnalyticsService.shared.track(event: name, properties: [
+            "notif_type": notifType
+        ])
     }
 }
 

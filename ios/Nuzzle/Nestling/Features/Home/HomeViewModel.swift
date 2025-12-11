@@ -23,6 +23,10 @@ class HomeViewModel: ObservableObject {
     @Published var hasAnyEvents: Bool = true // Epic 2 AC2.1
     @Published var userGoal: String? // User's selected goal from onboarding
     
+    var babyAgeDescription: String {
+        DateUtils.formatBabyAge(dateOfBirth: baby.dateOfBirth)
+    }
+    
     enum TimeOfDay {
         case morning, day, evening, night
     }

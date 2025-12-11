@@ -29,6 +29,9 @@ class AppEnvironment: ObservableObject {
     func setCaregiverMode(_ enabled: Bool) {
         isCaregiverMode = enabled
         UserDefaults.standard.set(enabled, forKey: "isCaregiverMode")
+        AnalyticsService.shared.track(event: "caregiver_mode_enabled", properties: [
+            "enabled": enabled
+        ])
     }
     
     private func loadInitialData() {
@@ -47,6 +50,8 @@ class AppEnvironment: ObservableObject {
                 let settings = try await dataStore.fetchAppSettings()
                 await MainActor.run {
                     self.appSettings = settings
+                    UserDefaults.standard.set(settings.celebrationsEnabled, forKey: "celebrationsEnabled")
+                    UserDefaults.standard.set(settings.analyticsEnabled, forKey: "analyticsEnabled")
                 }
             } catch {
                 print("Error loading initial data: \(error)")
@@ -78,6 +83,8 @@ class AppEnvironment: ObservableObject {
                 let settings = try await dataStore.fetchAppSettings()
                 await MainActor.run {
                     self.appSettings = settings
+                    UserDefaults.standard.set(settings.celebrationsEnabled, forKey: "celebrationsEnabled")
+                    UserDefaults.standard.set(settings.analyticsEnabled, forKey: "analyticsEnabled")
                 }
             } catch {
                 print("Error refreshing settings: \(error)")

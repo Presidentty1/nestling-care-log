@@ -130,6 +130,7 @@ class TummyTimeFormViewModel: ObservableObject {
     func save() async throws {
         guard !isSaving else { return }
         
+        let saveStart = Date()
         validate()
         guard isValid else {
             throw FormError.validationFailed
@@ -166,6 +167,9 @@ class TummyTimeFormViewModel: ObservableObject {
         } else {
             try await dataStore.addEvent(eventData)
         }
+        
+        let durationMs = Int(Date().timeIntervalSince(saveStart) * 1000)
+        AnalyticsService.shared.trackLogSaveLatency(eventType: "tummy_time", durationMs: durationMs)
         
         // Save last used values
         let lastUsed = LastUsedValues(durationMinutes: duration)
