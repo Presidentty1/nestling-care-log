@@ -220,6 +220,7 @@ struct TimelineRow: View {
         case .diaper: return .eventDiaper
         case .sleep: return .eventSleep
         case .tummyTime: return .eventTummy
+        case .cry: return .eventCry
         }
     }
     
@@ -288,6 +289,11 @@ struct TimelineRow: View {
                 return "\(duration) min"
             }
             return ""
+        case .cry:
+            if let duration = event.durationMinutes, duration > 0 {
+                return "\(duration) sec"
+            }
+            return "Cry logged"
         }
     }
     
@@ -348,6 +354,10 @@ struct TimelineRow: View {
         case .tummyTime:
             if let duration = event.durationMinutes {
                 label += ", \(duration) minutes"
+            }
+        case .cry:
+            if let duration = event.durationMinutes {
+                label += ", \(duration) seconds"
             }
         }
         

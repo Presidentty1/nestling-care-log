@@ -6,6 +6,8 @@ enum EventTypeFilter: String, CaseIterable {
     case diapers = "Diapers"
     case sleep = "Sleep"
     case tummy = "Tummy"
+    case cry = "Cry"
+    case other = "Other"
     
     var displayName: String {
         rawValue
@@ -18,6 +20,8 @@ enum EventTypeFilter: String, CaseIterable {
         case .diapers: return "drop.circle.fill"
         case .sleep: return "moon.fill"
         case .tummy: return "figure.child"
+        case .cry: return "waveform"
+        case .other: return "ellipsis.circle"
         }
     }
 }

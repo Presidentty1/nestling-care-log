@@ -90,6 +90,11 @@ struct ActivityFeedView: View {
             } else {
                 return "started tummy time"
             }
+        case .cry:
+            if let duration = event.durationMinutes {
+                return "logged \(duration)s cry"
+            }
+            return "logged cry"
         }
     }
 }

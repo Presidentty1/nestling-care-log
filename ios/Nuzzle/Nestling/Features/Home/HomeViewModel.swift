@@ -22,6 +22,7 @@ class HomeViewModel: ObservableObject {
     @Published var selectedFilter: EventTypeFilter = .all
     @Published var hasAnyEvents: Bool = true // Epic 2 AC2.1
     @Published var userGoal: String? // User's selected goal from onboarding
+    @Published var isProcessingQuickLog: Bool = false // Prevent duplicate quick log calls
     
     var babyAgeDescription: String {
         DateUtils.formatBabyAge(dateOfBirth: baby.dateOfBirth)
@@ -111,6 +112,8 @@ class HomeViewModel: ObservableObject {
                 case .diapers: return event.type == .diaper
                 case .sleep: return event.type == .sleep
                 case .tummy: return event.type == .tummyTime
+                case .cry: return event.type == .cry
+                case .other: return false // Or handle specific "other" types if you have them
                 }
             }
         }
@@ -250,9 +253,12 @@ class HomeViewModel: ObservableObject {
     
     private func loadTodayEventsInternal(signpostID: OSSignpostID) async {
         isLoadingTask = Task { @MainActor in
+            var taskCompleted = false
+            
             // Use defer to ALWAYS reset isLoading and clear task reference
             // This ensures isLoading is reset even if task is cancelled or errors occur
             defer {
+                taskCompleted = true
                 print("[Task] loadTodayEvents defer block executing, setting isLoading = false")
                 // Ensure we're on MainActor
                 assert(Thread.isMainThread, "Defer block must run on main thread")
@@ -271,8 +277,8 @@ class HomeViewModel: ObservableObject {
             let timeoutTask = Task {
                 try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
                 await MainActor.run {
-                    // Check if this task is still the active one
-                    if self.isLoadingTask?.isCancelled == false && self.isLoading {
+                    // Only log timeout if task hasn't completed and is still loading
+                    if !taskCompleted && self.isLoading {
                         let elapsed = Date().timeIntervalSince(startTime)
                         print("ERROR [\(taskID)]: loadTodayEvents timed out after \(elapsed) seconds")
                         self.isLoading = false
@@ -318,10 +324,7 @@ class HomeViewModel: ObservableObject {
                     self.longestStreak = 0
                 }
 
-                // Set isLoading to false BEFORE defer block to ensure immediate UI update
-                self.isLoading = false
-                print("[\(taskID)] UI updated with \(todayEvents.count) events, isLoading = false")
-                // Note: defer block will also set it, but setting it here ensures immediate update
+                print("[\(taskID)] UI updated with \(todayEvents.count) events")
                 
                 // Index events in Spotlight (non-blocking)
                 Task {
@@ -335,11 +338,6 @@ class HomeViewModel: ObservableObject {
                     await restoreActiveSleep()
                     await MainActor.run {
                         checkActiveSleep()
-        
-        // Debounce search text to improve performance
-        $searchText
-            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-            .assign(to: &$debouncedSearchText)
                     }
                 }
                 
@@ -360,9 +358,7 @@ class HomeViewModel: ObservableObject {
                 let elapsed = Date().timeIntervalSince(startTime)
                 print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
-                // Set isLoading to false on error as well
-                self.isLoading = false
-                print("[\(taskID)] Error set, isLoading = false")
+                print("[\(taskID)] Error set")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
             
@@ -389,8 +385,21 @@ class HomeViewModel: ObservableObject {
     
     func quickLogFeed() {
         print("quickLogFeed called")
+        
+        // Prevent duplicate calls
+        guard !isProcessingQuickLog else {
+            print("Already processing quick log, ignoring duplicate call")
+            return
+        }
+        
+        isProcessingQuickLog = true
+        
         // Reload events after adding
         Task { @MainActor in
+            defer {
+                isProcessingQuickLog = false
+            }
+            
             do {
                 // Get last used values or use defaults
                 var amount = AppConstants.defaultFeedAmountML
@@ -456,7 +465,20 @@ class HomeViewModel: ObservableObject {
     
     func quickLogSleep() {
         print("quickLogSleep called")
+        
+        // Prevent duplicate calls
+        guard !isProcessingQuickLog else {
+            print("Already processing quick log, ignoring duplicate call")
+            return
+        }
+        
+        isProcessingQuickLog = true
+        
         Task { @MainActor in
+            defer {
+                isProcessingQuickLog = false
+            }
+            
             do {
                 if activeSleep != nil {
                     // Stop active sleep
@@ -506,7 +528,20 @@ class HomeViewModel: ObservableObject {
     
     func quickLogDiaper() {
         print("quickLogDiaper called")
+        
+        // Prevent duplicate calls
+        guard !isProcessingQuickLog else {
+            print("Already processing quick log, ignoring duplicate call")
+            return
+        }
+        
+        isProcessingQuickLog = true
+        
         Task { @MainActor in
+            defer {
+                isProcessingQuickLog = false
+            }
+            
             do {
                 // Get last used subtype or default to wet
                 var subtype = "wet"
@@ -696,6 +731,8 @@ class HomeViewModel: ObservableObject {
                 }
             case .tummyTime:
                 tummyTimeCount += 1
+            case .cry:
+                break
             }
         }
         

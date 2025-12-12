@@ -3,22 +3,23 @@ import SwiftUI
 struct GoalSelectionView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
     
-    let goals = [
-        (id: "sleep", title: "😴 Better Sleep", description: "Understand sleep patterns and get nap predictions", icon: "moon.zzz.fill"),
-        (id: "feeding", title: "🍼 Track Feeding", description: "Monitor milk intake and feeding schedules", icon: "drop.fill"),
-        (id: "health", title: "📊 Health Logs", description: "Track growth, vaccines, and doctor visits", icon: "heart.text.square.fill"),
-        (id: "survive", title: "🆘 Just Surviving", description: "I'm overwhelmed and need all the help I can get", icon: "hands.sparkles.fill")
+    let focusOptions: [(area: FocusArea, icon: String, description: String)] = [
+        (.napsAndNights, "moon.zzz.fill", "Get smart nap windows and sleep tracking"),
+        (.feedsAndDiapers, "drop.fill", "Monitor feeds, bottles, and diaper changes"),
+        (.cries, "waveform", "Understand possible reasons for crying"),
+        (.all, "sparkles", "I need help with everything")
     ]
     
     var body: some View {
         ScrollView {
             VStack(spacing: .spacingXL) {
                 VStack(spacing: .spacingSM) {
-                    Text("What's your main goal?")
+                    Text("What do you need most right now?")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.foreground)
+                        .multilineTextAlignment(.center)
                     
-                    Text("We'll personalize your home screen to help you most")
+                    Text("We'll tune your home screen around this")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
@@ -26,17 +27,37 @@ struct GoalSelectionView: View {
                 .padding(.top, .spacingXL)
                 
                 VStack(spacing: .spacingMD) {
-                    ForEach(goals, id: \.id) { goal in
-                        GoalCard(
-                            title: goal.title,
-                            description: goal.description,
-                            icon: goal.icon,
-                            isSelected: coordinator.selectedGoal == goal.id,
+                    ForEach(focusOptions, id: \.area) { option in
+                        FocusAreaCard(
+                            title: option.area.displayName,
+                            description: option.description,
+                            icon: option.icon,
+                            isSelected: coordinator.selectedFocusAreas.contains(option.area),
                             action: {
-                                coordinator.selectedGoal = goal.id
+                                if option.area == .all {
+                                    // "All" acts like select all
+                                    if coordinator.selectedFocusAreas.contains(.all) {
+                                        coordinator.selectedFocusAreas.removeAll()
+                                    } else {
+                                        coordinator.selectedFocusAreas = Set(FocusArea.allCases)
+                                    }
+                                } else {
+                                    // Toggle individual selection
+                                    if coordinator.selectedFocusAreas.contains(option.area) {
+                                        coordinator.selectedFocusAreas.remove(option.area)
+                                        coordinator.selectedFocusAreas.remove(.all)
+                                    } else {
+                                        coordinator.selectedFocusAreas.insert(option.area)
+                                        // If all others are selected, also select "all"
+                                        let others: Set<FocusArea> = [.napsAndNights, .feedsAndDiapers, .cries]
+                                        if others.isSubset(of: coordinator.selectedFocusAreas) {
+                                            coordinator.selectedFocusAreas.insert(.all)
+                                        }
+                                    }
+                                }
                                 Haptics.selection()
                                 Task {
-                                    await Analytics.shared.logOnboardingGoalSelected(goal: goal.id)
+                                    await Analytics.shared.logOnboardingGoalSelected(goal: option.area.rawValue)
                                 }
                             }
                         )
@@ -56,16 +77,16 @@ struct GoalSelectionView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(coordinator.selectedGoal != nil ? Color.primary : Color.primary.opacity(0.5))
+                            .background(!coordinator.selectedFocusAreas.isEmpty ? Color.primary : Color.primary.opacity(0.5))
                             .cornerRadius(.radiusXL)
                             .shadow(
-                                color: coordinator.selectedGoal != nil ? Color.primary.opacity(0.3) : .clear,
+                                color: !coordinator.selectedFocusAreas.isEmpty ? Color.primary.opacity(0.3) : .clear,
                                 radius: 12,
                                 x: 0,
                                 y: 6
                             )
                     }
-                    .disabled(coordinator.selectedGoal == nil)
+                    .disabled(coordinator.selectedFocusAreas.isEmpty)
                     
                     Button("Skip") {
                         Haptics.light()
@@ -87,8 +108,8 @@ struct GoalSelectionView: View {
     }
 }
 
-// MARK: - Goal Card Component
-struct GoalCard: View {
+// MARK: - Focus Area Card Component
+struct FocusAreaCard: View {
     let title: String
     let description: String
     let icon: String
@@ -142,6 +163,7 @@ struct GoalCard: View {
 #Preview {
     GoalSelectionView(coordinator: OnboardingCoordinator(dataStore: InMemoryDataStore()))
 }
+
 
 
 

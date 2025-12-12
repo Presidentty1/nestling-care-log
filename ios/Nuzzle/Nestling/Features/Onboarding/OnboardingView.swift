@@ -23,18 +23,26 @@ struct OnboardingView: View {
                     switch coordinator.currentStep {
                     case .welcome:
                         WelcomeView(coordinator: coordinator)
-                    case .babyEssentials:
+                    case .babyBasics:
                         BabyEssentialsView(coordinator: coordinator)
-                    case .goalSelection:
+                    case .focusGoals:
                         GoalSelectionView(coordinator: coordinator)
+                    case .lastWake:
+                        LastWakeView(coordinator: coordinator)
+                    case .notifications:
+                        NotificationsIntroView(coordinator: coordinator)
+                    case .paywall:
+                        PaywallView(coordinator: coordinator)
                     case .complete:
-                        ReadyToGoView(coordinator: coordinator)
+                        OnboardingCompleteView(coordinator: coordinator)
                     }
                 }
+                .id(coordinator.currentStep)
                 .transition(.asymmetric(
                     insertion: .move(edge: .trailing).combined(with: .opacity),
                     removal: .move(edge: .leading).combined(with: .opacity)
                 ))
+                .animation(.easeInOut(duration: 0.3), value: coordinator.currentStep)
             }
         }
         .onChange(of: coordinator.isCompleted) { _, completed in

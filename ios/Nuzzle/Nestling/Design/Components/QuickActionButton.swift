@@ -91,12 +91,11 @@ struct QuickActionButton: View {
         .contentShape(Rectangle()) // Ensure entire button area is tappable
         .buttonStyle(QuickActionButtonStyle(isActive: isActive))
         .simultaneousGesture(
-            // Double-tap for instant log with defaults
+            // Double-tap for enhanced haptic feedback only (action already called by button tap)
             TapGesture(count: 2)
                 .onEnded { _ in
-                    print("🔵 QuickActionButton double-tap: \(title)")
-                    Haptics.medium()
-                    action() // Quick log with defaults
+                    print("🔵 QuickActionButton double-tap detected: \(title)")
+                    Haptics.medium() // Enhanced feedback for double-tap
                 }
         )
         .simultaneousGesture(
@@ -121,8 +120,8 @@ struct QuickActionButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed && !MotionModifiers.reduceMotion ? 0.96 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed && !MotionModifiers.reduceMotion ? 0.92 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

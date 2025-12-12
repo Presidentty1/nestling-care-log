@@ -12,32 +12,74 @@ struct WelcomeView: View {
                 .foregroundColor(.primary)
             
             VStack(spacing: .spacingMD) {
-                Text("Get 2 More Hours of Sleep")
+                Text("Less guessing.\nMore calm days.")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.foreground)
                     .multilineTextAlignment(.center)
                 
-                Text("Track baby care in 2 taps. Predict naps. Sync with partner.")
+                Text("Log feeds, diapers, and sleep — and get smart nap tips based on your baby.")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.mutedForeground)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, .spacingLG)
                     .fixedSize(horizontal: false, vertical: true)
                 
-                // Trust signals
-                HStack(spacing: .spacingLG) {
-                    TrustBadge(icon: "lock.shield.fill", text: "Privacy First")
-                    TrustBadge(icon: "clock.fill", text: "Setup < 60s")
-                    TrustBadge(icon: "heart.fill", text: "No Ads Ever")
+                // Three icon bullets
+                VStack(spacing: .spacingMD) {
+                    HStack(spacing: .spacingXL) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "moon.zzz.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.primary)
+                            Text("Smart nap\nwindows")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.foreground)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity)
+                        
+                        VStack(spacing: 8) {
+                            Image(systemName: "hand.tap.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.primary)
+                            Text("2-tap\nlogging")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.foreground)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity)
+                        
+                        VStack(spacing: 8) {
+                            Image(systemName: "waveform")
+                                .font(.system(size: 32))
+                                .foregroundColor(.primary)
+                            Text("Cry insights\n(beta)")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.foreground)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
-                .padding(.top, .spacingSM)
+                .padding(.top, .spacingLG)
                 
-                Text("Start your 7-day free trial • Then $5.99/mo")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.mutedForeground.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, .spacingMD)
-                    .padding(.top, 4)
+                // Badge showing privacy
+                HStack(spacing: 8) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.mutedForeground)
+                    Text("Private, iCloud-backed")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.mutedForeground)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.surface)
+                .cornerRadius(16)
+                .padding(.top, .spacingSM)
             }
             
             Spacer()
@@ -45,9 +87,10 @@ struct WelcomeView: View {
             VStack(spacing: .spacingSM) {
                 Button(action: {
                     Haptics.light()
+                    // TODO: Analytics.track(.onboardingStarted)
                     coordinator.next()
                 }) {
-                    Text("Let's Go!")
+                    Text("Get started (30 seconds)")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -57,7 +100,7 @@ struct WelcomeView: View {
                         .shadow(color: Color.primary.opacity(0.3), radius: 12, x: 0, y: 6)
                 }
                 
-                Button("Maybe later") {
+                Button("Just log for now") {
                     Haptics.light()
                     coordinator.skip()
                 }

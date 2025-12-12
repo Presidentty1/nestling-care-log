@@ -49,6 +49,8 @@ struct FilterChip: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel("\(filter.displayName) filter")
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 

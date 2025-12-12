@@ -123,6 +123,8 @@ struct EventDetailView: View {
             diaperDetails
         case .tummyTime:
             tummyTimeDetails
+        case .cry:
+            cryDetails
         }
     }
     
@@ -165,6 +167,27 @@ struct EventDetailView: View {
             detailRow(label: "Duration", value: "\(duration) minutes")
         }
     }
+
+    @ViewBuilder
+    private var cryDetails: some View {
+        detailRow(label: "Time", value: formatTime(event.startTime))
+        if let duration = event.durationMinutes, duration > 0 {
+            detailRow(label: "Duration", value: "\(duration) seconds")
+        }
+        if let note = event.note, !note.isEmpty {
+            Divider()
+            VStack(alignment: .leading, spacing: .spacingSM) {
+                Text("Notes")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.mutedForeground)
+                Text(note)
+                    .font(.body)
+                    .foregroundColor(.foreground)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
     
     @ViewBuilder
     private func detailRow(label: String, value: String) -> some View {
@@ -188,6 +211,7 @@ struct EventDetailView: View {
         case .sleep: return .eventSleep
         case .diaper: return .eventDiaper
         case .tummyTime: return .eventTummy
+        case .cry: return .eventCry
         }
     }
     
@@ -197,6 +221,7 @@ struct EventDetailView: View {
         case .sleep: return "moon.zzz.fill"
         case .diaper: return "drop.fill"
         case .tummyTime: return "figure.cooldown"
+        case .cry: return "waveform"
         }
     }
     
@@ -233,12 +258,11 @@ struct EventDetailView: View {
             babyId: UUID(),
             type: .feed,
             subtype: "bottle",
+            startTime: Date(),
+            endTime: nil,
             amount: 120,
             unit: "ml",
             side: nil,
-            startTime: Date(),
-            endTime: nil,
-            durationMinutes: nil,
             note: "Fed well, seemed very hungry",
             createdAt: Date(),
             updatedAt: Date()
@@ -247,9 +271,9 @@ struct EventDetailView: View {
             id: UUID(),
             name: "Test Baby",
             dateOfBirth: Date(),
-            sex: "f",
-            primaryFeedingStyle: "bottle",
+            sex: .female,
             timezone: "America/Los_Angeles",
+            primaryFeedingStyle: .bottle,
             createdAt: Date(),
             updatedAt: Date()
         ),
@@ -258,6 +282,7 @@ struct EventDetailView: View {
         onClose: {}
     )
 }
+
 
 
 

@@ -367,7 +367,7 @@ struct ContentView: View {
         )) {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house.fill")
+                    Label("Today", systemImage: "sun.max")
                 }
                 .tag(0)
 
@@ -377,17 +377,11 @@ struct ContentView: View {
                 }
                 .tag(1)
 
-            LabsView()
+            MoreView()
                 .tabItem {
-                    Label("Labs", systemImage: "flask.fill")
+                    Label("More", systemImage: "ellipsis.circle")
                 }
                 .tag(2)
-
-            SettingsRootView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-                .tag(3)
         }
         .motionTransition(.opacity)
     }

@@ -128,6 +128,7 @@ class SpotlightIndexer {
         case .diaper: return "Diaper Change"
         case .sleep: return "Sleep"
         case .tummyTime: return "Tummy Time"
+        case .cry: return "Cry"
         }
     }
     
@@ -153,6 +154,11 @@ class SpotlightIndexer {
                 return "\(duration) minutes"
             }
             return "Tummy Time"
+        case .cry:
+            if let duration = event.durationMinutes, duration > 0 {
+                return "\(duration) seconds"
+            }
+            return "Cry"
         }
     }
 }

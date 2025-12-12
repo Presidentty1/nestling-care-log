@@ -41,7 +41,7 @@ struct Haptics {
     static func light() {
         guard celebrationsEnabled, !reduceMotion else { return }
         let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.prepare()
+        // Fire immediately without prepare for instant feedback
         generator.impactOccurred()
     }
     
@@ -49,7 +49,15 @@ struct Haptics {
     static func medium() {
         guard celebrationsEnabled, !reduceMotion else { return }
         let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.prepare()
+        // Fire immediately without prepare for instant feedback
+        generator.impactOccurred()
+    }
+    
+    /// Rigid impact (for pronounced feedback on important quick actions)
+    static func rigid() {
+        guard celebrationsEnabled, !reduceMotion else { return }
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
+        // Fire immediately without prepare for instant feedback
         generator.impactOccurred()
     }
     

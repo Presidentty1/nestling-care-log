@@ -90,12 +90,19 @@ struct NapPredictionCard: View {
                     .fontWeight(.medium)
             }
             
-            // Reasoning
+            // Reasoning (non-diagnostic)
             Text(window.reason)
                 .font(.caption)
                 .foregroundColor(.mutedForeground)
-                .lineLimit(2)
+                .lineLimit(3)
                 .padding(.top, .spacingXS)
+            
+            // Safety disclaimer
+            Text("These are suggestions to guide you, not medical advice.")
+                .font(.caption2)
+                .foregroundColor(.mutedForeground.opacity(0.8))
+                .italic()
+                .padding(.top, 4)
             
             // Confidence indicator (subtle)
             HStack(spacing: 4) {
@@ -203,9 +210,9 @@ struct NapPredictionCard: View {
                 id: UUID(),
                 name: "Test Baby",
                 dateOfBirth: Calendar.current.date(byAdding: .month, value: -3, to: Date())!,
-                sex: "f",
-                primaryFeedingStyle: "breast",
+                sex: .female,
                 timezone: "America/Los_Angeles",
+                primaryFeedingStyle: .breast,
                 createdAt: Date(),
                 updatedAt: Date()
             ),
@@ -222,6 +229,7 @@ struct NapPredictionCard: View {
     .padding()
     .background(Color.background)
 }
+
 
 
 

@@ -87,3 +87,4 @@ struct DailySummaryCard: View {
         Haptics.selection()
     }
 }
+

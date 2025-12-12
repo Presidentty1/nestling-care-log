@@ -1,291 +1,103 @@
 import Foundation
 import Combine
 
+enum HistoryViewState: Equatable {
+    case loading
+    case loaded
+    case error(message: String)
+}
+
 @MainActor
-class HistoryViewModel: ObservableObject {
-    @Published var events: [Event] = []
-    @Published var selectedDate: Date = {
-        let calendar = Calendar.current
-        return calendar.startOfDay(for: Date())
-    }()
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var searchText: String = ""
+final class HistoryViewModel: ObservableObject {
+    @Published var state: HistoryViewState = .loading
+    @Published var days: [HistoryDay] = []
+    @Published var selectedRange: HistoryRange = .last24Hours
     @Published var selectedFilter: EventTypeFilter = .all
-    @Published var eventCountsByDate: [Date: EventDayCounts] = [:]
-    @Published var useCalendarView: Bool = true // Toggle between calendar and 7-day strip
-    
+    @Published var searchText: String = ""
+    @Published var rangeSummary: HistoryRangeSummary?
+    @Published var canLoadMore: Bool = false
+    @Published var isLoadingMore: Bool = false
+    @Published var errorMessage: String?
+
+    var filteredDays: [HistoryDay] {
+        let filtered = days.compactMap { day -> HistoryDay? in
+            let filteredEvents = day.events.filter { matchesFilter($0) && matchesSearch($0) }
+            guard !filteredEvents.isEmpty else { return nil }
+            return HistoryDay(date: day.date, events: filteredEvents, summary: day.summary)
+        }
+        return filtered.sorted { $0.date > $1.date }
+    }
+
     private let dataStore: DataStore
-    let baby: Baby // Made internal so HistoryView can check if baby changed
-    private var isLoadingTask: Task<Void, Never>?
-    
-    /// Filtered events based on search text and selected filter
-    var filteredEvents: [Event] {
-        var filtered = events
-        
-        // Apply type filter
-        if selectedFilter != .all {
-            filtered = filtered.filter { event in
-                switch selectedFilter {
-                case .all: return true
-                case .feeds: return event.type == .feed
-                case .diapers: return event.type == .diaper
-                case .sleep: return event.type == .sleep
-                case .tummy: return event.type == .tummyTime
-                }
-            }
-        }
-        
-        // Apply search text
-        if !searchText.isEmpty {
-            let query = searchText.lowercased()
-            filtered = filtered.filter { event in
-                // Search in type name
-                if event.type.displayName.lowercased().contains(query) {
-                    return true
-                }
-                
-                // Search in note
-                if let note = event.note?.lowercased(), note.contains(query) {
-                    return true
-                }
-                
-                // Natural language queries
-                let naturalLanguagePatterns: [(pattern: String, type: EventType?)] = [
-                    ("feed", .feed),
-                    ("bottle", .feed),
-                    ("breast", .feed),
-                    ("nurse", .feed),
-                    ("diaper", .diaper),
-                    ("poop", .diaper),
-                    ("poo", .diaper),
-                    ("wet", .diaper),
-                    ("dirty", .diaper),
-                    ("nap", .sleep),
-                    ("sleep", .sleep),
-                    ("bedtime", .sleep),
-                    ("tummy", .tummyTime),
-                    ("tummy time", .tummyTime)
-                ]
-                
-                for (pattern, eventType) in naturalLanguagePatterns {
-                    if query.contains(pattern) {
-                        if let eventType = eventType, event.type == eventType {
-                            return true
-                        }
-                    }
-                }
-                
-                // Search for "last" queries (e.g., "last poop", "last feed")
-                if query.contains("last") {
-                    // Sort by most recent and return first match
-                    let sortedEvents = filtered.sorted { $0.startTime > $1.startTime }
-                    if let firstMatch = sortedEvents.first(where: { event in
-                        for (pattern, eventType) in naturalLanguagePatterns {
-                            if query.contains(pattern) {
-                                if let eventType = eventType, event.type == eventType {
-                                    return true
-                                }
-                            }
-                        }
-                        return false
-                    }) {
-                        return event.id == firstMatch.id
-                    }
-                }
-                
-                // Search for time tokens (e.g., "8:30", "pm")
-                let timeFormatter = DateFormatter()
-                timeFormatter.timeStyle = .short
-                let timeString = timeFormatter.string(from: event.startTime).lowercased()
-                if timeString.contains(query) {
-                    return true
-                }
-                
-                return false
-            }
-        }
-        
-        return filtered
-    }
-    
-    /// Get search suggestions based on recent notes
-    var searchSuggestions: [String] {
-        var suggestions: [String] = []
-        
-        // Canned suggestions
-        suggestions.append(contentsOf: ["feeds", "diapers", "naps", "tummy"])
-        
-        // Extract last 5 unique note terms
-        let noteTerms = events.compactMap { $0.note?.lowercased() }
-            .flatMap { $0.components(separatedBy: .whitespacesAndNewlines) }
-            .filter { $0.count > 2 }
-            .prefix(5)
-        
-        suggestions.append(contentsOf: Array(Set(noteTerms)))
-        
-        return Array(suggestions.prefix(5))
-    }
-    
-    init(dataStore: DataStore, baby: Baby) {
+    private let dataProvider: HistoryDataProvider
+    let baby: Baby
+    private let calendar = Calendar.current
+    private var earliestLoadedDate: Date?
+    private let pageSizeDays = 7
+
+    init(dataStore: DataStore, baby: Baby, dataProvider: HistoryDataProvider? = nil) {
         self.dataStore = dataStore
         self.baby = baby
-        print("HistoryViewModel.init: Created for baby \(baby.id)")
-        Task { @MainActor in
-            await loadEvents()
-        }
+        self.dataProvider = dataProvider ?? DefaultHistoryDataProvider(dataStore: dataStore)
+        Task { await loadEvents() }
     }
-    
-    deinit {
-        print("HistoryViewModel.deinit: Cleaning up for baby \(baby.id)")
-        isLoadingTask?.cancel()
-        Task { @MainActor in
-            self.isLoading = false
-        }
-    }
-    
+
     func loadEvents() async {
-        // Cancel any existing load task first
-        isLoadingTask?.cancel()
-        isLoadingTask = nil
-        
-        print("HistoryViewModel.loadEvents called for baby: \(baby.id), date: \(selectedDate)")
-        isLoading = true
+        state = .loading
         errorMessage = nil
-        
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { @MainActor in
-                await self.loadEventsInternal()
-            }
-        }
+        earliestLoadedDate = nil
+        await fetchRange(
+            startDate: startDate(for: selectedRange, endingAt: Date()),
+            endDate: Date(),
+            append: false
+        )
     }
-    
-    private func loadEventsInternal() async {
-        isLoadingTask = Task { @MainActor in
-            print("Starting fetchEvents task...")
-            let startTime = Date()
-            let taskID = UUID()
-            print("Task ID: \(taskID)")
-            
-            // Add timeout to prevent infinite loading
-            let timeoutTask = Task {
-                try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
-                await MainActor.run {
-                    if self.isLoading && !Task.isCancelled {
-                        let elapsed = Date().timeIntervalSince(startTime)
-                        print("ERROR [\(taskID)]: loadEvents timed out after \(elapsed) seconds")
-                        self.isLoading = false
-                        self.errorMessage = "Loading took too long. Please try again."
-                    }
-                }
-            }
-            
-            do {
-                print("[\(taskID)] Calling dataStore.fetchEvents for date: \(selectedDate)")
-                let dayEvents = try await dataStore.fetchEvents(for: baby, on: selectedDate)
-                
-                // Check if task was cancelled
-                if Task.isCancelled {
-                    print("[\(taskID)] loadEvents was cancelled after fetch")
-                    timeoutTask.cancel()
-                    self.isLoading = false
-                    return
-                }
-                
-                timeoutTask.cancel()
-                
-                let elapsed = Date().timeIntervalSince(startTime)
-                print("[\(taskID)] fetchEvents completed in \(elapsed) seconds, got \(dayEvents.count) events")
-                
-                self.events = dayEvents
-                self.isLoading = false
-                print("[\(taskID)] UI updated with \(dayEvents.count) events, isLoading = false")
-                
-                // Index events in Spotlight (non-blocking)
-                Task {
-                    if let settings = try? await dataStore.fetchAppSettings() {
-                        SpotlightIndexer.shared.indexEvents(dayEvents, for: baby, settings: settings)
-                    }
-                }
-            } catch {
-                if Task.isCancelled {
-                    print("[\(taskID)] loadEvents was cancelled during error handling")
-                    timeoutTask.cancel()
-                    self.isLoading = false
-                    return
-                }
-                
-                timeoutTask.cancel()
-                let elapsed = Date().timeIntervalSince(startTime)
-                print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
-                self.errorMessage = "Failed to load events: \(error.localizedDescription)"
-                self.isLoading = false
-                print("[\(taskID)] Error set, isLoading = false")
-            }
-            
-            self.isLoadingTask = nil
-        }
-        
-        await isLoadingTask?.value
+
+    func onRangeChanged(_ range: HistoryRange) async {
+        selectedRange = range
+        await loadEvents()
     }
-    
-    func selectDate(_ date: Date) {
-        let calendar = Calendar.current
-        selectedDate = calendar.startOfDay(for: date)
-        Task {
-            await loadEvents()
-        }
+
+    func loadMore() async {
+        guard !isLoadingMore else { return }
+        let endDate = earliestLoadedDate ?? Date()
+        guard let startDate = calendar.date(byAdding: .day, value: -pageSizeDays, to: endDate) else { return }
+        await fetchRange(startDate: startDate, endDate: endDate, append: true)
     }
-    
+
     func deleteEvent(_ event: Event) async {
-        Task {
-            do {
-                // Store event for potential undo
-                let eventToDelete = event
-                
-                // Remove from Spotlight index
-                SpotlightIndexer.shared.removeEvent(event)
-                
-                try await dataStore.deleteEvent(event)
-                
-                // Register for undo
-                UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
-                    guard let self = self else { return }
-                    try await self.dataStore.addEvent(eventToDelete)
-                    await MainActor.run {
-                        Task {
-                            await self.loadEvents()
-                        }
-                    }
-                }
-                
-                await MainActor.run {
-                    Task {
-                        await loadEvents()
-                    }
-                }
-            } catch {
-                errorMessage = "Failed to delete event: \(error.localizedDescription)"
+        do {
+            let eventToDelete = event
+            SpotlightIndexer.shared.removeEvent(event)
+            try await dataStore.deleteEvent(event)
+
+            UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
+                guard let self else { return }
+                try await self.dataStore.addEvent(eventToDelete)
+                await self.loadEvents()
             }
+
+            await loadEvents()
+        } catch {
+            errorMessage = "Failed to delete event: \(error.localizedDescription)"
+            state = .error(message: errorMessage ?? "Failed to delete event.")
         }
     }
-    
+
     func undoDeletion() async throws {
         try await UndoManager.shared.undo()
         await loadEvents()
     }
-    
-    /// Duplicate an event with current time
+
     func duplicateEvent(_ event: Event) {
         Task {
             do {
-                // Create a new event based on the original, but with current time
                 let duplicatedEvent = Event(
                     id: IDGenerator.generate(),
                     babyId: event.babyId,
                     type: event.type,
                     subtype: event.subtype,
-                    startTime: Date(), // Use current time
+                    startTime: Date(),
                     endTime: event.durationMinutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) },
                     amount: event.amount,
                     unit: event.unit,
@@ -294,67 +106,186 @@ class HistoryViewModel: ObservableObject {
                     createdAt: Date(),
                     updatedAt: Date()
                 )
-                
+
                 try await dataStore.addEvent(duplicatedEvent)
                 Haptics.success()
                 await loadEvents()
             } catch {
                 Haptics.error()
                 errorMessage = "Failed to duplicate event: \(error.localizedDescription)"
+                state = .error(message: errorMessage ?? "Failed to duplicate event.")
             }
         }
     }
-    
-    /// Load event counts for calendar view (entire month)
-    func loadEventCountsForMonth(_ month: Date) async {
-        let calendar = Calendar.current
-        guard let monthStart = calendar.dateComponents([.year, .month], from: month).date,
-              let monthEnd = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) else {
-            return
-        }
-        
+
+    var searchSuggestions: [String] {
+        var suggestions: [String] = ["feeds", "diapers", "naps", "tummy", "cry"]
+        let noteTerms = days
+            .flatMap { $0.events }
+            .compactMap { $0.note?.lowercased() }
+            .flatMap { $0.components(separatedBy: .whitespacesAndNewlines) }
+            .filter { $0.count > 2 }
+        suggestions.append(contentsOf: Array(Set(noteTerms)).prefix(5))
+        return Array(suggestions.prefix(5))
+    }
+
+    // MARK: - Private
+
+    private func fetchRange(startDate: Date, endDate: Date, append: Bool) async {
+        if append { isLoadingMore = true }
         do {
-            let allEventsInMonth = try await dataStore.fetchEvents(
-                for: baby,
-                from: monthStart,
-                to: monthEnd
-            )
-            
-            // Group events by date and count by type
-            var countsByDate: [Date: EventDayCounts] = [:]
-            for event in allEventsInMonth {
-                let eventDate = calendar.startOfDay(for: event.startTime)
-                var counts = countsByDate[eventDate] ?? EventDayCounts()
-                
-                switch event.type {
-                case .feed:
-                    counts.feeds += 1
-                case .sleep:
-                    counts.sleep += 1
-                case .diaper:
-                    counts.diapers += 1
-                case .tummyTime:
-                    counts.tummyTime += 1
-                }
-                
-                countsByDate[eventDate] = counts
+            let events = try await dataProvider.fetchEvents(for: baby, from: startDate, to: endDate)
+            let grouped = Self.groupEvents(events, calendar: calendar)
+            if append {
+                days.append(contentsOf: grouped)
+            } else {
+                days = grouped
             }
-            
-            await MainActor.run {
-                self.eventCountsByDate = countsByDate
-            }
+            days.sort { $0.date > $1.date }
+            earliestLoadedDate = min(earliestLoadedDate ?? endDate, startDate)
+            rangeSummary = makeRangeSummary()
+            canLoadMore = true
+            state = .loaded
         } catch {
-            print("Error loading event counts for month: \(error)")
+            errorMessage = "Failed to load events: \(error.localizedDescription)"
+            state = .error(message: errorMessage ?? "Failed to load events.")
+        }
+        isLoadingMore = false
+    }
+
+    private func startDate(for range: HistoryRange, endingAt endDate: Date) -> Date {
+        switch range {
+        case .last24Hours:
+            return endDate.addingTimeInterval(-24 * 60 * 60)
+        case .last7Days, .last30Days:
+            let startOfToday = calendar.startOfDay(for: endDate)
+            let daysBack = (range.daysToFetch - 1) * -1
+            return calendar.date(byAdding: .day, value: daysBack, to: startOfToday) ?? startOfToday
         }
     }
-}
 
-// MARK: - Event Day Counts
+    private func makeRangeSummary() -> HistoryRangeSummary? {
+        let start = startDate(for: selectedRange, endingAt: Date())
+        let daysInRange = days.filter { calendar.startOfDay(for: $0.date) >= calendar.startOfDay(for: start) }
+        let events = daysInRange.flatMap { $0.events }
+        guard !events.isEmpty else {
+            return HistoryRangeSummary(range: selectedRange, totalDays: selectedRange.daysToFetch, totalFeeds: 0, totalDiapers: 0, totalSleepMinutes: 0, totalCries: 0)
+        }
 
-struct EventDayCounts {
-    var feeds: Int = 0
-    var sleep: Int = 0
-    var diapers: Int = 0
-    var tummyTime: Int = 0
+        var totalSleepMinutes = 0
+        var totalFeeds = 0
+        var totalDiapers = 0
+        var totalCries = 0
+
+        events.forEach { event in
+            switch event.type {
+            case .feed:
+                totalFeeds += 1
+            case .diaper:
+                totalDiapers += 1
+            case .sleep:
+                totalSleepMinutes += event.durationMinutes ?? 0
+            case .tummyTime:
+                break
+            case .cry:
+                totalCries += 1
+            }
+        }
+
+        let daysCount = max(1, min(selectedRange.daysToFetch, daysInRange.count))
+        return HistoryRangeSummary(
+            range: selectedRange,
+            totalDays: daysCount,
+            totalFeeds: totalFeeds,
+            totalDiapers: totalDiapers,
+            totalSleepMinutes: totalSleepMinutes,
+            totalCries: totalCries
+        )
+    }
+
+    private func matchesFilter(_ event: Event) -> Bool {
+        switch selectedFilter {
+        case .all: return true
+        case .feeds: return event.type == .feed
+        case .diapers: return event.type == .diaper
+        case .sleep: return event.type == .sleep
+        case .tummy: return event.type == .tummyTime
+        case .cry: return event.type == .cry
+        case .other: return false
+        }
+    }
+
+    private func matchesSearch(_ event: Event) -> Bool {
+        guard !searchText.isEmpty else { return true }
+        let query = searchText.lowercased()
+
+        if event.type.displayName.lowercased().contains(query) { return true }
+        if let note = event.note?.lowercased(), note.contains(query) { return true }
+        if let subtype = event.subtype?.lowercased(), subtype.contains(query) { return true }
+
+        let timeFormatter = DateFormatter()
+        timeFormatter.timeStyle = .short
+        if timeFormatter.string(from: event.startTime).lowercased().contains(query) { return true }
+
+        if query.contains("last") {
+            let sorted = days.flatMap { $0.events }.sorted { $0.startTime > $1.startTime }
+            if let match = sorted.first(where: { $0.type == event.type }) {
+                return match.id == event.id
+            }
+        }
+        return false
+    }
+
+    private static func groupEvents(_ events: [Event], calendar: Calendar) -> [HistoryDay] {
+        let grouped = Dictionary(grouping: events) { calendar.startOfDay(for: $0.startTime) }
+        return grouped
+            .map { date, events in
+                let sortedEvents = events.sorted { $0.startTime > $1.startTime }
+                let summary = Self.computeDaySummary(for: sortedEvents)
+                return HistoryDay(date: date, events: sortedEvents, summary: summary)
+            }
+            .sorted { $0.date > $1.date }
+    }
+
+    private static func computeDaySummary(for events: [Event]) -> HistoryDaySummary {
+        var totalSleepMinutes = 0
+        var napCount = 0
+        var feedCount = 0
+        var diaperCount = 0
+        var wetDiaperCount = 0
+        var dirtyDiaperCount = 0
+        var tummyTimeCount = 0
+        var cryCount = 0
+
+        for event in events {
+            switch event.type {
+            case .sleep:
+                napCount += 1
+                totalSleepMinutes += event.durationMinutes ?? 0
+            case .feed:
+                feedCount += 1
+            case .diaper:
+                diaperCount += 1
+                let subtype = event.subtype?.lowercased() ?? ""
+                if subtype.contains("wet") { wetDiaperCount += 1 }
+                if subtype.contains("dirty") || subtype.contains("poop") { dirtyDiaperCount += 1 }
+            case .tummyTime:
+                tummyTimeCount += 1
+            case .cry:
+                cryCount += 1
+            }
+        }
+
+        return HistoryDaySummary(
+            totalSleepMinutes: totalSleepMinutes,
+            napCount: napCount,
+            feedCount: feedCount,
+            diaperCount: diaperCount,
+            wetDiaperCount: wetDiaperCount,
+            dirtyDiaperCount: dirtyDiaperCount,
+            tummyTimeCount: tummyTimeCount,
+            cryCount: cryCount
+        )
+    }
 }
 

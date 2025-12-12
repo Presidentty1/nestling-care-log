@@ -11,8 +11,6 @@ struct HomeView: View {
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
     @State private var showProSubscription = false
-    @State private var showAssistant = false
-    @State private var showFabMenu = false
     @State private var showTutorial = false
     @State private var hasCheckedTrialExpiration = false
     @State private var showCaregiverWelcome = false
@@ -20,104 +18,6 @@ struct HomeView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             navigationContent
-            
-            // Spotlight Tutorial Overlay (Phase 3)
-            if showTutorial {
-                SpotlightTutorialOverlay(isPresented: $showTutorial) {
-                    // Mark tutorial as seen
-                    UserDefaults.standard.set(true, forKey: "hasSeenHomeTutorial")
-                }
-                .zIndex(1000)
-            }
-            
-            // Floating Action Button (North Star)
-            VStack(alignment: .trailing, spacing: .spacingSM) {
-                if showFabMenu {
-                    fabActionButton(title: "Diaper", icon: "drop.circle.fill", color: .eventDiaper) {
-                        showFabMenu = false
-                        showDiaperForm = true
-                    }
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                    
-                    fabActionButton(title: "Sleep", icon: "moon.fill", color: .eventSleep) {
-                        showFabMenu = false
-                        showSleepForm = true
-                    }
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                    
-                    fabActionButton(title: "Feed", icon: "drop.fill", color: .eventFeed) {
-                        showFabMenu = false
-                        showFeedForm = true
-                    }
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                }
-                
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        showFabMenu.toggle()
-                    }
-                    Haptics.light()
-                }) {
-                    Image(systemName: "plus")
-                        .font(.title.weight(.semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 60, height: 60)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.primary.opacity(1.1),
-                                    Color.primary
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .clipShape(Circle())
-                        .shadow(color: Color.primary.opacity(0.4), radius: 12, x: 0, y: 6)
-                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        .rotationEffect(.degrees(showFabMenu ? 45 : 0))
-                        .scaleEffect(showFabMenu ? 1.05 : 1.0)
-                }
-                .accessibilityLabel("Add log")
-                .accessibilityHint("Opens quick actions for feed, sleep, diaper, or tummy time")
-                .accessibilityAddTraits(.isButton)
-            }
-            .padding(.spacingLG)
-            
-            // Offline Indicator (Epic 4)
-            VStack {
-                OfflineIndicatorView()
-                SyncStatusView()
-                Spacer()
-            }
-            .padding(.top, 40) // Safe area padding
-        }
-    }
-    
-    private func fabActionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: {
-            Haptics.selection()
-            action()
-        }) {
-            HStack {
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.foreground)
-                    .padding(.horizontal, .spacingSM)
-                    .padding(.vertical, .spacingXS)
-                    .background(Color.surface)
-                    .cornerRadius(.radiusSM)
-                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
-                
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(color)
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
-            }
         }
     }
     
@@ -139,9 +39,6 @@ struct HomeView: View {
                 if let baby = environment.currentBaby {
                     CryRecorderView(dataStore: environment.dataStore, baby: baby)
                 }
-            }
-            .sheet(isPresented: $showAssistant) {
-                AssistantSheetView()
             }
             .sheet(isPresented: $showProSubscription) {
                 ProSubscriptionView()
@@ -207,7 +104,6 @@ struct HomeView: View {
                 showDiaperForm: $showDiaperForm,
                 showTummyForm: $showTummyForm,
                 showCryRecorder: $showCryRecorder,
-                showAssistant: $showAssistant,
                 editingEvent: $editingEvent,
                 showToast: $showToast,
                 showProSubscription: $showProSubscription,
@@ -431,6 +327,8 @@ struct HomeView: View {
             showDiaperForm = true
         case .tummyTime:
             showTummyForm = true
+        case .cry:
+            break
         }
     }
     
@@ -460,101 +358,6 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Baby Selector
-
-struct BabySelectorView: View {
-    let baby: Baby
-    let babies: [Baby]
-    let onSelect: (Baby) -> Void
-    
-    var body: some View {
-        Menu {
-            ForEach(babies) { b in
-                Button(action: { onSelect(b) }) {
-                    HStack {
-                        Text(b.name)
-                        if b.id == baby.id {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
-        } label: {
-            HStack {
-                Text(baby.name)
-                    .font(.title)
-                    .foregroundColor(.foreground)
-                Image(systemName: "chevron.down")
-                    .font(.caption)
-                    .foregroundColor(.mutedForeground)
-            }
-            .padding(.spacingMD)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.surface)
-            .cornerRadius(.radiusMD)
-        }
-    }
-}
-
-// MARK: - Summary Cards
-
-struct SummaryCardsView: View {
-    let summary: DaySummary
-    
-    var body: some View {
-        HStack(spacing: .spacingSM) {
-            SummaryCard(
-                title: "Feeds",
-                value: "\(summary.feedCount)",
-                icon: "drop.fill",
-                color: .eventFeed
-            )
-            
-            SummaryCard(
-                title: "Diapers",
-                value: "\(summary.diaperCount)",
-                icon: "drop.circle.fill",
-                color: .eventDiaper
-            )
-            
-            SummaryCard(
-                title: "Sleep",
-                value: summary.sleepDisplay,
-                icon: "moon.fill",
-                color: .eventSleep
-            )
-        }
-    }
-}
-
-struct SummaryCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: .spacingSM) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(color)
-            
-            Text(value)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.foreground)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.mutedForeground)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.spacingMD)
-        .background(Color.surface)
-        .cornerRadius(.radiusMD)
-    }
-}
-
 // MARK: - Quick Actions
 
 struct QuickActionsSection: View {
@@ -567,8 +370,6 @@ struct QuickActionsSection: View {
     let onOpenSleepForm: () -> Void
     let onOpenDiaperForm: () -> Void
     let onOpenTummyForm: () -> Void
-    let onCryAnalysis: () -> Void
-    let onAskQuestion: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -576,7 +377,7 @@ struct QuickActionsSection: View {
                 .font(.title)
                 .foregroundColor(.foreground)
             
-            // Balanced grid of quick actions
+            // 2x2 grid of core actions
             VStack(spacing: .spacingMD) {
                 HStack(spacing: .spacingMD) {
                     QuickActionButton(
@@ -612,34 +413,6 @@ struct QuickActionsSection: View {
                         color: .eventTummy,
                         action: onTummyTime,
                         longPressAction: onOpenTummyForm
-                    )
-                }
-                
-                HStack(spacing: .spacingMD) {
-                    QuickActionButton(
-                        title: "Analyze Cry",
-                        icon: "waveform",
-                        color: .eventSleep,
-                        action: onCryAnalysis,
-                        longPressAction: onCryAnalysis
-                    )
-                    .overlay(alignment: .topTrailing) {
-                        Text("Beta")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundColor(.eventSleep)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
-                            .background(Color.eventSleep.opacity(0.12))
-                            .cornerRadius(.radiusSM)
-                            .padding(6)
-                    }
-                    
-                    QuickActionButton(
-                        title: "Ask a Question",
-                        icon: "questionmark.bubble.fill",
-                        color: .primary,
-                        action: onAskQuestion,
-                        longPressAction: onAskQuestion
                     )
                 }
             }
@@ -751,43 +524,6 @@ private struct CaregiverWelcomeSheet: View {
 #Preview {
     HomeView()
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
-}
-
-// MARK: - Assistant fallback if not linked in target
-
-struct AssistantSheetView: View {
-    var body: some View {
-        NavigationStack {
-            if let assistant = makeAssistantView() {
-                assistant
-            } else {
-                VStack(spacing: .spacingMD) {
-                    Image(systemName: "questionmark.bubble")
-                        .font(.largeTitle)
-                        .foregroundColor(.primary)
-                    Text("AI Assistant is not available in this build.")
-                        .font(.headline)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, .spacingMD)
-                    Text("Try again after syncing or enable the Assistant target.")
-                        .font(.subheadline)
-                        .foregroundColor(.mutedForeground)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, .spacingMD)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.background)
-            }
-        }
-    }
-    
-    /// Attempts to instantiate AssistantView if it's linked in this target.
-    /// TODO: Import and use AssistantView directly when properly added to target
-    private func makeAssistantView() -> AnyView? {
-        // For now, return nil so fallback view is shown
-        // When AssistantView is properly added to target, import it and return: AnyView(AssistantView())
-        return nil
-    }
 }
 
 // MARK: - Sync Status Pill

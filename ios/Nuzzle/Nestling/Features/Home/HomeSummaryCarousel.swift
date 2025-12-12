@@ -258,3 +258,4 @@ private struct HomeSummaryCard: View {
     )
     .background(Color.background)
 }
+

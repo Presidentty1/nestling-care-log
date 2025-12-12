@@ -126,6 +126,8 @@ class PDFExportService {
                 if let duration = event.durationMinutes {
                     tummyTimeMinutes += duration
                 }
+            case .cry:
+                break
             }
         }
         

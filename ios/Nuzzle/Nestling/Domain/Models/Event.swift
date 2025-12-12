@@ -109,6 +109,7 @@ enum EventType: String, Codable, CaseIterable {
     case diaper
     case sleep
     case tummyTime = "tummy_time"
+    case cry
     
     var displayName: String {
         switch self {
@@ -116,6 +117,7 @@ enum EventType: String, Codable, CaseIterable {
         case .diaper: return "Diaper"
         case .sleep: return "Sleep"
         case .tummyTime: return "Tummy Time"
+        case .cry: return "Cry"
         }
     }
     
@@ -125,15 +127,17 @@ enum EventType: String, Codable, CaseIterable {
         case .diaper: return "drop.circle.fill"
         case .sleep: return "moon.fill"
         case .tummyTime: return "figure.child"
+        case .cry: return "waveform"
         }
     }
     
     var color: Color {
         switch self {
-        case .feed: return .blue
-        case .diaper: return .orange
-        case .sleep: return .purple
-        case .tummyTime: return .green
+        case .feed: return .eventFeed
+        case .diaper: return .eventDiaper
+        case .sleep: return .eventSleep
+        case .tummyTime: return .eventTummy
+        case .cry: return .eventCry
         }
     }
 }

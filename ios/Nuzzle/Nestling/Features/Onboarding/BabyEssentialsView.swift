@@ -14,11 +14,11 @@ struct BabyEssentialsView: View {
         ScrollView {
             VStack(spacing: .spacingXL) {
                 VStack(spacing: .spacingSM) {
-                    Text("Tell us about your baby")
+                    Text("Who is this for?")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.foreground)
                     
-                    Text("Just the essentials to get started")
+                    Text("We use age to suggest nap windows and tailor tips")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
@@ -50,39 +50,66 @@ struct BabyEssentialsView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: .spacingSM) {
-                        Text("🎂 Birthday")
+                        Text("🎂 Date")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.foreground)
                         
-                        DatePicker(
-                            "Date of Birth",
-                            selection: $coordinator.dateOfBirth,
-                            in: ...Date(),
-                            displayedComponents: .date
-                        )
-                        .datePickerStyle(.compact)
-                        .font(.system(size: 17, weight: .regular))
-                        .padding()
-                        .frame(height: 56)
-                        .background(Color.surface)
-                        .cornerRadius(.radiusMD)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: .radiusMD)
-                                .stroke(Color.cardBorder, lineWidth: 1)
-                        )
-                        .onChange(of: coordinator.dateOfBirth) { _, newDate in
-                            if newDate > Date() {
-                                dobError = "Birth date can't be in the future"
-                            } else {
-                                dobError = nil
+                        // Birth/Due date selector
+                        Picker("Date Type", selection: $coordinator.birthDueSelection) {
+                            Text("Date of Birth").tag(BirthDueSelection.dateOfBirth)
+                            Text("Due Date").tag(BirthDueSelection.dueDate)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.bottom, .spacingSM)
+                        
+                        if coordinator.birthDueSelection == .dateOfBirth {
+                            DatePicker(
+                                "Date of Birth",
+                                selection: $coordinator.dateOfBirth,
+                                in: ...Date(),
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.compact)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding()
+                            .frame(height: 56)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusMD)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
+                            .onChange(of: coordinator.dateOfBirth) { _, newDate in
+                                if newDate > Date() {
+                                    dobError = "Birth date can't be in the future"
+                                } else {
+                                    dobError = nil
+                                }
+                                
+                                let ageInMonths = Calendar.current.dateComponents([.month], from: newDate, to: Date()).month ?? 0
+                                if ageInMonths > 6 {
+                                    coordinator.showAgeWarning = true
+                                } else {
+                                    coordinator.showAgeWarning = false
+                                }
                             }
-                            
-                            let ageInMonths = Calendar.current.dateComponents([.month], from: newDate, to: Date()).month ?? 0
-                            if ageInMonths > 6 {
-                                coordinator.showAgeWarning = true
-                            } else {
-                                coordinator.showAgeWarning = false
-                            }
+                        } else {
+                            DatePicker(
+                                "Due Date",
+                                selection: $coordinator.dueDate,
+                                in: Date()...,
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.compact)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding()
+                            .frame(height: 56)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusMD)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
                         }
                         
                         if let dobError = dobError {
@@ -155,7 +182,7 @@ struct BabyEssentialsView: View {
                     }
                     .disabled(coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid)
                     
-                    Button("Skip") {
+                    Button("I'll add later") {
                         Haptics.light()
                         coordinator.skip()
                     }

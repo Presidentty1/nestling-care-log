@@ -44,3 +44,4 @@ struct HomeGreeting: View {
     .padding()
     .background(Color.background)
 }
+
