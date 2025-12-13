@@ -60,3 +60,21 @@ xcuserdata/
 # Playwright test results and reports
 playwright-report/
 test-results/
+
+# Web artifacts (removed during iOS migration cleanup - Dec 2025)
+src/
+public/
+package.json
+package-lock.json
+bun.lockb
+vite.config.ts
+vite.config.js
+tailwind.config.js
+postcss.config.js
+tsconfig.json
+tsconfig.node.json
+components.json
+vercel.json
+playwright.config.ts
+index.html
+.prettierrc
