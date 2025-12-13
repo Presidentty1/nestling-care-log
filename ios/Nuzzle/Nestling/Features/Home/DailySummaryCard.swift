@@ -7,9 +7,10 @@ struct DailySummaryCard: View {
 
     @State private var isCollapsed: Bool
     
-    init(summary: DaySummary, isCollapsedByDefault: Bool = false) {
+    init(summary: DaySummary, isCollapsedByDefault: Bool = false, onTileTapped: ((EventTypeFilter) -> Void)? = nil) {
         self.summary = summary
         self.isCollapsedByDefault = isCollapsedByDefault
+        self.onTileTapped = onTileTapped
         _isCollapsed = State(initialValue: isCollapsedByDefault)
     }
     

@@ -288,7 +288,7 @@ struct HeroNapCard: View {
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 12))
                         .foregroundColor(.mutedForeground)
-                    Text("Nuzzle's AI will learn \(baby.name)'s unique patterns over the first week")
+                    Text("Nestling's AI will learn \(baby.name)'s unique patterns over the first week")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.mutedForeground)
                 }

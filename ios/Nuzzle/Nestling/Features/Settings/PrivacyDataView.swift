@@ -1,4 +1,6 @@
 import SwiftUI
+import Supabase
+import Auth
 
 struct PrivacyDataView: View {
     @EnvironmentObject var environment: AppEnvironment

@@ -51,8 +51,8 @@ struct PaywallView: View {
                 return product.displayPrice
             case .annual:
                 // Calculate effective monthly price for annual plan
-                if let price = product.price,
-                   let period = product.subscription?.subscriptionPeriod {
+                let price = product.price
+                if let period = product.subscription?.subscriptionPeriod {
                     // Calculate months based on period unit
                     let months: Int
                     switch period.unit {
@@ -62,8 +62,9 @@ struct PaywallView: View {
                     case .day: months = period.value / 30
                     @unknown default: months = 12
                     }
-                    let effectiveMonthly = price / Decimal(months)
-                    return effectiveMonthly.formatted(.currency(code: product.priceFormatStyle?.currencyCode ?? "USD"))
+                    let safeMonths = max(1, months)
+                    let effectiveMonthly = price / Decimal(safeMonths)
+                    return effectiveMonthly.formatted(.currency(code: product.priceFormatStyle.currencyCode))
                 }
                 return "$4.17" // Fallback
             }
@@ -163,12 +164,11 @@ struct PaywallView: View {
                             .foregroundColor(.mutedForeground)
                             .multilineTextAlignment(.center)
 
-                        Button("Retry") {
+                        PrimaryButton("Retry", isDisabled: proService.isLoading) {
                             Task {
                                 await proService.loadProducts()
                             }
                         }
-                        .buttonStyle(PrimaryButtonStyle())
                     }
                     .padding()
                 }

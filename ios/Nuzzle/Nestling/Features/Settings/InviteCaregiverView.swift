@@ -28,9 +28,9 @@ struct InviteCaregiverView: View {
         if let baby = environment.currentBaby {
             // Use baby ID as part of the invite for uniqueness
             let babyIdShort = String(baby.id.uuidString.prefix(8))
-            return "https://nuzzle.app/invite/\(inviteCode)?baby=\(babyIdShort)"
+            return "https://nestling.app/invite/\(inviteCode)?baby=\(babyIdShort)"
         }
-        return "https://nuzzle.app/invite/\(inviteCode)"
+        return "https://nestling.app/invite/\(inviteCode)"
     }
     
     private func initializeInvite() {
@@ -75,7 +75,7 @@ struct InviteCaregiverView: View {
 
         Looking forward to having you on the team!
 
-        Sent from Nuzzle
+        Sent from Nestling
         """
 
         let codedBody = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? body

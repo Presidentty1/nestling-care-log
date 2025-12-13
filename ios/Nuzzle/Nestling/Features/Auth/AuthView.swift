@@ -36,7 +36,7 @@ struct AuthView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.eventFeed)
                         
-                        Text("Nuzzle")
+                        Text("Nestling")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         

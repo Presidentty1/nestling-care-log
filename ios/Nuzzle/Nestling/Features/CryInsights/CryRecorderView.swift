@@ -74,7 +74,7 @@ struct CryRecorderView: View {
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("Nuzzle needs microphone access to record cry analysis. Please enable it in Settings.")
+                Text("Nestling needs microphone access to record cry analysis. Please enable it in Settings.")
             }
             .alert("Save Insight", isPresented: $showSaveConfirmation) {
                 Button("Save") {
@@ -259,7 +259,7 @@ struct CryRecorderView: View {
                                         // Safety disclaimer
                                         InfoBanner(
                                             title: "Important",
-                                            message: "Nuzzle gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional.",
+                                            message: "Nestling gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional.",
                                             variant: .warning
                                         )
                                         
@@ -356,7 +356,7 @@ struct CryRecorderView: View {
                                         // Safety disclaimer
                                         InfoBanner(
                                             title: "Important",
-                                            message: "Nuzzle gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional.",
+                                            message: "Nestling gives general guidance, not medical care. If your baby seems very unwell or you're worried, contact a pediatric professional.",
                                             variant: .warning
                                         )
                                         

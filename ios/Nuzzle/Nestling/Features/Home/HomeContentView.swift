@@ -151,10 +151,10 @@ struct HomeContentView: View {
         NapPredictionCard(
             napWindow: viewModel.nextNapWindow,
             baby: currentBaby,
-            cardVariant: .emphasis,
             onTap: {
                 // TODO: Could show more detailed nap prediction info
-            }
+            },
+            cardVariant: .emphasis
         )
         .padding(.horizontal, .spacingLG)
     }

@@ -173,7 +173,7 @@ class AIAssistantService {
             
             return AIAssistantResponse(
                 conversationId: conversationId ?? UUID().uuidString,
-                message: "Demo: I'm Nuzzle's AI assistant. I can help with general baby care questions.",
+                message: "Demo: I'm Nestling's AI assistant. I can help with general baby care questions.",
                 timestamp: ISO8601DateFormatter().string(from: Date()),
                 disclaimer: "Demo Mode: This is a simulated response."
             )

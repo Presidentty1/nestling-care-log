@@ -119,7 +119,7 @@ struct SettingsRootView: View {
                 Section("Subscription") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Nuzzle Pro")
+                            Text("Nestling Pro")
                                 .font(.headline)
                                 .foregroundColor(.foreground)
 
@@ -313,7 +313,7 @@ struct SettingsRootView: View {
                 }
                 
                 Section("Subscription") {
-                    NavigationLink("Nuzzle Pro") {
+                    NavigationLink("Nestling Pro") {
                         ProSubscriptionView()
                     }
                 }
@@ -321,8 +321,8 @@ struct SettingsRootView: View {
                 Section("About") {
                     Button(action: {
                         // Open support email
-                        let email = "support@nuzzle.app"
-                        let subject = "Nuzzle Support Request"
+                        let email = "support@nestling.app"
+                        let subject = "Nestling Support Request"
                         let body = """
                         Please describe your issue or feedback:
 
@@ -414,7 +414,7 @@ struct SettingsRootView: View {
                     .frame(maxWidth: .infinity)
                     .listRowBackground(Color.clear)
                     
-                    Text("Nuzzle v\(appVersion) (\(buildNumber))")
+                    Text("Nestling v\(appVersion) (\(buildNumber))")
                         .font(.caption2)
                         .foregroundColor(.mutedForeground)
                         .frame(maxWidth: .infinity)

@@ -71,12 +71,14 @@ struct UpgradePromptView: View {
                     VStack(spacing: .spacingMD) {
                         PlanCard(
                             plan: .monthly,
+                            products: products,
                             isSelected: selectedPlan == .monthly,
                             onSelect: { selectedPlan = .monthly }
                         )
                         
                         PlanCard(
                             plan: .yearly,
+                            products: products,
                             isSelected: selectedPlan == .yearly,
                             onSelect: { selectedPlan = .yearly }
                         )
@@ -169,6 +171,7 @@ struct UpgradePromptView: View {
 // MARK: - Plan Card
 struct PlanCard: View {
     let plan: UpgradePromptView.SubscriptionPlan
+    let products: [Product]
     let isSelected: Bool
     let onSelect: () -> Void
     
@@ -273,6 +276,6 @@ struct TrustSignal: View {
 }
 
 #Preview {
-    UpgradePromptView(feature: .smartPredictions)
+    UpgradePromptView(feature: .smartPredictions, products: [])
 }
 

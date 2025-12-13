@@ -74,7 +74,7 @@ struct BabySetupView: View {
                                 Image(systemName: "info.circle.fill")
                                     .foregroundColor(.eventDiaper)
                                     .font(.caption)
-                                Text("Nuzzle is optimized for 0-6 months. You can still use it, but guidance is best for early months.")
+                                Text("Nestling is optimized for 0-6 months. You can still use it, but guidance is best for early months.")
                                     .font(.caption)
                                     .foregroundColor(.mutedForeground)
                             }

@@ -17,30 +17,34 @@ struct SleepFormView: View {
     }
 
     private var mode: SleepMode {
-        get {
-            if viewModel.isTimerMode {
-                return .timer
-            } else if viewModel.endTime == nil {
-                return .quick
-            } else {
-                return .manual
-            }
+        if viewModel.isTimerMode {
+            return .timer
+        } else if viewModel.endTime == nil {
+            return .quick
+        } else {
+            return .manual
         }
-        set {
-            switch newValue {
-            case .timer:
-                viewModel.isTimerMode = true
-                viewModel.endTime = nil
-            case .quick:
-                viewModel.isTimerMode = false
-                viewModel.endTime = nil
-            case .manual:
-                viewModel.isTimerMode = false
-                if viewModel.endTime == nil {
-                    viewModel.endTime = Date()
+    }
+    
+    private var modeBinding: Binding<SleepMode> {
+        Binding(
+            get: { mode },
+            set: { newValue in
+                switch newValue {
+                case .timer:
+                    viewModel.isTimerMode = true
+                    viewModel.endTime = nil
+                case .quick:
+                    viewModel.isTimerMode = false
+                    viewModel.endTime = nil
+                case .manual:
+                    viewModel.isTimerMode = false
+                    if viewModel.endTime == nil {
+                        viewModel.endTime = Date()
+                    }
                 }
             }
-        }
+        )
     }
     
     var body: some View {
@@ -58,7 +62,7 @@ struct SleepFormView: View {
                 }
                 
                 Section("Mode") {
-                    Picker("Mode", selection: $mode) {
+                    Picker("Mode", selection: modeBinding) {
                         Text("Timer")
                             .font(isCaregiverMode ? .caregiverBody : .body)
                             .tag(SleepMode.timer)
@@ -223,29 +227,31 @@ struct SleepFormView: View {
                 Text("You have unsaved changes. Do you want to discard them?")
             }
         }
-        }
     }
 
-    private func quickLogSleep(minutes: Int) async {
-        do {
-            viewModel.endTime = Date()
-            viewModel.startTime = viewModel.endTime!.addingTimeInterval(-Double(minutes * 60))
-            viewModel.isTimerMode = false
+    private func quickLogSleep(minutes: Int) {
+        Task {
+            do {
+                viewModel.endTime = Date()
+                viewModel.startTime = viewModel.endTime!.addingTimeInterval(-Double(minutes * 60))
+                viewModel.isTimerMode = false
 
-            try await viewModel.save()
-            Haptics.success()
-            showToast = ToastMessage(message: "Sleep logged", type: .success)
-            AnalyticsService.shared.trackQuickNapLogged(minutes: minutes)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                dismiss()
+                try await viewModel.save()
+                Haptics.success()
+                showToast = ToastMessage(message: "Sleep logged", type: .success)
+                AnalyticsService.shared.trackQuickNapLogged(minutes: minutes)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    dismiss()
+                }
+            } catch {
+                Haptics.error()
+                showToast = ToastMessage(message: error.localizedDescription, type: .error)
             }
-        } catch {
-            Haptics.error()
-            showToast = ToastMessage(message: error.localizedDescription, type: .error)
         }
     }
+}
 
-    private struct QuickDurationButton: View {
+private struct QuickDurationButton: View {
     let minutes: Int
     let action: (Int) -> Void
 

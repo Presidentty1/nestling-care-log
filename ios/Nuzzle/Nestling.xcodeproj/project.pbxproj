@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E406116CBF9FED36A70637C /* BottleLevelIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */; };
 		00DD022BB745243508B30128 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7AEE12597766D7CA40E492C /* Haptics.swift */; };
 		02A5F8302AABE4DF18A6E28A /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0206CEB3041C28184B563A98 /* CrashReportingService.swift */; };
 		02AD1970D365F5945B2E10BC /* TimelineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F82D9077D12DA207488E /* TimelineRow.swift */; };
@@ -115,6 +116,7 @@
 		5FBB825FB9D9FD868985F842 /* ViewHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3D748B0A3E2793E4E5681C /* ViewHelpers.swift */; };
 		603A58349B7A81F258232A82 /* TodayPatternsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F076F2229EB8006E3BDA3A23 /* TodayPatternsCard.swift */; };
 		604EA5B9BF1B1D82ABC4B24F /* HomeContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF086FC49E1528A9B35CC5D /* HomeContentView.swift */; };
+		AC7238957CCE1FD10EA58AF2 /* DailySummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28C2136CB384E2A3073867D /* DailySummaryCard.swift */; };
 		60C37EC7A349AD745D09C96D /* CelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C708E0FA2249A5D38492E6D /* CelebrationView.swift */; };
 		624DBED462562AD396DF54EF /* LastUsedValuesMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BF20CBFEC0A8DE504618C9 /* LastUsedValuesMO+CoreDataProperties.swift */; };
 		627886A0A498A58244941E18 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAA899FF8ED770FA910588E /* CardView.swift */; };
@@ -270,6 +272,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BottleLevelIndicator.swift; sourceTree = "<group>"; };
+		A28C2136CB384E2A3073867D /* DailySummaryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailySummaryCard.swift; sourceTree = "<group>"; };
 		001AD0E1A9B0C8DD3FE24A7A /* ReviewPromptManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewPromptManager.swift; sourceTree = "<group>"; };
 		0025C6434BC0FE04842531F4 /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		003AF7BCAB6C61C9DFF0424A /* ProSubscriptionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProSubscriptionView.swift; sourceTree = "<group>"; };
@@ -1886,6 +1890,7 @@
 				A486A5AFD377FD659657A35A /* FirstLogCard.swift */,
 				5EA435A86F8B993AFFD3486B /* GuidanceStripView.swift */,
 				90A94DAD0664855AE1282448 /* HomeContentView.swift */,
+				A28C2136CB384E2A3073867D /* DailySummaryCard.swift */,
 				D06E8309B36C95EB82FFFA6D /* HomeView.swift */,
 				44BD4086A1F87DBBAC907137 /* HomeViewModel.swift */,
 				9A4A623B39ED6DA94F032E8B /* Last7DaysTrendsView.swift */,
@@ -2128,6 +2133,7 @@
 		3FE85BBE71B994F114D1DA50 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */,
 				32AA6284B452D2DF1D1483A1 /* AccessibilityHelpers.swift */,
 				DE2BF7E42D1B77C8B2F6795A /* BabyAvatar.swift */,
 				90BE0DBE6727D883394A706B /* Badge.swift */,
@@ -3667,6 +3673,8 @@
 				1E247D78EEFD0B6A8F9F9DC4 /* FirstTasksChecklistCard.swift in Sources */,
 				AAEDF1E2A53DBE4B2952C28F /* GuidanceStripView.swift in Sources */,
 				604EA5B9BF1B1D82ABC4B24F /* HomeContentView.swift in Sources */,
+				AC7238957CCE1FD10EA58AF2 /* DailySummaryCard.swift in Sources */,
+				6E406116CBF9FED36A70637C /* BottleLevelIndicator.swift in Sources */,
 				3A7181BE31D8AC03AAB15620 /* HomeView.swift in Sources */,
 				DDA52F903168723370A271AE /* HomeViewModel.swift in Sources */,
 				22801E4620804CF523313263 /* Last7DaysTrendsView.swift in Sources */,

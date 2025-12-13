@@ -304,10 +304,6 @@ class AnalyticsService {
             "duration_minutes": minutes
         ])
     }
-        track(event: "caregiver_invited", properties: [
-            "invited_role": invitedRole
-        ])
-    }
     
     func trackCaregiverJoined(role: String) {
         track(event: "caregiver_joined", properties: [

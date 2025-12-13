@@ -12,7 +12,7 @@ struct AboutView: View {
                 
                 // App Name and Version
                 VStack(spacing: .spacingSM) {
-                    Text("Nuzzle")
+                    Text("Nestling")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.foreground)
@@ -31,9 +31,9 @@ struct AboutView: View {
                 
                 // Links
                 VStack(spacing: .spacingMD) {
-                    Link("Privacy Policy", destination: URL(string: "https://nuzzle.app/privacy")!)
-                    Link("Terms of Service", destination: URL(string: "https://nuzzle.app/terms")!)
-                    Link("Support", destination: URL(string: "https://nuzzle.app/support")!)
+                    Link("Privacy Policy", destination: URL(string: "https://nestling.app/privacy")!)
+                    Link("Terms of Service", destination: URL(string: "https://nestling.app/terms")!)
+                    Link("Support", destination: URL(string: "https://nestling.app/support")!)
                 }
                 .padding(.spacingMD)
                 

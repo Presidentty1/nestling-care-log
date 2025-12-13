@@ -721,23 +721,6 @@ class HomeViewModel: ObservableObject {
                 errorMessage = "Failed to delete events: \(error.localizedDescription)"
             }
         }
-                        }
-                    }
-                }
-                
-                // Analytics
-                Task {
-                    await Analytics.shared.log("event_deleted", parameters: [
-                        "event_type": eventToDelete.type.rawValue,
-                        "undo_available": true
-                    ])
-                }
-                
-                await loadTodayEvents()
-            } catch {
-                errorMessage = "Failed to delete event: \(error.localizedDescription)"
-            }
-        }
     }
     
     func undoDeletion() async throws {

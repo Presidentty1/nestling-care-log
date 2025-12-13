@@ -30,6 +30,14 @@ struct Baby: Identifiable, Codable, Equatable {
         self.updatedAt = updatedAt
     }
     
+    /// Baby's age in months (computed from dateOfBirth)
+    var ageInMonths: Double {
+        let components = Calendar.current.dateComponents([.month, .day], from: dateOfBirth, to: Date())
+        let months = Double(components.month ?? 0)
+        let days = Double(components.day ?? 0)
+        return months + (days / 30.0)
+    }
+    
     // MARK: - Mock Data
     
     static func mock() -> Baby {

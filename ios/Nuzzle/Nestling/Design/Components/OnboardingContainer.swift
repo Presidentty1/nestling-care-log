@@ -103,7 +103,7 @@ struct OnboardingContainer<Content: View>: View {
 
 #Preview {
     OnboardingContainer(
-        title: "Welcome to Nuzzle",
+        title: "Welcome to Nestling",
         subtitle: "Know what happened last and what's coming next.",
         step: 1,
         totalSteps: 3,

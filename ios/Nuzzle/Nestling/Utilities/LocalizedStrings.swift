@@ -5,7 +5,7 @@ import Foundation
 struct LocalizedStrings {
     // MARK: - Onboarding
     
-    static let onboardingWelcomeTitle = "Welcome to Nuzzle"
+    static let onboardingWelcomeTitle = "Welcome to Nestling"
     static let onboardingWelcomeMessage = "Track feeds, sleep, and diapers with ease. Get AI-powered insights to support you."
     
     static let onboardingBabySetupTitle = "Tell us about your baby"
