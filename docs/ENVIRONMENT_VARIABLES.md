@@ -260,3 +260,4 @@ If migrating from Lovable platform:
 - [Supabase Environment Variables](https://supabase.com/docs/guides/functions/secrets)
 - [Vite Environment Variables](https://vitejs.dev/guide/env-and-mode.html)
 - [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+

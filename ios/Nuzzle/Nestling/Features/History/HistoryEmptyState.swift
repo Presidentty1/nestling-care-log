@@ -120,3 +120,4 @@ struct HistoryEmptyState: View {
 }
 
 
+

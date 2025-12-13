@@ -38,3 +38,4 @@ export function ChecklistItem({ completed, label, onClick }: ChecklistItemProps)
     </button>
   );
 }
+

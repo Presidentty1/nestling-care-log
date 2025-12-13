@@ -427,3 +427,4 @@ const PROGRESS_UPDATE_INTERVAL_MS = 250; // Also fix the performance issue
 - Performance profiling (Instruments for iOS, React DevTools Profiler for Web)
 - Memory leak detection (Leaks instrument, React DevTools)
 - User testing for UX issues
+

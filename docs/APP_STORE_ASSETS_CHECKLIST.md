@@ -107,3 +107,4 @@
 - Highlight unique features (AI, sync, speed)
 - Use actual baby data (anonymized) for realism
 - Consider A/B testing different screenshots
+

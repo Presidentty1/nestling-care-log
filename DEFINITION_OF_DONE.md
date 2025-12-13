@@ -29,3 +29,4 @@ Scope: iOS SwiftUI app in `ios/Nuzzle/Nestling.xcodeproj`. Update this checklist
 - [ ] App Store readiness (permissions strings, no placeholders, paywall/pricing, icons/names)
 - [ ] Code lint/format passed
 - [ ] Test suite passed (unit/UI)
+

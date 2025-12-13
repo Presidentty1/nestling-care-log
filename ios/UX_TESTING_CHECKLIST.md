@@ -12,3 +12,4 @@
 - [ ] Sheets and modals present consistent Done/Close controls
 - [ ] Offline/slow network states show skeletons or loading indicators
 - [ ] Tab navigation returns to Home without getting stuck in modals
+

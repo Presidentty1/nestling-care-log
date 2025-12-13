@@ -255,3 +255,4 @@ final class E2ETests: XCTestCase {
         XCTAssertTrue(app.waitForExistence(timeout: 3))
     }
 }
+

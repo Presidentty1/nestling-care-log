@@ -194,3 +194,4 @@
 | iPhone 5.5" Screenshots | 1242×2208        | PNG/JPG | 5+                |
 | iPad Screenshots        | 2048×2732        | PNG/JPG | 5+ (if supported) |
 | App Preview Video       | Match screenshot | MP4/MOV | Optional          |
+
