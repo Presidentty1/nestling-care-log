@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface OnboardingStepViewProps {
   stepNumber: number;
   totalSteps: number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
-  description: string | React.ReactNode;
+  description: string | ReactNode;
+  timeEstimate?: string;
   primaryAction: {
     label: string;
     onClick: () => void;
@@ -20,7 +22,7 @@ interface OnboardingStepViewProps {
     label: string;
     onClick: () => void;
   };
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export function OnboardingStepView({
@@ -29,6 +31,7 @@ export function OnboardingStepView({
   icon,
   title,
   description,
+  timeEstimate,
   primaryAction,
   secondaryAction,
   children,
@@ -115,6 +118,9 @@ export function OnboardingStepView({
               <div className='p-4 rounded-full bg-primary/10 text-primary'>{icon}</div>
             </motion.div>
 
+            {/* Time Estimate */}
+            {timeEstimate && <p className='text-sm text-muted-foreground mb-2'>{timeEstimate}</p>}
+
             {/* Title */}
             <h1 className='text-[32px] leading-[1.1] font-bold tracking-tight text-foreground mb-3'>
               {title}
@@ -144,7 +150,20 @@ export function OnboardingStepView({
             )}
             size='lg'
           >
-            {primaryAction.loading ? 'Loading...' : primaryAction.label}
+            {primaryAction.loading ? (
+              <div className='space-y-2 py-1'>
+                <div className='flex items-center justify-center gap-2'>
+                  <Loader2 className='h-5 w-5 animate-spin' />
+                  <span>Setting up your profile...</span>
+                </div>
+                <div className='text-xs text-primary-foreground/80 space-y-0.5'>
+                  <div>✓ 10,000+ parents trust Nestling</div>
+                  <div>✓ Rated 4.9/5.0 stars</div>
+                </div>
+              </div>
+            ) : (
+              primaryAction.label
+            )}
           </Button>
 
           {/* Secondary action */}

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - Nuzzle</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+      h2 {
+        color: #34495e;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+      h3 {
+        color: #7f8c8d;
+        margin-top: 25px;
+        margin-bottom: 10px;
+      }
+      p,
+      li {
+        margin-bottom: 12px;
+      }
+      ul,
+      ol {
+        margin-left: 20px;
+      }
+      .highlight {
+        background-color: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+        margin: 20px 0;
+      }
+      .warning {
+        background-color: #fff5f5;
+        border: 1px solid #fed7d7;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      .last-updated {
+        color: #7f8c8d;
+        font-style: italic;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated"><strong>Last Updated:</strong> [DATE]</p>
+
+      <h2>Introduction</h2>
+      <p>
+        Nuzzle ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy
+        explains how we collect, use, disclose, and safeguard your information when you use our
+        mobile application and website.
+      </p>
+
+      <h2>Information We Collect</h2>
+
+      <h3>Information You Provide</h3>
+      <ul>
+        <li><strong>Account Information:</strong> Email address, name (optional)</li>
+        <li>
+          <strong>Baby Profile Information:</strong> Baby's name, date of birth, sex, feeding
+          preferences
+        </li>
+        <li>
+          <strong>Event Data:</strong> Feeds, sleep, diapers, tummy time, and other care activities
+          you log
+        </li>
+        <li>
+          <strong>Health Data:</strong> Growth records, health records, milestones (if you choose to
+          log)
+        </li>
+        <li><strong>Photos:</strong> Baby photos you upload (stored securely)</li>
+        <li><strong>Feedback:</strong> User feedback, nap prediction feedback</li>
+      </ul>
+
+      <h3>Automatically Collected Information</h3>
+      <ul>
+        <li><strong>Usage Data:</strong> App features used, pages viewed, time spent</li>
+        <li><strong>Device Information:</strong> Device type, operating system, app version</li>
+        <li>
+          <strong>Analytics:</strong> Aggregated, anonymized usage statistics (Firebase Analytics)
+        </li>
+        <li><strong>Error Logs:</strong> Application errors for debugging (Sentry)</li>
+      </ul>
+
+      <div class="highlight">
+        <h3>Information We Do NOT Collect</h3>
+        <ul>
+          <li><strong>Location Data:</strong> We do not track your location</li>
+          <li>
+            <strong>Third-Party Tracking:</strong> No advertising trackers, no data sold to
+            advertisers
+          </li>
+          <li>
+            <strong>Sensitive Health Data:</strong> We do not collect medical diagnoses or
+            prescriptions
+          </li>
+        </ul>
+      </div>
+
+      <h2>How We Use Your Information</h2>
+
+      <h3>Core Functionality</h3>
+      <ul>
+        <li>Provide baby care tracking features</li>
+        <li>Calculate nap predictions based on age and patterns</li>
+        <li>Generate insights and summaries</li>
+        <li>Enable multi-device synchronization</li>
+        <li>Support family sharing features</li>
+      </ul>
+
+      <h3>AI Features (Opt-In)</h3>
+      <ul>
+        <li><strong>Nap Predictions:</strong> Age-based wake window calculations</li>
+        <li><strong>AI Assistant:</strong> Answer parenting questions using your baby's context</li>
+        <li><strong>Cry Analysis:</strong> Analyze cry patterns (if you enable this feature)</li>
+      </ul>
+
+      <div class="highlight">
+        <p>
+          <strong>AI Data Sharing:</strong> You can opt out of AI features in Settings → AI & Data
+          Sharing. When disabled, we do not use your data for AI processing.
+        </p>
+      </div>
+
+      <h3>Service Improvement</h3>
+      <ul>
+        <li>Fix bugs and improve app performance</li>
+        <li>Analyze usage patterns (aggregated, anonymized)</li>
+        <li>Develop new features</li>
+      </ul>
+
+      <h3>Communication</h3>
+      <ul>
+        <li>Send important app updates (via in-app notifications)</li>
+        <li>Respond to support requests</li>
+        <li>Send product updates (if you opt in)</li>
+      </ul>
+
+      <h2>Data Storage & Security</h2>
+
+      <h3>Storage</h3>
+      <ul>
+        <li><strong>Primary Storage:</strong> Supabase (PostgreSQL database)</li>
+        <li><strong>Media Storage:</strong> Supabase Storage (encrypted)</li>
+        <li><strong>Local Storage:</strong> IndexedDB for offline support</li>
+        <li><strong>Location:</strong> Data stored in [REGION] (specify your Supabase region)</li>
+      </ul>
+
+      <h3>Security Measures</h3>
+      <ul>
+        <li><strong>Encryption:</strong> All data encrypted in transit (TLS) and at rest</li>
+        <li><strong>Authentication:</strong> Secure email/password authentication</li>
+        <li>
+          <strong>Access Control:</strong> Row Level Security (RLS) ensures you can only access your
+          family's data
+        </li>
+        <li><strong>Regular Backups:</strong> Automated daily backups (7-day retention)</li>
+      </ul>
+
+      <h3>Data Retention</h3>
+      <ul>
+        <li><strong>Active Accounts:</strong> Data retained while account is active</li>
+        <li>
+          <strong>Deleted Accounts:</strong> Data permanently deleted within 30 days of account
+          deletion
+        </li>
+        <li><strong>Backups:</strong> Deleted from backups within 90 days</li>
+      </ul>
+
+      <h2>Data Sharing & Disclosure</h2>
+
+      <div class="highlight">
+        <h3>We Do NOT Share Your Data With:</h3>
+        <ul>
+          <li><strong>Advertisers:</strong> Never</li>
+          <li><strong>Data Brokers:</strong> Never</li>
+          <li><strong>Third-Party Services:</strong> Except as specified below</li>
+        </ul>
+      </div>
+
+      <h3>Limited Sharing:</h3>
+      <ul>
+        <li>
+          <strong>Service Providers:</strong>
+          <ul>
+            <li>Supabase (database and storage)</li>
+            <li>Firebase Analytics (anonymized usage data)</li>
+            <li>Sentry (error tracking)</li>
+          </ul>
+        </li>
+        <li><strong>Legal Requirements:</strong> If required by law or to protect rights</li>
+      </ul>
+
+      <h3>AI Services:</h3>
+      <ul>
+        <li><strong>Lovable AI / OpenAI / Google AI:</strong> Only if you enable AI features</li>
+        <li><strong>Data Used:</strong> Baby age, recent events (no PII)</li>
+        <li><strong>Purpose:</strong> Generate predictions and answer questions</li>
+        <li><strong>Opt-Out:</strong> Available in Settings</li>
+      </ul>
+
+      <h2>Your Rights & Choices</h2>
+
+      <h3>Access & Export</h3>
+      <ul>
+        <li><strong>View Your Data:</strong> All data visible in app</li>
+        <li>
+          <strong>Export Data:</strong> CSV or PDF export available in Settings → Privacy & Data
+        </li>
+        <li><strong>Request Data:</strong> Contact support@nuzzle.app for data export</li>
+      </ul>
+
+      <h3>Deletion</h3>
+      <ul>
+        <li><strong>Delete Account:</strong> Settings → Privacy & Data → Delete Account</li>
+        <li><strong>Data Deletion:</strong> All data permanently deleted within 30 days</li>
+        <li><strong>Backup Deletion:</strong> Deleted from backups within 90 days</li>
+      </ul>
+
+      <h3>AI Features</h3>
+      <ul>
+        <li><strong>Opt-Out:</strong> Settings → AI & Data Sharing → Disable</li>
+        <li><strong>Effect:</strong> AI features disabled, data not used for AI processing</li>
+      </ul>
+
+      <h3>Analytics</h3>
+      <ul>
+        <li>Analytics are anonymized and aggregated</li>
+        <li>No personal identification in analytics data</li>
+      </ul>
+
+      <h2>Children's Privacy</h2>
+      <p>
+        Nuzzle is designed for parents to track their babies' care. We do not knowingly collect
+        information directly from children under 13. All data is provided by parents or caregivers.
+      </p>
+
+      <h2>International Users</h2>
+
+      <h3>GDPR (European Users)</h3>
+      <ul>
+        <li><strong>Legal Basis:</strong> Consent and contract performance</li>
+        <li><strong>Data Processing:</strong> Within EU/EEA (if Supabase EU region)</li>
+        <li><strong>Rights:</strong> Access, rectification, erasure, portability, objection</li>
+        <li><strong>Contact:</strong> support@nuzzle.app for GDPR requests</li>
+      </ul>
+
+      <h3>CCPA (California Users)</h3>
+      <ul>
+        <li><strong>No Sale of Data:</strong> We do not sell personal information</li>
+        <li><strong>Rights:</strong> Access, deletion, opt-out</li>
+        <li><strong>Contact:</strong> support@nuzzle.app for CCPA requests</li>
+      </ul>
+
+      <div class="warning">
+        <h2>Medical Disclaimer</h2>
+        <p>
+          <strong>IMPORTANT:</strong> Nuzzle is not a medical device and does not provide medical
+          advice. All features, including AI predictions and insights, are informational only.
+          Always consult your pediatrician or healthcare provider for medical guidance.
+        </p>
+      </div>
+
+      <h2>Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy periodically. We will notify you of significant changes
+        via:
+      </p>
+      <ul>
+        <li>In-app notification</li>
+        <li>Email (if you've provided one)</li>
+        <li>Updated "Last Updated" date</li>
+      </ul>
+
+      <h2>Contact Us</h2>
+      <ul>
+        <li><strong>Privacy Questions:</strong> support@nuzzle.app</li>
+        <li><strong>Data Requests:</strong> support@nuzzle.app</li>
+        <li><strong>Website:</strong> https://nuzzle.app/privacy</li>
+      </ul>
+
+      <hr style="margin: 40px 0; border: none; border-top: 1px solid #ecf0f1" />
+
+      <p style="font-size: 14px; color: #7f8c8d">
+        <strong>Note:</strong> Review this template with legal counsel. Customize [DATE], [REGION],
+        and other placeholders. Ensure compliance with applicable laws (GDPR, CCPA, etc.).
+      </p>
+    </div>
+  </body>
+</html>

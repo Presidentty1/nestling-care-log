@@ -1,6 +1,10 @@
 import type { EventType } from '@/types/events';
-import { track, identify } from '@/analytics/analytics';
+import { track } from '@/analytics/analytics';
 import * as Sentry from '@sentry/react';
+
+interface AnalyticsData {
+  [key: string]: unknown;
+}
 
 /**
  * Analytics service for tracking user actions with Firebase Analytics and Sentry error reporting
@@ -8,7 +12,7 @@ import * as Sentry from '@sentry/react';
 class AnalyticsService {
   private enabled = true;
 
-  private log(event: string, data?: any) {
+  private log(event: string, data?: AnalyticsData) {
     if (!this.enabled) return;
 
     // Send breadcrumb to Sentry for user actions
@@ -40,6 +44,28 @@ class AnalyticsService {
       babyId,
       ...(durationSeconds !== undefined && { duration_seconds: durationSeconds }),
       ...(stepsCompleted !== undefined && { steps_completed: stepsCompleted }),
+    });
+  }
+
+  trackOnboardingStepViewed(stepId: string) {
+    this.log('onboarding_step_viewed', { step_id: stepId });
+  }
+
+  trackOnboardingFieldError(stepId: string, fieldName: string, errorType: string) {
+    this.log('onboarding_field_error', {
+      step_id: stepId,
+      field_name: fieldName,
+      error_type: errorType,
+    });
+  }
+
+  trackWelcomeCardInteraction(action: 'item_clicked' | 'dismissed') {
+    this.log('welcome_card_interaction', { action });
+  }
+
+  trackTimeToFirstLog(timeFromOnboardingMs: number) {
+    this.log('time_to_first_log', {
+      time_from_onboarding_seconds: Math.floor(timeFromOnboardingMs / 1000),
     });
   }
 
@@ -103,7 +129,7 @@ class AnalyticsService {
     this.log('page_view', { page });
   }
 
-  trackError(error: string, context?: any) {
+  trackError(error: string, context?: AnalyticsData) {
     this.log('error', { error, context });
   }
 

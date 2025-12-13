@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,8 +6,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, Baby, Sparkles } from 'lucide-react';
-import { format } from 'date-fns';
+import { CalendarIcon, Baby, Sparkles, Check } from 'lucide-react';
+import { format, differenceInMonths } from 'date-fns';
 import { dataService } from '@/services/dataService';
 import { useAppStore } from '@/store/appStore';
 import { detectTimeZone, parseLocalDate } from '@/services/time';
@@ -17,7 +17,6 @@ import { validateBaby } from '@/services/validation';
 import { toast } from 'sonner';
 import { OnboardingStepView } from '@/components/onboarding/OnboardingStepView';
 import { cn } from '@/lib/utils';
-import { track } from '@/analytics/analytics';
 import { analyticsService } from '@/services/analyticsService';
 import { MESSAGING } from '@/lib/messaging';
 
@@ -26,8 +25,8 @@ export default function Onboarding() {
   const { setActiveBabyId } = useAppStore();
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // State - Reduced to 3 steps for faster onboarding
-  const [step, setStep] = useState(0); // 0: Name, 1: DOB, 2: Preferences
+  // State - 4 steps with welcome first
+  const [step, setStep] = useState(-1); // -1: Welcome, 0: Name, 1: DOB, 2: Preferences
   const [onboardingStartTime] = useState(Date.now());
   const [loading, setLoading] = useState(false);
   const completedRef = useRef(false);
@@ -38,7 +37,7 @@ export default function Onboarding() {
   const [name, setName] = useState('');
   const [dob, setDob] = useState<Date>();
   const [dobInput, setDobInput] = useState('');
-  const [sex, setSex] = useState<'m' | 'f' | 'other'>('m');
+  const [sex, setSex] = useState<'m' | 'f' | 'other' | undefined>(undefined);
   const [timeZone, setTimeZone] = useState(detectTimeZone());
   const [units, setUnits] = useState<'metric' | 'imperial'>('imperial');
 
@@ -52,16 +51,20 @@ export default function Onboarding() {
       if (currentStep === 0) {
         if (!name.trim()) {
           newErrors.name = 'Name is required';
+          analyticsService.trackOnboardingFieldError('name', 'name', 'required');
         } else if (name.length > 40) {
           newErrors.name = 'Name must be 40 characters or less';
+          analyticsService.trackOnboardingFieldError('name', 'name', 'too_long');
         }
       }
 
       if (currentStep === 1) {
         if (!dob) {
           newErrors.dob = 'Date of birth is required';
+          analyticsService.trackOnboardingFieldError('dob', 'dob', 'required');
         } else if (dob > new Date()) {
           newErrors.dob = 'Date of birth cannot be in the future';
+          analyticsService.trackOnboardingFieldError('dob', 'dob', 'future_date');
         }
       }
 
@@ -144,6 +147,13 @@ export default function Onboarding() {
   useEffect(() => {
     analyticsService.trackOnboardingStarted();
 
+    // Track step views
+    const stepIds = ['welcome', 'name', 'dob', 'preferences'];
+    const stepId = stepIds[step + 1] || 'unknown';
+    analyticsService.trackOnboardingStepViewed(stepId);
+  }, [step]);
+
+  useEffect(() => {
     const handleBeforeUnload = () => {
       if (!completedRef.current) {
         const timeSpent = Math.floor((Date.now() - onboardingStartTime) / 1000);
@@ -199,23 +209,44 @@ export default function Onboarding() {
     setUnits(value);
   }, []);
 
+  // Step -1: Welcome (with ValuePreview)
+  if (step === -1) {
+    return (
+      <OnboardingStepView
+        stepNumber={1}
+        totalSteps={4}
+        icon={<Sparkles className='h-12 w-12' />}
+        title='Welcome to Nestling'
+        description='The fastest way to track baby care'
+        timeEstimate='30 seconds to get started'
+        primaryAction={{
+          label: "Let's get started",
+          onClick: nextStep,
+        }}
+      >
+        <ValuePreview />
+      </OnboardingStepView>
+    );
+  }
+
   // Step 0: Name (with inline value messaging)
   if (step === 0) {
     return (
       <OnboardingStepView
-        stepNumber={1}
-        totalSteps={3}
+        stepNumber={2}
+        totalSteps={4}
         icon={<Baby className='h-12 w-12' />}
         title={MESSAGING.onboarding.babyName.title}
-        description="Track feeds, sleep & diapers in 2 taps. We'll personalize everything for your baby."
+        description={
+          name.trim()
+            ? `Great! We'll use ${name} throughout the app and in reminders.`
+            : "We'll personalize everything for your baby."
+        }
+        timeEstimate='Step 2 of 4 • 15 seconds'
         primaryAction={{
           label: 'Next',
           onClick: nextStep,
           disabled: !name.trim(),
-        }}
-        secondaryAction={{
-          label: 'Back',
-          onClick: prevStep,
         }}
       >
         <div className='space-y-4 pt-4'>
@@ -250,11 +281,16 @@ export default function Onboarding() {
   if (step === 1) {
     return (
       <OnboardingStepView
-        stepNumber={2}
-        totalSteps={3}
+        stepNumber={3}
+        totalSteps={4}
         icon={<CalendarIcon className='h-12 w-12' />}
         title={MESSAGING.onboarding.dateOfBirth.title}
-        description="We'll use this to provide age-appropriate insights and smart nap predictions."
+        description={
+          dob
+            ? `Perfect! ${name || 'Your baby'} is ${differenceInMonths(new Date(), dob)} months old. We'll tailor wake windows to their age.`
+            : 'Age matters! A 2-week-old needs different patterns than a 6-month-old.'
+        }
+        timeEstimate='Step 3 of 4 • 20 seconds'
         primaryAction={{
           label: 'Next',
           onClick: nextStep,
@@ -333,11 +369,12 @@ export default function Onboarding() {
   // Step 2: Preferences (final step)
   return (
     <OnboardingStepView
-      stepNumber={3}
-      totalSteps={3}
+      stepNumber={4}
+      totalSteps={4}
       icon={<Sparkles className='h-12 w-12' />}
       title='Almost done!'
       description='Quick preferences to personalize your experience.'
+      timeEstimate='Step 4 of 4 • 15 seconds • Almost done!'
       primaryAction={{
         label: 'Start Tracking',
         onClick: handleCreateBaby,
@@ -432,6 +469,30 @@ export default function Onboarding() {
           <p className='text-xs text-muted-foreground flex items-center gap-1.5 px-1'>
             <Sparkles className='h-3.5 w-3.5' /> Auto-detected from your device
           </p>
+        </div>
+
+        <div className='p-4 rounded-xl bg-primary/5 border border-primary/20 mt-6'>
+          <h4 className='font-semibold text-sm mb-2 flex items-center gap-2'>
+            <Sparkles className='h-4 w-4 text-primary' />
+            What happens next?
+          </h4>
+          <p className='text-sm text-muted-foreground mb-3'>
+            After this, you'll see your personalized dashboard:
+          </p>
+          <div className='space-y-2'>
+            <div className='flex items-center gap-2 text-xs'>
+              <Check className='h-3 w-3 text-primary' />
+              <span>Quick log buttons (Feed, Sleep, Diaper)</span>
+            </div>
+            <div className='flex items-center gap-2 text-xs'>
+              <Check className='h-3 w-3 text-primary' />
+              <span>Timeline to track {name || 'your baby'}'s day</span>
+            </div>
+            <div className='flex items-center gap-2 text-xs'>
+              <Check className='h-3 w-3 text-primary' />
+              <span>Smart predictions after 3-5 logs</span>
+            </div>
+          </div>
         </div>
       </div>
     </OnboardingStepView>

@@ -11,22 +11,23 @@ test.describe('Onboarding Flow', () => {
   });
 
   test('should complete onboarding with valid data', async ({ page }) => {
-    await page.goto('/onboarding-simple');
+    await page.goto('/onboarding');
 
-    // Fill baby name
-    await page.fill('input[name="name"]', 'Test Baby');
+    // Step 1: Welcome
+    await expect(page.locator('text=Welcome to Nestling')).toBeVisible();
+    await page.click('button:has-text("Let\'s get started")');
 
-    // Fill date of birth
-    await page.fill('input[name="date_of_birth"]', '2024-01-01');
+    // Step 2: Name
+    await page.fill('input[id="name"]', 'Test Baby');
+    await page.click('button:has-text("Next")');
 
-    // Select timezone (should be auto-detected)
-    await expect(page.locator('text=Timezone')).toBeVisible();
+    // Step 3: DOB
+    await page.fill('input[placeholder="MM/DD/YYYY"]', '01/01/2024');
+    await page.click('button:has-text("Next")');
 
-    // Select units
-    await page.click('text=Metric');
-
-    // Submit form
-    await page.click('button:has-text("Get Started")');
+    // Step 4: Preferences
+    await page.click('text=Imperial');
+    await page.click('button:has-text("Start Tracking")');
 
     // Should navigate to home
     await expect(page).toHaveURL('/home');
@@ -34,39 +35,50 @@ test.describe('Onboarding Flow', () => {
   });
 
   test('should show validation errors for invalid data', async ({ page }) => {
-    await page.goto('/onboarding-simple');
+    await page.goto('/onboarding');
 
-    // Try to submit without filling
-    await page.click('button:has-text("Get Started")');
+    // Step 1: Welcome - click next
+    await page.click('button:has-text("Let\'s get started")');
+
+    // Step 2: Name - try to submit without filling
+    await page.click('button:has-text("Next")');
 
     // Should show validation errors
     await expect(page.locator('text=Name is required')).toBeVisible();
   });
 
   test('should handle date of birth in future', async ({ page }) => {
-    await page.goto('/onboarding-simple');
+    await page.goto('/onboarding');
 
-    await page.fill('input[name="name"]', 'Test Baby');
+    // Step 1: Welcome
+    await page.click('button:has-text("Let\'s get started")');
 
-    // Try future date
+    // Step 2: Name
+    await page.fill('input[id="name"]', 'Test Baby');
+    await page.click('button:has-text("Next")');
+
+    // Step 3: DOB - try future date
     const futureDate = new Date();
     futureDate.setFullYear(futureDate.getFullYear() + 1);
-    await page.fill('input[name="date_of_birth"]', futureDate.toISOString().split('T')[0]);
+    await page.fill('input[placeholder="MM/DD/YYYY"]', futureDate.toISOString().split('T')[0]);
 
-    await page.click('button:has-text("Get Started")');
+    await page.click('button:has-text("Next")');
 
     // Should show error
-    await expect(page.locator('text=Date cannot be in the future')).toBeVisible();
+    await expect(page.locator('text=Date of birth cannot be in the future')).toBeVisible();
   });
 
-  test('should create demo baby as fallback', async ({ page }) => {
-    await page.goto('/onboarding-simple');
+  test('should handle onboarding welcome step', async ({ page }) => {
+    await page.goto('/onboarding');
 
-    // Click demo baby button if available
-    const demoButton = page.locator('button:has-text("Create Demo Baby")');
-    if (await demoButton.isVisible()) {
-      await demoButton.click();
-      await expect(page).toHaveURL('/home');
-    }
+    // Should start at welcome step
+    await expect(page.locator('text=Welcome to Nestling')).toBeVisible();
+    await expect(page.locator('text=The fastest way to track baby care')).toBeVisible();
+
+    // Should show ValuePreview component
+    await expect(page.locator('text=Track in 2 taps')).toBeVisible();
+
+    // Should show time estimate
+    await expect(page.locator('text=30 seconds to get started')).toBeVisible();
   });
 });

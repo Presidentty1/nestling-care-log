@@ -237,6 +237,15 @@ export default function Home() {
         description: `${formattedTime}${details}`,
       });
 
+      // Mark checklist items complete
+      if (type === 'feed' && !localStorage.getItem('completed_firstFeed')) {
+        localStorage.setItem('completed_firstFeed', 'true');
+      } else if (type === 'diaper' && !localStorage.getItem('completed_firstDiaper')) {
+        localStorage.setItem('completed_firstDiaper', 'true');
+      } else if (type === 'sleep' && !localStorage.getItem('completed_firstSleep')) {
+        localStorage.setItem('completed_firstSleep', 'true');
+      }
+
       // No need to call loadTodayEvents, subscription in useHomeData handles it
     } catch (error) {
       logger.error('Quick log error', error, 'Home');
