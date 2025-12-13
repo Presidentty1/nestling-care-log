@@ -36,9 +36,9 @@ class SpotlightIndexer {
         // Index items
         CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
             if let error = error {
-                print("Failed to index events in Spotlight: \(error)")
+                logger.debug("Failed to index events in Spotlight: \(error)")
             } else {
-                print("Indexed \(searchableItems.count) events in Spotlight")
+                logger.debug("Indexed \(searchableItems.count) events in Spotlight")
             }
         }
     }
@@ -89,9 +89,9 @@ class SpotlightIndexer {
     func removeAllIndexedEvents() {
         CSSearchableIndex.default().deleteSearchableItems(withDomainIdentifiers: [indexDomainIdentifier]) { error in
             if let error = error {
-                print("Failed to remove indexed events: \(error)")
+                logger.debug("Failed to remove indexed events: \(error)")
             } else {
-                print("Removed all indexed events from Spotlight")
+                logger.debug("Removed all indexed events from Spotlight")
             }
         }
     }
@@ -101,7 +101,7 @@ class SpotlightIndexer {
         let identifier = "\(indexDomainIdentifier).\(event.id)"
         CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [identifier]) { error in
             if let error = error {
-                print("Failed to remove event from Spotlight: \(error)")
+                logger.debug("Failed to remove event from Spotlight: \(error)")
             }
         }
     }
@@ -115,7 +115,7 @@ class SpotlightIndexer {
         let item = createSearchableItem(for: event, baby: baby)
         CSSearchableIndex.default().indexSearchableItems([item]) { error in
             if let error = error {
-                print("Failed to update event in Spotlight: \(error)")
+                logger.debug("Failed to update event in Spotlight: \(error)")
             }
         }
     }

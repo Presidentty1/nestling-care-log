@@ -166,5 +166,10 @@ class PredictionsViewModel: ObservableObject {
     private var babyAgeDays: Int {
         Calendar.current.dateComponents([.day], from: baby.dateOfBirth, to: Date()).day ?? 0
     }
+
+    deinit {
+        logger.debug("PredictionsViewModel.deinit: Cleaning up for baby \(baby.id)")
+        // Any active Tasks will be cancelled by Swift's runtime
+    }
 }
 

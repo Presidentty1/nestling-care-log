@@ -52,7 +52,7 @@ class MLCryClassifier {
     init() {
         // TODO: Load model
         // guard let modelURL = Bundle.main.url(forResource: "CryClassifier", withExtension: "mlmodelc") else {
-        //     print("Warning: CryClassifier model not found")
+        //     logger.debug("Warning: CryClassifier model not found")
         //     return
         // }
         // model = try? MLModel(contentsOf: modelURL)

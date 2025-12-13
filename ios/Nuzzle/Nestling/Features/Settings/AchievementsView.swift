@@ -74,7 +74,7 @@ struct AchievementsView: View {
                 }
             }
         } catch {
-            print("Failed to load achievements: \(error)")
+            logger.debug("Failed to load achievements: \(error)")
         }
     }
 }

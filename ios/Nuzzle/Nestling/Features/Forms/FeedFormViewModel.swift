@@ -104,7 +104,7 @@ class FeedFormViewModel: ObservableObject {
                 }
             } catch {
                 // Use defaults if dataStore fails
-                print("Failed to load last used values from dataStore: \(error)")
+                logger.debug("Failed to load last used values from dataStore: \(error)")
             }
             validate()
         }
@@ -297,11 +297,11 @@ class FeedFormViewModel: ObservableObject {
                 await MainActor.run {
                     Haptics.success()
                     // Note: Toast notification would be shown here in a complete implementation
-                    print("🎉 Great start! First event logged!")
+                    logger.debug("🎉 Great start! First event logged!")
                 }
             }
         } catch {
-            print("Failed to check first event: \(error.localizedDescription)")
+            logger.debug("Failed to check first event: \(error.localizedDescription)")
         }
     }
 
@@ -341,6 +341,11 @@ class FeedFormViewModel: ObservableObject {
         let note: String
         let startTime: Date
         let photosCount: Int
+    }
+
+    deinit {
+        logger.debug("FeedFormViewModel.deinit: Cleaning up")
+        // Any active Tasks will be cancelled by Swift's runtime
     }
 }
 

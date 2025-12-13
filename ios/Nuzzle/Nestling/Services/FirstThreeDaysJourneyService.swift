@@ -205,9 +205,9 @@ class FirstThreeDaysJourneyService: ObservableObject {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Failed to schedule journey notification: \(error)")
+                logger.debug("Failed to schedule journey notification: \(error)")
             } else {
-                print("Scheduled journey notification for \(milestone.rawValue)")
+                logger.debug("Scheduled journey notification for \(milestone.rawValue)")
             }
         }
     }

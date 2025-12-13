@@ -1,5 +1,5 @@
 import SwiftUI
-import os.signpost
+import Loggerimport os.signpost
 import CoreSpotlight
 
 @main
@@ -20,6 +20,9 @@ struct NestlingApp: App {
         
         // Initialize crash reporting (first-party only)
         _ = CrashReportingService.shared
+
+        // Initialize background refresh service
+        _ = BackgroundRefreshService.shared
 
         // Use DataStoreSelector to choose implementation
         // Defaults to Core Data if available, falls back to JSON
@@ -195,13 +198,13 @@ struct NestlingApp: App {
     
     private func checkOnboarding() {
         Task { @MainActor in
-            print("🔍 Starting onboarding check...")
+            logger.debug("🔍 Starting onboarding check...")
             
             // Add timeout to prevent infinite loading (declare early for guest mode)
             let timeoutTask = Task {
                 try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
                 if isCheckingOnboarding {
-                    print("⚠️ WARNING: checkOnboarding timed out after 1.5 seconds, proceeding anyway")
+                    logger.debug("⚠️ WARNING: checkOnboarding timed out after 1.5 seconds, proceeding anyway")
                     await MainActor.run {
                         isCheckingOnboarding = false
                         // On timeout, just show onboarding
@@ -212,7 +215,7 @@ struct NestlingApp: App {
             
             // For guest mode (skipped auth), proceed immediately
             if authViewModel.hasSkippedAuth {
-                print("✅ Guest mode: Proceeding immediately to onboarding check")
+                logger.debug("✅ Guest mode: Proceeding immediately to onboarding check")
                 timeoutTask.cancel()
                 isCheckingOnboarding = false
                 
@@ -227,7 +230,7 @@ struct NestlingApp: App {
                             showOnboarding = false
                         }
                     } catch {
-                        print("⚠️ Error checking babies: \(error)")
+                        logger.debug("⚠️ Error checking babies: \(error)")
                     }
                 }
                 
@@ -264,7 +267,7 @@ struct NestlingApp: App {
                 }
             default:
                 // On timeout or error, show onboarding
-                print("⚠️ Timeout or error during onboarding check, showing onboarding")
+                logger.debug("⚠️ Timeout or error during onboarding check, showing onboarding")
                 showOnboarding = true
             }
         }

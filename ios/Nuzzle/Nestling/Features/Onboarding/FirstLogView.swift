@@ -62,7 +62,7 @@ struct FirstLogView: View {
                                     "event_type": "feed"
                                 ])
                             } catch {
-                                print("Error logging first event: \(error)")
+                                logger.debug("Error logging first event: \(error)")
                                 // Still show paywall even if log fails
                                 await MainActor.run {
                                     showPaywall = true

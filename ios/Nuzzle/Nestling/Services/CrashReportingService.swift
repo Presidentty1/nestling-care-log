@@ -14,7 +14,7 @@ class CrashReportingService {
     private init() {
         // Set up Sentry configuration
         setupSentry()
-        print("✅ CrashReportingService initialized with Sentry")
+        logger.debug("✅ CrashReportingService initialized with Sentry")
     }
 
     private func setupSentry() {
@@ -25,7 +25,7 @@ class CrashReportingService {
             } else {
                 // Fallback for development - replace with actual DSN
                 options.dsn = "https://your-sentry-dsn@sentry.io/project-id"
-                print("⚠️ Using placeholder Sentry DSN - configure SENTRY_DSN environment variable")
+                logger.debug("⚠️ Using placeholder Sentry DSN - configure SENTRY_DSN environment variable")
             }
 
             // Configure for iOS app
@@ -73,7 +73,7 @@ class CrashReportingService {
         SentrySDK.capture(event: event)
 
         // Also log to console for development
-        print("🚨 Error logged: \(extra)")
+        logger.debug("🚨 Error logged: \(extra)")
     }
 
     /// Log a fatal crash (if we can catch it before termination)
@@ -97,7 +97,7 @@ class CrashReportingService {
 
         SentrySDK.capture(event: event)
 
-        print("💥 Fatal crash logged: \(extra)")
+        logger.debug("💥 Fatal crash logged: \(extra)")
     }
 
     /// Log a user action that might be relevant for debugging
@@ -117,13 +117,13 @@ class CrashReportingService {
         SentrySDK.addBreadcrumb(breadcrumb)
 
         // Also log to console for development
-        print("📝 Breadcrumb: \(category) - \(message)")
+        logger.debug("📝 Breadcrumb: \(category) - \(message)")
     }
 
     /// Enable/disable crash reporting
     func setEnabled(_ enabled: Bool) {
         self.enabled = enabled
-        print("📊 Crash reporting \(enabled ? "enabled" : "disabled")")
+        logger.debug("📊 Crash reporting \(enabled ? "enabled" : "disabled")")
     }
 
     /// Get current status

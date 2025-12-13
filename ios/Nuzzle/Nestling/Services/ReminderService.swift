@@ -43,7 +43,7 @@ class ReminderService {
             authorizationStatus = granted ? .authorized : .denied
             return granted
         } catch {
-            print("Failed to request notification authorization: \(error)")
+            logger.debug("Failed to request notification authorization: \(error)")
             return false
         }
     }

@@ -151,10 +151,10 @@ class CloudKitSyncService: ObservableObject {
             
             lastSyncTime = Date()
             syncError = nil
-            print("CloudKit sync completed successfully")
+            logger.debug("CloudKit sync completed successfully")
         } catch {
             syncError = error
-            print("CloudKit sync failed: \(error.localizedDescription)")
+            logger.debug("CloudKit sync failed: \(error.localizedDescription)")
         }
     }
     
@@ -278,7 +278,7 @@ class CloudKitSyncService: ObservableObject {
                         fetched.append(event)
                     }
                 case .failure(let error):
-                    print("Failed to fetch record: \(error.localizedDescription)")
+                    logger.debug("Failed to fetch record: \(error.localizedDescription)")
                 }
             }
             
@@ -337,10 +337,10 @@ class CloudKitSyncService: ObservableObject {
     
     func resolveConflict(local: Any, remote: Any, timestamp localTimestamp: Date, remoteTimestamp: Date) -> Any {
         if localTimestamp > remoteTimestamp {
-            print("Conflict resolved: keeping local version")
+            logger.debug("Conflict resolved: keeping local version")
             return local
         } else {
-            print("Conflict resolved: keeping remote version")
+            logger.debug("Conflict resolved: keeping remote version")
             return remote
         }
     }

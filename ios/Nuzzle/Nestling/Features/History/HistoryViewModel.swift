@@ -149,7 +149,7 @@ final class HistoryViewModel: ObservableObject {
                 baby: baby
             )
         } catch {
-            print("Error generating weekly summary: \(error)")
+            logger.debug("Error generating weekly summary: \(error)")
             weeklySummary = nil
         }
     }
@@ -379,13 +379,19 @@ final class HistoryViewModel: ObservableObject {
             monthCache[monthStart] = historyDays.sorted { $0.date > $1.date }
 
         } catch {
-            print("Failed to preload month \(monthStart): \(error)")
+            logger.debug("Failed to preload month \(monthStart): \(error)")
         }
     }
 
     /// Get cached month data if available
     func getCachedMonth(_ monthStart: Date) -> [HistoryDay]? {
         return monthCache[monthStart]
+    }
+
+    deinit {
+        logger.debug("HistoryViewModel.deinit: Cleaning up")
+        // Cancel any active Tasks and clear cache
+        monthCache.removeAll()
     }
 }
 

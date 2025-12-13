@@ -39,7 +39,7 @@ class DiagnosticsService {
             try encoder.encode(settings).write(to: settingsURL)
         } catch {
             // Log error but continue
-            print("Failed to export settings: \(error)")
+            logger.debug("Failed to export settings: \(error)")
         }
         
         // 4. Data Summary (no PII)

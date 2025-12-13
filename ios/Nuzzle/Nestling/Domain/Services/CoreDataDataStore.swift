@@ -16,12 +16,12 @@ class CoreDataDataStore: DataStore {
     /// Ensure CoreData store is ready before performing operations
     private func ensureStoreReady() async throws {
         if !stack.isStoreReady {
-            print("WARNING: CoreData store not ready yet, waiting...")
+            logger.debug("WARNING: CoreData store not ready yet, waiting...")
             // Wait up to 2 seconds for store to be ready
             for _ in 0..<20 {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                 if stack.isStoreReady {
-                    print("CoreData store is now ready")
+                    logger.debug("CoreData store is now ready")
                     return
                 }
             }
@@ -113,7 +113,7 @@ class CoreDataDataStore: DataStore {
     // MARK: - Events
     
     func fetchEvents(for baby: Baby, on date: Date) async throws -> [Event] {
-        print("CoreDataDataStore.fetchEvents called for baby: \(baby.id), date: \(date)")
+        logger.debug("CoreDataDataStore.fetchEvents called for baby: \(baby.id), date: \(date)")
         let startTime = Date()
         
         // Ensure store is ready before using contexts
@@ -121,7 +121,7 @@ class CoreDataDataStore: DataStore {
         
         return try await withCheckedThrowingContinuation { continuation in
             let context = self.stack.newBackgroundContext()
-            print("Created background context, calling perform...")
+            logger.debug("Created background context, calling perform...")
             
             // Add timeout wrapper
             var hasResumed = false
@@ -133,7 +133,7 @@ class CoreDataDataStore: DataStore {
                 if !hasResumed {
                     hasResumed = true
                     lock.unlock()
-                    print("ERROR: fetchEvents timed out - context.perform never executed")
+                    logger.debug("ERROR: fetchEvents timed out - context.perform never executed")
                     continuation.resume(throwing: NSError(domain: "CoreDataDataStore", code: -2, userInfo: [NSLocalizedDescriptionKey: "Fetch timed out - CoreData store may not be ready"]))
                 } else {
                     lock.unlock()
@@ -145,20 +145,20 @@ class CoreDataDataStore: DataStore {
                 lock.lock()
                 if hasResumed {
                     lock.unlock()
-                    print("WARNING: fetchEvents continuation already resumed (timeout or cancelled)")
+                    logger.debug("WARNING: fetchEvents continuation already resumed (timeout or cancelled)")
                     return
                 }
                 hasResumed = true
                 lock.unlock()
                 timeoutTask.cancel()
                 
-                print("Inside context.perform block")
+                logger.debug("Inside context.perform block")
                 do {
                     let calendar = Calendar.current
                     let startOfDay = calendar.startOfDay(for: date)
                     let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? date
                     
-                    print("Date range: \(startOfDay) to \(endOfDay)")
+                    logger.debug("Date range: \(startOfDay) to \(endOfDay)")
                     
                     let request = NSFetchRequest<EventEntity>(entityName: "EventEntity")
                     request.predicate = NSPredicate(format: "babyId == %@ AND startTime >= %@ AND startTime < %@", 
@@ -168,9 +168,9 @@ class CoreDataDataStore: DataStore {
                     // Add fetch limit to prevent hanging on large datasets
                     request.fetchLimit = 1000
                     
-                    print("Executing fetch request...")
+                    logger.debug("Executing fetch request...")
                     let entities = try context.fetch(request)
-                    print("Fetch completed, got \(entities.count) entities")
+                    logger.debug("Fetch completed, got \(entities.count) entities")
                     
                     let events = entities.compactMap { entity -> Event? in
                         // Use compactMap to filter out any invalid entities
@@ -178,14 +178,14 @@ class CoreDataDataStore: DataStore {
                     }
                     
                     let elapsed = Date().timeIntervalSince(startTime)
-                    print("fetchEvents completed successfully in \(elapsed) seconds, returning \(events.count) events")
+                    logger.debug("fetchEvents completed successfully in \(elapsed) seconds, returning \(events.count) events")
                     if events.count > 0 {
-                        print("Sample event: type=\(events.first!.type), startTime=\(events.first!.startTime), babyId=\(events.first!.babyId)")
+                        logger.debug("Sample event: type=\(events.first!.type), startTime=\(events.first!.startTime), babyId=\(events.first!.babyId)")
                     }
                     continuation.resume(returning: events)
                 } catch {
                     let elapsed = Date().timeIntervalSince(startTime)
-                    print("ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
+                    logger.debug("ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                     continuation.resume(throwing: error)
                 }
             }
@@ -213,7 +213,7 @@ class CoreDataDataStore: DataStore {
     }
     
     func addEvent(_ event: Event) async throws {
-        print("CoreDataDataStore.addEvent called: type=\(event.type), babyId=\(event.babyId), startTime=\(event.startTime)")
+        logger.debug("CoreDataDataStore.addEvent called: type=\(event.type), babyId=\(event.babyId), startTime=\(event.startTime)")
         // Domain-level validation
         try EventValidator.validate(event)
         
@@ -231,7 +231,7 @@ class CoreDataDataStore: DataStore {
                 if !hasResumed {
                     hasResumed = true
                     lock.unlock()
-                    print("ERROR: addEvent timed out - context.perform never executed")
+                    logger.debug("ERROR: addEvent timed out - context.perform never executed")
                     continuation.resume(throwing: NSError(domain: "CoreDataDataStore", code: -2, userInfo: [NSLocalizedDescriptionKey: "Save timed out - CoreData store may not be ready"]))
                 } else {
                     lock.unlock()
@@ -243,7 +243,7 @@ class CoreDataDataStore: DataStore {
                 lock.lock()
                 if hasResumed {
                     lock.unlock()
-                    print("WARNING: addEvent continuation already resumed (timeout or cancelled)")
+                    logger.debug("WARNING: addEvent continuation already resumed (timeout or cancelled)")
                     return
                 }
                 hasResumed = true
@@ -255,10 +255,10 @@ class CoreDataDataStore: DataStore {
                 
                 do {
                     try self.stack.save(context: context)
-                    print("CoreDataDataStore.addEvent: Event saved successfully with id=\(event.id)")
+                    logger.debug("CoreDataDataStore.addEvent: Event saved successfully with id=\(event.id)")
                     continuation.resume()
                 } catch {
-                    print("CoreDataDataStore.addEvent ERROR: Failed to save event: \(error)")
+                    logger.debug("CoreDataDataStore.addEvent ERROR: Failed to save event: \(error)")
                     continuation.resume(throwing: error)
                 }
             }

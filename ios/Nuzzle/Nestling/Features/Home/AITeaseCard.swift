@@ -147,20 +147,20 @@ struct AIFeatureRow: View {
         AITeaseCard(
             focusArea: .all,
             onCryAnalysisTap: {
-                print("Cry analysis tapped")
+                logger.debug("Cry analysis tapped")
             },
             onQATap: {
-                print("Q&A tapped")
+                logger.debug("Q&A tapped")
             }
         )
         
         AITeaseCard(
             focusArea: .napsAndNights,
             onCryAnalysisTap: {
-                print("Cry analysis tapped")
+                logger.debug("Cry analysis tapped")
             },
             onQATap: {
-                print("Q&A tapped")
+                logger.debug("Q&A tapped")
             }
         )
     }

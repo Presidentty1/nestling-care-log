@@ -321,7 +321,7 @@ struct Last7DaysTrendsView: View {
             )
 
         } catch {
-            print("Failed to load weekly data: \(error)")
+            logger.debug("Failed to load weekly data: \(error)")
             weeklyData = nil
         }
     }

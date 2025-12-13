@@ -118,7 +118,7 @@ struct NotificationsIntroView: View {
                 coordinator.wantsNapNotifications = granted
                 // TODO: Analytics.track(.notificationOptIn, granted: granted)
             } catch {
-                print("Error requesting notification permission: \(error)")
+                logger.debug("Error requesting notification permission: \(error)")
             }
             
             await MainActor.run {

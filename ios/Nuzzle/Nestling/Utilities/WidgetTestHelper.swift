@@ -25,14 +25,14 @@ class WidgetTestHelper {
     /// Reload all widget timelines
     static func reloadAllWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
-        print("[Widget] Reloaded all widget timelines")
+        logger.debug("[Widget] Reloaded all widget timelines")
     }
     
     /// Reload specific widget timeline
     /// - Parameter kind: Widget kind identifier
     static func reloadWidget(kind: String) {
         WidgetCenter.shared.reloadTimelines(ofKind: kind)
-        print("[Widget] Reloaded widget: \(kind)")
+        logger.debug("[Widget] Reloaded widget: \(kind)")
     }
     
     /// Get widget configuration info
@@ -81,11 +81,11 @@ class WidgetTestHelper {
     static func verifyAppGroups() -> Bool {
         let fileManager = FileManager.default
         guard let appGroupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
-            print("[Widget] ❌ App Groups not configured")
+            logger.debug("[Widget] ❌ App Groups not configured")
             return false
         }
         
-        print("[Widget] ✅ App Groups configured: \(appGroupURL.path)")
+        logger.debug("[Widget] ✅ App Groups configured: \(appGroupURL.path)")
         return true
     }
     
@@ -93,7 +93,7 @@ class WidgetTestHelper {
     /// - Parameter data: Data to persist
     static func testDataPersistence(data: [String: Any]) {
         guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) else {
-            print("[Widget] ❌ Cannot test persistence: App Groups not configured")
+            logger.debug("[Widget] ❌ Cannot test persistence: App Groups not configured")
             return
         }
         
@@ -102,9 +102,9 @@ class WidgetTestHelper {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: data, options: .prettyPrinted)
             try jsonData.write(to: testFileURL)
-            print("[Widget] ✅ Test data persisted to: \(testFileURL.path)")
+            logger.debug("[Widget] ✅ Test data persisted to: \(testFileURL.path)")
         } catch {
-            print("[Widget] ❌ Failed to persist test data: \(error)")
+            logger.debug("[Widget] ❌ Failed to persist test data: \(error)")
         }
     }
     
@@ -117,7 +117,7 @@ class WidgetTestHelper {
         let testFileURL = appGroupURL.appendingPathComponent("widget_test.json")
         
         try? FileManager.default.removeItem(at: testFileURL)
-        print("[Widget] Cleared test data")
+        logger.debug("[Widget] Cleared test data")
     }
 }
 

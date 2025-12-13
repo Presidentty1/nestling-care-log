@@ -16,7 +16,7 @@ class CoreDataStack {
     private var storeLoadComplete = false
     
     lazy var persistentContainer: NSPersistentContainer = {
-        print("Initializing CoreData persistentContainer...")
+        logger.debug("Initializing CoreData persistentContainer...")
         let container = NSPersistentContainer(name: "Nestling")
         
         // Configure for App Groups (shared with widgets)
@@ -37,10 +37,10 @@ class CoreDataStack {
         
         container.loadPersistentStores { description, error in
             if let error = error {
-                print("ERROR: Core Data store failed to load: \(error.localizedDescription)")
+                logger.debug("ERROR: Core Data store failed to load: \(error.localizedDescription)")
                 self.storeLoadError = error
             } else {
-                print("Core Data store loaded successfully at: \(description.url?.path ?? "unknown")")
+                logger.debug("Core Data store loaded successfully at: \(description.url?.path ?? "unknown")")
             }
             self.storeLoadComplete = true
             semaphore.signal()
@@ -49,18 +49,18 @@ class CoreDataStack {
         // Wait for store to load (max 5 seconds)
         let timeout = semaphore.wait(timeout: .now() + 5.0)
         if timeout == .timedOut {
-            print("WARNING: Core Data store loading timed out after 5 seconds - contexts may not work properly")
+            logger.debug("WARNING: Core Data store loading timed out after 5 seconds - contexts may not work properly")
         }
         
         if let error = storeLoadError {
-            print("ERROR: Core Data initialization failed: \(error.localizedDescription)")
+            logger.debug("ERROR: Core Data initialization failed: \(error.localizedDescription)")
         }
         
         // Optimize for UI
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
-        print("CoreData container initialized and ready: storeLoadComplete=\(storeLoadComplete)")
+        logger.debug("CoreData container initialized and ready: storeLoadComplete=\(storeLoadComplete)")
         storeLoadSemaphore = nil
         return container
     }()

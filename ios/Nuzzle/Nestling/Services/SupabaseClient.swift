@@ -21,13 +21,13 @@ class SupabaseClientProvider {
         // Validate configuration
         guard !url.isEmpty,
               !key.isEmpty else {
-            print("⚠️ Supabase not configured - environment variables SUPABASE_URL and SUPABASE_ANON_KEY are required")
+            logger.debug("⚠️ Supabase not configured - environment variables SUPABASE_URL and SUPABASE_ANON_KEY are required")
             return
         }
 
         // Create Supabase client with simplified configuration
         guard let supabaseURL = URL(string: url) else {
-            print("❌ Invalid Supabase URL")
+            logger.debug("❌ Invalid Supabase URL")
             return
         }
         
@@ -37,7 +37,7 @@ class SupabaseClientProvider {
         )
         isConfigured = true
 
-        print("✅ Supabase client configured successfully")
+        logger.debug("✅ Supabase client configured successfully")
     }
 
     /// Get the configured Supabase client
@@ -60,7 +60,7 @@ class SupabaseClientProvider {
 
         // Reconfigure with new values
         guard let supabaseURL = URL(string: url) else {
-            print("❌ Invalid Supabase URL")
+            logger.debug("❌ Invalid Supabase URL")
             return
         }
         

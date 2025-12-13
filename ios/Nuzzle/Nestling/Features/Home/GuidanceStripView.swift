@@ -73,7 +73,7 @@ struct GuidanceStripView: View {
             do {
                 activeSleep = try await dataStore.getActiveSleep(for: baby)
             } catch {
-                print("Failed to check active sleep: \(error.localizedDescription)")
+                logger.debug("Failed to check active sleep: \(error.localizedDescription)")
             }
         }
     }

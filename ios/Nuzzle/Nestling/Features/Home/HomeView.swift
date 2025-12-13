@@ -373,10 +373,10 @@ struct HomeView: View {
     private func updateViewModel(for baby: Baby) {
         // Only create a new viewModel if we don't have one, or if the baby changed
         if let existingViewModel = viewModel, existingViewModel.baby.id == baby.id {
-            print("updateViewModel: Keeping existing viewModel for baby \(baby.id)")
+            logger.debug("updateViewModel: Keeping existing viewModel for baby \(baby.id)")
             return
         }
-        print("updateViewModel: Creating new viewModel for baby \(baby.id)")
+        logger.debug("updateViewModel: Creating new viewModel for baby \(baby.id)")
         viewModel = HomeViewModel(
             dataStore: environment.dataStore,
             baby: baby,

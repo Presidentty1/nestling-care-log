@@ -157,6 +157,11 @@ class NowNextViewModel: ObservableObject {
             nextFeedWindowText = nil
         }
     }
+
+    deinit {
+        logger.debug("NowNextViewModel.deinit: Cleaning up")
+        // Any active Tasks will be cancelled by Swift's runtime
+    }
 }
 
 extension Date {

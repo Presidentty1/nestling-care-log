@@ -1,5 +1,5 @@
 import SwiftUI
-
+import Logger
 struct AIDataSharingSettingsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @Environment(\.dismiss) var dismiss
@@ -66,7 +66,7 @@ struct AIDataSharingSettingsView: View {
                     environment.appSettings = settings
                 }
             } catch {
-                print("Failed to save settings: \(error)")
+                logger.debug("Failed to save settings: \(error)")
             }
         }
     }

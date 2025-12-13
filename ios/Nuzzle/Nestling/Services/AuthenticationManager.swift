@@ -18,7 +18,7 @@ class AuthenticationManager {
         do {
             return try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
         } catch {
-            print("Authentication failed: \(error.localizedDescription)")
+            logger.debug("Authentication failed: \(error.localizedDescription)")
             return false
         }
     }

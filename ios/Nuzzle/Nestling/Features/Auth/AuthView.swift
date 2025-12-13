@@ -381,7 +381,7 @@ struct AuthView: View {
                 } else {
                     viewModel.errorMessage = error.localizedDescription
                 }
-                print("Auth error: \(error)")
+                logger.debug("Auth error: \(error)")
             }
         }
     }
@@ -414,7 +414,7 @@ struct CheckboxToggleStyle: ToggleStyle {
 
 #Preview {
     AuthView(viewModel: AuthViewModel()) {
-        print("Authenticated!")
+        logger.debug("Authenticated!")
     }
 }
 

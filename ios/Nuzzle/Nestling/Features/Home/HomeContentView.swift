@@ -144,7 +144,7 @@ struct HomeContentView: View {
                         // Handle suggestion tap
                         proactiveDiscovery.trackSuggestionAction(suggestion, action: "tapped")
                         // TODO: Navigate to relevant feature
-                        print("Navigate to: \(suggestion.rawValue)")
+                        logger.debug("Navigate to: \(suggestion.rawValue)")
                     } onDismiss: {
                         viewModel.proactiveSuggestion = nil
                         proactiveDiscovery.trackSuggestionAction(suggestion, action: "dismissed")

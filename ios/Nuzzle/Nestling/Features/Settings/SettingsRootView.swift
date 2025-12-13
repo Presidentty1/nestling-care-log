@@ -12,6 +12,8 @@ struct SettingsRootView: View {
     @State private var showProSubscription = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfUse = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     private func proStatusText() -> String {
         let proService = ProSubscriptionService.shared
@@ -28,6 +30,18 @@ struct SettingsRootView: View {
     
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+
+    private func saveSettings(_ settings: AppSettings) async {
+        do {
+            try await environment.dataStore.saveAppSettings(settings)
+        } catch {
+            logger.error("Failed to save settings: \(error)")
+            await MainActor.run {
+                errorMessage = "Failed to save settings. Please try again."
+                showError = true
+            }
+        }
     }
     
     private var buildNumber: String {
@@ -98,7 +112,7 @@ struct SettingsRootView: View {
                             Task {
                                 var settings = environment.appSettings
                                 settings.celebrationsEnabled = newValue
-                                try? await environment.dataStore.saveAppSettings(settings)
+                                await saveSettings(settings)
                                 await MainActor.run {
                                     environment.appSettings = settings
                                     UserDefaults.standard.set(newValue, forKey: "celebrationsEnabled")
@@ -186,7 +200,7 @@ struct SettingsRootView: View {
                             Task {
                                 var settings = environment.appSettings
                                 settings.preferMediumSheet = newValue
-                                try? await environment.dataStore.saveAppSettings(settings)
+                                await saveSettings(settings)
                                 await MainActor.run {
                                     environment.appSettings = settings
                                 }
@@ -202,10 +216,10 @@ struct SettingsRootView: View {
                                 Task {
                                     var settings = environment.appSettings
                                     settings.spotlightIndexingEnabled = newValue
-                                    try? await environment.dataStore.saveAppSettings(settings)
+                                    await saveSettings(settings)
                                     await MainActor.run {
                                         environment.appSettings = settings
-                                        
+
                                         // If disabling, remove all indexed events
                                         if !newValue {
                                             SpotlightIndexer.shared.removeAllIndexedEvents()
@@ -238,7 +252,7 @@ struct SettingsRootView: View {
                             Task {
                                 var settings = environment.appSettings
                                 settings.analyticsEnabled = newValue
-                                try? await environment.dataStore.saveAppSettings(settings)
+                                await saveSettings(settings)
                                 await MainActor.run {
                                     environment.appSettings = settings
                                     UserDefaults.standard.set(newValue, forKey: "analyticsEnabled")
@@ -327,7 +341,7 @@ struct SettingsRootView: View {
                                     rootVC.present(activityVC, animated: true)
                                 }
                             } catch {
-                                print("Failed to generate diagnostics: \(error)")
+                                logger.debug("Failed to generate diagnostics: \(error)")
                             }
                         }
                     }) {
@@ -392,9 +406,17 @@ struct SettingsRootView: View {
                     
                     Button(action: {
                         Task {
-                            let service = OnboardingService(dataStore: environment.dataStore)
-                            try? await service.resetOnboarding()
-                            // App will show onboarding on next launch
+                            do {
+                                let service = OnboardingService(dataStore: environment.dataStore)
+                                try await service.resetOnboarding()
+                                // App will show onboarding on next launch
+                            } catch {
+                                logger.error("Failed to reset onboarding: \(error)")
+                                await MainActor.run {
+                                    errorMessage = "Failed to reset onboarding. Please try again."
+                                    showError = true
+                                }
+                            }
                         }
                     }) {
                         Text("Reset Onboarding")
@@ -410,9 +432,17 @@ struct SettingsRootView: View {
                         ForEach(ScenarioType.allCases, id: \.self) { scenario in
                             Button(scenario.displayName) {
                                 Task {
-                                    let seeder = ScenarioSeeder(dataStore: environment.dataStore)
-                                    try? await seeder.applyScenario(scenario)
-                                    await environment.refreshBabies()
+                                    do {
+                                        let seeder = ScenarioSeeder(dataStore: environment.dataStore)
+                                        try await seeder.applyScenario(scenario)
+                                        await environment.refreshBabies()
+                                    } catch {
+                                        logger.error("Failed to apply scenario \(scenario): \(error)")
+                                        await MainActor.run {
+                                            errorMessage = "Failed to load scenario. Please try again."
+                                            showError = true
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -486,6 +516,13 @@ struct SettingsRootView: View {
             }
             .sheet(isPresented: $showTermsOfUse) {
                 LegalDocumentView(documentType: .termsOfUse)
+            }
+            .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+                Button("OK") {
+                    errorMessage = nil
+                }
+            } message: { message in
+                Text(message)
             }
         }
     }

@@ -1,5 +1,5 @@
 import SwiftUI
-import WebKit
+import Loggerimport WebKit
 
 struct LegalDocumentView: View {
     enum DocumentType {
@@ -66,7 +66,7 @@ struct LegalDocumentView: View {
         do {
             return try String(contentsOf: resourceURL, encoding: .utf8)
         } catch {
-            print("Error loading HTML content: \(error)")
+            logger.debug("Error loading HTML content: \(error)")
             return nil
         }
     }

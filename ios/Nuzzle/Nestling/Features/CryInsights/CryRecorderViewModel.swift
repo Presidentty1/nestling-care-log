@@ -157,7 +157,7 @@ class CryRecorderViewModel: ObservableObject {
                 state = .recording
             } catch {
                 state = .error("Failed to start recording: \(error.localizedDescription)")
-                print("Failed to start recording: \(error)")
+                logger.debug("Failed to start recording: \(error)")
             }
         }
     }
@@ -275,6 +275,12 @@ class CryRecorderViewModel: ObservableObject {
                 self.audioService.deleteRecording()
             }
         }
+    }
+
+    deinit {
+        logger.debug("CryRecorderViewModel.deinit: Cleaning up")
+        // Audio service handles its own cleanup
+        // Tasks are cancelled by Swift's runtime when the object is deallocated
     }
 }
 

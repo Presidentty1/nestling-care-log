@@ -101,7 +101,7 @@ class PDFExportService {
             
             return fileURL
         } catch {
-            print("Failed to generate PDF: \(error)")
+            logger.debug("Failed to generate PDF: \(error)")
             return nil
         }
     }

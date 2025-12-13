@@ -34,7 +34,7 @@ class RemoteDataStore: DataStore {
     init() {
         // Verify Supabase is configured
         if !provider.isConfigured {
-            print("⚠️ WARNING: SupabaseClientProvider is not configured. Please check SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
+            logger.debug("⚠️ WARNING: SupabaseClientProvider is not configured. Please check SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
         }
     }
     

@@ -107,7 +107,7 @@ class ProSubscriptionService: ObservableObject {
             isProUser = true
             subscriptionStatus = .subscribed
             trialDaysRemaining = 999
-            print("[Pro] Dev mode restored from UserDefaults")
+            logger.debug("[Pro] Dev mode restored from UserDefaults")
         }
 
         Task {
@@ -125,7 +125,7 @@ class ProSubscriptionService: ObservableObject {
         // Start trial on first app launch
         if trialStartDate == nil {
             trialStartDate = Date()
-            print("[Pro] Started 7-day trial at \(Date())")
+            logger.debug("[Pro] Started 7-day trial at \(Date())")
             
             // Schedule Day 5 warning notification
             NotificationScheduler.shared.scheduleTrialWarningNotification(trialStartDate: Date())
@@ -151,14 +151,14 @@ class ProSubscriptionService: ObservableObject {
             // During trial, user has Pro access
             if !isProUser && subscriptionStatus != .subscribed {
                 isProUser = true
-                print("[Pro] Time-based trial active: \(daysRemaining) days remaining")
+                logger.debug("[Pro] Time-based trial active: \(daysRemaining) days remaining")
             }
         } else {
             trialDaysRemaining = 0
             // Trial ended, revoke Pro access if no subscription
             if subscriptionStatus != .subscribed {
                 isProUser = false
-                print("[Pro] Time-based trial expired")
+                logger.debug("[Pro] Time-based trial expired")
             }
         }
     }
@@ -240,7 +240,7 @@ class ProSubscriptionService: ObservableObject {
                 trialDaysRemaining = nil
             }
         } catch {
-            print("[Pro] Failed to check trial status: \(error)")
+            logger.debug("[Pro] Failed to check trial status: \(error)")
             await MainActor.run {
                 trialDaysRemaining = nil
             }
@@ -262,7 +262,7 @@ class ProSubscriptionService: ObservableObject {
                     // Finish transaction
                     await transaction.finish()
                 } catch {
-                    print("[Pro] Transaction verification failed: \(error)")
+                    logger.debug("[Pro] Transaction verification failed: \(error)")
                 }
             }
         }
@@ -334,15 +334,15 @@ class ProSubscriptionService: ObservableObject {
         
         do {
             products = try await Product.products(for: [monthlyProductID, yearlyProductID])
-            print("[Pro] Loaded \(products.count) products")
+            logger.debug("[Pro] Loaded \(products.count) products")
             
             if products.isEmpty {
                 productLoadError = "No subscription products found. Please check your internet connection and try again."
-                print("[Pro] Warning: Product array is empty")
+                logger.debug("[Pro] Warning: Product array is empty")
             }
         } catch {
             productLoadError = "Unable to load subscription options. Please check your internet connection and try again."
-            print("[Pro] Failed to load products: \(error.localizedDescription)")
+            logger.debug("[Pro] Failed to load products: \(error.localizedDescription)")
         }
     }
     
@@ -390,7 +390,7 @@ class ProSubscriptionService: ObservableObject {
                 isProUser = false
             }
         } catch {
-            print("[Pro] Failed to check subscription: \(error)")
+            logger.debug("[Pro] Failed to check subscription: \(error)")
             // Even if subscription check fails, honor the time-based trial
             updateTrialDaysRemaining()
             if trialDaysRemaining == nil || trialDaysRemaining! <= 0 {
@@ -406,17 +406,17 @@ class ProSubscriptionService: ObservableObject {
     func purchase(productID: String) async -> Bool {
         // Ensure products are loaded
         if products.isEmpty {
-            print("[Pro] Products not loaded, loading now...")
+            logger.debug("[Pro] Products not loaded, loading now...")
             await loadProducts()
         }
         
         guard let product = products.first(where: { $0.id == productID }) else {
-            print("[Pro] Product not found: \(productID)")
-            print("[Pro] Available products: \(products.map { $0.id })")
+            logger.debug("[Pro] Product not found: \(productID)")
+            logger.debug("[Pro] Available products: \(products.map { $0.id })")
             return false
         }
         
-        print("[Pro] Starting purchase for product: \(product.displayName) (\(productID))")
+        logger.debug("[Pro] Starting purchase for product: \(product.displayName) (\(productID))")
         
         do {
             let result = try await product.purchase()
@@ -425,7 +425,7 @@ class ProSubscriptionService: ObservableObject {
             case .success(let verification):
                 switch verification {
                 case .verified(let transaction):
-                    print("[Pro] Purchase verified successfully")
+                    logger.debug("[Pro] Purchase verified successfully")
                     // Purchase successful
                     await transaction.finish()
                     await checkSubscriptionStatus()
@@ -440,24 +440,24 @@ class ProSubscriptionService: ObservableObject {
 
                     return true
                 case .unverified(_, let error):
-                    print("[Pro] Unverified transaction: \(error.localizedDescription)")
+                    logger.debug("[Pro] Unverified transaction: \(error.localizedDescription)")
                     return false
                 }
             case .userCancelled:
-                print("[Pro] User cancelled purchase")
+                logger.debug("[Pro] User cancelled purchase")
                 return false
             case .pending:
-                print("[Pro] Purchase pending (requires approval)")
+                logger.debug("[Pro] Purchase pending (requires approval)")
                 // For pending purchases, we should still return true as the purchase is in progress
                 // The transaction listener will handle the completion
                 return true
             @unknown default:
-                print("[Pro] Unknown purchase result")
+                logger.debug("[Pro] Unknown purchase result")
                 return false
             }
         } catch {
-            print("[Pro] Purchase failed with error: \(error.localizedDescription)")
-            print("[Pro] Error details: \(error)")
+            logger.debug("[Pro] Purchase failed with error: \(error.localizedDescription)")
+            logger.debug("[Pro] Error details: \(error)")
             return false
         }
     }
@@ -469,7 +469,7 @@ class ProSubscriptionService: ObservableObject {
             await checkSubscriptionStatus()
             return isProUser
         } catch {
-            print("[Pro] Restore failed: \(error)")
+            logger.debug("[Pro] Restore failed: \(error)")
             return false
         }
     }
@@ -521,7 +521,7 @@ class ProSubscriptionService: ObservableObject {
                     }
                 }
             } catch {
-                print("[Pro] Failed to get expiration date: \(error)")
+                logger.debug("[Pro] Failed to get expiration date: \(error)")
             }
             return nil
         }

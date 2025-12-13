@@ -266,7 +266,7 @@ class FirebaseAnalyticsService: AnalyticsService {
     init?() {
         // Check if Firebase is properly configured
         guard let _ = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") else {
-            print("[Analytics] Firebase not configured, using console analytics")
+            logger.debug("[Analytics] Firebase not configured, using console analytics")
             return nil
         }
 
@@ -275,9 +275,9 @@ class FirebaseAnalyticsService: AnalyticsService {
         self.isEnabled = firebaseEnabled
 
         if isEnabled {
-            print("[Analytics] Firebase Analytics initialized")
+            logger.debug("[Analytics] Firebase Analytics initialized")
         } else {
-            print("[Analytics] Firebase Analytics disabled via environment")
+            logger.debug("[Analytics] Firebase Analytics disabled via environment")
         }
     }
 
@@ -285,9 +285,9 @@ class FirebaseAnalyticsService: AnalyticsService {
         guard isEnabled else {
             // Fallback to console logging
             if let params = parameters {
-                print("[Analytics] \(event): \(params)")
+                logger.debug("[Analytics] \(event): \(params)")
             } else {
-                print("[Analytics] \(event)")
+                logger.debug("[Analytics] \(event)")
             }
             return
         }
@@ -328,9 +328,9 @@ class FirebaseAnalyticsService: AnalyticsService {
 class ConsoleAnalytics: AnalyticsService {
     func logEvent(_ event: String, parameters: [String: Any]?) {
         if let params = parameters {
-            print("[Analytics] \(event): \(params)")
+            logger.debug("[Analytics] \(event): \(params)")
         } else {
-            print("[Analytics] \(event)")
+            logger.debug("[Analytics] \(event)")
         }
     }
 }

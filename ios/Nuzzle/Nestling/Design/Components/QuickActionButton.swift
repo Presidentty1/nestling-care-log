@@ -1,5 +1,5 @@
 import SwiftUI
-import UIKit
+import Loggerimport UIKit
 
 struct QuickActionButton: View {
     @EnvironmentObject var environment: AppEnvironment
@@ -64,11 +64,11 @@ struct QuickActionButton: View {
             }
 
             Button(action: {
-                print("🔵 QuickActionButton tapped: \(title)")
+                logger.debug("🔵 QuickActionButton tapped: \(title)")
                 Haptics.light()
                 action()
                 showSuccessFeedback()
-                print("🔵 QuickActionButton action called: \(title)")
+                logger.debug("🔵 QuickActionButton action called: \(title)")
             }) {
             VStack(spacing: isCaregiverMode ? .spacingSM : .spacingXS) {
                 ZStack {
@@ -134,7 +134,7 @@ struct QuickActionButton: View {
                 // Double-tap for enhanced haptic feedback only (action already called by button tap)
                 TapGesture(count: 2)
                     .onEnded { _ in
-                        print("🔵 QuickActionButton double-tap detected: \(title)")
+                        logger.debug("🔵 QuickActionButton double-tap detected: \(title)")
                         Haptics.medium() // Enhanced feedback for double-tap
                     }
             )
@@ -142,7 +142,7 @@ struct QuickActionButton: View {
                 // Long press for detailed form
                 LongPressGesture(minimumDuration: 0.5)
                     .onEnded { _ in
-                        print("🔵 QuickActionButton long press: \(title)")
+                        logger.debug("🔵 QuickActionButton long press: \(title)")
                         if let longPressAction = longPressAction {
                             Haptics.medium()
                             longPressAction()

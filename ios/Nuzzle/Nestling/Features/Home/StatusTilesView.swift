@@ -359,7 +359,7 @@ struct HeroNapCard: View {
         let key = "nap_prediction_feedback_\(napWindow.start.timeIntervalSince1970)"
         UserDefaults.standard.set(helpful, forKey: key)
         // TODO: Sync to analytics/backend
-        print("📊 Nap prediction feedback: \(helpful ? "Helpful" : "Not helpful")")
+        logger.debug("📊 Nap prediction feedback: \(helpful ? "Helpful" : "Not helpful")")
     }
     
     private func formatNapWindow(_ window: NapWindow) -> String {

@@ -210,7 +210,7 @@ class OnboardingCoordinator: ObservableObject {
                     FirstThreeDaysJourneyService.shared.startJourney(onboardingCompleteDate: Date())
                 }
             } catch {
-                print("Error completing onboarding: \(error)")
+                logger.debug("Error completing onboarding: \(error)")
             }
         }
     }
@@ -243,7 +243,7 @@ class OnboardingCoordinator: ObservableObject {
                     isCompleted = true
                 }
             } catch {
-                print("Error loading sample data: \(error)")
+                logger.debug("Error loading sample data: \(error)")
             }
         }
     }

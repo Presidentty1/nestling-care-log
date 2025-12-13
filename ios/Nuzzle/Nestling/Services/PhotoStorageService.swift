@@ -62,7 +62,7 @@ class PhotoStorageService {
                 }
             }
         } catch {
-            print("Error loading photos for event \(eventId): \(error)")
+            logger.debug("Error loading photos for event \(eventId): \(error)")
         }
 
         return images
@@ -82,7 +82,7 @@ class PhotoStorageService {
                 try fileManager.removeItem(at: fileURL)
             }
         } catch {
-            print("Error deleting photos for event \(eventId): \(error)")
+            logger.debug("Error deleting photos for event \(eventId): \(error)")
         }
     }
 
@@ -99,7 +99,7 @@ class PhotoStorageService {
                 totalSize += attributes[.size] as? Int64 ?? 0
             }
         } catch {
-            print("Error calculating photos size: \(error)")
+            logger.debug("Error calculating photos size: \(error)")
         }
 
         return totalSize
@@ -140,7 +140,7 @@ class PhotoStorageService {
                 deletedSize += fileSize
             }
         } catch {
-            print("Error during photo cleanup: \(error)")
+            logger.debug("Error during photo cleanup: \(error)")
         }
     }
 

@@ -1,5 +1,5 @@
 import SwiftUI
-
+import Logger
 /// Trial countdown banner shown at top of Home screen
 struct TrialBannerView: View {
     let daysRemaining: Int
@@ -132,7 +132,7 @@ struct TrialStartedCelebrationView: View {
 #Preview("Trial Banner - 5 days") {
     VStack {
         TrialBannerView(daysRemaining: 5) {
-            print("Upgrade tapped")
+            logger.debug("Upgrade tapped")
         }
         .padding()
         
@@ -144,7 +144,7 @@ struct TrialStartedCelebrationView: View {
 #Preview("Trial Banner - 1 day") {
     VStack {
         TrialBannerView(daysRemaining: 1) {
-            print("Upgrade tapped")
+            logger.debug("Upgrade tapped")
         }
         .padding()
         

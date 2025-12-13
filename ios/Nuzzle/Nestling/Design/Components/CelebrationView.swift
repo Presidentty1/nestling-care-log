@@ -1,5 +1,5 @@
 import SwiftUI
-
+import Logger
 // Import for feature flags and sharing
 private let featureFlags = PolishFeatureFlags.shared
 
@@ -284,7 +284,7 @@ struct ConfettiView: View {
 
 #Preview {
     CelebrationView(type: .firstLog) {
-        print("Dismissed")
+        logger.debug("Dismissed")
     }
 }
 

@@ -33,7 +33,7 @@ class SharedWidgetData {
         do {
             return try JSONDecoder().decode(Baby.self, from: babyData)
         } catch {
-            print("Failed to decode baby data: \(error)")
+            logger.debug("Failed to decode baby data: \(error)")
             return nil
         }
     }
@@ -46,7 +46,7 @@ class SharedWidgetData {
             userDefaults.set(data, forKey: SharedWidgetData.babyKey)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            print("Failed to encode baby data: \(error)")
+            logger.debug("Failed to encode baby data: \(error)")
         }
     }
 
@@ -61,7 +61,7 @@ class SharedWidgetData {
         do {
             return try JSONDecoder().decode([Prediction].self, from: predictionsData)
         } catch {
-            print("Failed to decode predictions: \(error)")
+            logger.debug("Failed to decode predictions: \(error)")
             return []
         }
     }
@@ -74,7 +74,7 @@ class SharedWidgetData {
             userDefaults.set(data, forKey: SharedWidgetData.predictionsKey)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            print("Failed to encode predictions: \(error)")
+            logger.debug("Failed to encode predictions: \(error)")
         }
     }
 
@@ -89,7 +89,7 @@ class SharedWidgetData {
         do {
             return try JSONDecoder().decode([Event].self, from: eventsData)
         } catch {
-            print("Failed to decode events: \(error)")
+            logger.debug("Failed to decode events: \(error)")
             return []
         }
     }
@@ -102,7 +102,7 @@ class SharedWidgetData {
             userDefaults.set(data, forKey: SharedWidgetData.eventsKey)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            print("Failed to encode events: \(error)")
+            logger.debug("Failed to encode events: \(error)")
         }
     }
 

@@ -194,7 +194,7 @@ class HomeViewModel: ObservableObject {
         self.dataStore = dataStore
         self.baby = baby
         self.showToast = showToast
-        print("HomeViewModel.init: Created for baby \(baby.id)")
+        logger.debug("HomeViewModel.init: Created for baby \(baby.id)")
         Task { @MainActor in
             await loadUserGoal()
             await loadTodayEvents()
@@ -265,7 +265,7 @@ class HomeViewModel: ObservableObject {
             }
         }
         
-        print("loadTodayEvents called for baby: \(baby.id), wasAlreadyLoading: \(wasAlreadyLoading)")
+        logger.debug("loadTodayEvents called for baby: \(baby.id), wasAlreadyLoading: \(wasAlreadyLoading)")
         
         // Only set isLoading = true if we weren't already loading
         // This prevents rapid calls from keeping isLoading stuck at true
@@ -336,7 +336,7 @@ class HomeViewModel: ObservableObject {
                 timeoutTask.cancel()
                 
                 let elapsed = Date().timeIntervalSince(startTime)
-                print("[\(taskID)] fetchEvents completed in \(elapsed) seconds, got \(todayEvents.count) events")
+                logger.debug("[\(taskID)] fetchEvents completed in \(elapsed) seconds, got \(todayEvents.count) events")
                 
                 // Update UI on MainActor (we're already on MainActor, but be explicit)
                 self.events = todayEvents
@@ -371,7 +371,7 @@ class HomeViewModel: ObservableObject {
                     self.currentStreak = try await streakService.calculateCurrentStreak(for: baby)
                     self.longestStreak = try await streakService.calculateLongestStreak(for: baby)
                 } catch {
-                    print("Error calculating streaks: \(error)")
+                    logger.debug("Error calculating streaks: \(error)")
                     self.currentStreak = 0
                     self.longestStreak = 0
                 }
@@ -406,16 +406,16 @@ class HomeViewModel: ObservableObject {
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             } catch {
                 if Task.isCancelled {
-                    print("[\(taskID)] loadTodayEvents was cancelled during error handling")
+                    logger.debug("[\(taskID)] loadTodayEvents was cancelled during error handling")
                     timeoutTask.cancel()
                     return // defer block will handle isLoading reset
                 }
                 
                 timeoutTask.cancel()
                 let elapsed = Date().timeIntervalSince(startTime)
-                print("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
+                logger.debug("[\(taskID)] ERROR: fetchEvents failed after \(elapsed) seconds: \(error)")
                 self.errorMessage = "Failed to load events: \(error.localizedDescription)"
-                print("[\(taskID)] Error set")
+                logger.debug("[\(taskID)] Error set")
                 SignpostLogger.endInterval("TimelineLoad", signpostID: signpostID, log: SignpostLogger.ui)
             }
             
@@ -436,16 +436,16 @@ class HomeViewModel: ObservableObject {
             }
         } catch {
             // Log error but don't block UI
-            print("Failed to restore active sleep: \(error.localizedDescription)")
+            logger.debug("Failed to restore active sleep: \(error.localizedDescription)")
         }
     }
     
     func quickLogFeed() {
-        print("quickLogFeed called")
+        logger.debug("quickLogFeed called")
         
         // Prevent duplicate calls
         guard !isProcessingQuickLog else {
-            print("Already processing quick log, ignoring duplicate call")
+            logger.debug("Already processing quick log, ignoring duplicate call")
             return
         }
         
@@ -483,7 +483,7 @@ class HomeViewModel: ObservableObject {
                     unit: finalUnit,
                     note: nil
                 )
-                print("Adding feed event: \(finalAmount) \(finalUnit)")
+                logger.debug("Adding feed event: \(finalAmount) \(finalUnit)")
 
                 if PolishFeatureFlags.shared.optimisticUIEnabled {
                     // OPTIMISTIC UI: Add to UI immediately
@@ -502,7 +502,7 @@ class HomeViewModel: ObservableObject {
                     Task {
                         do {
                             try await dataStore.addEvent(event)
-                            print("Feed event persisted successfully")
+                            logger.debug("Feed event persisted successfully")
 
                             // Check if this is the first event and show onboarding toast
                             await checkAndShowFirstEventToast(eventType: "feed")
@@ -541,7 +541,7 @@ class HomeViewModel: ObservableObject {
                                 baby: baby
                             )
                         } catch {
-                            print("Error persisting feed event: \(error)")
+                            logger.debug("Error persisting feed event: \(error)")
                             // ROLLBACK: Remove from UI on error
                             events.removeAll { $0.id == event.id }
                             updateSummaryAfterEventRemoval(event)
@@ -554,7 +554,7 @@ class HomeViewModel: ObservableObject {
                 } else {
                     // FALLBACK: Original synchronous behavior
                     try await dataStore.addEvent(event)
-                    print("Feed event added successfully")
+                    logger.debug("Feed event added successfully")
 
                     // Check if this is the first event and show onboarding toast
                     await checkAndShowFirstEventToast(eventType: "feed")
@@ -577,11 +577,11 @@ class HomeViewModel: ObservableObject {
 
                     // Small delay to ensure CoreData save is complete, then reload
                     try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                    print("Reloading events after feed...")
+                    logger.debug("Reloading events after feed...")
                     await loadTodayEvents()
                 }
             } catch {
-                print("Error logging feed: \(error)")
+                logger.debug("Error logging feed: \(error)")
                 Haptics.error()
                 await MainActor.run {
                     errorMessage = "Failed to log feed: \(error.localizedDescription)"
@@ -619,11 +619,11 @@ class HomeViewModel: ObservableObject {
     }
 
     func quickLogSleep() {
-        print("quickLogSleep called")
+        logger.debug("quickLogSleep called")
         
         // Prevent duplicate calls
         guard !isProcessingQuickLog else {
-            print("Already processing quick log, ignoring duplicate call")
+            logger.debug("Already processing quick log, ignoring duplicate call")
             return
         }
         
@@ -660,7 +660,7 @@ class HomeViewModel: ObservableObject {
                     
                     // Small delay to ensure CoreData save is complete, then reload
                     try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                    print("Reloading events after sleep stop...")
+                    logger.debug("Reloading events after sleep stop...")
                     await loadTodayEvents()
                 } else {
                     // Start new sleep
@@ -677,7 +677,7 @@ class HomeViewModel: ObservableObject {
                     Haptics.light()
                 }
             } catch {
-                print("Error logging sleep: \(error)")
+                logger.debug("Error logging sleep: \(error)")
                 CrashReportingService.shared.logError(error, context: ["action": "log_sleep"])
                 Haptics.error()
                 await MainActor.run {
@@ -688,11 +688,11 @@ class HomeViewModel: ObservableObject {
     }
     
     func quickLogDiaper() {
-        print("quickLogDiaper called")
+        logger.debug("quickLogDiaper called")
         
         // Prevent duplicate calls
         guard !isProcessingQuickLog else {
-            print("Already processing quick log, ignoring duplicate call")
+            logger.debug("Already processing quick log, ignoring duplicate call")
             return
         }
         
@@ -734,10 +734,10 @@ class HomeViewModel: ObservableObject {
                 
                 // Small delay to ensure CoreData save is complete, then reload
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                print("Reloading events after diaper...")
+                logger.debug("Reloading events after diaper...")
                 await loadTodayEvents()
             } catch {
-                print("Error logging diaper: \(error)")
+                logger.debug("Error logging diaper: \(error)")
                 CrashReportingService.shared.logError(error, context: ["action": "log_diaper"])
                 Haptics.error()
                 await MainActor.run {
@@ -748,7 +748,7 @@ class HomeViewModel: ObservableObject {
     }
     
     func quickLogTummyTime() {
-        print("quickLogTummyTime called")
+        logger.debug("quickLogTummyTime called")
         Task { @MainActor in
             do {
                 // For quick log, use current time (not backdated)
@@ -761,7 +761,7 @@ class HomeViewModel: ObservableObject {
                     endTime: nil, // No end time for quick log - user can add duration later
                     note: nil
                 )
-                print("Adding tummy time event at: \(now)")
+                logger.debug("Adding tummy time event at: \(now)")
                 try await dataStore.addEvent(event)
 
                 // Check if this is the first event and show onboarding toast
@@ -781,10 +781,10 @@ class HomeViewModel: ObservableObject {
                 
                 // Small delay to ensure CoreData save is complete, then reload
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                print("Reloading events after tummy time...")
+                logger.debug("Reloading events after tummy time...")
                 await loadTodayEvents()
             } catch {
-                print("Error logging tummy time: \(error)")
+                logger.debug("Error logging tummy time: \(error)")
                 CrashReportingService.shared.logError(error, context: ["action": "log_tummy_time"])
                 Haptics.error()
                 await MainActor.run {
@@ -1099,7 +1099,7 @@ extension HomeViewModel {
             // Check if we should show upgrade prompts at milestones
             await checkUpgradeMilestones(totalEvents: allEvents.count)
         } catch {
-            print("Error checking for first event toast: \(error)")
+            logger.debug("Error checking for first event toast: \(error)")
         }
     }
     
@@ -1165,7 +1165,7 @@ extension HomeViewModel {
                 await triggerOMGCelebration(omgMoment)
             }
         } catch {
-            print("Error checking for OMG moment: \(error)")
+            logger.debug("Error checking for OMG moment: \(error)")
         }
     }
 
@@ -1273,7 +1273,7 @@ extension HomeViewModel {
                 ])
             }
         } catch {
-            print("Error checking for reassurance: \(error)")
+            logger.debug("Error checking for reassurance: \(error)")
         }
     }
 
@@ -1310,7 +1310,7 @@ extension HomeViewModel {
             predictiveSuggestions.removeAll { $0.id == prediction.id }
 
         } catch {
-            print("Error executing predictive log: \(error)")
+            logger.debug("Error executing predictive log: \(error)")
             Haptics.error()
         }
 
@@ -1361,7 +1361,7 @@ extension HomeViewModel {
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
             await loadTodayEvents()
         } catch {
-            print("Error logging predictive feed: \(error)")
+            logger.debug("Error logging predictive feed: \(error)")
             await MainActor.run {
                 showToast("Failed to log feed", "error")
             }
@@ -1409,7 +1409,7 @@ extension HomeViewModel {
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
             await loadTodayEvents()
         } catch {
-            print("Error logging predictive diaper: \(error)")
+            logger.debug("Error logging predictive diaper: \(error)")
             await MainActor.run {
                 showToast("Failed to log diaper", "error")
             }
@@ -1440,7 +1440,7 @@ extension HomeViewModel {
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
             await loadTodayEvents()
         } catch {
-            print("Error starting predictive tummy time: \(error)")
+            logger.debug("Error starting predictive tummy time: \(error)")
             await MainActor.run {
                 showToast("Failed to start tummy time", "error")
             }

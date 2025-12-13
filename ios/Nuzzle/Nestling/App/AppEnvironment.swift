@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import Loggerimport Combine
 
 /// Central dependency container for the app.
 /// Provides access to DataStore and shared view models.
@@ -54,7 +54,7 @@ class AppEnvironment: ObservableObject {
                     UserDefaults.standard.set(settings.analyticsEnabled, forKey: "analyticsEnabled")
                 }
             } catch {
-                print("Error loading initial data: \(error)")
+                logger.debug("Error loading initial data: \(error)")
             }
         }
     }
@@ -73,7 +73,7 @@ class AppEnvironment: ObservableObject {
                 }
             }
         } catch {
-            print("Error refreshing babies: \(error)")
+            logger.debug("Error refreshing babies: \(error)")
         }
     }
     
@@ -87,7 +87,7 @@ class AppEnvironment: ObservableObject {
                     UserDefaults.standard.set(settings.analyticsEnabled, forKey: "analyticsEnabled")
                 }
             } catch {
-                print("Error refreshing settings: \(error)")
+                logger.debug("Error refreshing settings: \(error)")
             }
         }
     }

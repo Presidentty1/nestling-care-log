@@ -54,7 +54,7 @@ struct OnboardingView: View {
 
 #Preview {
     OnboardingView(dataStore: InMemoryDataStore()) {
-        print("Onboarding complete")
+        logger.debug("Onboarding complete")
     }
     .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
 }

@@ -13,7 +13,7 @@ class LiveActivityManager {
     /// Start Live Activity for sleep tracking with Dynamic Island support
     func startSleepActivity(for baby: Baby, startTime: Date) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            print("Live Activities not enabled")
+            logger.debug("Live Activities not enabled")
             return
         }
         
@@ -33,7 +33,7 @@ class LiveActivityManager {
             currentActivity = activity
             Haptics.success()
         } catch {
-            print("Failed to start Live Activity: \(error)")
+            logger.debug("Failed to start Live Activity: \(error)")
         }
     }
     

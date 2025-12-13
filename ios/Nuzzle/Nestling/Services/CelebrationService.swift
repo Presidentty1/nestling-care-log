@@ -119,7 +119,7 @@ class CelebrationService: ObservableObject {
     private func triggerCelebration(_ celebration: Celebration) {
         // Check fatigue prevention
         guard shouldShowCelebration(celebration) else {
-            print("Celebration throttled: \(celebration)")
+            logger.debug("Celebration throttled: \(celebration)")
             return
         }
 

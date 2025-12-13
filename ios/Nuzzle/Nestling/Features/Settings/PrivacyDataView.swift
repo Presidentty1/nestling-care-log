@@ -1,5 +1,5 @@
 import SwiftUI
-import Supabase
+import Loggerimport Supabase
 import Auth
 
 struct PrivacyDataView: View {
@@ -401,7 +401,7 @@ struct PrivacyDataView: View {
                     // App will show onboarding on next launch since no babies exist
                 }
             } catch {
-                print("Error deleting all data: \(error)")
+                logger.debug("Error deleting all data: \(error)")
                 Haptics.error()
             }
         }
@@ -431,14 +431,14 @@ struct PrivacyDataView: View {
                         )
                         
                         if response.success {
-                            print("Account deleted successfully from Supabase")
+                            logger.debug("Account deleted successfully from Supabase")
                         } else {
                             let errorMessage = response.error ?? "Unknown error"
-                            print("Failed to delete account from Supabase: \(errorMessage)")
+                            logger.debug("Failed to delete account from Supabase: \(errorMessage)")
                             // Continue with local deletion even if server deletion fails
                         }
                     } catch {
-                        print("Failed to delete account from Supabase: \(error)")
+                        logger.debug("Failed to delete account from Supabase: \(error)")
                         // Continue with local deletion even if Supabase deletion fails
                     }
                 }
@@ -453,7 +453,7 @@ struct PrivacyDataView: View {
                     // App will show onboarding on next launch since no babies exist
                 }
             } catch {
-                print("Error deleting account: \(error)")
+                logger.debug("Error deleting account: \(error)")
                 Haptics.error()
             }
         }
@@ -479,7 +479,7 @@ struct PrivacyDataView: View {
             environment.refreshSettings()
 
         } catch {
-            print("Error deleting local data: \(error)")
+            logger.debug("Error deleting local data: \(error)")
         }
     }
 

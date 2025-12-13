@@ -180,7 +180,7 @@ class NotificationScheduler {
         
         center.add(request) { error in
             if let error = error {
-                print("Failed to send test notification: \(error)")
+                logger.debug("Failed to send test notification: \(error)")
             }
         }
     }
@@ -294,7 +294,7 @@ class NotificationScheduler {
         
         guard let notificationDate = Calendar.current.date(from: components),
               notificationDate > Date() else {
-            print("[Notifications] Trial warning date is in the past, skipping")
+            logger.debug("[Notifications] Trial warning date is in the past, skipping")
             return
         }
         
@@ -312,9 +312,9 @@ class NotificationScheduler {
         
         center.add(request) { error in
             if let error = error {
-                print("[Notifications] Failed to schedule trial warning: \(error)")
+                logger.debug("[Notifications] Failed to schedule trial warning: \(error)")
             } else {
-                print("[Notifications] Scheduled trial warning for \(notificationDate)")
+                logger.debug("[Notifications] Scheduled trial warning for \(notificationDate)")
             }
         }
     }

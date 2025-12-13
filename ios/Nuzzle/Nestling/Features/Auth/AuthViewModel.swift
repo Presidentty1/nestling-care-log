@@ -23,7 +23,7 @@ class AuthViewModel: ObservableObject {
         do {
             self.supabaseClient = try SupabaseClientProvider.shared.getClient()
         } catch {
-            print("⚠️ Supabase client not configured: \(error.localizedDescription)")
+            logger.debug("⚠️ Supabase client not configured: \(error.localizedDescription)")
         }
 
         // Check for existing session on init
@@ -65,7 +65,7 @@ class AuthViewModel: ObservableObject {
             if let session = response.session {
                 self.session = session
                 // Session is automatically persisted by Supabase
-                print("✅ Signed up successfully")
+                logger.debug("✅ Signed up successfully")
             } else {
                 // Email confirmation required
                 throw AuthError.emailConfirmationRequired
@@ -98,7 +98,7 @@ class AuthViewModel: ObservableObject {
             )
 
             self.session = session
-            print("✅ Signed in successfully")
+            logger.debug("✅ Signed in successfully")
         } catch {
             self.errorMessage = error.localizedDescription
             throw error
@@ -113,13 +113,13 @@ class AuthViewModel: ObservableObject {
 
         try await client.auth.signOut()
         self.session = nil
-        print("✅ Signed out successfully")
+        logger.debug("✅ Signed out successfully")
     }
     
     /// Restore session from Supabase
     func restoreSession() async {
         guard let client = supabaseClient else {
-            print("Supabase client not configured")
+            logger.debug("Supabase client not configured")
             return
         }
 
@@ -127,10 +127,10 @@ class AuthViewModel: ObservableObject {
             let session = try await client.auth.session
             self.session = session
             if self.session != nil {
-                print("✅ Session restored successfully")
+                logger.debug("✅ Session restored successfully")
             }
         } catch {
-            print("Failed to restore session: \(error.localizedDescription)")
+            logger.debug("Failed to restore session: \(error.localizedDescription)")
         }
     }
     
@@ -155,13 +155,13 @@ class AuthViewModel: ObservableObject {
             }
         case .signedIn:
             self.session = session
-            print("✅ Auth state: signed in")
+            logger.debug("✅ Auth state: signed in")
         case .signedOut:
             self.session = nil
-            print("✅ Auth state: signed out")
+            logger.debug("✅ Auth state: signed out")
         case .tokenRefreshed:
             self.session = session
-            print("✅ Auth state: token refreshed")
+            logger.debug("✅ Auth state: token refreshed")
         default:
             break
         }
@@ -171,7 +171,7 @@ class AuthViewModel: ObservableObject {
     
     /// Skip authentication to use app in guest mode (local-only data)
     func skipAuthentication() {
-        print("✅ Skipping authentication - using guest mode")
+        logger.debug("✅ Skipping authentication - using guest mode")
         // Mark that user has skipped auth so app can proceed
         hasSkippedAuth = true
         session = nil
@@ -261,7 +261,7 @@ class AuthViewModel: ObservableObject {
             errorMessage = nil
         } catch {
             errorMessage = "Failed to send password reset email. Please try again."
-            print("Password reset error: \(error)")
+            logger.debug("Password reset error: \(error)")
         }
 
         isLoading = false
