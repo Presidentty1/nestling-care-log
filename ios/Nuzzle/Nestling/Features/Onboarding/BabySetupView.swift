@@ -4,6 +4,29 @@ struct BabySetupView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
     @State private var showError = false
     @State private var dobError: String?
+    @State private var localName: String = ""
+    @State private var selectedWakeOption: WakeOption = .justNow
+    @State private var customWakeTime: Date = Date()
+    @State private var showCustomTimePicker = false
+    
+    enum WakeOption: String, CaseIterable {
+        case justNow = "Just now"
+        case fifteenMin = "15 min ago"
+        case thirtyMin = "30 min ago"
+        case fortyFiveMin = "45 min ago"
+        case custom = "Custom time"
+        
+        func getDate() -> Date {
+            let now = Date()
+            switch self {
+            case .justNow: return now
+            case .fifteenMin: return now.addingTimeInterval(-15 * 60)
+            case .thirtyMin: return now.addingTimeInterval(-30 * 60)
+            case .fortyFiveMin: return now.addingTimeInterval(-45 * 60)
+            case .custom: return now
+            }
+        }
+    }
     
     private var isDOBValid: Bool {
         coordinator.dateOfBirth <= Date()
@@ -11,55 +34,105 @@ struct BabySetupView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: .spacingLG) {
+            VStack(spacing: .spacingXL) {
                 VStack(spacing: .spacingSM) {
-                    Text("Tell us about your baby")
-                        .font(.headline)
+                    Text("Who is this for?")
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.foreground)
                     
-                    Text("We'll use this to personalize your experience")
-                        .font(.body)
+                    Text("We'll use age to suggest nap windows and tailor tips")
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
                 }
-                .padding(.top, .spacing2XL)
+                .padding(.top, .spacingXL)
                 
-                Form {
-                    Section {
-                        TextField("Baby's name", text: $coordinator.babyName)
-                            .textInputAutocapitalization(.words)
-                            .font(.system(size: 17, weight: .regular))
-                            .padding(.vertical, 4)
-                    } header: {
-                        Text("Name")
+                // Baby Profile Form
+                VStack(alignment: .leading, spacing: .spacingLG) {
+                    VStack(alignment: .leading, spacing: .spacingSM) {
+                        Text("👶 Baby's Name")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.foreground)
+                        
+                        TextField("Enter name", text: $localName)
+                            .textInputAutocapitalization(.words)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding()
+                            .frame(height: 56)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusMD)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
+                            .onChange(of: localName) { _, newValue in
+                                coordinator.babyName = newValue
+                            }
                     }
                     
-                    Section {
-                        DatePicker(
-                            "Date of Birth",
-                            selection: $coordinator.dateOfBirth,
-                            in: ...Date(), // Prevent future dates
-                            displayedComponents: .date
-                        )
-                        .datePickerStyle(.compact)
-                        .font(.system(size: 17, weight: .regular))
-                        .padding(.vertical, 4)
-                        .onChange(of: coordinator.dateOfBirth) { _, newDate in
-                            if newDate > Date() {
-                                dobError = "Birth date can't be in the future"
-                            } else {
-                                dobError = nil
+                    VStack(alignment: .leading, spacing: .spacingSM) {
+                        Text("🎂 Date")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.foreground)
+                        
+                        Picker("Date Type", selection: $coordinator.birthDueSelection) {
+                            Text("Date of Birth").tag(BirthDueSelection.dateOfBirth)
+                            Text("Due Date").tag(BirthDueSelection.dueDate)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.bottom, .spacingSM)
+                        
+                        if coordinator.birthDueSelection == .dateOfBirth {
+                            DatePicker(
+                                "Date of Birth",
+                                selection: $coordinator.dateOfBirth,
+                                in: ...Date(),
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.compact)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding()
+                            .frame(height: 56)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusMD)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
+                            .onChange(of: coordinator.dateOfBirth) { _, newDate in
+                                if newDate > Date() {
+                                    dobError = "Birth date can't be in the future"
+                                } else {
+                                    dobError = nil
+                                }
+                                
+                                let ageInMonths = Calendar.current.dateComponents([.month], from: newDate, to: Date()).month ?? 0
+                                if ageInMonths > 6 {
+                                    coordinator.showAgeWarning = true
+                                } else {
+                                    coordinator.showAgeWarning = false
+                                }
+                                
+                                // Update nap prediction when DOB changes
+                                coordinator.updateNapPrediction()
                             }
-                            
-                            // Check if baby is >6 months old (Epic 1 AC4)
-                            let ageInMonths = Calendar.current.dateComponents([.month], from: newDate, to: Date()).month ?? 0
-                            if ageInMonths > 6 {
-                                coordinator.showAgeWarning = true
-                            } else {
-                                coordinator.showAgeWarning = false
-                            }
+                        } else {
+                            DatePicker(
+                                "Due Date",
+                                selection: $coordinator.dueDate,
+                                in: Date()...,
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.compact)
+                            .font(.system(size: 17, weight: .regular))
+                            .padding()
+                            .frame(height: 56)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusMD)
+                                    .stroke(Color.cardBorder, lineWidth: 1)
+                            )
                         }
                         
                         if let dobError = dobError {
@@ -68,7 +141,6 @@ struct BabySetupView: View {
                                 .foregroundColor(.destructive)
                         }
                         
-                        // Age >6mo warning (Epic 1 AC4)
                         if coordinator.showAgeWarning {
                             HStack(spacing: .spacingSM) {
                                 Image(systemName: "info.circle.fill")
@@ -84,7 +156,11 @@ struct BabySetupView: View {
                         }
                     }
                     
-                    Section {
+                    VStack(alignment: .leading, spacing: .spacingSM) {
+                        Text("Gender (Optional)")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.foreground)
+                        
                         Picker("Gender", selection: $coordinator.sex) {
                             Text("Not specified").tag(nil as Sex?)
                             Text("Girl").tag(Sex.female as Sex?)
@@ -93,15 +169,119 @@ struct BabySetupView: View {
                             Text("Prefer not to say").tag(Sex.preferNotToSay as Sex?)
                         }
                         .font(.system(size: 17, weight: .regular))
-                    } header: {
-                        // UX-05: Change "Sex" to "Gender" to soften the medical feel
-                        Text("Gender (Optional)")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.foreground)
+                        .padding()
+                        .frame(height: 56)
+                        .background(Color.surface)
+                        .cornerRadius(.radiusMD)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: .radiusMD)
+                                .stroke(Color.cardBorder, lineWidth: 1)
+                        )
                     }
                 }
-                .frame(height: 360)
-                .scrollDismissesKeyboard(.interactively)
+                .padding(.horizontal, .spacingLG)
+                
+                // Nap prediction section (shown after baby info is entered)
+                if !coordinator.babyName.isEmpty && isDOBValid {
+                    VStack(spacing: .spacingMD) {
+                        Text("When did \(babyName) last wake up?")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.foreground)
+                            .multilineTextAlignment(.center)
+                        
+                        VStack(spacing: .spacingSM) {
+                            ForEach(WakeOption.allCases, id: \.self) { option in
+                                WakeOptionButton(
+                                    title: option.rawValue,
+                                    isSelected: selectedWakeOption == option,
+                                    action: {
+                                        selectedWakeOption = option
+                                        Haptics.selection()
+                                        
+                                        if option == .custom {
+                                            showCustomTimePicker = true
+                                            coordinator.lastWakeTime = customWakeTime
+                                        } else {
+                                            showCustomTimePicker = false
+                                            coordinator.lastWakeTime = option.getDate()
+                                        }
+                                        
+                                        coordinator.updateNapPrediction()
+                                    }
+                                )
+                            }
+                            
+                            if showCustomTimePicker {
+                                DatePicker(
+                                    "Wake time",
+                                    selection: $customWakeTime,
+                                    in: ...Date(),
+                                    displayedComponents: [.hourAndMinute, .date]
+                                )
+                                .datePickerStyle(.graphical)
+                                .padding()
+                                .background(Color.surface)
+                                .cornerRadius(.radiusMD)
+                                .onChange(of: customWakeTime) { _, newValue in
+                                    coordinator.lastWakeTime = newValue
+                                    coordinator.updateNapPrediction()
+                                }
+                            }
+                        }
+                        .padding(.horizontal, .spacingLG)
+                        
+                        // Nap window prediction card
+                        if let napWindow = coordinator.firstNapWindow {
+                            VStack(alignment: .leading, spacing: .spacingSM) {
+                                HStack {
+                                    Image(systemName: "moon.zzz.fill")
+                                        .foregroundColor(.eventSleep)
+                                    Text("Next nap window")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.mutedForeground)
+                                    Spacer()
+                                    if napWindow.start < Date() {
+                                        Text("now")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(Color.warning)
+                                            .cornerRadius(8)
+                                    } else {
+                                        Text("in \(minutesUntil(napWindow.start)) min")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(Color.primary)
+                                            .cornerRadius(8)
+                                    }
+                                }
+                                
+                                Text(formatNapWindow(napWindow))
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.foreground)
+                                
+                                Text("Based on \(babyName)'s age and typical wake windows for this stage.")
+                                    .font(.system(size: 14, weight: .regular))
+                                    .foregroundColor(.mutedForeground)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .padding(.spacingLG)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusLG)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusLG)
+                                    .stroke(Color.eventSleep.opacity(0.3), lineWidth: 2)
+                            )
+                            .padding(.horizontal, .spacingLG)
+                        }
+                    }
+                    .padding(.top, .spacingMD)
+                }
+                
+                Spacer(minLength: 40)
                 
                 VStack(spacing: .spacingSM) {
                     Button(action: {
@@ -133,9 +313,9 @@ struct BabySetupView: View {
                             )
                     }
                     .disabled(coordinator.babyName.trimmingCharacters(in: .whitespaces).isEmpty || !isDOBValid)
-                    .padding(.horizontal, .spacingMD)
+                    .padding(.horizontal, .spacingLG)
                     
-                    Button("Skip") {
+                    Button("Skip for now") {
                         Haptics.light()
                         coordinator.skip()
                     }
@@ -147,6 +327,12 @@ struct BabySetupView: View {
         }
         .background(Color.background)
         .onAppear {
+            // Set default last wake time and update prediction
+            if coordinator.lastWakeTime == nil {
+                coordinator.lastWakeTime = Date()
+                coordinator.updateNapPrediction()
+            }
+            
             Task {
                 await Analytics.shared.logOnboardingStepViewed(step: "baby_setup")
             }
@@ -156,6 +342,48 @@ struct BabySetupView: View {
         } message: {
             Text("Please enter your baby's name to continue.")
         }
+    }
+    
+    private var babyName: String {
+        coordinator.babyName.isEmpty ? "baby" : coordinator.babyName
+    }
+    
+    private func formatNapWindow(_ window: NapWindow) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return "\(formatter.string(from: window.start)) – \(formatter.string(from: window.end))"
+    }
+    
+    private func minutesUntil(_ date: Date) -> Int {
+        max(0, Int(date.timeIntervalSinceNow / 60))
+    }
+}
+
+// MARK: - Wake Option Button
+private struct WakeOptionButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(isSelected ? .white : .foreground)
+                Spacer()
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? .white : .mutedForeground)
+            }
+            .padding(.spacingMD)
+            .background(isSelected ? Color.primary : Color.surface)
+            .cornerRadius(.radiusMD)
+            .overlay(
+                RoundedRectangle(cornerRadius: .radiusMD)
+                    .stroke(isSelected ? Color.primary : Color.cardBorder, lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

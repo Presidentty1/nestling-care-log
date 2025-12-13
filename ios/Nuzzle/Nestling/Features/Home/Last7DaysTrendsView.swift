@@ -10,7 +10,7 @@ struct Last7DaysTrendsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            ZStack {
                 if isLoading {
                     LoadingStateView(message: "Loading your baby's patterns...")
                 } else if let data = weeklyData {
@@ -226,9 +226,9 @@ struct Last7DaysTrendsView: View {
                     }
                 } else {
                     EmptyStateView(
-                        icon: "chart.bar.fill",
-                        title: "No data yet",
-                        message: "Log more feeds, sleep, and diapers to see your baby's patterns."
+                        context: .historyView,
+                        babyName: environment.currentBaby?.name,
+                        onPrimaryAction: { dismiss() }
                     )
                 }
             }

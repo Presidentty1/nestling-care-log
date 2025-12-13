@@ -30,13 +30,11 @@ struct PredictionsView: View {
                             
                             if !viewModel.aiEnabled {
                                 EmptyStateView(
-                                    icon: "brain.head.profile",
-                                    title: "Turn on Smart Predictions",
-                                    message: "Turn on Smart Predictions to get suggested nap and feed times based on your baby's logs.",
-                                    actionTitle: "Go to Settings",
-                                    action: {
+                                    context: .firstTimeUser,
+                                    babyName: environment.currentBaby?.name,
+                                    onPrimaryAction: {
                                         dismiss()
-                                        // Navigate to settings - would need navigation coordinator
+                                        // TODO: Navigate to settings (needs navigation coordinator route)
                                     }
                                 )
                                 .padding(.horizontal, .spacingMD)
@@ -86,9 +84,11 @@ struct PredictionsView: View {
                                     
                                     if viewModel.nextFeedPrediction == nil && viewModel.nextNapPrediction == nil {
                                         EmptyStateView(
-                                            icon: "brain.head.profile",
-                                            title: "No predictions yet",
-                                            message: "Tap the buttons above to generate predictions"
+                                            context: .todayTimeline,
+                                            babyName: environment.currentBaby?.name,
+                                            onPrimaryAction: {
+                                                viewModel.generatePrediction(type: .nextNap)
+                                            }
                                         )
                                         .frame(height: 200)
                                     }

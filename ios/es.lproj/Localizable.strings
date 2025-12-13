@@ -16,6 +16,44 @@
 
 /* Settings */
 "settings.title" = "Configuración";
+
+/* Polish Features - Time-based CTAs */
+"cta_log_morning_feed" = "Registrar Alimentación Matutina";
+"cta_log_afternoon_nap" = "Registrar Siesta de Hoy";
+"cta_log_evening_feed" = "Registrar Alimentación Vespertina";
+"cta_quick_night_log" = "Registro Rápido Nocturno";
+
+/* Success messages */
+"toast_feed_logged" = "¡Entendido! La alimentación de %1$@ a las %2$@ está registrada";
+"toast_event_deleted" = "Eliminado. Toca deshacer si cambias de opinión";
+
+/* Contextual badges */
+"badge_on_track" = "En camino";
+"badge_low_today" = "Bajo hoy";
+"badge_great_day" = "¡Gran día!";
+"badge_low_sleep" = "Sueño bajo";
+
+/* Share messages */
+"share_milestone_streak" = "¡%1$@ días de racha!";
+"share_milestone_sleep_record" = "¡%1$@h de sueño récord!";
+"share_milestone_week_complete" = "¡Semana %1$@ completada!";
+"share_milestone_patterns_unlocked" = "Patrones desbloqueados";
+"share_encouragement_streak" = "¡Consistencia increíble! Estás creando hábitos que te ayudarán a entender mejor a tu bebé cada día.";
+"share_encouragement_sleep" = "El descanso es tan importante para ambos. Disfruta estos momentos de paz.";
+"share_encouragement_week" = "Otra semana de preciosos recuerdos capturados. ¡Estás haciendo un trabajo increíble!";
+"share_encouragement_patterns" = "Tu dedicación está dando frutos. Están emergiendo patrones que ayudarán a hacer la crianza más clara.";
+
+/* Trial loss messaging */
+"trial_loss_personalized_naps" = "Predicciones personalizadas de siestas";
+"trial_loss_weekly_charts" = "Gráficos de tendencias semanales";
+"trial_loss_ai_insights" = "Información de IA de los patrones de tu bebé";
+"trial_loss_shareable_cards" = "Tarjetas de hitos para compartir";
+
+/* Offline messages */
+"offline_general" = "Sin conexión";
+"offline_ai_features" = "Funciones de IA sin conexión";
+"offline_sharing_queued" = "Compartición en cola";
+"offline_notifications_limited" = "Notificaciones limitadas";
 "settings.notifications" = "Notificaciones";
 "settings.aiDataSharing" = "IA y Compartir Datos";
 "settings.privacy" = "Privacidad y Datos";

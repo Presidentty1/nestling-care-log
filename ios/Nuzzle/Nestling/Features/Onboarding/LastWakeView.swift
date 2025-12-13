@@ -251,7 +251,7 @@ struct LastWakeView: View {
 }
 
 // MARK: - Wake Option Button
-struct WakeOptionButton: View {
+private struct WakeOptionButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void

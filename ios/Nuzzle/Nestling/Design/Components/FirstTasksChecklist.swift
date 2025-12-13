@@ -10,7 +10,36 @@ struct FirstTasksChecklist: View {
     let onLogFeed: () -> Void
     let onLogSleep: () -> Void
     let onViewPredictions: () -> Void
-    
+    let focusArea: FocusArea?  // Add this parameter
+
+    private var orderedTasks: [(icon: String, title: String, completed: Bool, action: (() -> Void)?)] {
+        var tasks = [
+            ("drop.fill", "Log your first feed", hasLoggedFeed, hasLoggedFeed ? nil : onLogFeed),
+            ("moon.fill", "Log your first sleep", hasLoggedSleep, hasLoggedSleep ? nil : onLogSleep),
+            ("brain.head.profile", "Explore AI predictions", hasViewedPredictions, hasViewedPredictions ? nil : onViewPredictions)
+        ]
+
+        // Reorder based on user's focus area
+        if focusArea == .napsAndNights {
+            // Put sleep first
+            tasks.swapAt(0, 1)
+        } else if focusArea == .cries {
+            // Put AI predictions first (cry analysis)
+            tasks.swapAt(0, 2)
+        }
+        return tasks
+    }
+
+    private var motivationalText: String {
+        let completed = [hasLoggedFeed, hasLoggedSleep, hasViewedPredictions].filter { $0 }.count
+        switch completed {
+        case 0: return "Log 2 events to unlock pattern insights!"
+        case 1: return "One more log until AI can help predict naps!"
+        case 2: return "Almost there! Explore AI to complete setup."
+        default: return "You're all set!"
+        }
+    }
+
     var body: some View {
         CardView(variant: .elevated) {
             VStack(alignment: .leading, spacing: .spacingMD) {
@@ -43,29 +72,24 @@ struct FirstTasksChecklist: View {
                 
                 // Tasks
                 VStack(spacing: .spacingMD) {
-                    TaskRow(
-                        icon: "drop.fill",
-                        title: "Log your first feed",
-                        isCompleted: hasLoggedFeed,
-                        action: hasLoggedFeed ? nil : onLogFeed
-                    )
-                    
-                    TaskRow(
-                        icon: "moon.fill",
-                        title: "Log your first sleep",
-                        isCompleted: hasLoggedSleep,
-                        action: hasLoggedSleep ? nil : onLogSleep
-                    )
-                    
-                    TaskRow(
-                        icon: "brain.head.profile",
-                        title: "Explore AI predictions",
-                        isCompleted: hasViewedPredictions,
-                        action: hasViewedPredictions ? nil : onViewPredictions,
-                        isPremium: true
-                    )
+                    ForEach(Array(orderedTasks.enumerated()), id: \.offset) { index, task in
+                        TaskRow(
+                            icon: task.icon,
+                            title: task.title,
+                            isCompleted: task.completed,
+                            action: task.action,
+                            isPremium: index == 2  // Third task is always AI predictions (premium)
+                        )
+                    }
                 }
-                
+
+                // Motivational text
+                Text(motivationalText)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, .spacingXS)
+
                 // Progress indicator
                 let completedCount = [hasLoggedFeed, hasLoggedSleep, hasViewedPredictions].filter { $0 }.count
                 ProgressView(value: Double(completedCount), total: 3.0)
@@ -157,9 +181,10 @@ struct TaskRow: View {
             hasViewedPredictions: false,
             onLogFeed: {},
             onLogSleep: {},
-            onViewPredictions: {}
+            onViewPredictions: {},
+            focusArea: .napsAndNights
         )
-        
+
         FirstTasksChecklist(
             isVisible: .constant(true),
             hasLoggedFeed: true,
@@ -167,7 +192,8 @@ struct TaskRow: View {
             hasViewedPredictions: true,
             onLogFeed: {},
             onLogSleep: {},
-            onViewPredictions: {}
+            onViewPredictions: {},
+            focusArea: .cries
         )
     }
     .padding()

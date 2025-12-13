@@ -112,6 +112,30 @@ struct HistoryView: View {
                 HistoryRangeSummaryCard(summary: summary)
                     .padding(.horizontal, .spacingMD)
             }
+
+            // Phase 3: Weekly trends card (shown for last 7 days)
+            if vm.selectedRange == .last7Days, let weeklySummary = vm.weeklySummary {
+                WeeklyTrendsCard(
+                    thisWeekData: weeklySummary,
+                    lastWeekData: nil, // TODO: Compare with last week
+                    isPro: ProSubscriptionService.shared.isProUser,
+                    onUpgradeTap: {
+                        // TODO: Show upgrade modal
+                    }
+                )
+                .padding(.horizontal, .spacingMD)
+            }
+
+            // Phase 3: Doctor report teaser
+            DoctorReportTeaser(
+                isPro: ProSubscriptionService.shared.isProUser,
+                onUpgradeTap: {
+                    // TODO: Show upgrade modal
+                },
+                onGenerateTap: {
+                    // TODO: Navigate to report generation
+                }
+            )
         }
     }
 
@@ -119,8 +143,11 @@ struct HistoryView: View {
     private func content(_ vm: HistoryViewModel) -> some View {
         switch vm.state {
         case .loading:
-            LoadingStateView(message: "Loading history...", useSkeleton: true)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            LoadingStateView(
+                message: "Loading history...",
+                useSkeleton: PolishFeatureFlags.shared.skeletonLoadingEnabled
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .error(let message):
             VStack(spacing: .spacingMD) {
                 Text(message)
@@ -139,13 +166,9 @@ struct HistoryView: View {
     @ViewBuilder
     private func loadedContentView(_ vm: HistoryViewModel) -> some View {
         if vm.filteredDays.isEmpty {
-            HistoryEmptyState(
-                title: "No events in this range",
-                message: "Try a different filter or start logging on Today.",
-                actionTitle: "Go to Today"
-            ) {
+            HistoryEmptyState(action: {
                 environment.navigationCoordinator.selectedTab = 0
-            }
+            })
         } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: .spacingSM) {

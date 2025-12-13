@@ -1,22 +1,28 @@
 import SwiftUI
+import UIKit
 
 struct QuickActionButton: View {
     @EnvironmentObject var environment: AppEnvironment
-    
+
     let title: String
     let icon: String
     let color: Color
     let action: () -> Void
     var isActive: Bool = false
     var longPressAction: (() -> Void)?
-    
-    init(title: String, icon: String, color: Color, isActive: Bool = false, action: @escaping () -> Void, longPressAction: (() -> Void)? = nil) {
+    var timeSinceLast: String?  // e.g., "2h ago"
+
+    @State private var showSuccessFeedback = false
+    @State private var rippleScale = 0.0
+
+    init(title: String, icon: String, color: Color, isActive: Bool = false, action: @escaping () -> Void, longPressAction: (() -> Void)? = nil, timeSinceLast: String? = nil) {
         self.title = title
         self.icon = icon
         self.color = color
         self.isActive = isActive
         self.action = action
         self.longPressAction = longPressAction
+        self.timeSinceLast = timeSinceLast
     }
     
     private var isCaregiverMode: Bool {
@@ -32,12 +38,14 @@ struct QuickActionButton: View {
     }
     
     var body: some View {
-        Button(action: {
-            print("🔵 QuickActionButton tapped: \(title)")
-            Haptics.light()
-            action()
-            print("🔵 QuickActionButton action called: \(title)")
-        }) {
+        ZStack {
+            Button(action: {
+                print("🔵 QuickActionButton tapped: \(title)")
+                Haptics.light()
+                action()
+                showSuccessFeedback()
+                print("🔵 QuickActionButton action called: \(title)")
+            }) {
             VStack(spacing: isCaregiverMode ? .spacingSM : .spacingXS) {
                 ZStack {
                     Circle()
@@ -54,6 +62,14 @@ struct QuickActionButton: View {
                     .font(buttonFont)
                     .foregroundColor(.foreground)
                     .lineLimit(1)
+
+                // Add time since last badge
+                if let timeSince = timeSinceLast {
+                    Text(timeSince)
+                        .font(.caption2)
+                        .foregroundColor(.mutedForeground)
+                        .padding(.top, 2)
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: isCaregiverMode ? 120 : 100)
@@ -87,31 +103,77 @@ struct QuickActionButton: View {
                 RoundedRectangle(cornerRadius: .radiusLG)
                     .stroke(isActive ? color.opacity(0.4) : Color.cardBorder, lineWidth: isActive ? 2 : 1)
             )
-        }
-        .contentShape(Rectangle()) // Ensure entire button area is tappable
-        .buttonStyle(QuickActionButtonStyle(isActive: isActive))
-        .simultaneousGesture(
-            // Double-tap for enhanced haptic feedback only (action already called by button tap)
-            TapGesture(count: 2)
-                .onEnded { _ in
-                    print("🔵 QuickActionButton double-tap detected: \(title)")
-                    Haptics.medium() // Enhanced feedback for double-tap
-                }
-        )
-        .simultaneousGesture(
-            // Long press for detailed form
-            LongPressGesture(minimumDuration: 0.5)
-                .onEnded { _ in
-                    print("🔵 QuickActionButton long press: \(title)")
-                    if let longPressAction = longPressAction {
-                        Haptics.medium()
-                        longPressAction()
+            }
+            .contentShape(Rectangle()) // Ensure entire button area is tappable
+            .buttonStyle(QuickActionButtonStyle(isActive: isActive))
+            .simultaneousGesture(
+                // Double-tap for enhanced haptic feedback only (action already called by button tap)
+                TapGesture(count: 2)
+                    .onEnded { _ in
+                        print("🔵 QuickActionButton double-tap detected: \(title)")
+                        Haptics.medium() // Enhanced feedback for double-tap
+                    }
+            )
+            .simultaneousGesture(
+                // Long press for detailed form
+                LongPressGesture(minimumDuration: 0.5)
+                    .onEnded { _ in
+                        print("🔵 QuickActionButton long press: \(title)")
+                        if let longPressAction = longPressAction {
+                            Haptics.medium()
+                            longPressAction()
+                        }
                     }
                 }
-        )
-        .motionAnimation(.easeInOut(duration: 0.2), value: isActive)
-        .accessibilityLabel("\(title) quick action")
-        .accessibilityHint(isActive ? "Active. Double tap to stop, long press for detailed form" : "Double tap to log \(title.lowercased()), long press for detailed form")
+            )
+            .motionAnimation(.easeInOut(duration: 0.2), value: isActive)
+            .accessibilityLabel("\(title) quick action")
+            .accessibilityHint(isActive ? "Active. Double tap to stop, long press for detailed form" : "Double tap to log \(title.lowercased()), long press for detailed form")
+
+            // Success feedback overlay
+            if showSuccessFeedback {
+                successFeedbackOverlay
+            }
+        }
+    }
+
+    private var successFeedbackOverlay: some View {
+        ZStack {
+            // Ripple effect
+            Circle()
+                .fill(color.opacity(0.3))
+                .scaleEffect(rippleScale)
+                .opacity(1 - rippleScale)
+
+            // Checkmark overlay
+            Image(systemName: "checkmark")
+                .font(.title)
+                .foregroundColor(.white)
+                .background(
+                    Circle()
+                        .fill(color)
+                        .frame(width: 40, height: 40)
+                )
+        }
+        .allowsHitTesting(false) // Don't block interaction
+    }
+
+    private func showSuccessFeedback() {
+        withAnimation(AnimationManager.celebration) {
+            showSuccessFeedback = true
+            rippleScale = 1.0
+        }
+
+        // Announce success to VoiceOver
+        UIAccessibility.post(notification: .announcement, argument: "\(title) logged successfully")
+
+        // Hide after animation completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation {
+                showSuccessFeedback = false
+                rippleScale = 0.0
+            }
+        }
     }
 }
 
@@ -127,9 +189,9 @@ struct QuickActionButtonStyle: ButtonStyle {
 
 #Preview {
     HStack(spacing: 8) {
-        QuickActionButton(title: "Feed", icon: "drop.fill", color: .eventFeed) {}
-        QuickActionButton(title: "Sleep", icon: "moon.fill", color: .eventSleep, isActive: true) {}
-        QuickActionButton(title: "Diaper", icon: "drop.circle.fill", color: .eventDiaper) {}
+        QuickActionButton(title: "Feed", icon: "drop.fill", color: .eventFeed, isActive: false, action: {}, longPressAction: nil, timeSinceLast: "2h ago")
+        QuickActionButton(title: "Sleep", icon: "moon.fill", color: .eventSleep, isActive: true, action: {}, longPressAction: nil, timeSinceLast: nil)
+        QuickActionButton(title: "Diaper", icon: "drop.circle.fill", color: .eventDiaper, isActive: false, action: {}, longPressAction: nil, timeSinceLast: "30m ago")
     }
     .padding()
 }

@@ -45,6 +45,17 @@ class ThemeManager: ObservableObject {
         }
     }
 
+    /// Whether night mode colors should be used
+    var nightModeColors: Bool {
+        nightModeEnabled || autoNightMode
+    }
+
+    /// Auto-enable night mode based on time (10pm-6am)
+    var autoNightMode: Bool {
+        let hour = Calendar.current.component(.hour, from: Date())
+        return hour >= 22 || hour < 6
+    }
+
     /// Whether the user has explicitly set a theme (vs using system)
     var hasExplicitThemePreference: Bool {
         themePreference != nil

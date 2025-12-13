@@ -427,32 +427,99 @@ class HomeViewModel: ObservableObject {
                     note: nil
                 )
                 print("Adding feed event: \(finalAmount) \(finalUnit)")
-                try await dataStore.addEvent(event)
-                print("Feed event added successfully")
 
-                // Check if this is the first event and show onboarding toast
-                await checkAndShowFirstEventToast(eventType: "feed")
+                if PolishFeatureFlags.shared.optimisticUIEnabled {
+                    // OPTIMISTIC UI: Add to UI immediately
+                    events.insert(event, at: 0)
+                    Haptics.success()
 
-                // Save last used
-                let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
-                try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
-                
-                // Analytics
-                Task {
-                    await Analytics.shared.log("event_added", parameters: [
-                        "event_type": "feed",
-                        "subtype": "bottle",
-                        "has_amount": true,
-                        "has_note": false
-                    ])
+                    // Show success feedback with personalized message
+                    let babyName = baby.name.isEmpty ? "your baby" : baby.name
+                    let timeString = DateUtils.formatTime(Date())
+                    showToast("Got it! \(babyName)'s \(timeString) feed is tracked", "success")
+
+                    // Update summary immediately
+                    updateSummaryAfterEvent(event)
+
+                    // Persist in background
+                    Task {
+                        do {
+                            try await dataStore.addEvent(event)
+                            print("Feed event persisted successfully")
+
+                            // Check if this is the first event and show onboarding toast
+                            await checkAndShowFirstEventToast(eventType: "feed")
+
+                            // Save last used
+                            let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
+                            try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
+
+                            // Analytics
+                            Task {
+                                await Analytics.shared.log("event_added", parameters: [
+                                    "event_type": "feed",
+                                    "subtype": "bottle",
+                                    "has_amount": true,
+                                    "has_note": false
+                                ])
+                            }
+
+                            // Update widget data after successful add
+                            syncWidgetData()
+
+                            // Check for upgrade milestones
+                            checkUpgradeMilestones()
+
+                            // Trigger proactive insights
+                            ProactiveInsightsService.shared.generateDailyInsight()
+
+                            // Check for celebrations
+                            CelebrationService.shared.checkForCelebration(
+                                events: events,
+                                totalLogs: totalLogs ?? 0,
+                                streakDays: daysActive ?? 0,
+                                baby: baby
+                            )
+                        } catch {
+                            print("Error persisting feed event: \(error)")
+                            // ROLLBACK: Remove from UI on error
+                            events.removeAll { $0.id == event.id }
+                            updateSummaryAfterEventRemoval(event)
+                            Haptics.error()
+                            await MainActor.run {
+                                errorMessage = "Failed to log feed: \(error.localizedDescription)"
+                            }
+                        }
+                    }
+                } else {
+                    // FALLBACK: Original synchronous behavior
+                    try await dataStore.addEvent(event)
+                    print("Feed event added successfully")
+
+                    // Check if this is the first event and show onboarding toast
+                    await checkAndShowFirstEventToast(eventType: "feed")
+
+                    // Save last used
+                    let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
+                    try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
+
+                    // Analytics
+                    Task {
+                        await Analytics.shared.log("event_added", parameters: [
+                            "event_type": "feed",
+                            "subtype": "bottle",
+                            "has_amount": true,
+                            "has_note": false
+                        ])
+                    }
+
+                    Haptics.success()
+
+                    // Small delay to ensure CoreData save is complete, then reload
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                    print("Reloading events after feed...")
+                    await loadTodayEvents()
                 }
-                
-                Haptics.success()
-                
-                // Small delay to ensure CoreData save is complete, then reload
-                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                print("Reloading events after feed...")
-                await loadTodayEvents()
             } catch {
                 print("Error logging feed: \(error)")
                 Haptics.error()
@@ -462,7 +529,35 @@ class HomeViewModel: ObservableObject {
             }
         }
     }
-    
+
+    /// Update summary statistics after adding an event (for optimistic UI)
+    private func updateSummaryAfterEvent(_ event: Event) {
+        if let currentSummary = summary {
+            let updatedSummary = DaySummary(
+                feedCount: currentSummary.feedCount + (event.type == .feed ? 1 : 0),
+                diaperCount: currentSummary.diaperCount + (event.type == .diaper ? 1 : 0),
+                sleepCount: currentSummary.sleepCount + (event.type == .sleep ? 1 : 0),
+                totalSleepMinutes: currentSummary.totalSleepMinutes + (event.durationMinutes ?? 0),
+                tummyTimeCount: currentSummary.tummyTimeCount + (event.type == .tummy ? 1 : 0)
+            )
+            summary = updatedSummary
+        }
+    }
+
+    /// Update summary statistics after removing an event (for rollback)
+    private func updateSummaryAfterEventRemoval(_ event: Event) {
+        if let currentSummary = summary {
+            let updatedSummary = DaySummary(
+                feedCount: max(0, currentSummary.feedCount - (event.type == .feed ? 1 : 0)),
+                diaperCount: max(0, currentSummary.diaperCount - (event.type == .diaper ? 1 : 0)),
+                sleepCount: max(0, currentSummary.sleepCount - (event.type == .sleep ? 1 : 0)),
+                totalSleepMinutes: max(0, currentSummary.totalSleepMinutes - (event.durationMinutes ?? 0)),
+                tummyTimeCount: max(0, currentSummary.tummyTimeCount - (event.type == .tummy ? 1 : 0))
+            )
+            summary = updatedSummary
+        }
+    }
+
     func quickLogSleep() {
         print("quickLogSleep called")
         
@@ -635,90 +730,37 @@ class HomeViewModel: ObservableObject {
             do {
                 // Store event for potential undo
                 let eventToDelete = event
-
+                
                 // Remove from Spotlight index
                 SpotlightIndexer.shared.removeEvent(event)
-
+                
                 try await dataStore.deleteEvent(event)
-
+                
                 // Register for undo
-                UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
+                UndoService.shared.offerUndo(
+                    message: "\(eventToDelete.type.displayName) deleted",
+                    duration: 5
+                ) { [weak self] in
                     guard let self = self else { return }
-                    Task {
-                        try? await self.dataStore.addEvent(eventToDelete)
-                        await MainActor.run {
-                            Task {
-                                await self.loadTodayEvents()
-                            }
+                    try await self.dataStore.addEvent(eventToDelete)
+                    await MainActor.run {
+                        Task {
+                            await self.loadTodayEvents()
                         }
                     }
                 }
-
+                
                 // Analytics
                 Task {
                     await Analytics.shared.log("event_deleted", parameters: [
-                        "event_type": event.type.rawValue,
-                        "has_undo": true
+                        "event_type": eventToDelete.type.rawValue,
+                        "undo_available": true
                     ])
                 }
-
-                // Reload events
+                
                 await loadTodayEvents()
-
             } catch {
-                print("Error deleting event: \(error)")
-                CrashReportingService.shared.logError(error, context: ["action": "delete_event"])
-                Haptics.error()
-                await MainActor.run {
-                    errorMessage = "Failed to delete event: \(error.localizedDescription)"
-                }
-            }
-        }
-    }
-
-    func batchDelete(events: [Event]) async {
-        do {
-            var deletedCount = 0
-
-            for event in events {
-                // Store event for potential undo
-                let eventToDelete = event
-
-                // Remove from Spotlight index
-                SpotlightIndexer.shared.removeEvent(event)
-
-                try await dataStore.deleteEvent(event)
-
-                // Register for batch undo
-                UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
-                    guard let self = self else { return }
-                    Task {
-                        try? await self.dataStore.addEvent(eventToDelete)
-                        await MainActor.run {
-                            Task {
-                                await self.loadTodayEvents()
-                            }
-                        }
-                    }
-                }
-
-                deletedCount += 1
-            }
-
-            // Analytics
-            AnalyticsService.shared.trackBatchDeleteExecuted(count: deletedCount)
-
-            Haptics.success()
-
-            // Reload events
-            await loadTodayEvents()
-
-        } catch {
-            print("Error in batch delete: \(error)")
-            CrashReportingService.shared.logError(error, context: ["action": "batch_delete"])
-            Haptics.error()
-            await MainActor.run {
-                errorMessage = "Failed to delete events: \(error.localizedDescription)"
+                errorMessage = "Failed to delete event: \(error.localizedDescription)"
             }
         }
     }

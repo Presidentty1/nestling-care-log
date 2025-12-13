@@ -2,7 +2,7 @@
 //  NestlingUITests.swift
 //  NestlingUITests
 //
-//  Stub to satisfy legacy references.
+//  Legacy test file - see E2ETests.swift for comprehensive e2e test suite
 //
 
 import XCTest

@@ -1,17 +1,20 @@
 import SwiftUI
+import UIKit
 
 struct TimelineRow: View {
     let event: Event
     let onEdit: () -> Void
     let onDelete: () -> Void
     let onDuplicate: (() -> Void)?
+    @Binding var showToast: ToastMessage?
     @State private var showDeleteConfirmation = false
-    
-    init(event: Event, onEdit: @escaping () -> Void, onDelete: @escaping () -> Void, onDuplicate: (() -> Void)? = nil) {
+
+    init(event: Event, onEdit: @escaping () -> Void, onDelete: @escaping () -> Void, onDuplicate: (() -> Void)? = nil, showToast: Binding<ToastMessage?>? = nil) {
         self.event = event
         self.onEdit = onEdit
         self.onDelete = onDelete
         self.onDuplicate = onDuplicate
+        self._showToast = showToast ?? .constant(nil)
     }
     
     var body: some View {
@@ -90,7 +93,7 @@ struct TimelineRow: View {
             Spacer()
 
             // Time with lighter color
-            Text(formatTime(event.startTime))
+            Text(formatRelativeTime(event.startTime))
                 .font(.system(size: 13, weight: .regular))
                 .foregroundColor(.mutedForeground.opacity(0.7))
             
@@ -144,6 +147,32 @@ struct TimelineRow: View {
         .onTapGesture {
             Haptics.light()
             onEdit()
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                deleteWithUndo()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading) {
+            Button {
+                Haptics.light()
+                onEdit()
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            .tint(.primary)
+
+            if let onDuplicate = onDuplicate {
+                Button {
+                    Haptics.light()
+                    onDuplicate()
+                } label: {
+                    Label("Log Again", systemImage: "arrow.clockwise")
+                }
+                .tint(.secondary)
+            }
         }
         .contextMenu {
             Button(action: {
@@ -311,6 +340,12 @@ struct TimelineRow: View {
         return "Logged by caregiver"
     }
     
+    private func formatRelativeTime(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -366,7 +401,20 @@ struct TimelineRow: View {
         
         return label
     }
-    
+
+    private func deleteWithUndo() {
+        guard PolishFeatureFlags.shared.swipeActionsEnabled else {
+            // Fallback to regular delete if feature flag is disabled
+            onDelete()
+            return
+        }
+
+        Haptics.heavy()
+        // The undo functionality is handled by the HomeViewModel's deleteEvent method
+        // which integrates with UndoManager
+        onDelete()
+    }
+
     /// Copy event summary to pasteboard (e.g., "Feed · 120 ml · 8:24 pm")
     private func copySummaryToPasteboard() {
         let timeString = formatTime(event.startTime)

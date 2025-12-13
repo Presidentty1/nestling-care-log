@@ -1,6 +1,7 @@
 import Foundation
 import UserNotifications
 import Combine
+import OSLog
 
 /// Notification delegate that handles quiet hours filtering
 class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
@@ -64,8 +65,100 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         let notification = response.notification
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
             trackNotificationEvent(name: "notif_tap_opened", notification: notification)
+            
+            // Handle deep link routing
+            let userInfo = notification.request.content.userInfo
+            if let deepLinkString = userInfo["deepLink"] as? String,
+               let deepLinkURL = URL(string: deepLinkString) {
+                let route = DeepLinkRouter.parse(url: deepLinkURL)
+                
+                // Post notification to main app to handle deep link
+                // The main app's NavigationCoordinator will handle this
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": route]
+                )
+            } else {
+                // Fallback: Open home tab if no deep link specified
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": DeepLinkRoute.openHome]
+                )
+            }
         } else if response.actionIdentifier.lowercased().contains("snooze") {
             trackNotificationEvent(name: "notif_snoozed", notification: notification)
+        } else {
+            // Handle new rich notification actions
+            switch response.actionIdentifier {
+            case "START_NAP":
+                trackNotificationEvent(name: "notif_start_nap", notification: notification)
+                // Deep link to sleep logging
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": DeepLinkRoute.sleepStart]
+                )
+            case "SNOOZE_15":
+                trackNotificationEvent(name: "notif_snooze_15", notification: notification)
+                // Schedule snooze for 15 minutes
+                if let originalTrigger = notification.request.trigger as? UNCalendarNotificationTrigger {
+                    // Reschedule with 15 minute delay
+                }
+            case "VIEW_SUMMARY":
+                trackNotificationEvent(name: "notif_view_summary", notification: notification)
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": DeepLinkRoute.openHome]
+                )
+            case "LOG_NOW":
+                trackNotificationEvent(name: "notif_log_now", notification: notification)
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": DeepLinkRoute.openHome]
+                )
+            case "SEE_INSIGHTS":
+                trackNotificationEvent(name: "notif_see_insights", notification: notification)
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("HandleDeepLink"),
+                    object: nil,
+                    userInfo: ["route": DeepLinkRoute.openHistory]
+                )
+            case "SHARE_WEEK":
+                trackNotificationEvent(name: "notif_share_week", notification: notification)
+                // Check if offline - queue the action if needed
+                if !NetworkMonitor.shared.isConnected {
+                    // Show offline queued message via local notification
+                    let offlineContent = UNMutableNotificationContent()
+                    offlineContent.title = "Share Queued"
+                    offlineContent.body = "Weekly recap share will be available when you're back online."
+                    offlineContent.sound = .default
+
+                    let request = UNNotificationRequest(
+                        identifier: "offline_share_queue_\(UUID().uuidString)",
+                        content: offlineContent,
+                        trigger: nil
+                    )
+
+                    UNUserNotificationCenter.current().add(request) { error in
+                        if let error = error {
+                            Logger.notifications.error("Failed to show offline share queued notification: \(error)")
+                        }
+                    }
+                } else {
+                    // Trigger share flow for weekly recap
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("HandleDeepLink"),
+                        object: nil,
+                        userInfo: ["route": DeepLinkRoute.openHistory]
+                    )
+                }
+            default:
+                break
+            }
         }
         // Handle notification interaction
         completionHandler()

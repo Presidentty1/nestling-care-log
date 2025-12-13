@@ -79,10 +79,10 @@ struct UpgradePromptModal: View {
                 
                 // Benefits list
                 VStack(alignment: .leading, spacing: .spacingMD) {
-                    BenefitRow(icon: "brain.head.profile", text: "Unlimited AI predictions")
-                    BenefitRow(icon: "chart.bar.fill", text: "Weekly insights & trends")
-                    BenefitRow(icon: "calendar", text: "Calendar heatmap")
-                    BenefitRow(icon: "doc.text.fill", text: "PDF doctor reports")
+                    UpgradePromptBenefitRow(icon: "brain.head.profile", text: "Unlimited AI predictions")
+                    UpgradePromptBenefitRow(icon: "chart.bar.fill", text: "Weekly insights & trends")
+                    UpgradePromptBenefitRow(icon: "calendar", text: "Calendar heatmap")
+                    UpgradePromptBenefitRow(icon: "doc.text.fill", text: "PDF doctor reports")
                 }
                 .padding()
                 .background(Color.surface.opacity(0.5))
@@ -138,7 +138,7 @@ struct UpgradePromptModal: View {
     }
 }
 
-struct BenefitRow: View {
+private struct UpgradePromptBenefitRow: View {
     let icon: String
     let text: String
     

@@ -3,6 +3,7 @@ import SwiftUI
 struct DeveloperSettingsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @StateObject private var proService = ProSubscriptionService.shared
+    @StateObject private var polishFlags = PolishFeatureFlags.shared
     @State private var showWidgetTest = false
     @State private var showResetConfirmation = false
     
@@ -103,6 +104,94 @@ struct DeveloperSettingsView: View {
                 }
             }
 
+            Section("Polish Feature Flags") {
+                Toggle("🔧 Kill Switch - Disable All Polish", isOn: Binding(
+                    get: { polishFlags.allPolishDisabled },
+                    set: { enabled in
+                        UserDefaults.standard.set(enabled, forKey: "polish.killSwitch")
+                    }
+                ))
+                .font(.headline)
+                .foregroundColor(.red)
+
+                Text("Emergency disable for all polish features. Use if polish causes issues.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+
+                Divider()
+
+                Group {
+                    Text("Tier 1: Quick Wins")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+
+                    Toggle("Skeleton Loading", isOn: Binding(
+                        get: { polishFlags.skeletonLoadingEnabled },
+                        set: { polishFlags.setFlag("skeletonLoading", enabled: $0) }
+                    ))
+
+                    Toggle("Contextual Badges", isOn: Binding(
+                        get: { polishFlags.contextualBadgesEnabled },
+                        set: { polishFlags.setFlag("contextualBadges", enabled: $0) }
+                    ))
+
+                    Toggle("Smart CTAs", isOn: Binding(
+                        get: { polishFlags.smartCTAsEnabled },
+                        set: { polishFlags.setFlag("smartCTAs", enabled: $0) }
+                    ))
+                }
+
+                Group {
+                    Text("Tier 2: High Impact")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                        .padding(.top, 8)
+
+                    Toggle("Shareable Cards", isOn: Binding(
+                        get: { polishFlags.shareCardsEnabled },
+                        set: { polishFlags.setFlag("shareCards", enabled: $0) }
+                    ))
+
+                    Toggle("Timeline Grouping", isOn: Binding(
+                        get: { polishFlags.timelineGroupingEnabled },
+                        set: { polishFlags.setFlag("timelineGrouping", enabled: $0) }
+                    ))
+
+                    Toggle("Rich Notifications", isOn: Binding(
+                        get: { polishFlags.richNotificationsEnabled },
+                        set: { polishFlags.setFlag("richNotifications", enabled: $0) }
+                    ))
+
+                    Toggle("Swipe Actions", isOn: Binding(
+                        get: { polishFlags.swipeActionsEnabled },
+                        set: { polishFlags.setFlag("swipeActions", enabled: $0) }
+                    ))
+                }
+
+                Group {
+                    Text("Tier 3: Defensive")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                        .padding(.top, 8)
+
+                    Toggle("Optimistic UI", isOn: Binding(
+                        get: { polishFlags.optimisticUIEnabled },
+                        set: { polishFlags.setFlag("optimisticUI", enabled: $0) }
+                    ))
+
+                    Toggle("Celebration Throttle", isOn: Binding(
+                        get: { polishFlags.celebrationThrottleEnabled },
+                        set: { polishFlags.setFlag("celebrationThrottle", enabled: $0) }
+                    ))
+                }
+
+                Button("Reset All Polish Flags to Defaults") {
+                    polishFlags.resetAllToDefaults()
+                }
+                .buttonStyle(.bordered)
+                .padding(.top, 8)
+            }
+
             Section("Data Management") {
                 Button("Reset All Data", role: .destructive) {
                     showResetConfirmation = true
@@ -150,6 +239,13 @@ struct DeveloperSettingsView: View {
                     Spacer()
                     Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
                         .foregroundColor(.mutedForeground)
+                }
+
+                DisclosureGroup("Polish Flags Debug") {
+                    Text(polishFlags.debugDescription)
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.leading)
                 }
             }
         }

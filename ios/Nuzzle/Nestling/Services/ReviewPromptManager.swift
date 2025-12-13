@@ -1,5 +1,6 @@
 import Foundation
 import StoreKit
+import UIKit
 
 /// Manages in-app review prompts based on usage thresholds
 @MainActor
@@ -46,20 +47,65 @@ class ReviewPromptManager {
         return totalLogs >= minTotalLogs && daysSinceFirstLog >= minDaysSinceFirstLog
     }
 
-    /// Show review prompt if conditions are met
-    func requestReviewIfAppropriate(from viewController: UIViewController) {
+    /// Show review prompt if conditions are met (SwiftUI version)
+    func requestReviewIfAppropriate() {
         guard shouldShowReviewPrompt() else { return }
 
-        // Request review
-        if let windowScene = viewController.view.window?.windowScene {
+        // Request review using current window scene
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             SKStoreReviewController.requestReview(in: windowScene)
             markReviewShownForCurrentVersion()
+            
+            // Analytics
+            Task {
+                await Analytics.shared.log("review_prompt_shown", parameters: [
+                    "total_logs": getTotalLogs(),
+                    "days_since_first_log": calculateDaysSinceFirstLog(getFirstLogDate())
+                ])
+            }
+        }
+    }
+    
+    /// Check and show review prompt for specific positive moments
+    func checkForPositiveMoment(
+        streakDays: Int? = nil,
+        totalLogs: Int? = nil,
+        predictionAccurate: Bool? = nil
+    ) {
+        var shouldShow = false
+        
+        // Check 7-day streak
+        if let streak = streakDays, streak == 7 {
+            shouldShow = true
+            Task {
+                await Analytics.shared.log("review_trigger", parameters: ["trigger": "7_day_streak"])
+            }
+        }
+        
+        // Check 50 logs milestone
+        if let logs = totalLogs, logs == 50 {
+            shouldShow = true
+            Task {
+                await Analytics.shared.log("review_trigger", parameters: ["trigger": "50_logs"])
+            }
+        }
+        
+        // Check accurate prediction feedback
+        if let accurate = predictionAccurate, accurate {
+            shouldShow = true
+            Task {
+                await Analytics.shared.log("review_trigger", parameters: ["trigger": "accurate_prediction"])
+            }
+        }
+        
+        if shouldShow && !hasShownReviewForCurrentVersion() {
+            requestReviewIfAppropriate()
         }
     }
 
     /// Force show review prompt (for testing)
-    func forceShowReview(from viewController: UIViewController) {
-        if let windowScene = viewController.view.window?.windowScene {
+    func forceShowReview() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             SKStoreReviewController.requestReview(in: windowScene)
         }
     }

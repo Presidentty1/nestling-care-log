@@ -37,6 +37,12 @@ struct Baby: Identifiable, Codable, Equatable {
         let days = Double(components.day ?? 0)
         return months + (days / 30.0)
     }
+
+    /// Baby's age in weeks (computed from dateOfBirth)
+    var ageInWeeks: Int {
+        let days = Calendar.current.dateComponents([.day], from: dateOfBirth, to: Date()).day ?? 0
+        return max(0, days / 7)
+    }
     
     // MARK: - Mock Data
     

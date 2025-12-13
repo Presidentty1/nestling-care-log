@@ -13,20 +13,24 @@ struct ErrorStateView: View {
     
     var body: some View {
         VStack(spacing: .spacingMD) {
-            Image(systemName: "exclamationmark.triangle.fill")
+            Image(systemName: "cloud.bolt")  // Softer than warning triangle
                 .font(.system(size: 48))
-                .foregroundColor(.destructive)
-            
-            Text("Something went wrong")
+                .foregroundColor(.mutedForeground)  // Less alarming
+
+            Text("We hit a bump")  // Softer language
                 .font(.headline)
                 .foregroundColor(.foreground)
-            
+
             Text(message)
                 .font(.body)
                 .foregroundColor(.mutedForeground)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, .spacingMD)
-            
+
+            Text("Don't worry, your data is safe")  // Reassurance
+                .font(.caption)
+                .foregroundColor(.mutedForeground)
+
             if let retryTitle = retryTitle, let retryAction = retryAction {
                 PrimaryButton(retryTitle, action: retryAction)
                     .padding(.horizontal, .spacingMD)

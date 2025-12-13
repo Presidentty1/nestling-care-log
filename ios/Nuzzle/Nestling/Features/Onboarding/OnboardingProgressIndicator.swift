@@ -3,28 +3,22 @@ import SwiftUI
 struct OnboardingProgressIndicator: View {
     let currentStep: OnboardingStep
     
-    private var currentStepIndex: Int {
+    /// 0 = welcome (hidden). 1...totalSteps = visible steps.
+    private var displayStepNumber: Int {
         switch currentStep {
         case .welcome: return 0
-        case .babyBasics: return 1
-        case .focusGoals: return 2
-        case .lastWake: return 3
-        case .notifications: return 4
-        case .paywall: return 5
-        case .complete: return 6
+        case .babySetup: return 1
+        case .firstLog: return 2
+        case .partnerOnboarding: return 3
+        case .complete: return 3
         }
     }
     
-    private var totalSteps: Int { 6 } // 6 steps after welcome
+    private var totalSteps: Int { 3 } // Baby Setup → First Log → Partner (optional)
     
     private var shouldShow: Bool {
         // Don't show progress on welcome screen
         currentStep != .welcome
-    }
-    
-    private var displayStepNumber: Int {
-        // Map to 1-3 for display (excluding welcome)
-        max(1, currentStepIndex)
     }
     
     var body: some View {
@@ -56,11 +50,9 @@ struct OnboardingProgressIndicator: View {
 #Preview {
     VStack(spacing: .spacingLG) {
         OnboardingProgressIndicator(currentStep: .welcome)
-        OnboardingProgressIndicator(currentStep: .babyBasics)
-        OnboardingProgressIndicator(currentStep: .focusGoals)
-        OnboardingProgressIndicator(currentStep: .lastWake)
-        OnboardingProgressIndicator(currentStep: .notifications)
-        OnboardingProgressIndicator(currentStep: .paywall)
+        OnboardingProgressIndicator(currentStep: .babySetup)
+        OnboardingProgressIndicator(currentStep: .firstLog)
+        OnboardingProgressIndicator(currentStep: .partnerOnboarding)
         OnboardingProgressIndicator(currentStep: .complete)
     }
     .padding()

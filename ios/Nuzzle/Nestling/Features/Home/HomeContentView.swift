@@ -25,18 +25,9 @@ struct HomeContentView: View {
     @Binding var showProSubscription: Bool
     let onBabySelected: (Baby) -> Void
     let onEventEdited: (Event) -> Void
-
+    
     @State private var showBabySwitcher = false
     @State private var showDatePicker = false
-    @State private var selectedTab: HomeTab = .dashboard
-    @State private var editMode: EditMode = .inactive
-    @State private var selectedEventIds: Set<UUID> = []
-    @State private var showBatchDeleteConfirmation = false
-
-    enum HomeTab: String, CaseIterable {
-        case dashboard = "Dashboard"
-        case timeline = "Activity"
-    }
     
     private var currentBaby: Baby? {
         environment.currentBaby
@@ -58,73 +49,38 @@ struct HomeContentView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Tab selector
-            Picker("View", selection: $selectedTab) {
-                ForEach(HomeTab.allCases, id: \.self) { tab in
-                    Text(tab.rawValue).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, .spacingLG)
-            .padding(.vertical, .spacingSM)
-            .onChange(of: selectedTab) { oldValue, newValue in
-                Haptics.selection()
-                AnalyticsService.shared.trackHomeTabSwitched(from: oldValue.rawValue, to: newValue.rawValue)
-            }
-
-            // Tab content
-            TabView(selection: $selectedTab) {
-                // Dashboard Tab
-                ScrollView {
-                    VStack(spacing: .spacingLG) {
-                        // Header
-                        TodayHeaderBar(
-                            baby: currentBaby,
-                            onDateTap: {
-                                // TODO: For MVP, this is a no-op. Can expand to show past days.
-                                Haptics.selection()
-                                showDatePicker = true
-                            }
-                        )
-
-                        // Nap Predictor Card (Hero)
-                        napPredictorSection
-
-                        // Quick Actions (2x2 Grid)
-                        quickActionsSection
-
-                        // Daily Summary (tappable tiles)
-                        if let summary = viewModel.summary {
-                            DailySummaryCard(
-                                summary: summary,
-                                isCollapsedByDefault: false,
-                                onTileTapped: { filter in
-                                    viewModel.selectedFilter = filter
-                                    selectedTab = .timeline
-                                    AnalyticsService.shared.track(event: "summary_filter_applied", properties: [
-                                        "filter": filter.rawValue
-                                    ])
-                                }
-                            )
-                            .padding(.horizontal, .spacingLG)
-                        }
-
-                        // AI Tease Card
-                        aiTeaseSection
+        ScrollView {
+            VStack(spacing: .spacingLG) {
+                // Header
+                TodayHeaderBar(
+                    baby: currentBaby,
+                    onDateTap: {
+                        // TODO: For MVP, this is a no-op. Can expand to show past days.
+                        Haptics.selection()
+                        showDatePicker = true
                     }
-                    .padding(.bottom, .spacingXL)
-                }
-                .tag(HomeTab.dashboard)
-
-                // Timeline Tab
-                timelineTabContent
-                .tag(HomeTab.timeline)
-                .environment(\.editMode, $editMode)
+                )
+                
+                // Nap Predictor Card (Hero)
+                napPredictorSection
+                
+                // Quick Actions (2x2 Grid)
+                quickActionsSection
+                
+                // Today Timeline
+                todayTimelineSection
+                
+                // AI Tease Card
+                aiTeaseSection
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .padding(.bottom, .spacingXL)
+        }
+        .refreshable {
+            // Refresh dashboard data
+            await viewModel.loadTodayEvents()
         }
         .background(Color.background)
+        .withUndoToast()
         .confirmationDialog("Choose baby", isPresented: $showBabySwitcher) {
             if let current = currentBaby {
                 ForEach(environment.babies) { baby in
@@ -148,15 +104,16 @@ struct HomeContentView: View {
     
     @ViewBuilder
     private var napPredictorSection: some View {
-        NapPredictionCard(
-            napWindow: viewModel.nextNapWindow,
-            baby: currentBaby,
-            onTap: {
-                // TODO: Could show more detailed nap prediction info
-            },
-            cardVariant: .emphasis
-        )
-        .padding(.horizontal, .spacingLG)
+        VStack(alignment: .leading, spacing: .spacingMD) {
+            NapPredictionCard(
+                napWindow: viewModel.nextNapWindow,
+                baby: currentBaby,
+                onTap: {
+                    // TODO: Could show more detailed nap prediction info
+                }
+            )
+            .padding(.horizontal, .spacingLG)
+        }
     }
     
     // MARK: - Quick Actions Section
@@ -168,17 +125,15 @@ struct HomeContentView: View {
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.foreground)
                 .padding(.horizontal, .spacingLG)
-
-            // Dynamic layout: hero sleep when active, otherwise 2x2 grid
-            if viewModel.activeSleep != nil {
-                // Hero layout: Sleep button full-width and prominent
-                VStack(spacing: .spacingMD) {
-                    // Hero sleep button
+            
+            // 2x2 grid of quick actions
+            VStack(spacing: .spacingMD) {
+                HStack(spacing: .spacingMD) {
                     QuickActionButton(
-                        title: "End Sleep",
+                        title: viewModel.activeSleep != nil ? "End Sleep" : "Sleep",
                         icon: "moon.fill",
                         color: .eventSleep,
-                        isActive: true,
+                        isActive: viewModel.activeSleep != nil,
                         action: {
                             viewModel.quickLogSleep()
                         },
@@ -186,256 +141,52 @@ struct HomeContentView: View {
                             showSleepForm = true
                         }
                     )
-                    .frame(height: 120) // Taller for hero treatment
-
-                    // Other buttons in a row
-                    HStack(spacing: .spacingMD) {
-                        QuickActionButton(
-                            title: "Feed",
-                            icon: "drop.fill",
-                            color: .eventFeed,
-                            action: {
-                                viewModel.quickLogFeed()
-                            },
-                            longPressAction: {
-                                showFeedForm = true
-                            }
-                        )
-
-                        QuickActionButton(
-                            title: "Diaper",
-                            icon: "drop.circle.fill",
-                            color: .eventDiaper,
-                            action: {
-                                viewModel.quickLogDiaper()
-                            },
-                            longPressAction: {
-                                showDiaperForm = true
-                            }
-                        )
-
-                        QuickActionButton(
-                            title: "Cry",
-                            icon: "waveform",
-                            color: .eventCry,
-                            action: {
-                                showCryRecorder = true
-                            },
-                            longPressAction: {
-                                showCryRecorder = true
-                            }
-                        )
-                    }
+                    
+                    QuickActionButton(
+                        title: "Feed",
+                        icon: "drop.fill",
+                        color: .eventFeed,
+                        action: {
+                            viewModel.quickLogFeed()
+                        },
+                        longPressAction: {
+                            showFeedForm = true
+                        }
+                    )
                 }
-                .padding(.horizontal, .spacingLG)
-            } else {
-                // Standard 2x2 grid
-                VStack(spacing: .spacingMD) {
-                    HStack(spacing: .spacingMD) {
-                        QuickActionButton(
-                            title: "Sleep",
-                            icon: "moon.fill",
-                            color: .eventSleep,
-                            action: {
-                                viewModel.quickLogSleep()
-                            },
-                            longPressAction: {
-                                showSleepForm = true
-                            }
-                        )
-
-                        QuickActionButton(
-                            title: "Feed",
-                            icon: "drop.fill",
-                            color: .eventFeed,
-                            action: {
-                                viewModel.quickLogFeed()
-                            },
-                            longPressAction: {
-                                showFeedForm = true
-                            }
-                        )
-                    }
-
-                    HStack(spacing: .spacingMD) {
-                        QuickActionButton(
-                            title: "Diaper",
-                            icon: "drop.circle.fill",
-                            color: .eventDiaper,
-                            action: {
-                                viewModel.quickLogDiaper()
-                            },
-                            longPressAction: {
-                                showDiaperForm = true
-                            }
-                        )
-
-                        QuickActionButton(
-                            title: "Cry",
-                            icon: "waveform",
-                            color: .eventCry,
-                            action: {
-                                showCryRecorder = true
-                            },
-                            longPressAction: {
-                                showCryRecorder = true
-                            }
-                        )
-                    }
+                
+                HStack(spacing: .spacingMD) {
+                    QuickActionButton(
+                        title: "Diaper",
+                        icon: "drop.circle.fill",
+                        color: .eventDiaper,
+                        action: {
+                            viewModel.quickLogDiaper()
+                        },
+                        longPressAction: {
+                            showDiaperForm = true
+                        }
+                    )
+                    
+                    QuickActionButton(
+                        title: "Cry",
+                        icon: "waveform",
+                        color: .eventCry,
+                        action: {
+                            showCryRecorder = true
+                        },
+                        longPressAction: {
+                            showCryRecorder = true
+                        }
+                    )
                 }
-                .padding(.horizontal, .spacingLG)
             }
+            .padding(.horizontal, .spacingLG)
         }
     }
     
-    // MARK: - Timeline Tab Content
-
-    @ViewBuilder
-    private var timelineTabContent: some View {
-        VStack(spacing: 0) {
-            if viewModel.filteredEvents.isEmpty && viewModel.events.isEmpty {
-                ScrollView {
-                    todayEmptyState
-                        .padding(.horizontal, .spacingLG)
-                }
-            } else if viewModel.filteredEvents.isEmpty && !viewModel.events.isEmpty {
-                // Show filter empty state
-                VStack(spacing: .spacingMD) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 48))
-                        .foregroundColor(.mutedForeground)
-
-                    Text("No events match your filter")
-                        .font(.headline)
-                        .foregroundColor(.foreground)
-
-                    Text("Try adjusting your search or filter settings")
-                        .font(.body)
-                        .foregroundColor(.mutedForeground)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, .spacingLG)
-
-                    Button(action: {
-                        viewModel.selectedFilter = .all
-                        viewModel.searchText = ""
-                        Haptics.selection()
-                    }) {
-                        Text("Clear Filter")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 44)
-                            .background(Color.primary)
-                            .cornerRadius(.radiusLG)
-                    }
-                    .padding(.horizontal, .spacingLG)
-                    .padding(.top, .spacingMD)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                // Timeline with events
-                VStack(alignment: .leading, spacing: .spacingSM) {
-                    // Header with edit button
-                    HStack {
-                        Text("Today")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.foreground)
-
-                        Spacer()
-
-                        // Filter indicator with clear button
-                        if viewModel.selectedFilter != .all {
-                            HStack(spacing: 8) {
-                                Text("\(viewModel.selectedFilter.displayName) only")
-                                    .font(.caption)
-                                    .foregroundColor(.primary)
-
-                                Button(action: {
-                                    viewModel.selectedFilter = .all
-                                    viewModel.searchText = ""
-                                    Haptics.selection()
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.primary.opacity(0.7))
-                                }
-                                .accessibilityLabel("Clear filter")
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.primary.opacity(0.1))
-                            .cornerRadius(12)
-                        }
-
-                        // Edit button
-                        EditButton()
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .padding(.horizontal, .spacingLG)
-
-                    // Batch delete toolbar when editing and items selected
-                    if editMode.isEditing && !selectedEventIds.isEmpty {
-                        HStack {
-                            Text("\(selectedEventIds.count) selected")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-
-                            Spacer()
-
-                            Button(action: {
-                                showBatchDeleteConfirmation = true
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.destructive)
-                            }
-                        }
-                        .padding(.horizontal, .spacingLG)
-                        .padding(.vertical, .spacingSM)
-                        .background(Color.destructive.opacity(0.1))
-                    }
-
-                    List(viewModel.filteredEvents, selection: $selectedEventIds) { event in
-                        TimelineRow(
-                            event: event,
-                            onEdit: {
-                                onEventEdited(event)
-                            },
-                            onDelete: {
-                                Task {
-                                    await viewModel.deleteEvent(event)
-                                }
-                            },
-                            onDuplicate: {
-                                Task {
-                                    await viewModel.duplicateEvent(event)
-                                }
-                            }
-                        )
-                        .listRowInsets(EdgeInsets(top: 8, leading: .spacingLG, bottom: 8, trailing: .spacingLG))
-                        .listRowBackground(Color.clear)
-                    }
-                    .listStyle(.plain)
-                    .environment(\.editMode, $editMode)
-                }
-            }
-        }
-        .alert("Delete \(selectedEventIds.count) events?", isPresented: $showBatchDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
-                let selectedEvents = viewModel.filteredEvents.filter { selectedEventIds.contains($0.id) }
-                Task {
-                    await viewModel.batchDelete(events: selectedEvents)
-                    selectedEventIds.removeAll()
-                    editMode = .inactive
-                }
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This action cannot be undone.")
-        }
-    }
-
-    // MARK: - Legacy Today Timeline Section (for backward compatibility)
-
+    // MARK: - Today Timeline Section
+    
     @ViewBuilder
     private var todayTimelineSection: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -447,25 +198,61 @@ struct HomeContentView: View {
             if viewModel.events.isEmpty {
                 todayEmptyState
             } else {
-                ForEach(viewModel.events) { event in
-                    TimelineRow(
-                        event: event,
-                        onEdit: {
-                            onEventEdited(event)
-                        },
-                        onDelete: {
-                            Task {
-                                await viewModel.deleteEvent(event)
-                            }
-                        },
-                        onDuplicate: {
-                            Task {
-                                await viewModel.duplicateEvent(event)
-                            }
-                        }
-                    )
-                    .padding(.horizontal, .spacingLG)
+                if viewModel.events.count >= 8 && PolishFeatureFlags.shared.timelineGroupingEnabled {
+                    groupedTodayTimeline
+                } else {
+                    simpleTodayTimeline
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var simpleTodayTimeline: some View {
+        ForEach(viewModel.events) { event in
+            TimelineRow(
+                event: event,
+                onEdit: {
+                    onEventEdited(event)
+                },
+                onDelete: {
+                    Task {
+                        await viewModel.deleteEvent(event)
+                    }
+                },
+                onDuplicate: {
+                    Task {
+                        await viewModel.duplicateEvent(event)
+                    }
+                }
+            )
+            .padding(.horizontal, .spacingLG)
+        }
+    }
+
+    @ViewBuilder
+    private var groupedTodayTimeline: some View {
+        let groupedEvents = groupEventsByTimeBlock(viewModel.events)
+
+        ForEach(groupedEvents.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { timeBlock in
+            if let events = groupedEvents[timeBlock], !events.isEmpty {
+                TimelineGroup(
+                    events: events,
+                    timeBlock: timeBlock,
+                    onEventEdited: onEventEdited,
+                    onEventDeleted: { event in
+                        Task {
+                            await viewModel.deleteEvent(event)
+                        }
+                    },
+                    onEventDuplicated: { event in
+                        Task {
+                            await viewModel.duplicateEvent(event)
+                        }
+                    }
+                )
+                .padding(.horizontal, .spacingLG)
+                .padding(.horizontal, .spacingLG)
             }
         }
     }
@@ -512,6 +299,138 @@ struct HomeContentView: View {
     
     private var babyName: String {
         currentBaby?.name ?? "your baby"
+    }
+
+    // MARK: - Timeline Tab Content
+
+    @ViewBuilder
+    private var timelineTabContent: some View {
+        ScrollView {
+            VStack(spacing: .spacingSM) {
+                // Filter controls
+                if !viewModel.events.isEmpty {
+                    HStack {
+                        Text("Filter")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+
+                        Spacer()
+
+                        Menu {
+                            Button(action: { viewModel.selectedFilter = .all }) {
+                                Label("All Events", systemImage: "line.3.horizontal")
+                            }
+                            Button(action: { viewModel.selectedFilter = .feeds }) {
+                                Label("Feeds", systemImage: "drop.fill")
+                            }
+                            Button(action: { viewModel.selectedFilter = .sleep }) {
+                                Label("Sleep", systemImage: "moon.fill")
+                            }
+                            Button(action: { viewModel.selectedFilter = .diapers }) {
+                                Label("Diapers", systemImage: "drop.circle.fill")
+                            }
+                            Button(action: { viewModel.selectedFilter = .tummy }) {
+                                Label("Tummy Time", systemImage: "figure.child")
+                            }
+                            Button(action: { viewModel.selectedFilter = .cry }) {
+                                Label("Cries", systemImage: "waveform")
+                            }
+                        } label: {
+                            HStack {
+                                Text(viewModel.selectedFilter.displayName)
+                                    .font(.subheadline)
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, .spacingMD)
+                            .padding(.vertical, .spacingSM)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusMD)
+                        }
+                    }
+                    .padding(.horizontal, .spacingLG)
+                }
+
+                if viewModel.filteredEvents.isEmpty {
+                    VStack(spacing: .spacingMD) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 48))
+                            .foregroundColor(.mutedForeground)
+
+                        Text("No events match this filter")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+
+                        Text("Try changing your filter or log some events")
+                            .font(.body)
+                            .foregroundColor(.mutedForeground)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.vertical, .spacing2XL)
+                } else {
+                    groupedTimelineContent
+                }
+            }
+            .padding(.bottom, .spacingXL)
+        }
+    }
+
+
+    private func groupEventsByTimeBlock(_ events: [Event]) -> [TimelineGroupHeader.TimeBlock: [Event]] {
+        var grouped: [TimelineGroupHeader.TimeBlock: [Event]] = [:]
+
+        for event in events {
+            let hour = Calendar.current.component(.hour, from: event.timestamp)
+            let timeBlock = TimelineGroupHeader.TimeBlock.from(hour: hour)
+            grouped[timeBlock, default: []].append(event)
+        }
+
+        return grouped
+    }
+}
+
+// MARK: - Timeline Group Component
+
+struct TimelineGroup: View {
+    let events: [Event]
+    let timeBlock: TimelineGroupHeader.TimeBlock
+    let onEventEdited: (Event) -> Void
+    let onEventDeleted: (Event) async -> Void
+    let onEventDuplicated: (Event) async -> Void
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(spacing: .spacingXS) {
+            TimelineGroupHeader(
+                timeBlock: timeBlock,
+                events: events,
+                isExpanded: $isExpanded
+            )
+
+            if isExpanded {
+                ForEach(events) { event in
+                    TimelineRow(
+                        event: event,
+                        onEdit: {
+                            onEventEdited(event)
+                        },
+                        onDelete: {
+                            Task {
+                                await onEventDeleted(event)
+                            }
+                        },
+                        onDuplicate: {
+                            Task {
+                                await onEventDuplicated(event)
+                            }
+                        }
+                    )
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+        }
     }
 }
 

@@ -194,7 +194,19 @@ struct FeedFormView: View {
                             do {
                                 try await viewModel.save()
                                 Haptics.success()
-                                showToast = ToastMessage(message: "Feed saved", type: .success)
+
+                                let feedCount = await viewModel.getTodayFeedCount()
+                                let nextFeedTime = viewModel.predictNextFeedTime()
+
+                                var message = "Feed logged!"
+                                if feedCount == 3 {
+                                    message = "3rd feed today - you're doing great!"
+                                }
+                                if let nextTime = nextFeedTime {
+                                    message += " Next feed probably around \(nextTime.formatted(date: .omitted, time: .shortened))"
+                                }
+
+                                showToast = ToastMessage(message: message, type: .success)
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                     dismiss()
                                 }

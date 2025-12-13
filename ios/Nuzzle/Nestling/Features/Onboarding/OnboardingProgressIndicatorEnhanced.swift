@@ -4,22 +4,22 @@ import SwiftUI
 struct OnboardingProgressIndicatorEnhanced: View {
     let currentStep: OnboardingStep
     
-    private var currentStepIndex: Int {
+    /// 0 = welcome (hidden). 1...totalSteps = visible steps.
+    private var displayStepNumber: Int {
         switch currentStep {
         case .welcome: return 0
-        case .babyBasics: return 1
-        case .focusGoals: return 2
-        case .lastWake: return 3
-        case .notifications: return 4
-        case .paywall: return 5
-        case .complete: return 6
+        case .babySetup: return 1
+        case .firstLog: return 2
+        case .partnerOnboarding: return 3
+        case .complete: return 3
         }
     }
     
-    private var totalSteps: Int { 7 }
+    private var totalSteps: Int { 3 }
     
     private var progress: Double {
-        Double(currentStepIndex) / Double(totalSteps)
+        guard totalSteps > 0 else { return 0 }
+        return Double(displayStepNumber) / Double(totalSteps)
     }
     
     private var shouldShow: Bool {
@@ -54,7 +54,7 @@ struct OnboardingProgressIndicatorEnhanced: View {
                 .frame(height: 6)
                 
                 // Step text
-                Text("Step \(currentStepIndex) of \(totalSteps)")
+                Text("Step \(max(1, displayStepNumber)) of \(totalSteps)")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.mutedForeground)
             }
@@ -69,11 +69,9 @@ struct OnboardingProgressIndicatorEnhanced: View {
 #Preview {
     VStack(spacing: .spacingXL) {
         OnboardingProgressIndicatorEnhanced(currentStep: .welcome)
-        OnboardingProgressIndicatorEnhanced(currentStep: .babyBasics)
-        OnboardingProgressIndicatorEnhanced(currentStep: .focusGoals)
-        OnboardingProgressIndicatorEnhanced(currentStep: .lastWake)
-        OnboardingProgressIndicatorEnhanced(currentStep: .notifications)
-        OnboardingProgressIndicatorEnhanced(currentStep: .paywall)
+        OnboardingProgressIndicatorEnhanced(currentStep: .babySetup)
+        OnboardingProgressIndicatorEnhanced(currentStep: .firstLog)
+        OnboardingProgressIndicatorEnhanced(currentStep: .partnerOnboarding)
         OnboardingProgressIndicatorEnhanced(currentStep: .complete)
     }
     .padding()

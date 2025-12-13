@@ -1,5 +1,10 @@
 import SwiftUI
 
+struct BadgeInfo {
+    let text: String
+    let color: Color
+}
+
 struct DailySummaryCard: View {
     let summary: DaySummary
     let isCollapsedByDefault: Bool
@@ -72,6 +77,16 @@ struct DailySummaryCard: View {
                     Text(title)
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
+
+                    if let badge = getBadge(for: filter) {
+                        Text(badge.text)
+                            .font(.caption2.weight(.medium))
+                            .foregroundColor(badge.color)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(badge.color.opacity(0.1))
+                            .cornerRadius(4)
+                    }
                 }
                 Text(value)
                     .font(.title3.weight(.semibold))
@@ -87,10 +102,50 @@ struct DailySummaryCard: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Filter by \(title.lowercased()): \(value) events")
+        .accessibilityLabel("Filter by \(title.lowercased()): \(value) events\(getBadge(for: filter)?.text.map { ", \($0)" } ?? "")")
         .accessibilityHint("Tap to view only \(title.lowercased()) events in timeline")
     }
-    
+
+    private func getBadge(for filter: EventTypeFilter) -> BadgeInfo? {
+        guard PolishFeatureFlags.shared.contextualBadgesEnabled else { return nil }
+
+        switch filter {
+        case .feeds:
+            // Typical newborn feeding: 8-12 feeds per day for first few months
+            if summary.feedCount >= 8 && summary.feedCount <= 12 {
+                return BadgeInfo(text: "On track", color: .success)
+            } else if summary.feedCount < 6 {
+                return BadgeInfo(text: "Low today", color: .warning)
+            }
+        case .sleep:
+            // Typical newborn sleep: 14-17 hours per day
+            let sleepHours = Double(summary.totalSleepMinutes) / 60.0
+            if sleepHours >= 14.0 && sleepHours <= 17.0 {
+                return BadgeInfo(text: "Great day!", color: .success)
+            } else if sleepHours < 12.0 {
+                return BadgeInfo(text: "Low sleep", color: .warning)
+            }
+        case .diapers:
+            // Typical diapers: 6-8 per day for newborns
+            if summary.diaperCount >= 6 && summary.diaperCount <= 8 {
+                return BadgeInfo(text: "On track", color: .success)
+            } else if summary.diaperCount < 4 {
+                return BadgeInfo(text: "Low today", color: .warning)
+            }
+        case .tummy:
+            // Tummy time: 30-60 minutes total per day recommended
+            if summary.tummyTimeMinutes >= 30 && summary.tummyTimeMinutes <= 60 {
+                return BadgeInfo(text: "On track", color: .success)
+            } else if summary.tummyTimeMinutes < 15 {
+                return BadgeInfo(text: "Low today", color: .warning)
+            }
+        default:
+            break
+        }
+
+        return nil
+    }
+
     private func toggle() {
         withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
             isCollapsed.toggle()

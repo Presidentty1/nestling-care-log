@@ -17,7 +17,7 @@ AI-powered feed & sleep log
 **Bundle ID:**
 
 ```
-app.lovable.3be850d6430e4062887da465d2abf643
+com.nestling.app
 ```
 
 ## Promotional Text

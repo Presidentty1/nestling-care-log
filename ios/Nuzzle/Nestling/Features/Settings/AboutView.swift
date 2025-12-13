@@ -20,6 +20,13 @@ struct AboutView: View {
                     Text("Version \(appVersion)")
                         .font(.body)
                         .foregroundColor(.mutedForeground)
+
+#if DEBUG
+                    Text("Debug • Build \(buildNumber) • \(bundleIdentifier)")
+                        .font(.caption2)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+#endif
                 }
                 
                 // Description
@@ -60,6 +67,16 @@ struct AboutView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
+
+#if DEBUG
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+    }
+
+    private var bundleIdentifier: String {
+        Bundle.main.bundleIdentifier ?? "unknown.bundle.id"
+    }
+#endif
 }
 
 #Preview {

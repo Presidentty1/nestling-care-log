@@ -7,6 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		001E4B24BEE843B99229587C /* ConversionTriggerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40DAA6473AB47A6B5A79763 /* ConversionTriggerService.swift */; };
+		01DA4690818F492A933DD705 /* WinOfTheDayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B9DDE3B6B441C59185D675 /* WinOfTheDayCard.swift */; };
+		09D4F124F4FF4065A8AE62D3 /* SpotlightOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BEF6DF774A4C328412F55C /* SpotlightOverlay.swift */; };
+		19F7AD0C77AE41BE831933B5 /* E2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D0C50C7CC34DDB80F0BA63 /* E2ETests.swift */; };
+		3EEF0A706EC442B08EEE7CE1 /* WeeklyTrendsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C45699F34DD4AD68FECDC1D /* WeeklyTrendsCard.swift */; };
+		53E9D2D62DBA4AF9B1146A98 /* MilestoneTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2210EFCEF84CAA82CF7461 /* MilestoneTracker.swift */; };
+		56857B14F7004F109C6A5E08 /* CelebrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7935F077A972493F93FFD525 /* CelebrationService.swift */; };
+		6254D408262444C9A3BCC387 /* PatternProgressCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820175379D004B21A3EC9032 /* PatternProgressCard.swift */; };
+		6A6021383C0942779F8A9DB2 /* PartnerOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54EAAFDABF434825AC14B478 /* PartnerOnboardingView.swift */; };
+		7076AE456CCC4AE781DCE4C1 /* TestimonialCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B934B17BB1A4B928C5FA218 /* TestimonialCard.swift */; };
+		758661AF622A440BBC014B57 /* MicroCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CF35CA90E841F19FD20424 /* MicroCelebrationView.swift */; };
+		9A993C0725804513A05F6501 /* NightModeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E687E7C157FF48B2AFC90924 /* NightModeHomeView.swift */; };
+		9C1A84979C22407EA844FEF1 /* ValueRealizedUpgradeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09248BB5269941D895900DC2 /* ValueRealizedUpgradeModal.swift */; };
+		BDF52CE948984B2BAEADAE1A /* DoctorReportTeaser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F36DC42260314378BB9C8FD8 /* DoctorReportTeaser.swift */; };
+		BE4DCE5F6B0C43A2B04C465A /* ProactiveInsightsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6680CFA0C1674F40B2D2714E /* ProactiveInsightsService.swift */; };
+		CE4540EB52CF42F885576094 /* AdaptiveTrialBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7772D070134C8B92B24F9A /* AdaptiveTrialBanner.swift */; };
+		D31825B9353E4128B142F1FC /* ExhaustedParentModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3655F5EF1EDA46E8BD94E7C9 /* ExhaustedParentModeService.swift */; };
+		DEAFF45606AC4244A4E291F1 /* InsightGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCA83FFEF9943C7AD287904 /* InsightGenerationService.swift */; };
+		E97601E8BC674B2F8CD113E5 /* ReassuranceCopyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8AB99470C4E619051295B /* ReassuranceCopyService.swift */; };
 		6E406116CBF9FED36A70637C /* BottleLevelIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */; };
 		00DD022BB745243508B30128 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7AEE12597766D7CA40E492C /* Haptics.swift */; };
 		02A5F8302AABE4DF18A6E28A /* CrashReportingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0206CEB3041C28184B563A98 /* CrashReportingService.swift */; };
@@ -272,6 +291,25 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		09248BB5269941D895900DC2 /* ValueRealizedUpgradeModal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Home/ValueRealizedUpgradeModal.swift; sourceTree = SOURCE_ROOT; };
+		3655F5EF1EDA46E8BD94E7C9 /* ExhaustedParentModeService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ExhaustedParentModeService.swift; sourceTree = SOURCE_ROOT; };
+		54EAAFDABF434825AC14B478 /* PartnerOnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Onboarding/PartnerOnboardingView.swift; sourceTree = SOURCE_ROOT; };
+		6680CFA0C1674F40B2D2714E /* ProactiveInsightsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ProactiveInsightsService.swift; sourceTree = SOURCE_ROOT; };
+		6B934B17BB1A4B928C5FA218 /* TestimonialCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Design/Components/TestimonialCard.swift; sourceTree = SOURCE_ROOT; };
+		6C45699F34DD4AD68FECDC1D /* WeeklyTrendsCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/History/WeeklyTrendsCard.swift; sourceTree = SOURCE_ROOT; };
+		7935F077A972493F93FFD525 /* CelebrationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/CelebrationService.swift; sourceTree = SOURCE_ROOT; };
+		80D0C50C7CC34DDB80F0BA63 /* E2ETests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NestlingUITests/E2ETests.swift; sourceTree = SOURCE_ROOT; };
+		820175379D004B21A3EC9032 /* PatternProgressCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Home/PatternProgressCard.swift; sourceTree = SOURCE_ROOT; };
+		8DCA83FFEF9943C7AD287904 /* InsightGenerationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/InsightGenerationService.swift; sourceTree = SOURCE_ROOT; };
+		9DE8AB99470C4E619051295B /* ReassuranceCopyService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ReassuranceCopyService.swift; sourceTree = SOURCE_ROOT; };
+		A40DAA6473AB47A6B5A79763 /* ConversionTriggerService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ConversionTriggerService.swift; sourceTree = SOURCE_ROOT; };
+		A4CF35CA90E841F19FD20424 /* MicroCelebrationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Design/Components/MicroCelebrationView.swift; sourceTree = SOURCE_ROOT; };
+		A5B9DDE3B6B441C59185D675 /* WinOfTheDayCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Home/WinOfTheDayCard.swift; sourceTree = SOURCE_ROOT; };
+		BA7772D070134C8B92B24F9A /* AdaptiveTrialBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Design/Components/AdaptiveTrialBanner.swift; sourceTree = SOURCE_ROOT; };
+		C3BEF6DF774A4C328412F55C /* SpotlightOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Design/Components/SpotlightOverlay.swift; sourceTree = SOURCE_ROOT; };
+		E687E7C157FF48B2AFC90924 /* NightModeHomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Home/NightModeHomeView.swift; sourceTree = SOURCE_ROOT; };
+		EC2210EFCEF84CAA82CF7461 /* MilestoneTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Domain/Services/MilestoneTracker.swift; sourceTree = SOURCE_ROOT; };
+		F36DC42260314378BB9C8FD8 /* DoctorReportTeaser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/History/DoctorReportTeaser.swift; sourceTree = SOURCE_ROOT; };
 		74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BottleLevelIndicator.swift; sourceTree = "<group>"; };
 		A28C2136CB384E2A3073867D /* DailySummaryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailySummaryCard.swift; sourceTree = "<group>"; };
 		001AD0E1A9B0C8DD3FE24A7A /* ReviewPromptManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewPromptManager.swift; sourceTree = "<group>"; };
@@ -3779,6 +3817,24 @@
 				319C4884A164A90A7AEBEE0C /* SharedWidgetData.swift in Sources */,
 				D2E2CFF132A5213AB2F13A4A /* OnboardingDefaultsHelper.swift in Sources */,
 				A05BCE038DC9777D568C67B0 /* LegalDocumentView.swift in Sources */,
+				CE4540EB52CF42F885576094 /* AdaptiveTrialBanner.swift in Sources */,
+				758661AF622A440BBC014B57 /* MicroCelebrationView.swift in Sources */,
+				09D4F124F4FF4065A8AE62D3 /* SpotlightOverlay.swift in Sources */,
+				7076AE456CCC4AE781DCE4C1 /* TestimonialCard.swift in Sources */,
+				53E9D2D62DBA4AF9B1146A98 /* MilestoneTracker.swift in Sources */,
+				BDF52CE948984B2BAEADAE1A /* DoctorReportTeaser.swift in Sources */,
+				3EEF0A706EC442B08EEE7CE1 /* WeeklyTrendsCard.swift in Sources */,
+				9A993C0725804513A05F6501 /* NightModeHomeView.swift in Sources */,
+				6254D408262444C9A3BCC387 /* PatternProgressCard.swift in Sources */,
+				9C1A84979C22407EA844FEF1 /* ValueRealizedUpgradeModal.swift in Sources */,
+				01DA4690818F492A933DD705 /* WinOfTheDayCard.swift in Sources */,
+				6A6021383C0942779F8A9DB2 /* PartnerOnboardingView.swift in Sources */,
+				56857B14F7004F109C6A5E08 /* CelebrationService.swift in Sources */,
+				001E4B24BEE843B99229587C /* ConversionTriggerService.swift in Sources */,
+				D31825B9353E4128B142F1FC /* ExhaustedParentModeService.swift in Sources */,
+				DEAFF45606AC4244A4E291F1 /* InsightGenerationService.swift in Sources */,
+				BE4DCE5F6B0C43A2B04C465A /* ProactiveInsightsService.swift in Sources */,
+				E97601E8BC674B2F8CD113E5 /* ReassuranceCopyService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3787,6 +3843,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				51BFEE3FBB8AA4783914557F /* NestlingUITests.swift in Sources */,
+				19F7AD0C77AE41BE831933B5 /* E2ETests.swift in Sources */,
 				4710AC254BB046FFF7895330 /* NestlingUITestsLaunchTests.swift in Sources */,
 				B70188B2F651A6989B7F9893 /* NuzzleUITests.swift in Sources */,
 				0B1B96B24B98BEDD2A5963BC /* NuzzleUITestsLaunchTests.swift in Sources */,
@@ -3849,7 +3906,7 @@
 				MARKETING_VERSION = 1.0;
 				NSPhotoLibraryUsageDescription = "Photo library access is used to attach photos to baby care events.";
 				NSSpeechRecognitionUsageDescription = "Speech recognition is used to convert voice notes into text when logging baby activities.";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestling.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

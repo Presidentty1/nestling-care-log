@@ -18,6 +18,11 @@ final class HistoryViewModel: ObservableObject {
     @Published var canLoadMore: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published var errorMessage: String?
+    @Published var weeklySummary: InsightGenerationService.WeekSummary? // Phase 3: Weekly trends
+
+    // Month caching for performance (Phase 3)
+    private var monthCache: [Date: [HistoryDay]] = [:]
+    private var preloadTask: Task<Void, Never>?
 
     var filteredDays: [HistoryDay] {
         let filtered = days.compactMap { day -> HistoryDay? in
@@ -129,6 +134,26 @@ final class HistoryViewModel: ObservableObject {
         return Array(suggestions.prefix(5))
     }
 
+    // MARK: - Phase 3: Weekly Trends
+
+    func generateWeeklySummary() async {
+        // Get all events from the last 7 days
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let weekStart = calendar.date(byAdding: .day, value: -6, to: today)!
+
+        do {
+            let weekEvents = try await dataStore.fetchEvents(for: baby, from: weekStart, to: today)
+            weeklySummary = InsightGenerationService.shared.generateWeeklySummary(
+                events: weekEvents,
+                baby: baby
+            )
+        } catch {
+            print("Error generating weekly summary: \(error)")
+            weeklySummary = nil
+        }
+    }
+
     // MARK: - Private
 
     private func fetchRange(startDate: Date, endDate: Date, append: Bool) async {
@@ -144,8 +169,17 @@ final class HistoryViewModel: ObservableObject {
             days.sort { $0.date > $1.date }
             earliestLoadedDate = min(earliestLoadedDate ?? endDate, startDate)
             rangeSummary = makeRangeSummary()
+
+            // Phase 3: Generate weekly summary if viewing last 7 days
+            if selectedRange == .last7Days {
+                await generateWeeklySummary()
+            }
+
             canLoadMore = true
             state = .loaded
+
+            // Preload adjacent months for better performance
+            preloadAdjacentMonths()
         } catch {
             errorMessage = "Failed to load events: \(error.localizedDescription)"
             state = .error(message: errorMessage ?? "Failed to load events.")
@@ -286,6 +320,72 @@ final class HistoryViewModel: ObservableObject {
             tummyTimeCount: tummyTimeCount,
             cryCount: cryCount
         )
+    }
+
+    // MARK: - Month Caching and Preloading
+
+    /// Preload adjacent months for smooth navigation
+    func preloadAdjacentMonths() {
+        guard PolishFeatureFlags.shared.timelineGroupingEnabled else { return }
+
+        preloadTask?.cancel()
+        preloadTask = Task {
+            // Get current month
+            let currentMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
+
+            // Preload previous and next month
+            let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentMonth)!
+            let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: currentMonth)!
+
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    await self.loadMonthIntoCache(previousMonth)
+                }
+                group.addTask {
+                    await self.loadMonthIntoCache(nextMonth)
+                }
+            }
+        }
+    }
+
+    private func loadMonthIntoCache(_ monthStart: Date) async {
+        // Check if already cached
+        if monthCache[monthStart] != nil { return }
+
+        do {
+            let monthEnd = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart)!
+
+            // Load events for this month
+            let events = try await dataStore.fetchEvents(
+                from: monthStart,
+                to: monthEnd,
+                babyId: babyId
+            )
+
+            // Group by day
+            let groupedEvents = Dictionary(grouping: events) { event in
+                Calendar.current.startOfDay(for: event.startTime)
+            }
+
+            // Create HistoryDay objects
+            var historyDays: [HistoryDay] = []
+            for (date, dayEvents) in groupedEvents {
+                let sortedEvents = dayEvents.sorted { $0.startTime > $1.startTime }
+                let summary = calculateDaySummary(sortedEvents)
+                historyDays.append(HistoryDay(date: date, events: sortedEvents, summary: summary))
+            }
+
+            // Cache the result
+            monthCache[monthStart] = historyDays.sorted { $0.date > $1.date }
+
+        } catch {
+            print("Failed to preload month \(monthStart): \(error)")
+        }
+    }
+
+    /// Get cached month data if available
+    func getCachedMonth(_ monthStart: Date) -> [HistoryDay]? {
+        return monthCache[monthStart]
     }
 }
 

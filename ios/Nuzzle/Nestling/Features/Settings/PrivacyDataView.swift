@@ -423,14 +423,23 @@ struct PrivacyDataView: View {
                 if isLoggedIn {
                     do {
                         let client = try SupabaseClientProvider.shared.getClient()
-                        // Note: Supabase doesn't have a direct user deletion endpoint in the client
-                        // This would need to be implemented via an edge function or server-side
-                        // For now, we'll sign out the user
-                        try await client.auth.signOut()
-                        print("User signed out from Supabase")
+                        
+                        // Call delete-user-account edge function using Supabase functions API
+                        let response: DeleteAccountResponse = try await client.functions.invoke(
+                            "delete-user-account",
+                            options: FunctionInvokeOptions(body: [String: String]())
+                        )
+                        
+                        if response.success {
+                            print("Account deleted successfully from Supabase")
+                        } else {
+                            let errorMessage = response.error ?? "Unknown error"
+                            print("Failed to delete account from Supabase: \(errorMessage)")
+                            // Continue with local deletion even if server deletion fails
+                        }
                     } catch {
-                        print("Failed to sign out from Supabase: \(error)")
-                        // Continue with local deletion even if Supabase logout fails
+                        print("Failed to delete account from Supabase: \(error)")
+                        // Continue with local deletion even if Supabase deletion fails
                     }
                 }
 
@@ -472,6 +481,11 @@ struct PrivacyDataView: View {
         } catch {
             print("Error deleting local data: \(error)")
         }
+    }
+
+    private struct DeleteAccountResponse: Decodable {
+        let success: Bool
+        let error: String?
     }
 }
 

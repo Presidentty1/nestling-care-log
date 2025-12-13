@@ -101,6 +101,18 @@ struct CryRecorderView: View {
                     showFirstUseExplainer = true
                     UserDefaults.standard.set(true, forKey: "cry_insights_seen_explainer")
                 }
+                
+                // Track feature first used
+                let hasUsedCry = UserDefaults.standard.bool(forKey: "feature_cry_analysis_used")
+                if !hasUsedCry {
+                    let onboardingDate = UserDefaults.standard.object(forKey: "onboardingCompletedDate") as? Date ?? Date()
+                    let daysSinceOnboarding = Calendar.current.dateComponents([.day], from: onboardingDate, to: Date()).day ?? 0
+                    AnalyticsService.shared.trackFeatureFirstUsed(
+                        featureName: "cry_analysis",
+                        daysSinceOnboarding: daysSinceOnboarding
+                    )
+                    UserDefaults.standard.set(true, forKey: "feature_cry_analysis_used")
+                }
             }
         }
     }

@@ -1,128 +1,179 @@
 import SwiftUI
 
+/// Enhanced Empty State View - Reassuring and contextual for parenting
+/// Research shows empty states should reduce anxiety, not pressure users
 struct EmptyStateView: View {
-    enum Variant {
-        case welcome
-        case activity
-        case search
-        case history
-    }
-    
-    let icon: String
-    let title: String
-    let message: String
-    let variant: Variant
-    let actionTitle: String?
-    let action: (() -> Void)?
-    let secondaryActionTitle: String?
-    let secondaryAction: (() -> Void)?
-    
-    init(
-        icon: String,
-        title: String,
-        message: String,
-        variant: Variant = .activity,
-        actionTitle: String? = nil,
-        action: (() -> Void)? = nil,
-        secondaryActionTitle: String? = nil,
-        secondaryAction: (() -> Void)? = nil
-    ) {
-        self.icon = icon
-        self.title = title
-        self.message = message
-        self.variant = variant
-        self.actionTitle = actionTitle
-        self.action = action
-        self.secondaryActionTitle = secondaryActionTitle
-        self.secondaryAction = secondaryAction
-    }
-    
-    @State private var isAnimating = false
-    
-    private var gradientColors: [Color] {
-        switch variant {
-        case .welcome: return [Color.eventFeed.opacity(0.16), Color.eventSleep.opacity(0.16)]
-        case .activity: return [Color.primary.opacity(0.14), Color.eventTummy.opacity(0.1)]
-        case .search: return [Color.primary.opacity(0.12), Color.surface.opacity(0.08)]
-        case .history: return [Color.eventSleep.opacity(0.12), Color.eventDiaper.opacity(0.1)]
+    enum Context {
+        case todayTimeline
+        case historyView
+        case firstTimeUser
+
+        var illustration: String {
+            switch self {
+            case .todayTimeline: return "moon.stars"
+            case .historyView: return "calendar.badge.clock"
+            case .firstTimeUser: return "heart.fill"
+            }
+        }
+
+        var headline: String {
+            switch self {
+            case .todayTimeline: return "Ready when you are"
+            case .historyView: return "Your story starts here"
+            case .firstTimeUser: return "Welcome to calmer days"
+            }
+        }
+
+        var supportingText: String {
+            switch self {
+            case .todayTimeline:
+                return "Log what you can, when you can. Every entry helps us understand your baby better."
+            case .historyView:
+                return "Once you start logging, you'll see patterns emerge that make parenting clearer."
+            case .firstTimeUser:
+                return "Tracking doesn't need to be perfect. Even one log a day helps us help you."
+            }
+        }
+
+        var ctaLabel: String {
+            guard PolishFeatureFlags.shared.smartCTAsEnabled else {
+                return defaultCTALabel
+            }
+
+            // Time-based CTAs only for today timeline and first time user contexts
+            switch self {
+            case .todayTimeline, .firstTimeUser:
+                return timeBasedCTALabel
+            case .historyView:
+                return defaultCTALabel
+            }
+        }
+
+        private var defaultCTALabel: String {
+            switch self {
+            case .todayTimeline: return "Log First Event"
+            case .historyView: return "Start Tracking"
+            case .firstTimeUser: return "Let's Begin"
+            }
+        }
+
+        private var timeBasedCTALabel: String {
+            let hour = Calendar.current.component(.hour, from: Date())
+            switch hour {
+            case 6..<10: return "Log Morning Feed"
+            case 12..<15: return "Log Today's Nap"
+            case 18..<21: return "Log Evening Feed"
+            case 22..<24, 0..<6: return "Quick Night Log"
+            default: return "Log First Event"
+            }
         }
     }
-    
+
+    let context: Context
+    let babyName: String?
+    let onPrimaryAction: () -> Void
+
+    @State private var isAnimating = false
+
     var body: some View {
-        VStack(spacing: .spacingMD) {
+        VStack(spacing: .spacingXL) {
+            Spacer()
+
+            // Animated illustration
             ZStack {
                 Circle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: gradientColors),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 110, height: 110)
-                    .blur(radius: 22)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                Color.primary,
-                                Color.eventSleep
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .symbolEffect(.bounce, value: isAnimating)
-                    .accessibilityHidden(true)
+                    .fill(Color.primary.opacity(0.05))
+                    .frame(width: 140, height: 140)
+                    .scaleEffect(isAnimating ? 1.1 : 1.0)
+
+                Circle()
+                    .fill(Color.primary.opacity(0.1))
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: context.illustration)
+                    .font(.system(size: 44))
+                    .foregroundColor(.primary)
+                    .scaleEffect(isAnimating ? 1.0 : 0.9)
             }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                    isAnimating = true
-                }
-            }
-            
-            VStack(spacing: .spacingXS) {
-                Text(title)
-                    .font(.title3)
-                    .fontWeight(.semibold)
+            .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
+
+            // Text content
+            VStack(spacing: .spacingMD) {
+                Text(context.headline)
+                    .font(.title2.weight(.bold))
                     .foregroundColor(.foreground)
                     .multilineTextAlignment(.center)
-                
-                Text(message)
+
+                Text(personalizedSupportingText)
                     .font(.body)
                     .foregroundColor(.mutedForeground)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, .spacingLG)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            
-            if let actionTitle = actionTitle, let action = action {
-                PrimaryButton(actionTitle, action: action)
-                    .padding(.horizontal, .spacingMD)
-                    .padding(.top, .spacingSM)
+            .padding(.horizontal, .spacingLG)
+
+            // Reassurance message - research shows reducing anxiety increases action
+            HStack(spacing: .spacingSM) {
+                Image(systemName: "checkmark.shield")
+                    .font(.caption)
+                    .foregroundColor(.success)
+
+                Text("No perfect timing needed. Log anytime.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
             }
-            
-            if let secondaryActionTitle = secondaryActionTitle, let secondaryAction = secondaryAction {
-                SecondaryButton(secondaryActionTitle, action: secondaryAction)
-                    .padding(.horizontal, .spacingMD)
+            .padding(.horizontal, .spacingLG)
+            .padding(.vertical, .spacingSM)
+            .background(Color.success.opacity(0.1))
+            .cornerRadius(.radiusSM)
+
+            Spacer()
+
+            // Primary CTA
+            Button(action: {
+                Haptics.medium()
+                onPrimaryAction()
+            }) {
+                Text(context.ctaLabel)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(Color.primary)
+                    .cornerRadius(.radiusXL)
+                    .shadow(color: Color.primary.opacity(0.3), radius: 8, x: 0, y: 4)
             }
+            .padding(.horizontal, .spacingLG)
+            .padding(.bottom, .spacing2XL)
         }
-        .padding(.spacing2XL)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title). \(message)")
-        .accessibilityHint(actionTitle ?? "Add an entry to get started")
+        .onAppear {
+            isAnimating = true
+        }
+    }
+
+    private var personalizedSupportingText: String {
+        if let name = babyName {
+            return context.supportingText.replacingOccurrences(of: "your baby", with: name)
+        }
+        return context.supportingText
     }
 }
 
 #Preview {
-    EmptyStateView(
-        icon: "calendar",
-        title: "No events logged",
-        message: "Start logging events to see them here",
-        actionTitle: "Log Event",
-        action: {}
-    )
+    VStack {
+        EmptyStateView(
+            context: .todayTimeline,
+            babyName: "Emma",
+            onPrimaryAction: {}
+        )
+
+        EmptyStateView(
+            context: .historyView,
+            babyName: nil,
+            onPrimaryAction: {}
+        )
+    }
+    .background(Color.background)
 }
 

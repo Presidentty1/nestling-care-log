@@ -4,14 +4,25 @@ struct WelcomeView: View {
     @ObservedObject var coordinator: OnboardingCoordinator
     
     var body: some View {
-        VStack(spacing: .spacing2XL) {
-            Spacer()
-            
-            Image(systemName: "heart.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.primary)
-            
-            VStack(spacing: .spacingMD) {
+        ZStack {
+            // Warm gradient background
+            LinearGradient(
+                colors: [Color.creamAccent.opacity(0.3), Color.background],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: .spacing2XL) {
+                Spacer()
+
+                // Replace SF Symbol with custom baby illustration
+                Image("WelcomeIllustration")  // Add to Assets
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 120)
+
+                VStack(spacing: .spacingMD) {
                 Text("Less guessing.\nMore calm days.")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.foreground)
@@ -109,8 +120,8 @@ struct WelcomeView: View {
             }
             .padding(.horizontal, .spacingMD)
             .padding(.bottom, .spacing2XL)
+            }
         }
-        .background(Color.background)
         .onAppear {
             Task {
                 await Analytics.shared.logOnboardingStepViewed(step: "welcome")

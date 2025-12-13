@@ -23,16 +23,12 @@ struct OnboardingView: View {
                     switch coordinator.currentStep {
                     case .welcome:
                         WelcomeView(coordinator: coordinator)
-                    case .babyBasics:
-                        BabyEssentialsView(coordinator: coordinator)
-                    case .focusGoals:
-                        GoalSelectionView(coordinator: coordinator)
-                    case .lastWake:
-                        LastWakeView(coordinator: coordinator)
-                    case .notifications:
-                        NotificationsIntroView(coordinator: coordinator)
-                    case .paywall:
-                        PaywallView(coordinator: coordinator)
+                    case .babySetup:
+                        BabySetupView(coordinator: coordinator)
+                    case .firstLog:
+                        FirstLogView(coordinator: coordinator)
+                    case .partnerOnboarding:
+                        PartnerOnboardingView(coordinator: coordinator)
                     case .complete:
                         OnboardingCompleteView(coordinator: coordinator)
                     }

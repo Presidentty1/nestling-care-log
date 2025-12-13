@@ -165,6 +165,11 @@ struct NestlingApp: App {
                         let route = DeepLinkRouter.parse(url: url)
                         environment.navigationCoordinator.handleDeepLink(route)
                     }
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("HandleDeepLink"))) { notification in
+                        if let route = notification.userInfo?["route"] as? DeepLinkRoute {
+                            environment.navigationCoordinator.handleDeepLink(route)
+                        }
+                    }
                     .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
                         if let url = userActivity.webpageURL {
                             let route = DeepLinkRouter.parse(url: url)

@@ -15,20 +15,22 @@ struct AssistantView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Medical disclaimer banner (sticky at top)
-            MedicalDisclaimer(
-                message: "General guidance only; not a replacement for your pediatrician"
-            )
-            .padding(.spacingMD)
-            .background(Color.surface)
-            
-            InfoBanner(
-                title: "Safety",
-                message: "No diagnoses. If anything feels urgent or serious, contact a pediatric professional immediately.",
-                variant: .warning
-            )
+            // Consolidated disclaimer banner
+            DisclosureGroup {
+                Text("No diagnoses. If anything feels urgent or serious, contact a pediatric professional immediately.")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+            } label: {
+                HStack {
+                    Image(systemName: "info.circle")
+                        .foregroundColor(.info)
+                    Text("General guidance only - not medical advice")
+                        .font(.caption)
+                        .foregroundColor(.mutedForeground)
+                }
+            }
             .padding(.horizontal, .spacingMD)
-            .padding(.bottom, .spacingSM)
+            .padding(.vertical, .spacingSM)
             .background(Color.surface)
             
             // Messages
@@ -112,6 +114,18 @@ struct AssistantView: View {
         .background(Color.background)
         .onAppear {
             viewModel.setBaby(environment.currentBaby)
+            
+            // Track feature first used
+            let hasUsedAI = UserDefaults.standard.bool(forKey: "feature_ai_assistant_used")
+            if !hasUsedAI {
+                let onboardingDate = UserDefaults.standard.object(forKey: "onboardingCompletedDate") as? Date ?? Date()
+                let daysSinceOnboarding = Calendar.current.dateComponents([.day], from: onboardingDate, to: Date()).day ?? 0
+                AnalyticsService.shared.trackFeatureFirstUsed(
+                    featureName: "ai_assistant",
+                    daysSinceOnboarding: daysSinceOnboarding
+                )
+                UserDefaults.standard.set(true, forKey: "feature_ai_assistant_used")
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -131,6 +145,10 @@ struct AssistantView: View {
         }
     }
     
+    private var babyName: String {
+        environment.currentBaby?.name ?? "your baby"
+    }
+
     @ViewBuilder
     private var welcomeContent: some View {
         VStack(spacing: .spacingLG) {
@@ -146,12 +164,12 @@ struct AssistantView: View {
             
             // Welcome text
             VStack(spacing: .spacingSM) {
-                Text("Hi! I'm here to help")
+                Text("Hi! I'm Nuzzle")  // Give it a name
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.foreground)
-                
-                Text("Ask me anything about baby care, feeding schedules, sleep tips, or developmental milestones. I'm here to support you.")
+
+                Text("I'm here to help you understand \(babyName)'s patterns. Parenting is hard - you're doing great!")
                     .font(.body)
                     .foregroundColor(.mutedForeground)
                     .multilineTextAlignment(.center)
@@ -314,7 +332,7 @@ class AssistantViewModel: ObservableObject {
     @Published var error: Error?
     
     private var currentBaby: Baby?
-    private var conversationId: UUID?
+    private var conversationId: String?
     private let storage = UserDefaults.standard
     private let sensitiveKeywords = ["fever", "vaccine", "medicine", "dosage", "sids", "pain", "emergency", "911"]
     
@@ -354,12 +372,17 @@ class AssistantViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Build prompt with context
-            let prompt = AIContextBuilder.buildPrompt(question: trimmed, baby: baby, recentEvents: recentEvents)
+            // Call AI service with the user's question
+            // The edge function will handle context building server-side
+            let response = try await AIAssistantService.shared.askAssistant(
+                message: trimmed,
+                babyId: baby.id,
+                conversationId: conversationId
+            )
+            var responseContent = response.message
             
-            // Call AI service
-            let response = try await AIAssistantService.shared.chat(prompt: prompt)
-            var responseContent = response
+            // Store conversation ID for continuity
+            conversationId = response.conversationId
             
             // Check for red flags
             let containsRedFlag = AIContextBuilder.containsRedFlag(trimmed) || AIContextBuilder.containsRedFlag(response)

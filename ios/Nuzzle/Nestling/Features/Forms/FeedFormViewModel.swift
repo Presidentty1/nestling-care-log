@@ -73,42 +73,38 @@ class FeedFormViewModel: ObservableObject {
     }
     
     private func loadLastUsedValues() {
+        // Load last used preferences from UserDefaults
+        if let lastTypeRaw = UserDefaults.standard.string(forKey: "lastFeedType"),
+           let lastType = FeedSubtype(rawValue: lastTypeRaw) {
+            feedType = lastType
+        }
+
+        if let lastUnitRaw = UserDefaults.standard.string(forKey: "lastFeedUnit"),
+           let lastUnit = UnitType(rawValue: lastUnitRaw) {
+            unit = lastUnit
+        }
+
+        // Show last amount as placeholder
+        if let lastAmount = UserDefaults.standard.string(forKey: "lastFeedAmount") {
+            amount = lastAmount
+        } else {
+            // Use smart defaults
+            let (defaultAmount, defaultUnit) = getSmartDefaults()
+            amount = String(Int(defaultAmount))
+            unit = defaultUnit
+        }
+
+        // Load other preferences from dataStore if available
         Task {
             do {
-                var finalAmount: Double
-                var finalUnit: UnitType
-
                 if let lastUsed = try await dataStore.getLastUsedValues(for: .feed) {
-                    // Start with last used values
-                    finalAmount = lastUsed.amount ?? Double(AppConstants.defaultFeedAmountML)
-                    finalUnit = (lastUsed.unit == "ml") ? .ml : .oz
-
                     if let sideStr = lastUsed.side {
                         side = Side(rawValue: sideStr) ?? .left
                     }
-                    if let subtype = lastUsed.subtype {
-                        if subtype == "breast" {
-                            feedType = .breast
-                        } else if subtype == "bottle" {
-                            feedType = .bottle
-                        }
-                    }
-
-                    // Apply smart adjustments on top of last used
-                    finalAmount = applySmartAdjustments(to: finalAmount, unit: finalUnit)
-                } else {
-                    // No last used values - use smart defaults based on baby and time
-                    (finalAmount, finalUnit) = getSmartDefaults()
                 }
-
-                amount = String(Int(finalAmount))
-                unit = finalUnit
-
             } catch {
-                // Fallback to basic defaults
-                let (defaultAmount, defaultUnit) = getSmartDefaults()
-                amount = String(Int(defaultAmount))
-                unit = defaultUnit
+                // Use defaults if dataStore fails
+                print("Failed to load last used values from dataStore: \(error)")
             }
             validate()
         }
@@ -266,6 +262,27 @@ class FeedFormViewModel: ObservableObject {
             subtype: eventData.subtype
         )
         try await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
+
+        // Remember preferences for next time
+        UserDefaults.standard.set(feedType.rawValue, forKey: "lastFeedType")
+        UserDefaults.standard.set(unit.rawValue, forKey: "lastFeedUnit")
+        UserDefaults.standard.set(amount, forKey: "lastFeedAmount")
+    }
+
+    func getTodayFeedCount() async -> Int {
+        do {
+            let today = Calendar.current.startOfDay(for: Date())
+            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
+            let todayEvents = try await dataStore.fetchEvents(for: baby, from: today, to: tomorrow)
+            return todayEvents.filter { $0.type == .feed }.count
+        } catch {
+            return 0
+        }
+    }
+
+    func predictNextFeedTime() -> Date? {
+        // Simple prediction: next feed in 2-3 hours
+        return Calendar.current.date(byAdding: .hour, value: 3, to: Date())
     }
     
     private func checkAndCelebrateFirstEvent() async {

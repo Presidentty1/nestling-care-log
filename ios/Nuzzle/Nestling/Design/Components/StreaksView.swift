@@ -57,6 +57,15 @@ struct StreaksView: View {
                 Spacer()
             }
 
+            // Freeze streak option
+            Button("Freeze streak (vacation)") {
+                UserDefaults.standard.set(true, forKey: "streakFrozen")
+                UserDefaults.standard.set(Date(), forKey: "streakFreezeDate")
+            }
+            .font(.system(size: 14))
+            .foregroundColor(.primary)
+            .padding(.vertical, .spacingXS)
+
             // Streak badges
             VStack(alignment: .leading, spacing: .spacingSM) {
                 Text("Milestones")

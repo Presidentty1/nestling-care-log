@@ -79,7 +79,10 @@
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "6738223825",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "type" : "FreeTrial",
+            "duration" : "P7D"
+          },
           "localizations" : [
             {
               "description" : "Unlock advanced features for tracking your baby's care",

@@ -8,10 +8,6 @@ struct CelebrationView: View {
     @State private var opacity: Double = 0
     @State private var showConfetti = false
     
-    private var celebrationsEnabled: Bool {
-        UserDefaults.standard.object(forKey: "celebrationsEnabled") as? Bool ?? true
-    }
-    
     enum CelebrationType {
         case firstLog
         case streakAchieved(days: Int)
@@ -119,18 +115,14 @@ struct CelebrationView: View {
             }
             
             // Show confetti after a brief delay
-            if celebrationsEnabled {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    withAnimation {
-                        showConfetti = true
-                    }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation {
+                    showConfetti = true
                 }
             }
             
             // Haptic feedback
-            if celebrationsEnabled {
-                Haptics.success()
-            }
+            Haptics.success()
         }
     }
     

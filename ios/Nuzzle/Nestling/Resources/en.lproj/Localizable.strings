@@ -18,6 +18,44 @@
 
 // Home
 "home_tab" = "Home";
+
+// Time-based CTAs
+"cta_log_morning_feed" = "Log Morning Feed";
+"cta_log_afternoon_nap" = "Log Today's Nap";
+"cta_log_evening_feed" = "Log Evening Feed";
+"cta_quick_night_log" = "Quick Night Log";
+
+// Success messages
+"toast_feed_logged" = "Got it! %1$@'s %2$@ feed is tracked";
+"toast_event_deleted" = "Removed. Tap undo if you change your mind";
+
+// Contextual badges
+"badge_on_track" = "On track";
+"badge_low_today" = "Low today";
+"badge_great_day" = "Great day!";
+"badge_low_sleep" = "Low sleep";
+
+// Share messages
+"share_milestone_streak" = "%1$@ Day Streak!";
+"share_milestone_sleep_record" = "%1$@h Sleep Record!";
+"share_milestone_week_complete" = "Week %1$@ Complete!";
+"share_milestone_patterns_unlocked" = "Patterns Unlocked!";
+"share_encouragement_streak" = "Amazing consistency! You're building habits that will help you understand your baby better every day.";
+"share_encouragement_sleep" = "Rest is so important for both of you. Cherish these peaceful moments!";
+"share_encouragement_week" = "Another week of precious memories captured. You're doing an incredible job!";
+"share_encouragement_patterns" = "Your dedication is paying off. Patterns are emerging that will help make parenting clearer.";
+
+// Trial loss messaging
+"trial_loss_personalized_naps" = "Personalized nap predictions";
+"trial_loss_weekly_charts" = "Weekly trend charts";
+"trial_loss_ai_insights" = "AI insights from your baby's patterns";
+"trial_loss_shareable_cards" = "Shareable milestone cards";
+
+// Offline messages
+"offline_general" = "Offline";
+"offline_ai_features" = "AI features offline";
+"offline_sharing_queued" = "Sharing queued";
+"offline_notifications_limited" = "Notifications limited";
 "quick_actions" = "Quick Actions";
 "feed" = "Feed";
 "sleep" = "Sleep";

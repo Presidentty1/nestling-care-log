@@ -11,13 +11,107 @@ struct HomeView: View {
     @State private var editingEvent: Event?
     @State private var showToast: ToastMessage?
     @State private var showProSubscription = false
+    @State private var showFabMenu = false
     @State private var showTutorial = false
     @State private var hasCheckedTrialExpiration = false
-    @State private var showCaregiverWelcome = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             navigationContent
+            
+            // Spotlight Tutorial Overlay (Phase 3)
+            if showTutorial {
+                SpotlightTutorialOverlay(isPresented: $showTutorial) {
+                    // Mark tutorial as seen
+                    UserDefaults.standard.set(true, forKey: "hasSeenHomeTutorial")
+                }
+                .zIndex(1000)
+            }
+            
+            // Floating Action Button (North Star)
+            VStack(alignment: .trailing, spacing: .spacingSM) {
+                if showFabMenu {
+                    fabActionButton(title: "Diaper", icon: "drop.circle.fill", color: .eventDiaper) {
+                        showFabMenu = false
+                        showDiaperForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    
+                    fabActionButton(title: "Sleep", icon: "moon.fill", color: .eventSleep) {
+                        showFabMenu = false
+                        showSleepForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    
+                    fabActionButton(title: "Feed", icon: "drop.fill", color: .eventFeed) {
+                        showFabMenu = false
+                        showFeedForm = true
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        showFabMenu.toggle()
+                    }
+                    Haptics.light()
+                }) {
+                    Image(systemName: "plus")
+                        .font(.title.weight(.semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.primary.opacity(1.1),
+                                    Color.primary
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Circle())
+                        .shadow(color: Color.primary.opacity(0.4), radius: 12, x: 0, y: 6)
+                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                        .rotationEffect(.degrees(showFabMenu ? 45 : 0))
+                        .scaleEffect(showFabMenu ? 1.05 : 1.0)
+                }
+            }
+            .padding(.spacingLG)
+            
+            // Offline Indicator (Epic 4)
+            VStack {
+                OfflineIndicatorView()
+                Spacer()
+            }
+            .padding(.top, 40) // Safe area padding
+        }
+    }
+    
+    private func fabActionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            Haptics.selection()
+            action()
+        }) {
+            HStack {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.foreground)
+                    .padding(.horizontal, .spacingSM)
+                    .padding(.vertical, .spacingXS)
+                    .background(Color.surface)
+                    .cornerRadius(.radiusSM)
+                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(color)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
+            }
         }
     }
     
@@ -44,11 +138,6 @@ struct HomeView: View {
                 ProSubscriptionView()
             }
             .toast($showToast)
-            .sheet(isPresented: $showCaregiverWelcome) {
-                CaregiverWelcomeSheet {
-                    showCaregiverWelcome = false
-                }
-            }
     }
     
     private var baseNavigationView: some View {
@@ -78,8 +167,6 @@ struct HomeView: View {
                 Task {
                     await checkAndShowTrialExpiredPaywall()
                 }
-                checkCaregiverWelcome()
-                checkConflictNotice()
             }
             .onChange(of: environment.currentBaby?.id) { _, _ in
                 if let baby = environment.currentBaby {
@@ -144,23 +231,6 @@ struct HomeView: View {
             get: { viewModel?.searchText ?? "" },
             set: { viewModel?.searchText = $0 }
         )
-    }
-    
-    private func checkCaregiverWelcome() {
-        if UserDefaults.standard.bool(forKey: "shouldShowCaregiverWelcome") {
-            showCaregiverWelcome = true
-            UserDefaults.standard.set(false, forKey: "shouldShowCaregiverWelcome")
-        }
-    }
-    
-    private func checkConflictNotice() {
-        if UserDefaults.standard.bool(forKey: "shouldShowConflictResolutionNotice") {
-            UserDefaults.standard.set(false, forKey: "shouldShowConflictResolutionNotice")
-            showToast = ToastMessage(
-                message: "Updated from another device",
-                type: .info
-            )
-        }
     }
     
     @ViewBuilder
@@ -327,8 +397,6 @@ struct HomeView: View {
             showDiaperForm = true
         case .tummyTime:
             showTummyForm = true
-        case .cry:
-            break
         }
     }
     
@@ -358,6 +426,101 @@ struct HomeView: View {
     }
 }
 
+// MARK: - Baby Selector
+
+struct BabySelectorView: View {
+    let baby: Baby
+    let babies: [Baby]
+    let onSelect: (Baby) -> Void
+    
+    var body: some View {
+        Menu {
+            ForEach(babies) { b in
+                Button(action: { onSelect(b) }) {
+                    HStack {
+                        Text(b.name)
+                        if b.id == baby.id {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack {
+                Text(baby.name)
+                    .font(.title)
+                    .foregroundColor(.foreground)
+                Image(systemName: "chevron.down")
+                    .font(.caption)
+                    .foregroundColor(.mutedForeground)
+            }
+            .padding(.spacingMD)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.surface)
+            .cornerRadius(.radiusMD)
+        }
+    }
+}
+
+// MARK: - Summary Cards
+
+struct SummaryCardsView: View {
+    let summary: DaySummary
+    
+    var body: some View {
+        HStack(spacing: .spacingSM) {
+            SummaryCard(
+                title: "Feeds",
+                value: "\(summary.feedCount)",
+                icon: "drop.fill",
+                color: .eventFeed
+            )
+            
+            SummaryCard(
+                title: "Diapers",
+                value: "\(summary.diaperCount)",
+                icon: "drop.circle.fill",
+                color: .eventDiaper
+            )
+            
+            SummaryCard(
+                title: "Sleep",
+                value: summary.sleepDisplay,
+                icon: "moon.fill",
+                color: .eventSleep
+            )
+        }
+    }
+}
+
+struct SummaryCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: .spacingSM) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.foreground)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.mutedForeground)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.spacingMD)
+        .background(Color.surface)
+        .cornerRadius(.radiusMD)
+    }
+}
+
 // MARK: - Quick Actions
 
 struct QuickActionsSection: View {
@@ -370,6 +533,7 @@ struct QuickActionsSection: View {
     let onOpenSleepForm: () -> Void
     let onOpenDiaperForm: () -> Void
     let onOpenTummyForm: () -> Void
+    let onCryAnalysis: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -377,7 +541,7 @@ struct QuickActionsSection: View {
                 .font(.title)
                 .foregroundColor(.foreground)
             
-            // 2x2 grid of core actions
+            // Balanced 2x2 Grid - Most-used actions
             VStack(spacing: .spacingMD) {
                 HStack(spacing: .spacingMD) {
                     QuickActionButton(
@@ -457,140 +621,8 @@ struct TimelineSection: View {
 // The implementation has been moved to its own file for better maintainability and dynamic layout support.
 
 
-// MARK: - Caregiver Welcome Sheet
-
-private struct CaregiverWelcomeSheet: View {
-    var onDismiss: () -> Void
-    
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: .spacingLG) {
-                Image(systemName: "person.2.fill")
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundColor(.primary)
-                    .padding(.top, .spacingXL)
-                
-                VStack(spacing: .spacingSM) {
-                    Text("Welcome to shared care")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                    
-                    Text("You can now log and view events for this baby. Changes you make will be visible to the family.")
-                        .font(.body)
-                        .foregroundColor(.mutedForeground)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, .spacingMD)
-                }
-                
-                VStack(alignment: .leading, spacing: .spacingSM) {
-                    Label("See the full history and log new events", systemImage: "list.bullet")
-                        .font(.body)
-                        .foregroundColor(.foreground)
-                    Label("Notifications respect quiet hours", systemImage: "moon.fill")
-                        .font(.body)
-                        .foregroundColor(.foreground)
-                    Label("You can leave anytime from Settings", systemImage: "gearshape.fill")
-                        .font(.body)
-                        .foregroundColor(.foreground)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, .spacingLG)
-                
-                Spacer()
-                
-                Button(action: onDismiss) {
-                    Text("Got it")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.primary)
-                        .foregroundColor(.white)
-                        .cornerRadius(.radiusMD)
-                }
-                .padding(.horizontal, .spacingLG)
-                .padding(.bottom, .spacingXL)
-            }
-            .background(Color.background)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", action: onDismiss)
-                }
-            }
-        }
-    }
-}
-
 #Preview {
     HomeView()
         .environmentObject(AppEnvironment(dataStore: InMemoryDataStore()))
-}
-
-// MARK: - Sync Status Pill
-
-struct SyncStatusView: View {
-    @StateObject private var syncService = CloudKitSyncService.shared
-    
-    var body: some View {
-        VStack(spacing: 6) {
-            if syncService.isSyncing {
-                pill(
-                    text: "Syncing…",
-                    systemImage: "arrow.triangle.2.circlepath",
-                    color: .primary
-                )
-            } else if let error = syncService.syncError {
-                pill(
-                    text: "Sync issue: \(error.localizedDescription)",
-                    systemImage: "exclamationmark.triangle.fill",
-                    color: .warning
-                )
-            } else if let last = syncService.lastSyncTime {
-                pill(
-                    text: "Synced \(relative(last))",
-                    systemImage: "checkmark.circle.fill",
-                    color: .green
-                )
-            }
-        }
-        .animation(.easeInOut, value: syncService.isSyncing)
-        .animation(.easeInOut, value: syncService.syncError != nil)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(syncAccessibilityLabel)
-    }
-    
-    private func pill(text: String, systemImage: String, color: Color) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: systemImage)
-                .font(.caption)
-            Text(text)
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .foregroundColor(.white)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(color.opacity(0.9))
-        .cornerRadius(16)
-    }
-    
-    private func relative(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        return formatter.localizedString(for: date, relativeTo: Date())
-    }
-    
-    private var syncAccessibilityLabel: String {
-        if syncService.isSyncing {
-            return "Cloud sync in progress"
-        }
-        if syncService.syncError != nil {
-            return "Cloud sync issue. Please retry."
-        }
-        if let last = syncService.lastSyncTime {
-            return "Cloud synced \(relative(last))"
-        }
-        return "Cloud sync status unavailable"
-    }
 }
 

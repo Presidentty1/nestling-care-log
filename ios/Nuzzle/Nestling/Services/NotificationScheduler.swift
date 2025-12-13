@@ -32,19 +32,29 @@ class NotificationScheduler {
             options: []
         )
         
-        // Nap window actions
-        let logSleepAction = UNNotificationAction(
-            identifier: "LOG_SLEEP",
-            title: "Start Sleep",
+        // Nap window actions - Updated per plan
+        let startNapAction = UNNotificationAction(
+            identifier: "START_NAP",
+            title: "Start Nap",
             options: [.foreground]
+        )
+        let snooze15Action = UNNotificationAction(
+            identifier: "SNOOZE_15",
+            title: "Snooze 15min",
+            options: []
+        )
+        let dismissAction = UNNotificationAction(
+            identifier: "DISMISS",
+            title: "Dismiss",
+            options: [.destructive]
         )
         let napCategory = UNNotificationCategory(
             identifier: "NAP_WINDOW",
-            actions: [logSleepAction, snooze30Action],
+            actions: [startNapAction, snooze15Action, dismissAction],
             intentIdentifiers: [],
             options: []
         )
-        
+
         // Diaper reminder actions
         let logDiaperAction = UNNotificationAction(
             identifier: "LOG_DIAPER",
@@ -57,13 +67,52 @@ class NotificationScheduler {
             intentIdentifiers: [],
             options: []
         )
-        
-        center.setNotificationCategories([feedCategory, napCategory, diaperCategory])
+
+        // Daily summary actions
+        let viewSummaryAction = UNNotificationAction(
+            identifier: "VIEW_SUMMARY",
+            title: "View Summary",
+            options: [.foreground]
+        )
+        let logNowAction = UNNotificationAction(
+            identifier: "LOG_NOW",
+            title: "Log Now",
+            options: [.foreground]
+        )
+        let dailySummaryCategory = UNNotificationCategory(
+            identifier: "DAILY_SUMMARY",
+            actions: [viewSummaryAction, logNowAction],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        // Weekly recap actions
+        let seeInsightsAction = UNNotificationAction(
+            identifier: "SEE_INSIGHTS",
+            title: "See Insights",
+            options: [.foreground]
+        )
+        let shareWeekAction = UNNotificationAction(
+            identifier: "SHARE_WEEK",
+            title: "Share Week",
+            options: [.foreground]
+        )
+        let weeklyRecapCategory = UNNotificationCategory(
+            identifier: "WEEKLY_RECAP",
+            actions: [seeInsightsAction, shareWeekAction],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        center.setNotificationCategories([
+            feedCategory, napCategory, diaperCategory,
+            dailySummaryCategory, weeklyRecapCategory
+        ])
     }
     
     // MARK: - Feed Reminders
     
-    func scheduleFeedReminder(hours: Int, enabled: Bool, lastFeedTime: Date? = nil, quietHoursStart: Date? = nil, quietHoursEnd: Date? = nil) {
+    func scheduleFeedReminder(hours: Int, enabled: Bool, babyName: String? = nil, lastFeedTime: Date? = nil, quietHoursStart: Date? = nil, quietHoursEnd: Date? = nil) {
         center.removePendingNotificationRequests(withIdentifiers: ["feed_reminder"])
         
         guard enabled else { return }
@@ -83,9 +132,10 @@ class NotificationScheduler {
         }
         
         let content = UNMutableNotificationContent()
-        content.title = "Feed Reminder"
+        content.title = "Hey there!"
         // Supportive, non-judgmental language
-        content.body = "It's been about \(hoursSinceLastFeed) hours since the last feed"
+        let babyNameText = babyName ?? "your baby's"
+        content.body = "It's been a bit since \(babyNameText) last feed. How's everyone doing?"
         content.sound = .default
         content.categoryIdentifier = "FEED_REMINDER"
         // Deep link URL
@@ -137,7 +187,7 @@ class NotificationScheduler {
     
     // MARK: - Nap Window Alerts
     
-    func scheduleNapWindowAlert(predictedTime: Date, enabled: Bool) {
+    func scheduleNapWindowAlert(predictedTime: Date, enabled: Bool, babyName: String? = nil) {
         center.removePendingNotificationRequests(withIdentifiers: ["nap_window_alert"])
         
         guard enabled else { return }
@@ -156,9 +206,9 @@ class NotificationScheduler {
         guard alertTime > Date() else { return }
         
         let content = UNMutableNotificationContent()
-        content.title = "Nap Window"
+        content.title = "Sweet dreams!"
         // Supportive, probabilistic language
-        content.body = "Nap window is starting soon based on your baby's age and patterns"
+        content.body = "Looks like a good time for \(babyName ?? "your baby") to nap. Ready to start?"
         content.sound = .default
         content.categoryIdentifier = "NAP_WINDOW"
         // Deep link URL
@@ -197,9 +247,9 @@ class NotificationScheduler {
         }
         
         let content = UNMutableNotificationContent()
-        content.title = "Diaper Check"
+        content.title = "Time for a check?"
         // Supportive, non-judgmental language
-        content.body = "It's been about \(hoursSinceLastDiaper) hours since the last diaper change"
+        content.body = "It's been a few hours since the last diaper change. Want to check?"
         content.sound = .default
         content.categoryIdentifier = "DIAPER_REMINDER"
         // Deep link URL
@@ -273,7 +323,63 @@ class NotificationScheduler {
     func cancelTrialWarningNotification() {
         center.removePendingNotificationRequests(withIdentifiers: ["trial_warning_day5"])
     }
-    
+
+    // MARK: - Success & Summary Notifications
+
+    func scheduleSuccessNotification(title: String, body: String, deliveryTime: Date = Date().addingTimeInterval(60)) {
+        guard PolishFeatureFlags.shared.richNotificationsEnabled else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "DAILY_SUMMARY"
+        content.userInfo = ["deepLink": "nestling://home/summary"]
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: deliveryTime.timeIntervalSince(Date()), repeats: false)
+        let request = UNNotificationRequest(identifier: "success_notification_\(UUID().uuidString)", content: content, trigger: trigger)
+
+        center.add(request) { error in
+            if let error = error {
+                Logger.notifications.error("Failed to schedule success notification: \(error)")
+            }
+        }
+    }
+
+    func scheduleWeeklyRecapNotification(babyName: String, weekNumber: Int, avgSleepHours: Double) {
+        guard PolishFeatureFlags.shared.richNotificationsEnabled else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Week \(weekNumber) Recap"
+        content.body = "\(babyName) averaged \(String(format: "%.1f", avgSleepHours))h sleep. See your insights!"
+        content.sound = .default
+        content.categoryIdentifier = "WEEKLY_RECAP"
+        content.userInfo = ["deepLink": "nestling://history/insights"]
+
+        // Add chart attachment (placeholder - would need actual chart generation)
+        // let attachment = try? UNNotificationAttachment(identifier: "weekly-chart", url: chartURL)
+        // content.attachments = [attachment]
+
+        // Schedule for Sunday evening
+        let calendar = Calendar.current
+        let now = Date()
+        let nextSunday = calendar.nextDate(after: now, matching: DateComponents(weekday: 1), matchingPolicy: .nextTimePreservingSmallerComponents) ?? now
+        let sundayEvening = calendar.date(bySettingHour: 19, minute: 0, second: 0, of: nextSunday) ?? now
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: sundayEvening),
+            repeats: false
+        )
+
+        let request = UNNotificationRequest(identifier: "weekly_recap_week_\(weekNumber)", content: content, trigger: trigger)
+
+        center.add(request) { error in
+            if let error = error {
+                Logger.notifications.error("Failed to schedule weekly recap: \(error)")
+            }
+        }
+    }
+
     // MARK: - Quiet Hours
     
     func isWithinQuietHours(start: Date?, end: Date?) -> Bool {
