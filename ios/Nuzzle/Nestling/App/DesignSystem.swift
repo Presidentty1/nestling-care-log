@@ -51,6 +51,8 @@ extension Color {
     static let eventDiaper = Color(red: 0.98, green: 0.58, blue: 0.24) // #FB923C
     /// Tummy time event color - Green
     static let eventTummy = Color(red: 0.06, green: 0.73, blue: 0.51) // #10B981
+    /// Cry event color - Red
+    static let eventCry = Color(red: 0.93, green: 0.25, blue: 0.25) // #EF4444
     
     // MARK: - Background Colors (Dark Mode Adaptive)
     

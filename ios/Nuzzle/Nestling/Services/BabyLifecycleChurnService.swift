@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 /// Baby lifecycle churn management service
 /// Research: Baby tracking apps face unique churn as baby grows
@@ -344,4 +345,4 @@ struct LifecycleMessage {
     }
 }
 
-private let logger = LoggerFactory.create(category: "LifecycleChurn")
+// Uses global logger instance

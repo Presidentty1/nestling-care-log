@@ -163,7 +163,7 @@ class NotificationScheduler {
             if let error = error {
                 Logger.dataError("Failed to schedule feed reminder: \(error.localizedDescription)")
             } else {
-                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "feed"])
+                Task { await Analytics.shared.log("notif_type_enabled", parameters: ["notif_type": "feed"]) }
             }
         }
     }
@@ -226,7 +226,7 @@ class NotificationScheduler {
             if let error = error {
                 Logger.dataError("Failed to schedule nap window alert: \(error.localizedDescription)")
             } else {
-                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "nap"])
+                Task { await Analytics.shared.log("notif_type_enabled", parameters: ["notif_type": "nap"]) }
             }
         }
     }
@@ -273,7 +273,7 @@ class NotificationScheduler {
             if let error = error {
                 Logger.dataError("Failed to schedule diaper reminder: \(error.localizedDescription)")
             } else {
-                AnalyticsService.shared.track(event: "notif_type_enabled", properties: ["notif_type": "diaper"])
+                Task { await Analytics.shared.log("notif_type_enabled", parameters: ["notif_type": "diaper"]) }
             }
         }
     }
@@ -341,7 +341,7 @@ class NotificationScheduler {
 
         center.add(request) { error in
             if let error = error {
-                Logger.notifications.error("Failed to schedule success notification: \(error)")
+                logger.error("Failed to schedule success notification: \(error)")
             }
         }
     }
@@ -375,7 +375,7 @@ class NotificationScheduler {
 
         center.add(request) { error in
             if let error = error {
-                Logger.notifications.error("Failed to schedule weekly recap: \(error)")
+                logger.error("Failed to schedule weekly recap: \(error)")
             }
         }
     }
@@ -462,12 +462,12 @@ class NotificationScheduler {
 
         center.add(request) { error in
             if let error = error {
-                Logger.notifications.error("Failed to schedule snoozed notification: \(error)")
+                logger.error("Failed to schedule snoozed notification: \(error)")
             } else {
-                AnalyticsService.shared.track(event: "notif_snoozed_scheduled", properties: [
+                Task { await Analytics.shared.log("notif_snoozed_scheduled", parameters: [
                     "category": original.categoryIdentifier,
                     "minutes": minutes
-                ])
+                ]) }
             }
         }
     }

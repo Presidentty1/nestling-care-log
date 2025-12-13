@@ -92,15 +92,19 @@ class AppLogger {
     }
 }
 
+// MARK: - Global Logger Instance
+/// Global logger instance for convenient logging throughout the app
+let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.nestling.Nestling", category: "App")
+
 // MARK: - Logger Extension for OSLog.Logger
 extension Logger {
     private static var subsystem = Bundle.main.bundleIdentifier ?? "com.nestling.Nestling"
     private static let dataLogger = Logger(subsystem: subsystem, category: "Data")
-    
+
     static func dataError(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         dataLogger.error("\(message) [\((file as NSString).lastPathComponent):\(line)]")
     }
-    
+
     static func dataInfo(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         dataLogger.info("\(message) [\((file as NSString).lastPathComponent):\(line)]")
     }

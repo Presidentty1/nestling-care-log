@@ -156,7 +156,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 
                     UNUserNotificationCenter.current().add(request) { error in
                         if let error = error {
-                            Logger.notifications.error("Failed to show offline share queued notification: \(error)")
+                            logger.error("Failed to show offline share queued notification: \(error)")
                         }
                     }
                 } else {
@@ -197,9 +197,9 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     private func trackNotificationEvent(name: String, notification: UNNotification) {
         let userInfo = notification.request.content.userInfo
         let notifType = userInfo["type"] as? String ?? "unknown"
-        AnalyticsService.shared.track(event: name, properties: [
+        Task { await Analytics.shared.log(name, parameters: [
             "notif_type": notifType
-        ])
+        ]) }
     }
 }
 

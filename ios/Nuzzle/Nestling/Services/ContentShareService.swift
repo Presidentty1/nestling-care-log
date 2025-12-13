@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import OSLog
 
 /// Service for generating beautiful shareable cards
 /// Optimized for social media platforms
@@ -333,4 +334,4 @@ extension ContentShareService {
     }
 }
 
-private let logger = LoggerFactory.create(category: "ContentShare")
+// Uses global logger instance

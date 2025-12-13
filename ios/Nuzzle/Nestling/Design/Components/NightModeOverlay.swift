@@ -172,7 +172,7 @@ struct NightModeSettingsCard: View {
     }
 }
 
-private let logger = LoggerFactory.create(category: "NightMode")
+// Uses global logger instance
 
 
 

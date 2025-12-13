@@ -1,5 +1,6 @@
 import CoreData
 import Foundation
+import OSLog
 
 class CoreDataStack {
     static let shared = CoreDataStack()
@@ -60,7 +61,7 @@ class CoreDataStack {
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
-        logger.debug("CoreData container initialized and ready: storeLoadComplete=\(storeLoadComplete)")
+        logger.debug("CoreData container initialized and ready: storeLoadComplete=\(self.storeLoadComplete)")
         storeLoadSemaphore = nil
         return container
     }()

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import StoreKit
 
 /// Coordinates strategic cancellation flow to reduce churn
@@ -336,4 +337,4 @@ struct CancellationUserStats {
     }
 }
 
-private let logger = LoggerFactory.create(category: "CancellationFlow")
+// Uses global logger instance

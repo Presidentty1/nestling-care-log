@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 /// Help center service for in-app self-service support
 /// Research: 81% try self-service first; good knowledge base deflects 20-50% of tickets
@@ -407,4 +408,4 @@ struct HelpArticle: Identifiable {
     }
 }
 
-private let logger = LoggerFactory.create(category: "HelpCenter")
+// Uses global logger instance

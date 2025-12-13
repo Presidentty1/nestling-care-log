@@ -194,9 +194,9 @@ class CaregiverSyncService: ObservableObject {
         try await sharedDatabase.save(record)
         
         // Track analytics
-        AnalyticsService.shared.track(event: "caregiver_invited", properties: [
+        Task { await Analytics.shared.log("caregiver_invited", parameters: [
             "invited_role": role.rawValue
-        ])
+        ]) }
         
         return inviteCode
     }
@@ -225,9 +225,9 @@ class CaregiverSyncService: ObservableObject {
         try await enable()
         
         // Track analytics
-        AnalyticsService.shared.track(event: "caregiver_joined", properties: [
+        Task { await Analytics.shared.log("caregiver_joined", parameters: [
             "role": record["role"] as? String ?? "member"
-        ])
+        ]) }
     }
     
     /// Revoke caregiver access
@@ -246,7 +246,7 @@ class CaregiverSyncService: ObservableObject {
         }
         
         // Track analytics
-        AnalyticsService.shared.track(event: "caregiver_revoked", properties: [:])
+        Task { await Analytics.shared.log("caregiver_revoked", parameters: [:]) }
     }
     
     /// Revoke a caregiver's access and clean local data if current user is revoked

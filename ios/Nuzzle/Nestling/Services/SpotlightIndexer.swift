@@ -1,6 +1,7 @@
 import Foundation
 @preconcurrency import CoreSpotlight
 import UniformTypeIdentifiers
+import OSLog
 
 /// Service for indexing app content in Core Spotlight
 @MainActor

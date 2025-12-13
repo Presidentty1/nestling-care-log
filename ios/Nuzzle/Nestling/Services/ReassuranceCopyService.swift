@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 /// Reassurance copy to reduce anxiety and build emotional connection
 /// Brand voice: Warm, supportive, confident (never clinical or overwhelming)
@@ -229,4 +230,4 @@ struct ReassuranceMessage: Identifiable {
     }
 }
 
-private let logger = LoggerFactory.create(category: "ReassuranceCopy")
+// Uses global logger instance

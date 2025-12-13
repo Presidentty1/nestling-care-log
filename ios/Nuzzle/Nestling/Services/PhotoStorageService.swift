@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import UIKit
 
 /// Service for storing and managing photos attached to events

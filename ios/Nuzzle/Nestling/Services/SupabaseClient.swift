@@ -1,5 +1,6 @@
 import Foundation
 import Supabase
+import OSLog
 
 /// Supabase client configuration and shared instance
 @MainActor

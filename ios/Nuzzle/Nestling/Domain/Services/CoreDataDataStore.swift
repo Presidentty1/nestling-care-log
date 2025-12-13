@@ -1,5 +1,6 @@
 @preconcurrency import Foundation
 import CoreData
+import OSLog
 
 /// Core Data implementation of DataStore protocol.
 /// Provides persistent storage with migration support.
@@ -180,7 +181,7 @@ class CoreDataDataStore: DataStore {
                     let elapsed = Date().timeIntervalSince(startTime)
                     logger.debug("fetchEvents completed successfully in \(elapsed) seconds, returning \(events.count) events")
                     if events.count > 0 {
-                        logger.debug("Sample event: type=\(events.first!.type), startTime=\(events.first!.startTime), babyId=\(events.first!.babyId)")
+                        logger.debug("Sample event: type=\(events.first!.type.rawValue), startTime=\(events.first!.startTime), babyId=\(events.first!.babyId)")
                     }
                     continuation.resume(returning: events)
                 } catch {
@@ -213,7 +214,7 @@ class CoreDataDataStore: DataStore {
     }
     
     func addEvent(_ event: Event) async throws {
-        logger.debug("CoreDataDataStore.addEvent called: type=\(event.type), babyId=\(event.babyId), startTime=\(event.startTime)")
+        logger.debug("CoreDataDataStore.addEvent called: type=\(event.type.rawValue), babyId=\(event.babyId), startTime=\(event.startTime)")
         // Domain-level validation
         try EventValidator.validate(event)
         

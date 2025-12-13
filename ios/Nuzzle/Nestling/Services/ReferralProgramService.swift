@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 /// Referral program service for tracking invites and rewards
 ///
@@ -339,4 +340,4 @@ struct ReferralIncentives {
     ]
 }
 
-private let logger = LoggerFactory.create(category: "ReferralProgram")
+// Uses global logger instance
