@@ -1,0 +1,63 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="milkGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0BA5EC" stop-opacity="0.60" />
+      <stop offset="12%" stop-color="#0BA5EC" stop-opacity="0.70" />
+      <stop offset="100%" stop-color="#0BA5EC" stop-opacity="0.70" />
+    </linearGradient>
+
+    <clipPath id="bottleInnerClip">
+      <!-- Inner area of bottle body for milk fill -->
+      <rect x="45.5" y="30" width="29" height="44" rx="8" />
+    </clipPath>
+
+    <filter id="dropGlow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="6" />
+    </filter>
+  </defs>
+
+  <!-- Ripples (behind) -->
+  <g id="ripples" stroke="#0BA5EC" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="60" cy="98" r="8" opacity="0.30" />
+    <circle cx="60" cy="98" r="14" opacity="0.20" />
+    <circle cx="60" cy="98" r="20" opacity="0.10" />
+  </g>
+
+  <!-- Drop glow (behind drop) -->
+  <g id="drop-glow" opacity="0.25" filter="url(#dropGlow)">
+    <path d="M60 74 C56.8 78.5 54.5 82.1 54.5 85.1 C54.5 90.0 57.9 93.6 60 93.6 C62.1 93.6 65.5 90.0 65.5 85.1 C65.5 82.1 63.2 78.5 60 74 Z" fill="#0BA5EC" />
+  </g>
+
+  <!-- Bottle + contents -->
+  <g id="bottle" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Nipple -->
+    <path d="M60 12 C55 12 52 17 52 22" />
+    <path d="M60 12 C65 12 68 17 68 22" />
+    <path d="M52 22 C52 26 68 26 68 22" />
+
+    <!-- Neck ring -->
+    <path d="M47 26 C47 23 51 22 60 22 C69 22 73 23 73 26" />
+    <path d="M47 26 L47 30" />
+    <path d="M73 26 L73 30" />
+
+    <!-- Bottle outer body -->
+    <rect x="43" y="30" width="34" height="52" rx="10" />
+
+    <!-- Base foot -->
+    <path d="M47 82 L47 86 C47 88 49 89 51 89 H69 C71 89 73 88 73 86 V82" />
+  </g>
+
+  <!-- Milk fill (clipped to inner body) -->
+  <g id="milk" clip-path="url(#bottleInnerClip)">
+    <!-- Fill about 2/3 of body height -->
+    <rect x="45.5" y="40" width="29" height="34" fill="url(#milkGradient)" />
+    <!-- Subtle foam highlight band -->
+    <rect x="45.5" y="40" width="29" height="6" fill="#FFFFFF" opacity="0.22" />
+  </g>
+
+  <!-- Drop (crisp) -->
+  <g id="drop">
+    <path d="M60 74 C56.8 78.5 54.5 82.1 54.5 85.1 C54.5 90.0 57.9 93.6 60 93.6 C62.1 93.6 65.5 90.0 65.5 85.1 C65.5 82.1 63.2 78.5 60 74 Z" fill="#0BA5EC" fill-opacity="0.90" stroke="#2E7D6A" stroke-width="2.5" stroke-linejoin="round" />
+    <ellipse cx="62.2" cy="83.2" rx="2" ry="3" fill="#FFFFFF" opacity="0.60" />
+  </g>
+</svg>

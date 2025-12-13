@@ -53,3 +53,10 @@ xcuserdata/
 # Temporary files
 *.tmp
 .tmp/
+
+# Swift Package Manager build
+.build/
+
+# Playwright test results and reports
+playwright-report/
+test-results/
