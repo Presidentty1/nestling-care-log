@@ -13,7 +13,7 @@ platform :ios do
   desc "Run tests"
   lane :test do
     run_tests(
-      scheme: "Nestling",
+      scheme: "Nuzzle",
       device: "iPhone 15",
       clean: true
     )

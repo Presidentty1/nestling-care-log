@@ -6,7 +6,7 @@ struct AIDataSharingSettingsView: View {
     @State private var aiEnabled: Bool
     
     init() {
-        _aiEnabled = State(initialValue: true)
+        _aiEnabled = State(initialValue: false)
     }
     
     var body: some View {

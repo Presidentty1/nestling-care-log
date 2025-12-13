@@ -61,7 +61,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save photos to your library for memories and record-keeping.</string>
 	<key>NSUserNotificationsUsageDescription</key>
-	<string>Notifications help remind you of feeding times, nap schedules, and medication doses.</string>
+	<string>Notifications help remind you of feeding times, nap schedules, and important milestones.</string>
 	
 	<!-- App Transport Security -->
 	<key>NSAppTransportSecurity</key>
