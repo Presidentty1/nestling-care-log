@@ -10,6 +10,8 @@ struct SettingsRootView: View {
     @State private var showAcceptInvite = false
     @State private var showAuth = false
     @State private var showProSubscription = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
 
     private func proStatusText() -> String {
         let proService = ProSubscriptionService.shared
@@ -394,21 +396,17 @@ struct SettingsRootView: View {
                 Section {
                     HStack(spacing: .spacingMD) {
                         Button("Privacy Policy") {
-                            if let url = URL(string: "https://nuzzleapp.com/privacy") {
-                                UIApplication.shared.open(url)
-                            }
+                            showPrivacyPolicy = true
                         }
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
-                        
+
                         Text("•")
                             .font(.caption)
                             .foregroundColor(.mutedForeground)
-                        
+
                         Button("Terms of Use") {
-                            if let url = URL(string: "https://nuzzleapp.com/terms") {
-                                UIApplication.shared.open(url)
-                            }
+                            showTermsOfUse = true
                         }
                         .font(.caption)
                         .foregroundColor(.mutedForeground)
@@ -454,6 +452,12 @@ struct SettingsRootView: View {
             }
             .sheet(isPresented: $showProSubscription) {
                 ProSubscriptionView()
+            }
+            .sheet(isPresented: $showPrivacyPolicy) {
+                LegalDocumentView(documentType: .privacyPolicy)
+            }
+            .sheet(isPresented: $showTermsOfUse) {
+                LegalDocumentView(documentType: .termsOfUse)
             }
         }
     }

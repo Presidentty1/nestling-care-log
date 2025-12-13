@@ -1,29 +1,42 @@
 import SwiftUI
+import StoreKit
 
 /// Upgrade prompt view for Pro features
 /// Shows feature benefits and pricing with clear CTA
 struct UpgradePromptView: View {
     let feature: ProFeature
+    let products: [Product]
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPlan: SubscriptionPlan = .yearly
-    
+
     enum SubscriptionPlan {
         case monthly, yearly
-        
-        var price: String {
+
+        var productID: String {
             switch self {
-            case .monthly: return "$5.99"
-            case .yearly: return "$44.99"
+            case .monthly: return "com.nestling.pro.monthly"
+            case .yearly: return "com.nestling.pro.yearly"
             }
         }
-        
+
+        func displayPrice(from products: [Product]) -> String {
+            guard let product = products.first(where: { $0.id == productID }) else {
+                // Fallback
+                switch self {
+                case .monthly: return "$5.99"
+                case .yearly: return "$44.99"
+                }
+            }
+            return product.displayPrice
+        }
+
         var period: String {
             switch self {
             case .monthly: return "month"
             case .yearly: return "year"
             }
         }
-        
+
         var savings: String? {
             switch self {
             case .monthly: return nil
@@ -119,7 +132,7 @@ struct UpgradePromptView: View {
                         VStack(spacing: 4) {
                             Text("Start 7-Day Free Trial")
                                 .font(.system(size: 17, weight: .semibold))
-                            Text("Then \(selectedPlan.price)/\(selectedPlan.period)")
+                            Text("Then \(selectedPlan.displayPrice(from: products))/\(selectedPlan.period)")
                                 .font(.system(size: 13, weight: .regular))
                                 .opacity(0.9)
                         }
@@ -182,7 +195,7 @@ struct PlanCard: View {
                         }
                     }
                     
-                    Text("\(plan.price)/\(plan.period)")
+                    Text("\(plan.displayPrice(from: products))/\(plan.period)")
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(isSelected ? .white.opacity(0.9) : .mutedForeground)
                 }

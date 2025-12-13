@@ -70,7 +70,7 @@ struct TrialBannerView: View {
         if daysRemaining <= 1 {
             return "Upgrade now to keep all features"
         } else {
-            return "Join 1,200+ parents who upgraded"
+            return "Unlock all Pro features"
         }
     }
 }

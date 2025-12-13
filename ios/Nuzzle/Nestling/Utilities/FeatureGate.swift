@@ -51,7 +51,7 @@ struct FeatureGate {
     /// - Returns: UpgradePromptView
     @ViewBuilder
     static func upgradePrompt(for feature: ProFeature) -> some View {
-        UpgradePromptView(feature: feature)
+        UpgradePromptView(feature: feature, products: proService.getProducts())
     }
     
     /// Execute block if feature is accessible, otherwise execute paywall block

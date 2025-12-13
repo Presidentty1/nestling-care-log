@@ -205,17 +205,6 @@ struct ProSubscriptionView: View {
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(.radiusSM)
             } else {
-                HStack(spacing: .spacingXS) {
-                    ForEach(0..<5) { _ in
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.primary)
-                            .font(.caption)
-                    }
-                    Text("4.8 • 1,200+ parents")
-                        .font(.caption)
-                        .foregroundColor(.mutedForeground)
-                }
-                .padding(.vertical, .spacingXS)
             }
         }
         .padding(.top, .spacingXL)

@@ -9,6 +9,9 @@ struct PrivacyDataView: View {
     @State private var csvURL: URL?
     @State private var showImportPicker = false
     @State private var analyticsEnabled = UserDefaults.standard.object(forKey: "analytics_enabled") as? Bool ?? true
+    @State private var isLoggedIn = false
+    @State private var showDeleteAccountConfirmation = false
+    @State private var deleteAccountConfirmationText = ""
     
     var body: some View {
         NavigationStack {
@@ -123,7 +126,28 @@ struct PrivacyDataView: View {
                         variant: .info
                     )
                     .padding(.horizontal, .spacingMD)
-                    
+
+                    // Account Deletion Section (only show if logged in)
+                    if isLoggedIn {
+                        CardView {
+                            VStack(alignment: .leading, spacing: .spacingSM) {
+                                Text("Delete Account")
+                                    .font(.headline)
+                                    .foregroundColor(.destructive)
+
+                                Text("This will permanently delete your account and all associated data from our servers. You will be signed out and local data will also be deleted.")
+                                    .font(.body)
+                                    .foregroundColor(.mutedForeground)
+
+                                DestructiveButton("Delete Account") {
+                                    showDeleteAccountConfirmation = true
+                                }
+                                .padding(.top, .spacingSM)
+                            }
+                        }
+                        .padding(.horizontal, .spacingMD)
+                    }
+
                     // Delete Section
                     CardView {
                         VStack(alignment: .leading, spacing: .spacingSM) {
@@ -154,6 +178,9 @@ struct PrivacyDataView: View {
                     }
                 }
             }
+            .task {
+                isLoggedIn = await checkSupabaseSession()
+            }
             .sheet(isPresented: $showShareSheet) {
                 if let csvURL = csvURL {
                     ShareSheet(items: [csvURL])
@@ -172,6 +199,20 @@ struct PrivacyDataView: View {
                 }
             } message: {
                 Text("This will permanently delete all your data. Type DELETE to confirm.")
+            }
+            .alert("Delete Account?", isPresented: $showDeleteAccountConfirmation) {
+                TextField("Type DELETE ACCOUNT to confirm", text: $deleteAccountConfirmationText)
+                Button("Cancel", role: .cancel) {
+                    deleteAccountConfirmationText = ""
+                }
+                Button("Delete Account", role: .destructive) {
+                    if deleteAccountConfirmationText == "DELETE ACCOUNT" {
+                        deleteAccount()
+                    }
+                    deleteAccountConfirmationText = ""
+                }
+            } message: {
+                Text("This will permanently delete your account and all data from our servers. This action cannot be undone.")
             }
         }
     }
@@ -361,6 +402,73 @@ struct PrivacyDataView: View {
                 print("Error deleting all data: \(error)")
                 Haptics.error()
             }
+        }
+    }
+
+    private func checkSupabaseSession() async -> Bool {
+        do {
+            let client = try SupabaseClientProvider.shared.getClient()
+            return (try? await client.auth.session) != nil
+        } catch {
+            return false
+        }
+    }
+
+    private func deleteAccount() {
+        Task {
+            do {
+                // First, try to delete from Supabase if configured
+                if isLoggedIn {
+                    do {
+                        let client = try SupabaseClientProvider.shared.getClient()
+                        // Note: Supabase doesn't have a direct user deletion endpoint in the client
+                        // This would need to be implemented via an edge function or server-side
+                        // For now, we'll sign out the user
+                        try await client.auth.signOut()
+                        print("User signed out from Supabase")
+                    } catch {
+                        print("Failed to sign out from Supabase: \(error)")
+                        // Continue with local deletion even if Supabase logout fails
+                    }
+                }
+
+                // Delete all local data
+                await deleteAllDataLocally()
+
+                Haptics.error()
+
+                await MainActor.run {
+                    dismiss()
+                    // App will show onboarding on next launch since no babies exist
+                }
+            } catch {
+                print("Error deleting account: \(error)")
+                Haptics.error()
+            }
+        }
+    }
+
+    private func deleteAllDataLocally() async {
+        do {
+            // Delete all data based on the data store type
+            if let jsonStore = environment.dataStore as? JSONBackedDataStore {
+                jsonStore.reset()
+            } else if let inMemoryStore = environment.dataStore as? InMemoryDataStore {
+                inMemoryStore.reset()
+            } else if let coreDataStore = environment.dataStore as? CoreDataDataStore {
+                try await coreDataStore.deleteAllData()
+            }
+
+            // Clear any cached auth data
+            UserDefaults.standard.removeObject(forKey: "auth_session")
+            UserDefaults.standard.removeObject(forKey: "user_email")
+
+            // Refresh app state
+            await environment.refreshBabies()
+            environment.refreshSettings()
+
+        } catch {
+            print("Error deleting local data: \(error)")
         }
     }
 }

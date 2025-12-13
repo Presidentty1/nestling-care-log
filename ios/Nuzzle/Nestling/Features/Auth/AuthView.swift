@@ -11,6 +11,9 @@ struct AuthView: View {
     @FocusState private var focusedField: Field?
     @State private var emailError: String?
     @State private var passwordError: String?
+    @State private var acceptedTerms = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
     
     var onAuthenticated: () -> Void
     
@@ -50,7 +53,7 @@ struct AuthView: View {
                             .multilineTextAlignment(.center)
                         
                         // Pricing transparency with trial callout
-                        Text("7-day free trial • Then $5.99/mo")
+                        Text("Free basic tracking • Pro trial available")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.eventFeed)
@@ -62,7 +65,7 @@ struct AuthView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.eventFeed)
                                     .font(.caption)
-                                Text("87% accurate nap predictions")
+                                Text("Personalized nap suggestions")
                                     .font(.caption)
                                     .foregroundColor(.mutedForeground)
                             }
@@ -171,7 +174,27 @@ struct AuthView: View {
                                 .foregroundColor(.destructive)
                                 .padding(.horizontal, .spacingMD)
                         }
-                        
+
+                        // Terms acceptance for signup
+                        if isSignUp {
+                            HStack(alignment: .top, spacing: .spacingSM) {
+                                Toggle("", isOn: $acceptedTerms)
+                                    .labelsHidden()
+                                    .toggleStyle(CheckboxToggleStyle())
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack(spacing: 4) {
+                                        Text("I agree to the")
+                                        Button("Terms") { showTermsOfUse = true }
+                                        Text("and")
+                                        Button("Privacy Policy") { showPrivacyPolicy = true }
+                                    }
+                                    .font(.caption)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+
                         // Submit button with clear no-credit-card messaging
                         Button(action: {
                             handleSubmit()
@@ -198,7 +221,7 @@ struct AuthView: View {
                             .foregroundColor(.white)
                             .cornerRadius(.radiusMD)
                         }
-                        .disabled(viewModel.isLoading || !isFormValid)
+                        .disabled(viewModel.isLoading || !isFormValid || (isSignUp && !acceptedTerms))
                         .padding(.horizontal, .spacingMD)
                         
                         // Password reset (sign in only)
@@ -250,21 +273,17 @@ struct AuthView: View {
                         // Legal links
                         HStack(spacing: .spacingMD) {
                             Button("Privacy Policy") {
-                                if let url = URL(string: "https://nuzzleapp.com/privacy") {
-                                    UIApplication.shared.open(url)
-                                }
+                                showPrivacyPolicy = true
                             }
                             .font(.caption2)
                             .foregroundColor(.mutedForeground)
-                            
+
                             Text("•")
                                 .font(.caption2)
                                 .foregroundColor(.mutedForeground)
-                            
+
                             Button("Terms of Use") {
-                                if let url = URL(string: "https://nuzzleapp.com/terms") {
-                                    UIApplication.shared.open(url)
-                                }
+                                showTermsOfUse = true
                             }
                             .font(.caption2)
                             .foregroundColor(.mutedForeground)
@@ -279,6 +298,12 @@ struct AuthView: View {
             .navigationBarHidden(true)
             .onSubmit {
                 handleFieldSubmit()
+            }
+            .sheet(isPresented: $showPrivacyPolicy) {
+                LegalDocumentView(documentType: .privacyPolicy)
+            }
+            .sheet(isPresented: $showTermsOfUse) {
+                LegalDocumentView(documentType: .termsOfUse)
             }
         }
     }
@@ -371,6 +396,18 @@ struct AuthView: View {
             handleSubmit()
         case .none:
             break
+        }
+    }
+}
+
+// MARK: - Checkbox Toggle Style
+struct CheckboxToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                .foregroundColor(configuration.isOn ? .primary : .mutedForeground)
         }
     }
 }

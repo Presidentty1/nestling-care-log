@@ -5,8 +5,8 @@ struct PrivacySettingsView: View {
     @StateObject private var privacyManager = PrivacyManager.shared
     @State private var showFaceIDAlert = false
     @State private var isAuthenticating = false
-    private let privacyPolicyURL = URL(string: "https://example.com/privacy")!
-    private let termsURL = URL(string: "https://example.com/terms")!
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
     
     var body: some View {
         Form {
@@ -66,8 +66,15 @@ struct PrivacySettingsView: View {
             }
             
             Section("Policies") {
-                Link("Privacy Policy", destination: privacyPolicyURL)
-                Link("Terms of Use", destination: termsURL)
+                Button("Privacy Policy") {
+                    showPrivacyPolicy = true
+                }
+                .foregroundColor(.primary)
+
+                Button("Terms of Use") {
+                    showTermsOfUse = true
+                }
+                .foregroundColor(.primary)
             }
         }
         .navigationTitle("Privacy & Security")
@@ -75,6 +82,12 @@ struct PrivacySettingsView: View {
             Button("OK") { }
         } message: {
             Text("Please authenticate to enable Face ID protection.")
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            LegalDocumentView(documentType: .privacyPolicy)
+        }
+        .sheet(isPresented: $showTermsOfUse) {
+            LegalDocumentView(documentType: .termsOfUse)
         }
     }
     
