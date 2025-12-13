@@ -270,6 +270,44 @@ class AnalyticsService {
             "invited_role": invitedRole
         ])
     }
+
+    // MARK: - New Home Screen Analytics
+
+    func trackHomeTabSwitched(from: String, to: String) {
+        track(event: "home_tab_switched", properties: [
+            "from_tab": from,
+            "to_tab": to
+        ])
+    }
+
+    func trackBatchDeleteExecuted(count: Int) {
+        track(event: "batch_delete_executed", properties: [
+            "event_count": count
+        ])
+    }
+
+    func trackFeedAmountStepperUsed(direction: String, unit: String) {
+        track(event: "feed_amount_stepper_used", properties: [
+            "direction": direction,
+            "unit": unit
+        ])
+    }
+
+    func trackSummaryFilterApplied(filter: String) {
+        track(event: "summary_filter_applied", properties: [
+            "filter_type": filter
+        ])
+    }
+
+    func trackQuickNapLogged(minutes: Int) {
+        track(event: "quick_nap_logged", properties: [
+            "duration_minutes": minutes
+        ])
+    }
+        track(event: "caregiver_invited", properties: [
+            "invited_role": invitedRole
+        ])
+    }
     
     func trackCaregiverJoined(role: String) {
         track(event: "caregiver_joined", properties: [

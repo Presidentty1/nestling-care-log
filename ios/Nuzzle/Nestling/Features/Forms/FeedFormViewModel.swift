@@ -75,13 +75,14 @@ class FeedFormViewModel: ObservableObject {
     private func loadLastUsedValues() {
         Task {
             do {
+                var finalAmount: Double
+                var finalUnit: UnitType
+
                 if let lastUsed = try await dataStore.getLastUsedValues(for: .feed) {
-                    if let amount = lastUsed.amount {
-                        self.amount = String(Int(amount))
-                    }
-                    if let unit = lastUsed.unit {
-                        self.unit = unit == "ml" ? .ml : .oz
-                    }
+                    // Start with last used values
+                    finalAmount = lastUsed.amount ?? Double(AppConstants.defaultFeedAmountML)
+                    finalUnit = (lastUsed.unit == "ml") ? .ml : .oz
+
                     if let sideStr = lastUsed.side {
                         side = Side(rawValue: sideStr) ?? .left
                     }
@@ -92,18 +93,72 @@ class FeedFormViewModel: ObservableObject {
                             feedType = .bottle
                         }
                     }
+
+                    // Apply smart adjustments on top of last used
+                    finalAmount = applySmartAdjustments(to: finalAmount, unit: finalUnit)
                 } else {
-                    // Defaults
-                    amount = String(Int(AppConstants.defaultFeedAmountML))
-                    unit = .ml
+                    // No last used values - use smart defaults based on baby and time
+                    (finalAmount, finalUnit) = getSmartDefaults()
                 }
+
+                amount = String(Int(finalAmount))
+                unit = finalUnit
+
             } catch {
-                // Use defaults
-                amount = String(Int(AppConstants.defaultFeedAmountML))
-                unit = .ml
+                // Fallback to basic defaults
+                let (defaultAmount, defaultUnit) = getSmartDefaults()
+                amount = String(Int(defaultAmount))
+                unit = defaultUnit
             }
             validate()
         }
+    }
+
+    private func applySmartAdjustments(to amount: Double, unit: UnitType) -> Double {
+        var adjustedAmount = amount
+
+        // Time-of-day adjustments (slight bias)
+        let hour = Calendar.current.component(.hour, from: Date())
+        if hour >= 6 && hour <= 10 { // Morning
+            adjustedAmount *= 1.1 // Slightly more in morning
+        } else if hour >= 18 && hour <= 22 { // Evening
+            adjustedAmount *= 0.9 // Slightly less in evening
+        }
+
+        // Baby age adjustments (gradual increase)
+        let babyAgeMonths = baby.ageInMonths
+        let ageMultiplier = min(1.0 + (babyAgeMonths * 0.05), 2.0) // Max 2x increase
+        adjustedAmount *= ageMultiplier
+
+        // Ensure within reasonable bounds
+        let minAmount = unit == .ml ? Double(AppConstants.minimumFeedAmountML) : Double(AppConstants.minimumFeedAmountML) / AppConstants.mlPerOz
+        let maxAmount = unit == .ml ? Double(AppConstants.maximumFeedAmountML) : Double(AppConstants.maximumFeedAmountOZ)
+
+        return max(minAmount, min(maxAmount, adjustedAmount))
+    }
+
+    private func getSmartDefaults() -> (amount: Double, unit: UnitType) {
+        let babyAgeMonths = baby.ageInMonths
+        let hour = Calendar.current.component(.hour, from: Date())
+
+        // Age-based baseline amounts (in ml)
+        var baselineML: Double
+        switch babyAgeMonths {
+        case 0..<1: baselineML = 60  // Newborn
+        case 1..<3: baselineML = 90  // 1-3 months
+        case 3..<6: baselineML = 120 // 3-6 months
+        case 6..<12: baselineML = 180 // 6-12 months
+        default: baselineML = 240     // 1+ years
+        }
+
+        // Time-of-day bias
+        if hour >= 6 && hour <= 10 { // Morning
+            baselineML *= 1.2
+        } else if hour >= 18 && hour <= 22 { // Evening
+            baselineML *= 0.8
+        }
+
+        return (baselineML, .ml)
     }
     
     private func convertAmount(from oldUnit: UnitType, to newUnit: UnitType) {

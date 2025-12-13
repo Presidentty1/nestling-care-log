@@ -5,12 +5,13 @@ struct NapPredictionCard: View {
     let napWindow: NapWindow?
     let baby: Baby?
     let onTap: () -> Void
+    var cardVariant: CardVariant = .default
     
     @State private var isPulsing = false
     @State private var showInfo = false
     
     var body: some View {
-        CardView(variant: .default) {
+        CardView(variant: cardVariant) {
             if let window = napWindow, let baby = baby {
                 napPredictionContent(window: window, baby: baby)
             } else {

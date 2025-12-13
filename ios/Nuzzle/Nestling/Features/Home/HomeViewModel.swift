@@ -635,12 +635,12 @@ class HomeViewModel: ObservableObject {
             do {
                 // Store event for potential undo
                 let eventToDelete = event
-                
+
                 // Remove from Spotlight index
                 SpotlightIndexer.shared.removeEvent(event)
-                
+
                 try await dataStore.deleteEvent(event)
-                
+
                 // Register for undo
                 UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
                     guard let self = self else { return }
@@ -650,6 +650,77 @@ class HomeViewModel: ObservableObject {
                             Task {
                                 await self.loadTodayEvents()
                             }
+                        }
+                    }
+                }
+
+                // Analytics
+                Task {
+                    await Analytics.shared.log("event_deleted", parameters: [
+                        "event_type": event.type.rawValue,
+                        "has_undo": true
+                    ])
+                }
+
+                // Reload events
+                await loadTodayEvents()
+
+            } catch {
+                print("Error deleting event: \(error)")
+                CrashReportingService.shared.logError(error, context: ["action": "delete_event"])
+                Haptics.error()
+                await MainActor.run {
+                    errorMessage = "Failed to delete event: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    func batchDelete(events: [Event]) async {
+        do {
+            var deletedCount = 0
+
+            for event in events {
+                // Store event for potential undo
+                let eventToDelete = event
+
+                // Remove from Spotlight index
+                SpotlightIndexer.shared.removeEvent(event)
+
+                try await dataStore.deleteEvent(event)
+
+                // Register for batch undo
+                UndoManager.shared.registerDeletion(event: eventToDelete) { [weak self] in
+                    guard let self = self else { return }
+                    Task {
+                        try? await self.dataStore.addEvent(eventToDelete)
+                        await MainActor.run {
+                            Task {
+                                await self.loadTodayEvents()
+                            }
+                        }
+                    }
+                }
+
+                deletedCount += 1
+            }
+
+            // Analytics
+            AnalyticsService.shared.trackBatchDeleteExecuted(count: deletedCount)
+
+            Haptics.success()
+
+            // Reload events
+            await loadTodayEvents()
+
+        } catch {
+            print("Error in batch delete: \(error)")
+            CrashReportingService.shared.logError(error, context: ["action": "batch_delete"])
+            Haptics.error()
+            await MainActor.run {
+                errorMessage = "Failed to delete events: \(error.localizedDescription)"
+            }
+        }
                         }
                     }
                 }

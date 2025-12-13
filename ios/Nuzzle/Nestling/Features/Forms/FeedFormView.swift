@@ -12,6 +12,36 @@ struct FeedFormView: View {
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
     }
+
+    private var currentAmountValue: Double {
+        Double(viewModel.amount) ?? 0
+    }
+
+    private var stepSize: Double {
+        viewModel.unit == .oz ? 0.5 : 10.0
+    }
+
+    private var canDecrement: Bool {
+        let minML = AppConstants.minimumFeedAmountML
+        let currentML = viewModel.unit == .ml ? currentAmountValue : currentAmountValue * AppConstants.mlPerOz
+        return currentML - (viewModel.unit == .ml ? stepSize : stepSize * AppConstants.mlPerOz) >= minML
+    }
+
+    private func incrementAmount() {
+        let newValue = currentAmountValue + stepSize
+        viewModel.amount = String(format: viewModel.unit == .oz ? "%.1f" : "%.0f", newValue)
+        viewModel.validate()
+        Haptics.light()
+        AnalyticsService.shared.trackFeedAmountStepperUsed(direction: "up", unit: viewModel.unit.rawValue)
+    }
+
+    private func decrementAmount() {
+        let newValue = max(0, currentAmountValue - stepSize)
+        viewModel.amount = String(format: viewModel.unit == .oz ? "%.1f" : "%.0f", newValue)
+        viewModel.validate()
+        Haptics.light()
+        AnalyticsService.shared.trackFeedAmountStepperUsed(direction: "down", unit: viewModel.unit.rawValue)
+    }
     
     var body: some View {
         NavigationStack {
@@ -43,27 +73,66 @@ struct FeedFormView: View {
                     }
                 } else if viewModel.feedType == .bottle || viewModel.feedType == .pumping {
                     Section("Amount") {
-                        HStack {
-                            TextField("Amount", text: $viewModel.amount)
-                                .keyboardType(.decimalPad)
-                                .accessibilityLabel("Feed amount")
-                                .accessibilityHint("Enter the amount in \(viewModel.unit.displayName). Minimum \(Int(AppConstants.minimumFeedAmountML)) milliliters required.")
-                                .onChange(of: viewModel.amount) { _, _ in
-                                    viewModel.validate()
+                        VStack(spacing: .spacingSM) {
+                            // Stepper row
+                            HStack(spacing: .spacingMD) {
+                                Button(action: decrementAmount) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.primary)
+                                        .frame(width: 44, height: 44)
                                 }
-                            
+                                .disabled(!canDecrement)
+                                .accessibilityLabel("Decrease amount")
+
+                                VStack(spacing: 4) {
+                                    TextField("Amount", text: $viewModel.amount)
+                                        .keyboardType(.decimalPad)
+                                        .multilineTextAlignment(.center)
+                                        .font(.system(size: 24, weight: .bold))
+                                        .frame(maxWidth: .infinity)
+                                        .accessibilityLabel("Feed amount")
+                                        .accessibilityHint("Enter the amount in \(viewModel.unit.displayName). Minimum \(Int(AppConstants.minimumFeedAmountML)) milliliters required.")
+                                        .onChange(of: viewModel.amount) { _, _ in
+                                            viewModel.validate()
+                                        }
+
+                                    Text(viewModel.unit.displayName)
+                                        .font(.caption)
+                                        .foregroundColor(.mutedForeground)
+                                }
+                                .frame(maxWidth: .infinity)
+
+                                Button(action: incrementAmount) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.primary)
+                                        .frame(width: 44, height: 44)
+                                }
+                                .accessibilityLabel("Increase amount")
+                            }
+
+                            // Unit picker
                             Picker("Unit", selection: $viewModel.unit) {
                                 ForEach(UnitType.allCases, id: \.self) { unit in
                                     Text(unit.displayName).tag(unit)
                                 }
                             }
                             .pickerStyle(.segmented)
-                            .frame(width: 100)
                             .accessibilityLabel("Unit")
                             .accessibilityHint("Select milliliters or ounces")
                             .onChange(of: viewModel.unit) { _, _ in
                                 Haptics.selection()
                             }
+                        }
+
+                        // Visual bottle level indicator (only for bottle/pumping)
+                        if viewModel.feedType == .bottle || viewModel.feedType == .pumping {
+                            BottleLevelIndicator(
+                                amount: currentAmountValue,
+                                unit: viewModel.unit
+                            )
+                            .padding(.horizontal)
                         }
                         
                         if !viewModel.isValid && (viewModel.feedType == .bottle || viewModel.feedType == .pumping) {

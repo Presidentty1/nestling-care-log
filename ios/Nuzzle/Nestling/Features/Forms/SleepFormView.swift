@@ -1,5 +1,9 @@
 import SwiftUI
 
+enum SleepMode {
+    case timer, quick, manual
+}
+
 struct SleepFormView: View {
     @ObservedObject var viewModel: SleepFormViewModel
     @Environment(\.dismiss) var dismiss
@@ -10,6 +14,33 @@ struct SleepFormView: View {
     
     private var isCaregiverMode: Bool {
         environment.isCaregiverMode
+    }
+
+    private var mode: SleepMode {
+        get {
+            if viewModel.isTimerMode {
+                return .timer
+            } else if viewModel.endTime == nil {
+                return .quick
+            } else {
+                return .manual
+            }
+        }
+        set {
+            switch newValue {
+            case .timer:
+                viewModel.isTimerMode = true
+                viewModel.endTime = nil
+            case .quick:
+                viewModel.isTimerMode = false
+                viewModel.endTime = nil
+            case .manual:
+                viewModel.isTimerMode = false
+                if viewModel.endTime == nil {
+                    viewModel.endTime = Date()
+                }
+            }
+        }
     }
     
     var body: some View {
@@ -27,17 +58,36 @@ struct SleepFormView: View {
                 }
                 
                 Section("Mode") {
-                    Picker("Mode", selection: $viewModel.isTimerMode) {
+                    Picker("Mode", selection: $mode) {
                         Text("Timer")
                             .font(isCaregiverMode ? .caregiverBody : .body)
-                            .tag(true)
+                            .tag(SleepMode.timer)
+                        Text("Quick Log")
+                            .font(isCaregiverMode ? .caregiverBody : .body)
+                            .tag(SleepMode.quick)
                         Text("Manual")
                             .font(isCaregiverMode ? .caregiverBody : .body)
-                            .tag(false)
+                            .tag(SleepMode.manual)
                     }
                     .pickerStyle(.segmented)
                 }
-                
+
+                if mode == .quick && viewModel.editingEvent == nil {
+                    Section("Quick Log") {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: .spacingSM) {
+                            QuickDurationButton(minutes: 15, action: quickLogSleep)
+                            QuickDurationButton(minutes: 30, action: quickLogSleep)
+                            QuickDurationButton(minutes: 60, action: quickLogSleep)
+                            QuickDurationButton(minutes: 120, action: quickLogSleep)
+                        }
+                    }
+                }
+
                 if viewModel.isTimerMode {
                     Section("Timer") {
                         if viewModel.isTimerRunning {
@@ -172,6 +222,60 @@ struct SleepFormView: View {
             } message: {
                 Text("You have unsaved changes. Do you want to discard them?")
             }
+        }
+        }
+    }
+
+    private func quickLogSleep(minutes: Int) async {
+        do {
+            viewModel.endTime = Date()
+            viewModel.startTime = viewModel.endTime!.addingTimeInterval(-Double(minutes * 60))
+            viewModel.isTimerMode = false
+
+            try await viewModel.save()
+            Haptics.success()
+            showToast = ToastMessage(message: "Sleep logged", type: .success)
+            AnalyticsService.shared.trackQuickNapLogged(minutes: minutes)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                dismiss()
+            }
+        } catch {
+            Haptics.error()
+            showToast = ToastMessage(message: error.localizedDescription, type: .error)
+        }
+    }
+
+    private struct QuickDurationButton: View {
+    let minutes: Int
+    let action: (Int) -> Void
+
+    var body: some View {
+        Button(action: { action(minutes) }) {
+            VStack {
+                Text(formatDuration(minutes))
+                    .font(.headline)
+                Text(durationLabel(minutes))
+                    .font(.caption2)
+                    .foregroundColor(.mutedForeground)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, .spacingSM)
+            .background(Color.surface)
+            .cornerRadius(.radiusSM)
+        }
+    }
+
+    private func formatDuration(_ minutes: Int) -> String {
+        minutes < 60 ? "\(minutes)m" : "\(minutes/60)h"
+    }
+
+    private func durationLabel(_ minutes: Int) -> String {
+        switch minutes {
+        case 15: return "Quick nap"
+        case 30: return "Short nap"
+        case 60: return "Full nap"
+        case 120: return "Long nap"
+        default: return ""
         }
     }
 }

@@ -9,9 +9,47 @@ struct VoiceInputView: View {
     @StateObject private var speechService = SpeechRecognitionService.shared
     @State private var isListening = false
     @State private var showError = false
+    @State private var showDictationHint = false
+
+    private var shouldShowDictationHint: Bool {
+        !UserDefaults.standard.bool(forKey: "hasDismissedDictationHint")
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
+            // One-time dictation hint
+            if shouldShowDictationHint {
+                HStack(alignment: .top, spacing: .spacingSM) {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundColor(.primary)
+                        .font(.caption)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Tip: Tap the mic to dictate notes")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+
+                        Button(action: dismissHint) {
+                            Text("Got it")
+                                .font(.caption2)
+                                .foregroundColor(.primary.opacity(0.8))
+                        }
+                    }
+
+                    Spacer()
+
+                    Button(action: dismissHint) {
+                        Image(systemName: "xmark")
+                            .font(.caption2)
+                            .foregroundColor(.mutedForeground)
+                    }
+                }
+                .padding(.spacingSM)
+                .background(Color.primary.opacity(0.05))
+                .cornerRadius(.radiusSM)
+                .transition(.opacity)
+            }
+
             HStack(alignment: .top, spacing: .spacingSM) {
                 ZStack(alignment: .topLeading) {
                     if text.isEmpty {
@@ -78,6 +116,9 @@ struct VoiceInputView: View {
         .onChange(of: speechService.errorMessage) { _, newError in
             showError = newError != nil
         }
+        .onAppear {
+            showDictationHint = shouldShowDictationHint
+        }
         .onChange(of: speechService.isRecording) { _, isRecording in
             if !isRecording && isListening {
                 isListening = false
@@ -102,6 +143,13 @@ struct VoiceInputView: View {
                     showError = true
                 }
             }
+        }
+    }
+
+    private func dismissHint() {
+        withAnimation {
+            UserDefaults.standard.set(true, forKey: "hasDismissedDictationHint")
+            showDictationHint = false
         }
     }
 }
