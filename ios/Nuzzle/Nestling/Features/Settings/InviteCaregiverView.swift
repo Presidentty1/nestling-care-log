@@ -1,6 +1,9 @@
 import SwiftUI
 import UIKit
 
+// Import for referral functionality
+private let referralService = ReferralProgramService.shared
+
 struct InviteCaregiverView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var environment: AppEnvironment
@@ -241,6 +244,30 @@ struct InviteCaregiverView: View {
                         message: "Full caregiver sharing features are in development. For now, you can share the invite link manually.",
                         variant: .info
                     )
+                    .padding(.horizontal, .spacingMD)
+
+                    // Referral Program Section
+                    VStack(alignment: .leading, spacing: .spacingMD) {
+                        Text("Help Friends Sleep Better")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.foreground)
+
+                        Text("Share Nestling with other parents and earn rewards")
+                            .font(.body)
+                            .foregroundColor(.mutedForeground)
+
+                        ReferralInviteCard(
+                            onShareLink: {
+                                showShareSheet = true
+                                AnalyticsService.shared.logReferralLinkShared(channel: "settings")
+                            },
+                            onViewDashboard: {
+                                // Navigate to referral dashboard
+                                // TODO: Add navigation to ReferralDashboardView
+                            }
+                        )
+                    }
                     .padding(.horizontal, .spacingMD)
                 }
                 .padding(.spacing2XL)

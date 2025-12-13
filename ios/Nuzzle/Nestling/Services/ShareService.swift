@@ -1,12 +1,11 @@
-import SwiftUI
+import Foundation
 import UIKit
+import SwiftUI
 
-/// Service for handling social sharing of milestone cards and achievements
-@MainActor
-final class ShareService {
+/// Service for handling milestone sharing and social media integration
+class ShareService {
     static let shared = ShareService()
 
-    /// Milestone types that can be shared
     enum MilestoneType {
         case streakAchieved(days: Int)
         case sleepRecord(minutes: Int)
@@ -15,124 +14,97 @@ final class ShareService {
 
         var title: String {
             switch self {
-            case .streakAchieved(let days): return "\(days) Day Streak!"
-            case .sleepRecord(let minutes): return "\(minutes/60)h Sleep Record!"
-            case .weekComplete(let number, _): return "Week \(number) Complete!"
-            case .patternUnlocked: return "Patterns Unlocked!"
+            case .streakAchieved(let days):
+                return "🎯 \(days)-Day Streak!"
+            case .sleepRecord(let minutes):
+                return "😴 \(minutes/60)h \(minutes%60)m Sleep!"
+            case .weekComplete(let number, _):
+                return "🏆 Week \(number) Complete!"
+            case .patternUnlocked:
+                return "📊 Patterns Unlocked!"
             }
         }
 
-        var subtitle: String {
+        var message: String {
             switch self {
-            case .streakAchieved: return "Consistent tracking streak"
-            case .sleepRecord: return "Longest sleep session"
-            case .weekComplete(_, let avgSleep): return "Avg \(String(format: "%.1f", avgSleep/60))h sleep"
-            case .patternUnlocked(let logs): return "\(logs) logs analyzed"
+            case .streakAchieved(let days):
+                return "I've been tracking my baby's sleep for \(days) days straight! 📱"
+            case .sleepRecord(let minutes):
+                let hours = minutes / 60
+                return "My baby just slept for \(hours)h \(minutes % 60)m! These patterns are amazing! 😴"
+            case .weekComplete(let number, _):
+                return "Just completed week \(number) of tracking! Seeing real patterns emerge. 📈"
+            case .patternUnlocked:
+                return "My baby's sleep patterns are becoming clear! Consistency is key! 🎯"
             }
         }
 
-        var emoji: String {
-            switch self {
-            case .streakAchieved: return "🔥"
-            case .sleepRecord: return "😴"
-            case .weekComplete: return "🎯"
-            case .patternUnlocked: return "🧠"
-            }
+        var shareableText: String {
+            return "\(title)\n\(message)\n\nTracked with Nestling app"
         }
     }
 
-    /// Generate and share a milestone card
+    private init() {}
+
+    /// Share a milestone with native iOS share sheet
     func shareMilestone(
         type: MilestoneType,
         babyName: String,
         presentingViewController: UIViewController
     ) async {
-        guard PolishFeatureFlags.shared.shareCardsEnabled else { return }
+        // Create the share text
+        let shareText = type.shareableText
 
-        let isOffline = !NetworkMonitor.shared.isConnected
-
-        // Show loading indicator with offline messaging
-        let loadingMessage = isOffline ?
-            "Creating share card... (Will share when online)" :
-            "Creating share card..."
-        let loadingAlert = UIAlertController(
-            title: nil,
-            message: loadingMessage,
-            preferredStyle: .alert
-        )
-        presentingViewController.present(loadingAlert, animated: true)
-
-        do {
-            let card = ShareableMilestoneCard(milestone: type, babyName: babyName)
-            let image = try await card.generateShareableImage()
-
-            loadingAlert.dismiss(animated: true) {
-                if isOffline {
-                    // Show queued message
-                    let queuedAlert = UIAlertController(
-                        title: "Share Queued",
-                        message: "Your milestone card is ready! It will be shared when you're back online.",
-                        preferredStyle: .alert
-                    )
-                    queuedAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                    presentingViewController.present(queuedAlert, animated: true)
-
-                    // TODO: Queue the share action for when connection returns
-                    // For now, just log that it would be queued
-                    print("Share queued for offline: \(type)")
-                } else {
-                    self.presentShareSheet(with: image, from: presentingViewController)
-                }
-
-                AnalyticsService.shared.track(event: "milestone_shared", properties: [
-                    "type": String(describing: type),
-                    "baby_name": babyName,
-                    "offline": isOffline
-                ])
-            }
-        } catch {
-            loadingAlert.dismiss(animated: true) {
-                let errorAlert = UIAlertController(
-                    title: "Share Failed",
-                    message: "Unable to create share card. Please try again.",
-                    preferredStyle: .alert
-                )
-                errorAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                presentingViewController.present(errorAlert, animated: true)
-            }
-        }
-    }
-
-    private func presentShareSheet(with image: UIImage, from viewController: UIViewController) {
+        // Create activity view controller
         let activityVC = UIActivityViewController(
-            activityItems: [image],
+            activityItems: [shareText],
             applicationActivities: nil
         )
 
-        // Exclude some activities that don't make sense for images
-        activityVC.excludedActivityTypes = [
-            .assignToContact,
-            .addToReadingList,
-            .openInIBooks
-        ]
-
-        // For iPad, set the popover presentation controller
+        // Configure for iPad
         if let popoverController = activityVC.popoverPresentationController {
-            popoverController.sourceView = viewController.view
+            popoverController.sourceView = presentingViewController.view
             popoverController.sourceRect = CGRect(
-                x: viewController.view.bounds.midX,
-                y: viewController.view.bounds.midY,
+                x: presentingViewController.view.bounds.midX,
+                y: presentingViewController.view.bounds.midY,
                 width: 0,
                 height: 0
             )
             popoverController.permittedArrowDirections = []
         }
 
-        viewController.present(activityVC, animated: true)
+        // Exclude certain activities that don't make sense for milestone sharing
+        activityVC.excludedActivityTypes = [
+            .addToReadingList,
+            .assignToContact,
+            .print,
+            .saveToCameraRoll
+        ]
+
+        // Present the share sheet
+        await MainActor.run {
+            presentingViewController.present(activityVC, animated: true)
+        }
+
+        // Track the share attempt
+        AnalyticsService.shared.track(event: "milestone_share_attempted", properties: [
+            "milestone_type": String(describing: type),
+            "baby_name_provided": !babyName.isEmpty
+        ])
     }
 
-    /// Check if sharing is available on this device
-    var isSharingAvailable: Bool {
-        return true // UIActivityViewController is always available on iOS
+    /// Get the top view controller for presenting share sheets
+    private func topViewController() -> UIViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else {
+            return nil
+        }
+
+        var topController = window.rootViewController
+        while let presented = topController?.presentedViewController {
+            topController = presented
+        }
+
+        return topController
     }
 }

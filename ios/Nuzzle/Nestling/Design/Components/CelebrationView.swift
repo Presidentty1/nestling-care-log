@@ -1,12 +1,17 @@
 import SwiftUI
 
+// Import for feature flags and sharing
+private let featureFlags = PolishFeatureFlags.shared
+
 /// Celebration view for special moments (first log, streaks, milestones)
 struct CelebrationView: View {
     let type: CelebrationType
     let onDismiss: () -> Void
+    let babyName: String? = nil // For share functionality
     @State private var scale: CGFloat = 0.8
     @State private var opacity: Double = 0
     @State private var showConfetti = false
+    @State private var showShareSheet = false
     
     enum CelebrationType {
         case firstLog
@@ -45,7 +50,19 @@ struct CelebrationView: View {
             }
         }
     }
-    
+
+    private var shouldShowShareButton: Bool {
+        guard featureFlags.shareCardsEnabled else { return false }
+
+        // Only show share for significant milestones
+        switch type {
+        case .streakAchieved, .milestoneUnlocked:
+            return true
+        default:
+            return false
+        }
+    }
+
     var body: some View {
         ZStack {
             // Backdrop
@@ -85,15 +102,49 @@ struct CelebrationView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                
-                Button(action: dismiss) {
-                    Text("Continue")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(type.color)
-                        .cornerRadius(.radiusXL)
+
+                // Action buttons
+                if shouldShowShareButton {
+                    HStack(spacing: .spacingMD) {
+                        // Share button
+                        Button(action: shareMilestone) {
+                            HStack {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Share")
+                            }
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(type.color)
+                            .frame(height: 56)
+                            .padding(.horizontal, .spacingLG)
+                            .background(Color.surface)
+                            .cornerRadius(.radiusXL)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: .radiusXL)
+                                    .stroke(type.color, lineWidth: 2)
+                            )
+                        }
+
+                        // Continue button
+                        Button(action: dismiss) {
+                            Text("Continue")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(type.color)
+                                .cornerRadius(.radiusXL)
+                        }
+                    }
+                } else {
+                    Button(action: dismiss) {
+                        Text("Continue")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(type.color)
+                            .cornerRadius(.radiusXL)
+                    }
                 }
             }
             .padding(.spacingXL)
@@ -125,7 +176,29 @@ struct CelebrationView: View {
             Haptics.success()
         }
     }
-    
+    .sheet(isPresented: $showShareSheet) {
+        MilestoneShareSheet(
+            milestone: convertToShareableMilestone() ?? .streakAchieved(days: 1),
+            babyName: babyName ?? "",
+            onDismiss: { showShareSheet = false }
+        )
+    }
+
+    private func shareMilestone() {
+        showShareSheet = true
+    }
+
+    private func convertToShareableMilestone() -> ShareableMilestoneCard.ShareableMilestone? {
+        switch type {
+        case .streakAchieved(let days):
+            return .streakAchieved(days: days)
+        case .milestoneUnlocked:
+            return .patternDiscovered // Generic milestone
+        default:
+            return nil
+        }
+    }
+
     private func dismiss() {
         withAnimation(.easeOut(duration: 0.2)) {
             opacity = 0

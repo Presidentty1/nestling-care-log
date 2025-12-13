@@ -155,6 +155,108 @@ actor Analytics {
     func logCaregiverInviteAccepted() {
         log("caregiver_invite_accepted")
     }
+
+    // MARK: - Pricing Experiment Analytics
+
+    func logPricingExperimentAssigned(variant: String) {
+        log("pricing_experiment_assigned", parameters: ["variant": variant])
+    }
+
+    func logPricingTrialStarted(variant: String, trialDays: Int) {
+        log("pricing_trial_started", parameters: [
+            "variant": variant,
+            "trial_days": trialDays
+        ])
+    }
+
+    func logPricingTrialConverted(variant: String, revenue: Double, monthlyPrice: Double) {
+        log("pricing_trial_converted", parameters: [
+            "variant": variant,
+            "revenue": revenue,
+            "monthly_price": monthlyPrice
+        ])
+    }
+
+    func logPricingTrialExpired(variant: String, converted: Bool, trialDays: Int) {
+        log("pricing_trial_expired", parameters: [
+            "variant": variant,
+            "converted": converted,
+            "trial_days": trialDays
+        ])
+    }
+
+    func logPricingPaywallViewed(variant: String) {
+        log("pricing_paywall_viewed", parameters: ["variant": variant])
+    }
+
+    // MARK: - Widget Analytics
+
+    func logWidgetOnboardingShown() {
+        log("widget_onboarding_shown")
+    }
+
+    func logWidgetOnboardingCompleted() {
+        log("widget_onboarding_completed")
+    }
+
+    func logWidgetPromptShown() {
+        log("widget_prompt_shown")
+    }
+
+    func logWidgetPromptDismissed() {
+        log("widget_prompt_dismissed")
+    }
+
+    func logWidgetPromptClicked() {
+        log("widget_prompt_clicked")
+    }
+
+    func logWidgetImpression(widgetType: String) {
+        log("widget_impression", parameters: ["widget_type": widgetType])
+    }
+
+    func logWidgetTapped(widgetType: String) {
+        log("widget_tapped", parameters: ["widget_type": widgetType])
+    }
+
+    func logWidgetLogCompleted(widgetType: String, eventType: String) {
+        log("widget_log_completed", parameters: [
+            "widget_type": widgetType,
+            "event_type": eventType
+        ])
+    }
+
+    // MARK: - Referral Analytics
+
+    func logReferralLinkShared(channel: String) {
+        log("referral_link_shared", parameters: ["channel": channel])
+    }
+
+    func logReferralInviteAccepted(referralCode: String) {
+        log("referral_invite_accepted", parameters: ["referral_code": referralCode])
+    }
+
+    func logReferralRefereeActivated(referralCode: String) {
+        log("referral_referee_activated", parameters: ["referral_code": referralCode])
+    }
+
+    func logReferralRewardClaimed(reward: String) {
+        log("referral_reward_claimed", parameters: ["reward": reward])
+    }
+
+    // MARK: - Medical Citation Analytics
+
+    func logCitationBadgeTapped(feature: String) {
+        log("citation_badge_tapped", parameters: ["feature": feature])
+    }
+
+    func logCitationTooltipViewed(feature: String) {
+        log("citation_tooltip_viewed", parameters: ["feature": feature])
+    }
+
+    func logCitationLinkClicked(feature: String, url: String) {
+        log("citation_link_clicked", parameters: ["feature": feature, "url": url])
+    }
 }
 
 /// Firebase Analytics implementation

@@ -48,6 +48,15 @@ struct PaywallView: View {
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.mutedForeground)
                         .multilineTextAlignment(.center)
+
+                    // AAP research mention
+                    if PolishFeatureFlags.shared.citationsEnabled {
+                        Text("Based on AAP research and pediatric guidelines")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(.mutedForeground.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 4)
+                    }
                 }
                 .padding(.top, .spacingXL)
                 

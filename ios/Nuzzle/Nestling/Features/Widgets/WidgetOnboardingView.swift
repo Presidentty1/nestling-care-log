@@ -78,7 +78,7 @@ struct WidgetOnboardingView: View {
                         }
                     } else {
                         PrimaryButton("Got it!") {
-                            AnalyticsService.shared.trackWidgetOnboardingCompleted()
+                            AnalyticsService.shared.logWidgetOnboardingCompleted()
                             dismiss()
                         }
                     }
@@ -88,7 +88,7 @@ struct WidgetOnboardingView: View {
             }
         }
         .onAppear {
-            AnalyticsService.shared.trackWidgetOnboardingShown()
+            AnalyticsService.shared.logWidgetOnboardingShown()
         }
     }
 }

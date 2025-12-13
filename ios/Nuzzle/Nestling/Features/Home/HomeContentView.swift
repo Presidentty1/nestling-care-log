@@ -28,6 +28,8 @@ struct HomeContentView: View {
     
     @State private var showBabySwitcher = false
     @State private var showDatePicker = false
+    @State private var showWidgetPrompt = false
+    @State private var showWidgetOnboarding = false
     
     private var currentBaby: Baby? {
         environment.currentBaby
@@ -47,7 +49,37 @@ struct HomeContentView: View {
         }
         return nil
     }
-    
+
+    private var shouldShowWidgetPrompt: Bool {
+        // Only show if feature flag is enabled
+        guard PolishFeatureFlags.shared.widgetOnboardingEnabled else { return false }
+
+        // Don't show if user has already seen it
+        if UserDefaults.standard.bool(forKey: "hasSeenWidgetPrompt") {
+            return false
+        }
+
+        // Show after first accurate nap prediction (within first 3 days of onboarding)
+        guard let onboardingDate = UserDefaults.standard.object(forKey: "onboardingCompleteDate") as? Date else {
+            return false
+        }
+
+        let daysSinceOnboarding = Calendar.current.dateComponents([.day], from: onboardingDate, to: Date()).day ?? 0
+
+        // Only show in first 3 days
+        guard daysSinceOnboarding <= 3 else { return false }
+
+        // Check if we have an accurate prediction
+        // This is a simple heuristic - if we have any prediction, assume it's accurate enough
+        return viewModel.prediction != nil
+    }
+
+    private var shouldShowJourneyCard: Bool {
+        // Only show during first 3 days of journey
+        let journeyService = FirstThreeDaysJourneyService.shared
+        return journeyService.currentDay <= 3 && journeyService.journeyProgress < 1.0
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: .spacingLG) {
@@ -61,9 +93,42 @@ struct HomeContentView: View {
                     }
                 )
                 
+                // Journey Progress Card (first 3 days)
+                if PolishFeatureFlags.shared.first72hJourneyEnabled && shouldShowJourneyCard {
+                    FirstThreeDaysCard()
+                        .padding(.horizontal, .spacingLG)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
                 // Nap Predictor Card (Hero)
                 napPredictorSection
-                
+
+                // Widget Onboarding Prompt
+                if shouldShowWidgetPrompt {
+                    AddWidgetPromptCard(
+                        onDismiss: {
+                            UserDefaults.standard.set(true, forKey: "hasSeenWidgetPrompt")
+                            AnalyticsService.shared.logWidgetPromptDismissed()
+                            withAnimation { showWidgetPrompt = false }
+                        },
+                        onAddWidget: {
+                            UserDefaults.standard.set(true, forKey: "hasSeenWidgetPrompt")
+                            AnalyticsService.shared.logWidgetPromptClicked()
+                            showWidgetOnboarding = true
+                        }
+                    )
+                    .padding(.horizontal, .spacingLG)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onAppear {
+                        AnalyticsService.shared.logWidgetPromptShown()
+                    }
+                }
+
+                // Predictive Logging Suggestions (if available)
+                if PolishFeatureFlags.shared.predictiveLoggingEnabled && !viewModel.predictiveSuggestions.isEmpty {
+                    predictiveSuggestionsSection
+                }
+
                 // Quick Actions (2x2 Grid)
                 quickActionsSection
                 
@@ -72,6 +137,24 @@ struct HomeContentView: View {
                 
                 // AI Tease Card
                 aiTeaseSection
+
+                // Proactive Feature Suggestion
+                if let suggestion = viewModel.proactiveSuggestion {
+                    ProactiveSuggestionCard(suggestion: suggestion) {
+                        // Handle suggestion tap
+                        proactiveDiscovery.trackSuggestionAction(suggestion, action: "tapped")
+                        // TODO: Navigate to relevant feature
+                        print("Navigate to: \(suggestion.rawValue)")
+                    } onDismiss: {
+                        viewModel.proactiveSuggestion = nil
+                        proactiveDiscovery.trackSuggestionAction(suggestion, action: "dismissed")
+                    }
+                    .padding(.horizontal, .spacingLG)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onAppear {
+                        proactiveDiscovery.markSuggestionShown(suggestion)
+                    }
+                }
             }
             .padding(.bottom, .spacingXL)
         }
@@ -294,7 +377,35 @@ struct HomeContentView: View {
         )
         .padding(.horizontal, .spacingLG)
     }
-    
+
+    @ViewBuilder
+    private var predictiveSuggestionsSection: some View {
+        VStack(alignment: .leading, spacing: .spacingSM) {
+            HStack {
+                Image(systemName: "sparkles")
+                    .font(.body)
+                    .foregroundColor(.primary)
+                Text("Quick log")
+                    .font(.body.weight(.medium))
+                    .foregroundColor(.foreground)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: .spacingMD) {
+                    ForEach(viewModel.predictiveSuggestions) { prediction in
+                        PredictiveSuggestionButton(prediction: prediction) {
+                            Task {
+                                await viewModel.executePredictiveLog(prediction)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, .spacingXS)
+            }
+        }
+        .padding(.horizontal, .spacingLG)
+    }
+
     // MARK: - Helpers
     
     private var babyName: String {
@@ -352,7 +463,10 @@ struct HomeContentView: View {
                     .padding(.horizontal, .spacingLG)
                 }
 
-                if viewModel.filteredEvents.isEmpty {
+                if viewModel.isLoading && viewModel.filteredEvents.isEmpty && PolishFeatureFlags.shared.skeletonLoadingEnabled {
+                    // Show skeleton loading for timeline
+                    SkeletonViews.TimelineSkeletonView()
+                } else if viewModel.filteredEvents.isEmpty {
                     VStack(spacing: .spacingMD) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 48))
@@ -430,6 +544,9 @@ struct TimelineGroup: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
+        }
+        .sheet(isPresented: $showWidgetOnboarding) {
+            WidgetOnboardingView()
         }
     }
 }

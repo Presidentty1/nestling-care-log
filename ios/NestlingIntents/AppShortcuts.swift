@@ -9,7 +9,14 @@ struct NuzzleAppShortcuts: AppShortcutsProvider {
                 "Log a feed in \(.applicationName)",
                 "Record a feed in \(.applicationName)",
                 "Feed baby in \(.applicationName)",
-                "Log feeding in \(.applicationName)"
+                "Log feeding in \(.applicationName)",
+                // Natural language additions
+                "Baby just ate",
+                "Log that baby ate",
+                "Baby finished feeding",
+                "Just fed the baby",
+                "Baby had a bottle",
+                "Baby nursed"
             ],
             shortTitle: "Log Feed",
             systemImageName: "drop.fill"
@@ -21,7 +28,14 @@ struct NuzzleAppShortcuts: AppShortcutsProvider {
                 "Start sleep timer in \(.applicationName)",
                 "Begin nap in \(.applicationName)",
                 "Put baby to sleep in \(.applicationName)",
-                "Start sleep tracking in \(.applicationName)"
+                "Start sleep tracking in \(.applicationName)",
+                // Natural language additions
+                "Baby is sleeping",
+                "Baby went to sleep",
+                "Start sleep timer",
+                "Baby fell asleep",
+                "Put baby down for nap",
+                "Baby is napping"
             ],
             shortTitle: "Start Sleep",
             systemImageName: "moon.fill"
@@ -45,7 +59,14 @@ struct NuzzleAppShortcuts: AppShortcutsProvider {
                 "Log diaper change in \(.applicationName)",
                 "Change diaper in \(.applicationName)",
                 "Record diaper in \(.applicationName)",
-                "Diaper change in \(.applicationName)"
+                "Diaper change in \(.applicationName)",
+                // Natural language additions
+                "Changed baby's diaper",
+                "Baby had a wet diaper",
+                "Baby had a dirty diaper",
+                "Diaper was wet",
+                "Diaper was dirty",
+                "Just changed diaper"
             ],
             shortTitle: "Log Diaper",
             systemImageName: "drop.circle.fill"

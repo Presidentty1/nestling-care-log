@@ -39,6 +39,30 @@ struct QuickActionButton: View {
     
     var body: some View {
         ZStack {
+            // Voice button overlay (when voice-first mode is enabled)
+            if PolishFeatureFlags.shared.voiceFirstEnabled {
+                GeometryReader { geometry in
+                    Button(action: {
+                        // Trigger voice command for this action
+                        triggerVoiceCommand()
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.primary.opacity(0.9))
+                                .frame(width: 32, height: 32)
+
+                            Image(systemName: "mic.fill")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .frame(width: 32, height: 32)
+                    .position(x: geometry.size.width - 16, y: 16)
+                    .accessibilityLabel("Voice command for \(title)")
+                    .accessibilityHint("Tap to use voice instead of touch")
+                }
+            }
+
             Button(action: {
                 print("🔵 QuickActionButton tapped: \(title)")
                 Haptics.light()
@@ -174,6 +198,24 @@ struct QuickActionButton: View {
                 rippleScale = 0.0
             }
         }
+    }
+
+    private func triggerVoiceCommand() {
+        // Show voice command hint
+        // In a real implementation, this would activate Siri or voice input
+        // For now, just provide haptic feedback and show a hint
+
+        Haptics.selection()
+
+        // Analytics
+        AnalyticsService.shared.track(event: "voice_button_tapped", properties: [
+            "action_type": title.lowercased(),
+            "voice_first_mode": true
+        ])
+
+        // TODO: Implement actual voice command activation
+        // This could integrate with Siri or a custom voice interface
+        // For example: activate Siri with specific phrase, or show voice input modal
     }
 }
 

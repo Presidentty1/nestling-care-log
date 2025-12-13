@@ -9,6 +9,7 @@ struct NapPredictionCard: View {
     
     @State private var isPulsing = false
     @State private var showInfo = false
+    @State private var showCitationTooltip = false
     
     var body: some View {
         CardView(variant: cardVariant) {
@@ -53,15 +54,37 @@ struct NapPredictionCard: View {
                 .accessibilityLabel("How predictions work")
                 .buttonStyle(.plain)
                 
-                // Suggestion badge
-                Text("Suggestion")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .foregroundColor(.eventSleep)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.eventSleep.opacity(0.1))
-                    .cornerRadius(8)
+                // Badges
+                HStack(spacing: 6) {
+                    // AAP Citation badge
+                    if PolishFeatureFlags.shared.citationsEnabled {
+                        Button {
+                            showCitationTooltip = true
+                            MedicalCitationService.shared.trackCitationViewed(feature: .napPrediction, context: "nap_card")
+                        } label: {
+                            Text("AAP")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Color.primary.opacity(0.1))
+                                .cornerRadius(6)
+                        }
+                        .accessibilityLabel("American Academy of Pediatrics citation")
+                        .buttonStyle(.plain)
+                    }
+
+                    // Suggestion badge
+                    Text("Suggestion")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.eventSleep)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.eventSleep.opacity(0.1))
+                        .cornerRadius(8)
+                }
             }
             
             // Time window
@@ -193,6 +216,15 @@ struct NapPredictionCard: View {
                     .fill(index < Int(confidence * 3) ? Color.eventSleep : Color.eventSleep.opacity(0.2))
                     .frame(width: 12, height: 4)
             }
+        }
+        .sheet(isPresented: $showCitationTooltip) {
+            CitationTooltipView(
+                citation: MedicalCitationService.shared.citation(for: .napPrediction),
+                onDismiss: { showCitationTooltip = false }
+            )
+        }
+        .sheet(isPresented: $showInfo) {
+            NapPredictionInfoSheet(onDismiss: { showInfo = false })
         }
     }
 }

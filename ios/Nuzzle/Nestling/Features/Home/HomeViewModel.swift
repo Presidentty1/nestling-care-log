@@ -3,6 +3,21 @@ import Combine
 import os.signpost
 import UserNotifications
 
+// Import for OMG moment detection
+private let omgDetection = OMGMomentDetectionService.shared
+
+// Import for educational tooltips
+private let educationalTooltips = EducationalTooltipService.shared
+
+// Import for reassurance system
+private let reassuranceService = ReassuranceCopyService.shared
+
+// Import for proactive feature discovery
+private let proactiveDiscovery = ProactiveFeatureDiscoveryService.shared
+
+// Import for predictive logging
+private let predictiveLogging = PredictiveLoggingService.shared
+
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var events: [Event] = []
@@ -17,12 +32,15 @@ class HomeViewModel: ObservableObject {
     }
     @Published var errorMessage: String?
     @Published var activeSleep: Event?
+    @Published var activeTummyTime: Event?
     @Published var searchText: String = ""
     @Published var debouncedSearchText: String = ""
     @Published var selectedFilter: EventTypeFilter = .all
     @Published var hasAnyEvents: Bool = true // Epic 2 AC2.1
     @Published var userGoal: String? // User's selected goal from onboarding
     @Published var isProcessingQuickLog: Bool = false // Prevent duplicate quick log calls
+    @Published var predictiveSuggestions: [PredictiveLoggingService.Prediction] = [] // Smart logging suggestions
+    @Published var proactiveSuggestion: ProactiveFeatureDiscoveryService.FeatureSuggestion? // Feature discovery
     
     var babyAgeDescription: String {
         DateUtils.formatBabyAge(dateOfBirth: baby.dateOfBirth)
@@ -307,6 +325,23 @@ class HomeViewModel: ObservableObject {
                 self.events = todayEvents
                 self.summary = calculateSummary(from: todayEvents)
 
+                // Generate predictive logging suggestions
+                if PolishFeatureFlags.shared.predictiveLoggingEnabled {
+                    self.predictiveSuggestions = predictiveLogging.getPredictions(
+                        for: baby,
+                        recentEvents: todayEvents
+                    )
+                }
+
+                // Check for reassurance messages during difficult patterns
+                await checkForReassurance(todayEvents)
+
+                // Update proactive feature suggestions
+                if PolishFeatureFlags.shared.proactiveDiscoveryEnabled {
+                    let context = ProactiveFeatureDiscoveryService.SuggestionContext.current()
+                    self.proactiveSuggestion = proactiveDiscovery.getSuggestion(context: context)
+                }
+
                 // Generate personalized recommendations
                 self.recommendations = await PersonalizedRecommendationsService.shared.generateRecommendations(
                     for: baby,
@@ -450,6 +485,9 @@ class HomeViewModel: ObservableObject {
                             // Check if this is the first event and show onboarding toast
                             await checkAndShowFirstEventToast(eventType: "feed")
 
+                            // Check for educational tooltips
+                            await checkForEducationalTooltip(event: event)
+
                             // Save last used
                             let lastUsed = LastUsedValues(amount: finalAmount, unit: finalUnit, subtype: "bottle")
                             try? await dataStore.saveLastUsedValues(for: .feed, values: lastUsed)
@@ -577,13 +615,19 @@ class HomeViewModel: ObservableObject {
             do {
                 if activeSleep != nil {
                     // Stop active sleep
-                    _ = try await dataStore.stopActiveSleep(for: baby)
+                    let stoppedEvent = try await dataStore.stopActiveSleep(for: baby)
                     await MainActor.run {
                         self.activeSleep = nil
                     }
 
+                    // Check for OMG moments
+                    await checkForOMGMoment(event: stoppedEvent)
+
                     // Check if this is the first event and show onboarding toast
                     await checkAndShowFirstEventToast(eventType: "sleep")
+
+                    // Check for educational tooltips
+                    await checkForEducationalTooltip(event: stoppedEvent)
 
                     // Stop Live Activity
                     if #available(iOS 16.1, *) {
@@ -656,6 +700,9 @@ class HomeViewModel: ObservableObject {
 
                 // Check if this is the first event and show onboarding toast
                 await checkAndShowFirstEventToast(eventType: "diaper")
+
+                // Check for educational tooltips
+                await checkForEducationalTooltip(event: event)
 
                 // Save last used
                 let lastUsed = LastUsedValues(subtype: subtype)
@@ -1070,6 +1117,313 @@ extension HomeViewModel {
                     "days_since_onboarding": daysSinceOnboarding
                 ])
             }
+        }
+    }
+
+    /// Check for OMG moments after logging events
+    private func checkForOMGMoment(event: Event) async {
+        // Only check if OMG detection is enabled
+        guard PolishFeatureFlags.shared.omgMomentsEnabled else { return }
+
+        // Get recent history for context
+        do {
+            let recentEvents = try await dataStore.fetchEvents(
+                for: baby,
+                from: Date().addingTimeInterval(-24 * 60 * 60), // Last 24 hours
+                to: Date()
+            )
+
+            if let omgMoment = omgDetection.detectAfterSleepEvent(
+                event: event,
+                baby: baby,
+                recentHistory: recentEvents
+            ), omgDetection.shouldTriggerMoment(omgMoment) {
+
+                // Trigger enhanced celebration
+                await triggerOMGCelebration(omgMoment)
+            }
+        } catch {
+            print("Error checking for OMG moment: \(error)")
+        }
+    }
+
+    /// Trigger an OMG celebration with enhanced visuals and share prompt
+    private func triggerOMGCelebration(_ moment: OMGMomentDetectionService.OMGMoment) async {
+        let celebrationCopy = omgDetection.getCelebrationCopy(for: moment)
+        let sharePrompt = omgDetection.getSharePrompt(for: moment)
+
+        // Use enhanced toast with celebration styling
+        showToast("\(celebrationCopy.title)\n\(celebrationCopy.message)", "celebration")
+
+        // Analytics
+        AnalyticsService.shared.track(event: "omg_moment_triggered", properties: [
+            "moment_type": String(describing: moment),
+            "baby_name": baby.name,
+            "celebration_title": celebrationCopy.title
+        ])
+
+        // TODO: Add share prompt integration
+        // This would show a subtle "Share this win?" prompt after the celebration
+        // For now, the share functionality is handled by the existing CelebrationView
+        // when milestones are achieved
+    }
+
+    /// Check for educational tooltips after logging events
+    private func checkForEducationalTooltip(event: Event) async {
+        guard PolishFeatureFlags.shared.educationalTooltipsEnabled else { return }
+
+        let context: EducationalTooltipService.Context
+
+        switch event.type {
+        case .sleep:
+            // Check if this is the first sleep log
+            let allEvents = try? await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            let sleepEvents = allEvents?.filter { $0.type == .sleep } ?? []
+            if sleepEvents.count == 1 {
+                context = .firstSleepLog
+            } else {
+                return // Not first sleep log
+            }
+
+        case .feed:
+            // Check if this is the first feed log
+            let allEvents = try? await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            let feedEvents = allEvents?.filter { $0.type == .feed } ?? []
+            if feedEvents.count == 1 {
+                context = .firstFeedLog
+            } else {
+                return // Not first feed log
+            }
+
+        case .diaper:
+            // Check if this is the first diaper log
+            let allEvents = try? await dataStore.fetchEvents(for: baby, from: Date.distantPast, to: Date.distantFuture)
+            let diaperEvents = allEvents?.filter { $0.type == .diaper } ?? []
+            if diaperEvents.count == 1 {
+                context = .firstDiaperLog
+            } else {
+                return // Not first diaper log
+            }
+
+        default:
+            return // No tooltip for this event type
+        }
+
+        let babyAgeInDays = Calendar.current.dateComponents([.day], from: baby.dateOfBirth, to: Date()).day
+
+        if let tooltip = educationalTooltips.tooltip(for: context, babyAgeInDays: babyAgeInDays) {
+            // Show educational tooltip
+            showToast(tooltip.displayText, "education")
+
+            // Analytics
+            educationalTooltips.trackTooltipShown(tooltip, context: context)
+        }
+    }
+
+    /// Check for reassurance messages during difficult patterns
+    private func checkForReassurance(_ events: [Event]) async {
+        guard PolishFeatureFlags.shared.reassuranceSystemEnabled else { return }
+
+        // Get broader context (last 7 days) for pattern detection
+        do {
+            let lastWeek = Date().addingTimeInterval(-7 * 24 * 60 * 60)
+            let weekEvents = try await dataStore.fetchEvents(for: baby, from: lastWeek, to: Date())
+
+            let patterns = reassuranceService.detectDifficultyPatterns(events: weekEvents, baby: baby)
+
+            if reassuranceService.shouldShowReassurance(for: patterns), let primaryPattern = patterns.first {
+                let message = reassuranceService.message(
+                    for: primaryPattern.context,
+                    babyName: baby.name,
+                    babyAgeWeeks: Calendar.current.dateComponents([.weekOfYear], from: baby.dateOfBirth, to: Date()).weekOfYear
+                )
+
+                // Show reassurance toast
+                showToast(message.fullMessage, "reassurance")
+
+                // Mark as shown to prevent spam
+                reassuranceService.markReassuranceShown()
+
+                // Analytics
+                AnalyticsService.shared.track(event: "reassurance_shown", properties: [
+                    "pattern": String(describing: primaryPattern.context),
+                    "baby_age_weeks": Calendar.current.dateComponents([.weekOfYear], from: baby.dateOfBirth, to: Date()).weekOfYear ?? 0
+                ])
+            }
+        } catch {
+            print("Error checking for reassurance: \(error)")
+        }
+    }
+
+    // MARK: - Predictive Logging Actions
+
+    func executePredictiveLog(_ prediction: PredictiveLoggingService.Prediction) async {
+        guard !isProcessingQuickLog else { return }
+
+        isProcessingQuickLog = true
+
+        do {
+            switch prediction.type {
+            case .feed(let amount, let unit, let side):
+                await quickLogFeedWithPrediction(amount: amount, unit: unit, side: side)
+
+            case .sleep:
+                await quickLogSleep()
+
+            case .diaper(let type):
+                await quickLogDiaperWithPrediction(type: type)
+
+            case .tummyTime:
+                await quickLogTummyTime()
+            }
+
+            // Analytics
+            AnalyticsService.shared.track(event: "predictive_log_used", properties: [
+                "prediction_type": String(describing: prediction.type),
+                "confidence": prediction.confidence,
+                "reason": prediction.reason
+            ])
+
+            // Clear this prediction since it was used
+            predictiveSuggestions.removeAll { $0.id == prediction.id }
+
+        } catch {
+            print("Error executing predictive log: \(error)")
+            Haptics.error()
+        }
+
+        isProcessingQuickLog = false
+    }
+
+    private func quickLogFeedWithPrediction(amount: Double?, unit: String?, side: String?) async {
+        // Similar to quickLogFeed but with pre-filled values
+        let finalAmount = amount ?? 4.0
+        let finalUnit = unit ?? "oz"
+        let finalSubtype = side.map { "breast_\($0)" }
+
+        let event = Event(
+            id: UUID(),
+            babyId: baby.id,
+            type: .feed,
+            startTime: Date(),
+            amount: finalAmount,
+            unit: finalUnit,
+            subtype: finalSubtype,
+            notes: nil
+        )
+
+        do {
+            try await dataStore.addEvent(event)
+
+            await MainActor.run {
+                showToast("Feed logged! \(Int(finalAmount))\(finalUnit)", "success")
+            }
+
+            // Check if this is the first event and show onboarding toast
+            await checkAndShowFirstEventToast(eventType: "feed")
+
+            // Check for educational tooltips
+            await checkForEducationalTooltip(event: event)
+
+            // Analytics
+            await Analytics.shared.log("event_added", parameters: [
+                "event_type": "feed",
+                "subtype": "predictive",
+                "has_amount": true,
+                "has_note": false
+            ])
+
+            Haptics.success()
+
+            // Small delay to ensure CoreData save is complete, then reload
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            await loadTodayEvents()
+        } catch {
+            print("Error logging predictive feed: \(error)")
+            await MainActor.run {
+                showToast("Failed to log feed", "error")
+            }
+            CrashReportingService.shared.logError(error, context: ["action": "predictive_log_feed"])
+            Haptics.error()
+        }
+    }
+
+    private func quickLogDiaperWithPrediction(type: String?) async {
+        let finalSubtype = type ?? "wet"
+
+        let event = Event(
+            id: UUID(),
+            babyId: baby.id,
+            type: .diaper,
+            startTime: Date(),
+            subtype: finalSubtype,
+            notes: nil
+        )
+
+        do {
+            try await dataStore.addEvent(event)
+
+            await MainActor.run {
+                showToast("Diaper logged!", "success")
+            }
+
+            // Check if this is the first event and show onboarding toast
+            await checkAndShowFirstEventToast(eventType: "diaper")
+
+            // Check for educational tooltips
+            await checkForEducationalTooltip(event: event)
+
+            // Analytics
+            await Analytics.shared.log("event_added", parameters: [
+                "event_type": "diaper",
+                "subtype": finalSubtype,
+                "has_amount": false,
+                "has_note": false
+            ])
+
+            Haptics.success()
+
+            // Small delay to ensure CoreData save is complete, then reload
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            await loadTodayEvents()
+        } catch {
+            print("Error logging predictive diaper: \(error)")
+            await MainActor.run {
+                showToast("Failed to log diaper", "error")
+            }
+            CrashReportingService.shared.logError(error, context: ["action": "predictive_log_diaper"])
+            Haptics.error()
+        }
+    }
+
+    private func quickLogTummyTime() async {
+        // Start tummy time (similar to starting sleep)
+        guard activeTummyTime == nil else {
+            await MainActor.run {
+                showToast("Tummy time already active", "info")
+            }
+            return
+        }
+
+        do {
+            let newTummyTime = try await dataStore.startActiveTummyTime(for: baby)
+            await MainActor.run {
+                self.activeTummyTime = newTummyTime
+                showToast("Tummy time started!", "success")
+            }
+
+            Haptics.success()
+
+            // Small delay to ensure CoreData save is complete, then reload
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            await loadTodayEvents()
+        } catch {
+            print("Error starting predictive tummy time: \(error)")
+            await MainActor.run {
+                showToast("Failed to start tummy time", "error")
+            }
+            CrashReportingService.shared.logError(error, context: ["action": "predictive_start_tummy"])
+            Haptics.error()
         }
     }
 }

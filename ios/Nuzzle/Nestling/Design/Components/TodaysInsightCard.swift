@@ -3,6 +3,18 @@ import SwiftUI
 /// Card displaying personalized recommendations and insights
 struct TodaysInsightCard: View {
     let recommendation: PersonalizedRecommendationsService.Recommendation
+    let babyName: String?
+    let onShare: (() -> Void)?
+
+    init(
+        recommendation: PersonalizedRecommendationsService.Recommendation,
+        babyName: String? = nil,
+        onShare: (() -> Void)? = nil
+    ) {
+        self.recommendation = recommendation
+        self.babyName = babyName
+        self.onShare = onShare
+    }
 
     var body: some View {
         CardView(variant: .default) {
@@ -27,15 +39,28 @@ struct TodaysInsightCard: View {
 
                         Spacer()
 
-                        if recommendation.isNew {
-                            Text("NEW")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, .spacingXS)
-                                .padding(.vertical, 2)
-                                .background(Color.success)
-                                .cornerRadius(.radiusSM)
+                        HStack(spacing: .spacingXS) {
+                            if recommendation.isNew {
+                                Text("NEW")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, .spacingXS)
+                                    .padding(.vertical, 2)
+                                    .background(Color.success)
+                                    .cornerRadius(.radiusSM)
+                            }
+
+                            // Share button (only if share callback provided)
+                            if onShare != nil && PolishFeatureFlags.shared.momGroupShareEnabled {
+                                Button(action: { onShare?() }) {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                        .padding(.spacingXS)
+                                }
+                                .accessibilityLabel("Share this insight")
+                            }
                         }
                     }
 

@@ -115,7 +115,31 @@ struct SettingsRootView: View {
                         }
                     }
                 }
-                
+
+                Section("Voice & Shortcuts") {
+                    Toggle(isOn: Binding(
+                        get: { PolishFeatureFlags.shared.voiceFirstEnabled },
+                        set: { newValue in
+                            PolishFeatureFlags.shared.voiceFirstEnabled = newValue
+                            AnalyticsService.shared.track(event: "voice_first_mode_toggled", properties: [
+                                "enabled": newValue
+                            ])
+                        }
+                    )) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Voice-First Mode")
+                                .font(.body)
+                            Text("Show voice buttons on action cards for hands-free logging")
+                                .font(.caption2)
+                                .foregroundColor(.mutedForeground)
+                        }
+                    }
+
+                    NavigationLink("Voice Commands") {
+                        VoiceCommandsHelpView()
+                    }
+                }
+
                 Section("Subscription") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -278,6 +302,10 @@ struct SettingsRootView: View {
                                 .foregroundColor(.mutedForeground)
                                 .font(.caption)
                         }
+                    }
+
+                    NavigationLink("Referrals") {
+                        ReferralDashboardView()
                     }
                 }
                 

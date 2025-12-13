@@ -4,7 +4,14 @@ struct TodayPatternsCard: View {
     let events: [Event]
     let isPro: Bool
     let onUpgrade: () -> Void
-    
+    let babyName: String?
+    let onShare: (() -> Void)?
+
+    private var hasPatterns: Bool {
+        let stats = todayStats
+        return stats.feeds > 0 || stats.naps > 0 || stats.diapers > 0
+    }
+
     private var todayStats: (feeds: Int, naps: Int, diapers: Int, avgFeedAmount: Double?, avgNapDuration: TimeInterval?, diaperTypes: (wet: Int, dirty: Int)) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -48,9 +55,24 @@ struct TodayPatternsCard: View {
             // Pro users see full stats
             CardView(variant: .default) {
                 VStack(alignment: .leading, spacing: .spacingSM) {
-                    Text("Today so far")
-                        .font(.headline)
-                        .foregroundColor(.foreground)
+                    HStack {
+                        Text("Today so far")
+                            .font(.headline)
+                            .foregroundColor(.foreground)
+
+                        Spacer()
+
+                        // Share button (only for Pro users with patterns)
+                        if onShare != nil && PolishFeatureFlags.shared.momGroupShareEnabled && hasPatterns {
+                            Button(action: { onShare?() }) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                    .padding(.spacingXS)
+                            }
+                            .accessibilityLabel("Share today's patterns")
+                        }
+                    }
                     
                     let stats = todayStats
                     

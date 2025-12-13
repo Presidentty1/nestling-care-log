@@ -204,6 +204,11 @@ class OnboardingCoordinator: ObservableObject {
                     // Mark as completed so parent view can react
                     isCompleted = true
                 }
+
+                // Start the first 72 hours activation journey
+                if PolishFeatureFlags.shared.first72hJourneyEnabled {
+                    FirstThreeDaysJourneyService.shared.startJourney(onboardingCompleteDate: Date())
+                }
             } catch {
                 print("Error completing onboarding: \(error)")
             }
