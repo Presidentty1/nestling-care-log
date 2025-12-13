@@ -30,12 +30,16 @@ class CoreDataStore: DataStore {
                     self?.logger.info("Deleted corrupted store, attempting to recreate")
                     container.loadPersistentStores { (storeDescription, error) in
                         if let error = error as NSError? {
-                            fatalError("Failed to recreate Core Data stack: \(error.localizedDescription)")
+                            self?.logger.error("Failed to recreate Core Data stack after deletion: \(error.localizedDescription)")
+                            // In debug, continue with potentially corrupted store rather than crash
+                            self?.logger.warning("Continuing with potentially corrupted Core Data store in DEBUG mode")
                         }
                     }
                 }
                 #else
-                fatalError("Failed to load Core Data stack: \(error.localizedDescription)")
+                // In production, log the error and continue - don't crash the app
+                self?.logger.error("Core Data stack failed to load in production - continuing with limited functionality")
+                // The app will continue but data persistence may not work
                 #endif
             }
         }

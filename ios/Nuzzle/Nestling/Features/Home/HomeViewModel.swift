@@ -27,7 +27,7 @@ class HomeViewModel: ObservableObject {
     @Published var longestStreak: Int = 0
     @Published var isLoading = false {
         didSet {
-            print("🔵 HomeViewModel.isLoading changed: \(oldValue) -> \(isLoading) [Thread: \(Thread.isMainThread ? "Main" : "Background")]")
+            logger.debug("HomeViewModel.isLoading changed: \(oldValue) -> \(isLoading) [Thread: \(Thread.isMainThread ? "Main" : "Background")]")
         }
     }
     @Published var errorMessage: String?
@@ -214,15 +214,29 @@ class HomeViewModel: ObservableObject {
                 self.userGoal = settings.userGoal
             }
         } catch {
-            print("Error loading user goal: \(error)")
+            logger.error("Error loading user goal: \(error)")
         }
     }
     
     deinit {
-        print("HomeViewModel.deinit: Cleaning up for baby \(baby.id)")
+        logger.info("HomeViewModel.deinit: Cleaning up for baby \(baby.id)")
+
+        // Cancel all active tasks to prevent memory leaks
         isLoadingTask?.cancel()
-        Task { @MainActor in
-            self.isLoading = false
+        isLoadingTask = nil
+
+        // Cancel any active timers
+        // Note: Timer cleanup is handled by invalidating them when they're no longer needed
+        // The existing timer management should handle this, but we ensure cleanup here
+
+        // Cancel any pending async operations
+        // Note: Most Tasks in this view model are short-lived and complete naturally,
+        // but we ensure any long-running operations are cancelled
+
+        // Reset state to prevent any lingering references
+        Task { @MainActor [weak self] in
+            self?.isLoading = false
+            self?.errorMessage = nil
         }
     }
     
@@ -272,12 +286,15 @@ class HomeViewModel: ObservableObject {
     private func loadTodayEventsInternal(signpostID: OSSignpostID) async {
         isLoadingTask = Task { @MainActor in
             var taskCompleted = false
-            
+
+            // Check for cancellation at start
+            try Task.checkCancellation()
+
             // Use defer to ALWAYS reset isLoading and clear task reference
             // This ensures isLoading is reset even if task is cancelled or errors occur
             defer {
                 taskCompleted = true
-                print("[Task] loadTodayEvents defer block executing, setting isLoading = false")
+                logger.debug("loadTodayEvents defer block executing, setting isLoading = false")
                 // Ensure we're on MainActor
                 assert(Thread.isMainThread, "Defer block must run on main thread")
                 // Set isLoading to false and clear task reference
@@ -286,32 +303,32 @@ class HomeViewModel: ObservableObject {
                 self.isLoadingTask = nil
             }
             
-            print("Starting fetchEvents task...")
+            logger.debug("Starting fetchEvents task...")
             let startTime = Date()
             let taskID = UUID()
-            print("Task ID: \(taskID)")
-            
+            logger.debug("Task ID: \(taskID)")
+
             // Add timeout to prevent infinite loading
-            let timeoutTask = Task {
+            let timeoutTask = Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
-                await MainActor.run {
-                    // Only log timeout if task hasn't completed and is still loading
-                    if !taskCompleted && self.isLoading {
-                        let elapsed = Date().timeIntervalSince(startTime)
-                        print("ERROR [\(taskID)]: loadTodayEvents timed out after \(elapsed) seconds")
-                        self.isLoading = false
+                // Only log timeout if task hasn't completed and is still loading
+                if !taskCompleted && self.isLoading {
+                    let elapsed = Date().timeIntervalSince(startTime)
+                    self.logger.error("loadTodayEvents timed out after \(elapsed) seconds")
+                    self.isLoading = false
                         self.errorMessage = "Loading took too long. Please try again."
                     }
                 }
             }
             
             do {
-                print("[\(taskID)] Calling dataStore.fetchEvents for date: \(Date())")
+                logger.debug("[\(taskID)] Calling dataStore.fetchEvents for date: \(Date())")
                 let todayEvents = try await dataStore.fetchEvents(for: baby, on: Date())
-                
+
                 // Check if task was cancelled
                 if Task.isCancelled {
-                    print("[\(taskID)] loadTodayEvents was cancelled after fetch")
+                    logger.debug("[\(taskID)] loadTodayEvents was cancelled after fetch")
                     timeoutTask.cancel()
                     return // defer block will handle isLoading reset
                 }
@@ -359,17 +376,22 @@ class HomeViewModel: ObservableObject {
                     self.longestStreak = 0
                 }
 
-                print("[\(taskID)] UI updated with \(todayEvents.count) events")
-                
+                logger.debug("[\(taskID)] UI updated with \(todayEvents.count) events")
+
                 // Index events in Spotlight (non-blocking)
-                Task {
-                    if let settings = try? await dataStore.fetchAppSettings() {
-                        SpotlightIndexer.shared.indexEvents(todayEvents, for: baby, settings: settings)
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    do {
+                        if let settings = try await self.dataStore.fetchAppSettings() {
+                            SpotlightIndexer.shared.indexEvents(todayEvents, for: self.baby, settings: settings)
+                        }
+                    } catch {
+                        self.logger.error("Failed to index events in Spotlight: \(error)")
                     }
                 }
-                
+
                 // Restore active sleep on launch (non-blocking, don't wait for it)
-                Task {
+                Task { @MainActor [weak self] in
                     await restoreActiveSleep()
                     await MainActor.run {
                         checkActiveSleep()

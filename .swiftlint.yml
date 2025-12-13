@@ -59,6 +59,7 @@ opt_in_rules:
   - private_outlet
   - prohibited_interface_builder
   - prohibited_super_call
+  - prohibited_super_call
   - quick_discouraged_call
   - quick_discouraged_focused_test
   - quick_discouraged_pending_test
@@ -85,6 +86,13 @@ opt_in_rules:
   - vertical_whitespace_closing_braces
   - vertical_whitespace_opening_braces
   - xct_specific_matcher
+
+custom_rules:
+  no_print_statements:
+    name: "No Print Statements"
+    regex: "print\\("
+    message: "Print statements should not be used in production code. Use Logger instead."
+    severity: error
 
 excluded:
   - Carthage
