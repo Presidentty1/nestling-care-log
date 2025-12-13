@@ -1,5 +1,4 @@
 import SwiftUI
-import Logger
 /// Standard iOS alert for critical/destructive actions
 /// Ensures consistent, accessible confirmation dialogs
 struct ConfirmDialog: ViewModifier {
@@ -138,6 +137,7 @@ extension View {
     
     return PreviewContainer()
 }
+
 
 
 

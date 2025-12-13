@@ -69,7 +69,11 @@ struct NotificationsIntroView: View {
                 VStack(spacing: .spacingSM) {
                     Button(action: {
                         Haptics.light()
-                        requestNotificationPermission()
+                        // Onboarding Session 1: show primer ONLY (no OS prompt).
+                        // We record intent and request permission later (Session 2+) in-context.
+                        UserDefaults.standard.set(true, forKey: "notifications_primer_opted_in")
+                        coordinator.wantsNapNotifications = true
+                        coordinator.next()
                     }) {
                         Text("Turn on notifications")
                             .font(.system(size: 17, weight: .semibold))
@@ -84,6 +88,7 @@ struct NotificationsIntroView: View {
                     Button("Not now") {
                         Haptics.light()
                         coordinator.wantsNapNotifications = false
+                        UserDefaults.standard.set(false, forKey: "notifications_primer_opted_in")
                         coordinator.next()
                     }
                     .font(.system(size: 17, weight: .medium))
@@ -112,19 +117,7 @@ struct NotificationsIntroView: View {
     }
     
     private func requestNotificationPermission() {
-        Task {
-            do {
-                let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
-                coordinator.wantsNapNotifications = granted
-                // TODO: Analytics.track(.notificationOptIn, granted: granted)
-            } catch {
-                logger.debug("Error requesting notification permission: \(error)")
-            }
-            
-            await MainActor.run {
-                coordinator.next()
-            }
-        }
+        // Intentionally unused: OS prompt is deferred (Session 2+).
     }
 }
 

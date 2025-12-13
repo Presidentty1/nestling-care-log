@@ -186,3 +186,4 @@ private struct LossItem: View {
     .padding()
     .background(Color.background)
 }
+

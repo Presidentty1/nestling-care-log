@@ -25,10 +25,16 @@ struct OnboardingView: View {
                         WelcomeView(coordinator: coordinator)
                     case .babySetup:
                         BabySetupView(coordinator: coordinator)
+                    case .goalSelection:
+                        GoalSelectionView(coordinator: coordinator)
+                    case .aiConsent:
+                        PreferencesAndConsentView(coordinator: coordinator)
                     case .firstLog:
                         FirstLogView(coordinator: coordinator)
-                    case .partnerOnboarding:
-                        PartnerOnboardingView(coordinator: coordinator)
+                    case .notificationsPrimer:
+                        NotificationsIntroView(coordinator: coordinator)
+                    case .paywall:
+                        PaywallView(coordinator: coordinator)
                     case .complete:
                         OnboardingCompleteView(coordinator: coordinator)
                     }

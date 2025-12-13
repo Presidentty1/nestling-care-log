@@ -8,13 +8,16 @@ struct OnboardingProgressIndicator: View {
         switch currentStep {
         case .welcome: return 0
         case .babySetup: return 1
-        case .firstLog: return 2
-        case .partnerOnboarding: return 3
-        case .complete: return 3
+        case .goalSelection: return 2
+        case .aiConsent: return 3
+        case .firstLog: return 4
+        case .notificationsPrimer: return 5
+        case .paywall: return 6
+        case .complete: return 6
         }
     }
     
-    private var totalSteps: Int { 3 } // Baby Setup → First Log → Partner (optional)
+    private var totalSteps: Int { 6 } // Baby → Goal → AI → First log → Notifs primer → Paywall
     
     private var shouldShow: Bool {
         // Don't show progress on welcome screen
@@ -51,8 +54,11 @@ struct OnboardingProgressIndicator: View {
     VStack(spacing: .spacingLG) {
         OnboardingProgressIndicator(currentStep: .welcome)
         OnboardingProgressIndicator(currentStep: .babySetup)
+        OnboardingProgressIndicator(currentStep: .goalSelection)
+        OnboardingProgressIndicator(currentStep: .aiConsent)
         OnboardingProgressIndicator(currentStep: .firstLog)
-        OnboardingProgressIndicator(currentStep: .partnerOnboarding)
+        OnboardingProgressIndicator(currentStep: .notificationsPrimer)
+        OnboardingProgressIndicator(currentStep: .paywall)
         OnboardingProgressIndicator(currentStep: .complete)
     }
     .padding()

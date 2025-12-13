@@ -36,3 +36,4 @@ final class BottleLevelIndicatorTests: XCTestCase {
         XCTAssertEqual(indicator.filledBars, 0)
     }
 }
+

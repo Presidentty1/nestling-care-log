@@ -139,3 +139,4 @@ struct TimelineGroupHeader: View {
     }
     .padding()
 }
+

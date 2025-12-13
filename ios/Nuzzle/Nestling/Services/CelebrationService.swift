@@ -89,6 +89,11 @@ class CelebrationService: ObservableObject {
         if totalLogs == 1 {
             let eventType = events.first?.type.displayName ?? "event"
             triggerCelebration(.firstLog(eventType: eventType))
+            
+            // Generate shareable card if enabled
+            if PolishFeatureFlags.shareableCards {
+                generateAndOfferShare(type: .milestone(.firstLog), babyName: baby.name)
+            }
             return
         }
 
@@ -97,6 +102,18 @@ class CelebrationService: ObservableObject {
         if streakMilestones.contains(streakDays) && !hasCelebrated("streak_\(streakDays)") {
             triggerCelebration(.streakMilestone(days: streakDays))
             markCelebrated("streak_\(streakDays)")
+            
+            // Generate shareable card for major streaks (7+ days)
+            if streakDays >= 7 && PolishFeatureFlags.shareableCards {
+                generateAndOfferShare(type: .milestone(.sevenDayStreak), babyName: baby.name)
+            }
+            
+            // Trigger review prompt after 7-day streak
+            if streakDays == 7 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    ReviewPromptManager.shared.checkForPositiveMoment(streakDays: 7)
+                }
+            }
             return
         }
 
@@ -173,4 +190,28 @@ class CelebrationService: ObservableObject {
     private func saveSleepRecord(_ minutes: Int, for babyId: UUID) {
         UserDefaults.standard.set(minutes, forKey: "sleep_record_\(babyId)")
     }
+    
+    // MARK: - Shareable Card Generation
+    
+    /// Generate and offer to share celebration card
+    private func generateAndOfferShare(type: ShareableContentType, babyName: String) {
+        // Generate card in background
+        Task {
+            guard let card = ContentShareService.shared.generateCard(
+                type: type,
+                babyName: babyName,
+                aspectRatio: .square
+            ) else {
+                logger.error("[Celebration] Failed to generate shareable card")
+                return
+            }
+            
+            // Store for later sharing
+            await MainActor.run {
+                UserDefaults.standard.set(card.pngData(), forKey: "last_celebration_card")
+                logger.debug("[Celebration] Generated shareable card for \(babyName)")
+            }
+        }
+    }
 }
+

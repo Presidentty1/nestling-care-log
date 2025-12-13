@@ -182,6 +182,7 @@ struct WinOfTheDayCard: View {
                 }
             }
         }
+        }
         .buttonStyle(.plain)
         .accessibilityLabel("Today's win: \(insight.headline(babyName: babyName)). \(isNewInsight ? "New insight. " : "")Tap to view details.")
         .accessibilityHint("Double tap to see more information about this insight")
@@ -238,3 +239,4 @@ struct WinOfTheDayCard: View {
     .padding()
     .background(Color.background)
 }
+

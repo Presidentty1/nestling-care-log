@@ -80,6 +80,7 @@ class HomeViewModel: ObservableObject {
     private var isLoadingTask: Task<Void, Never>?
     private let showToast: (String, String) -> Void // (message, type)
     private var cancellables = Set<AnyCancellable>()
+    private var sleepLiveActivityTimer: AnyCancellable?
     
     // Today Status data
     var lastFeed: Event? {
@@ -317,8 +318,7 @@ class HomeViewModel: ObservableObject {
                     let elapsed = Date().timeIntervalSince(startTime)
                     self.logger.error("loadTodayEvents timed out after \(elapsed) seconds")
                     self.isLoading = false
-                        self.errorMessage = "Loading took too long. Please try again."
-                    }
+                    self.errorMessage = "Loading took too long. Please try again."
                 }
             }
             
@@ -432,6 +432,11 @@ class HomeViewModel: ObservableObject {
                 // Active sleep exists, update UI state
                 await MainActor.run {
                     self.activeSleep = activeSleep
+                }
+                // Restore Live Activity + updates
+                if #available(iOS 16.1, *) {
+                    LiveActivityManager.shared.startSleepActivity(for: baby, startTime: activeSleep.startTime)
+                    startSleepLiveActivityUpdates(startTime: activeSleep.startTime)
                 }
             }
         } catch {
@@ -655,6 +660,15 @@ class HomeViewModel: ObservableObject {
                     if #available(iOS 16.1, *) {
                         LiveActivityManager.shared.stopSleepActivity()
                     }
+                    stopSleepLiveActivityUpdates()
+
+                    // Review prompt: long sleep milestone (4+ hours)
+                    if let endTime = stoppedEvent.endTime {
+                        let durationSeconds = Int(endTime.timeIntervalSince(stoppedEvent.startTime))
+                        if durationSeconds >= 4 * 3600 {
+                            ReviewPromptManager.shared.checkForPositiveMoment(longSleepMilestone: true)
+                        }
+                    }
                     
                     Haptics.success()
                     
@@ -673,6 +687,7 @@ class HomeViewModel: ObservableObject {
                     if #available(iOS 16.1, *) {
                         LiveActivityManager.shared.startSleepActivity(for: baby, startTime: newSleep.startTime)
                     }
+                    startSleepLiveActivityUpdates(startTime: newSleep.startTime)
                     
                     Haptics.light()
                 }
@@ -685,6 +700,30 @@ class HomeViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    // MARK: - Live Activity Updates
+
+    private func startSleepLiveActivityUpdates(startTime: Date) {
+        stopSleepLiveActivityUpdates()
+        guard #available(iOS 16.1, *) else { return }
+
+        // Update every 60 seconds with elapsed time so Dynamic Island stays fresh.
+        sleepLiveActivityTimer = Timer.publish(every: 60, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                let elapsed = Int(Date().timeIntervalSince(startTime))
+                LiveActivityManager.shared.updateSleepActivity(elapsedSeconds: max(0, elapsed))
+            }
+
+        // Push an immediate update
+        let elapsed = Int(Date().timeIntervalSince(startTime))
+        LiveActivityManager.shared.updateSleepActivity(elapsedSeconds: max(0, elapsed))
+    }
+
+    private func stopSleepLiveActivityUpdates() {
+        sleepLiveActivityTimer?.cancel()
+        sleepLiveActivityTimer = nil
     }
     
     func quickLogDiaper() {

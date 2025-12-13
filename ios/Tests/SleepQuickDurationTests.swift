@@ -69,3 +69,4 @@ final class SleepQuickDurationTests: XCTestCase {
         XCTAssertNil(viewModel.endTime)
     }
 }
+

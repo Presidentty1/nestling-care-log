@@ -22,6 +22,26 @@ final class PolishFeatureFlags {
     // Tier 3 - Defensive
     var optimisticUIEnabled: Bool { flag("optimisticUI", default: true) }
     var celebrationThrottleEnabled: Bool { flag("celebrationThrottle", default: true) }
+    
+    // NEW: UX Polish Roadmap Features
+    
+    // Phase 1: Foundation
+    var reassuranceSystemEnabled: Bool { flag("reassuranceSystem", default: true) }
+    var educationalTooltipsEnabled: Bool { flag("educationalTooltips", default: true) }
+    
+    // Phase 2: Delight & Engagement
+    var first72hJourneyEnabled: Bool { flag("first72hJourney", default: true) }
+    var widgetOnboardingEnabled: Bool { flag("widgetOnboarding", default: true) }
+    var momGroupShareEnabled: Bool { flag("momGroupShare", default: true) }
+    var omgMomentsEnabled: Bool { flag("omgMoments", default: true) }
+    var predictiveLoggingEnabled: Bool { flag("predictiveLogging", default: true) }
+    
+    // Phase 3: Growth
+    var citationsEnabled: Bool { flag("citations", default: true) }
+    var proactiveDiscoveryEnabled: Bool { flag("proactiveDiscovery", default: true) }
+    
+    // Phase 4: Accessibility & Voice
+    var voiceFirstEnabled: Bool { flag("voiceFirst", default: false) }  // User preference
 
     // Kill switch - disables ALL polish features
     var allPolishDisabled: Bool { defaults.bool(forKey: "\(prefix)killSwitch") }
@@ -39,7 +59,10 @@ final class PolishFeatureFlags {
         let allKeys = [
             "skeletonLoading", "contextualBadges", "smartCTAs",
             "shareCards", "timelineGrouping", "richNotifications", "swipeActions",
-            "optimisticUI", "celebrationThrottle"
+            "optimisticUI", "celebrationThrottle",
+            "reassuranceSystem", "educationalTooltips", "first72hJourney",
+            "widgetOnboarding", "momGroupShare", "omgMoments", "predictiveLogging",
+            "citations", "proactiveDiscovery", "voiceFirst"
         ]
 
         for key in allKeys {
@@ -55,6 +78,8 @@ final class PolishFeatureFlags {
         Tier 1: Skeleton=\(skeletonLoadingEnabled), Badges=\(contextualBadgesEnabled), SmartCTAs=\(smartCTAsEnabled)
         Tier 2: Share=\(shareCardsEnabled), Grouping=\(timelineGroupingEnabled), Notifs=\(richNotificationsEnabled), Swipe=\(swipeActionsEnabled)
         Tier 3: Optimistic=\(optimisticUIEnabled), Throttle=\(celebrationThrottleEnabled)
+        UX Polish: Reassurance=\(reassuranceSystemEnabled), Journey=\(first72hJourneyEnabled), Citations=\(citationsEnabled), Predictive=\(predictiveLoggingEnabled)
         """
     }
 }
+

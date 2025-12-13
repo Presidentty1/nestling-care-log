@@ -54,3 +54,4 @@
 ## Tools
 - Built-in iOS Simulator screenshot (Cmd+S)
 - Or use Fastlane Snapshot for automation
+

@@ -474,3 +474,4 @@ The combination of:
 
 **Confidence Level: 8.5/10** that this will achieve sustainable subscription revenue.
 
+

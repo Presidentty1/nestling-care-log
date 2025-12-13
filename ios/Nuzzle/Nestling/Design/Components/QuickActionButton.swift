@@ -1,5 +1,5 @@
 import SwiftUI
-import Loggerimport UIKit
+import UIKit
 
 struct QuickActionButton: View {
     @EnvironmentObject var environment: AppEnvironment
@@ -148,7 +148,6 @@ struct QuickActionButton: View {
                             longPressAction()
                         }
                     }
-                }
             )
             .motionAnimation(.easeInOut(duration: 0.2), value: isActive)
             .accessibilityLabel("\(title) quick action")

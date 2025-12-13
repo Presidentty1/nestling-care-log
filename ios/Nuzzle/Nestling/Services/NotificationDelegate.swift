@@ -89,6 +89,20 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
             }
         } else if response.actionIdentifier.lowercased().contains("snooze") {
             trackNotificationEvent(name: "notif_snoozed", notification: notification)
+
+            // Reschedule a one-off snoozed reminder
+            let minutes: Int
+            switch response.actionIdentifier {
+            case "SNOOZE_15":
+                minutes = 15
+            case "SNOOZE_30":
+                minutes = 30
+            default:
+                // Best-effort parse: "SNOOZE_XX"
+                let parts = response.actionIdentifier.split(separator: "_")
+                minutes = parts.last.flatMap { Int($0) } ?? 15
+            }
+            NotificationScheduler.shared.snooze(notification: notification, minutes: minutes)
         } else {
             // Handle new rich notification actions
             switch response.actionIdentifier {
@@ -102,10 +116,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                 )
             case "SNOOZE_15":
                 trackNotificationEvent(name: "notif_snooze_15", notification: notification)
-                // Schedule snooze for 15 minutes
-                if let originalTrigger = notification.request.trigger as? UNCalendarNotificationTrigger {
-                    // Reschedule with 15 minute delay
-                }
+                NotificationScheduler.shared.snooze(notification: notification, minutes: 15)
             case "VIEW_SUMMARY":
                 trackNotificationEvent(name: "notif_view_summary", notification: notification)
                 NotificationCenter.default.post(

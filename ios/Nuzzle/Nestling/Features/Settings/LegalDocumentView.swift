@@ -1,5 +1,5 @@
 import SwiftUI
-import Loggerimport WebKit
+import WebKit
 
 struct LegalDocumentView: View {
     enum DocumentType {
@@ -87,3 +87,4 @@ struct WebView: UIViewRepresentable {
         webView.loadHTMLString(htmlContent, baseURL: nil)
     }
 }
+

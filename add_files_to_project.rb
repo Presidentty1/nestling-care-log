@@ -40,3 +40,4 @@ resources_build_phase.add_file_reference(terms_file)
 project.save
 
 puts "Successfully added files to Xcode project!"
+

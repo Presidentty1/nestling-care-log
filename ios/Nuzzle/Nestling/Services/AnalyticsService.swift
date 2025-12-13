@@ -257,6 +257,160 @@ actor Analytics {
     func logCitationLinkClicked(feature: String, url: String) {
         log("citation_link_clicked", parameters: ["feature": feature, "url": url])
     }
+
+    // MARK: - Complete Event Taxonomy (Research-Based)
+
+    // Onboarding & Activation Events
+    func logOnboardingStarted() {
+        log("onboarding_started", parameters: [:])
+    }
+
+    func logBabyNameEntered(nameLength: Int) {
+        log("baby_name_entered", parameters: ["name_length": nameLength])
+    }
+
+    func logFirstLogCompleted(eventType: String, timeToComplete: TimeInterval) {
+        log("first_log_completed", parameters: [
+            "event_type": eventType,
+            "time_to_complete_seconds": timeToComplete
+        ])
+    }
+
+    func logPredictionFirstViewed() {
+        log("prediction_first_viewed", parameters: [:])
+    }
+
+    func logOnboardingCompleted(stepsCompleted: Int, timeElapsed: TimeInterval) {
+        log("onboarding_completed", parameters: [
+            "steps_completed": stepsCompleted,
+            "time_elapsed_seconds": timeElapsed
+        ])
+    }
+
+    func logOnboardingSkipped(stepSkipped: String) {
+        log("onboarding_skipped", parameters: ["step_skipped": stepSkipped])
+    }
+
+    // Engagement Events
+    func logLogCreated(eventType: String, method: String) {
+        log("log_created", parameters: [
+            "event_type": eventType,
+            "method": method  // quickAction, timeline, widget, siri
+        ])
+    }
+
+    func logTimelineViewed() {
+        log("timeline_viewed", parameters: [:])
+    }
+
+    func logPredictionViewed(confidence: Double, type: String) {
+        log("prediction_viewed", parameters: [
+            "confidence": confidence,
+            "type": type
+        ])
+    }
+
+    func logPatternViewed() {
+        log("pattern_viewed", parameters: [:])
+    }
+
+    func logPartnerInvited() {
+        log("partner_invited", parameters: [:])
+    }
+
+    func logSessionDuration(durationSeconds: Int) {
+        log("session_duration", parameters: ["duration_seconds": durationSeconds])
+    }
+
+    // Delight Moment Events
+    func logCelebrationViewed(type: String) {
+        log("celebration_viewed", parameters: ["type": type])
+    }
+
+    func logCelebrationShared(type: String, platform: String) {
+        log("celebration_shared", parameters: [
+            "type": type,
+            "platform": platform
+        ])
+    }
+
+    func logPredictionAccurate(predictedTime: Date, actualTime: Date, deltaMinutes: Double) {
+        log("prediction_accurate", parameters: [
+            "predicted_time": predictedTime.timeIntervalSince1970,
+            "actual_time": actualTime.timeIntervalSince1970,
+            "delta_minutes": deltaMinutes
+        ])
+    }
+
+    func logStreakAchieved(days: Int) {
+        log("streak_achieved", parameters: ["days": days])
+    }
+
+    // Monetization Events
+    func logPaywallViewed(source: String, variant: String? = nil) {
+        var params: [String: Any] = ["source": source]
+        if let variant = variant {
+            params["variant"] = variant
+        }
+        log("paywall_viewed", parameters: params)
+    }
+
+    func logTrialStarted(source: String) {
+        log("trial_started", parameters: ["source": source])
+    }
+
+    func logSubscriptionActivated(plan: String, price: Double, source: String) {
+        log("subscription_activated", parameters: [
+            "plan": plan,
+            "price": price,
+            "source": source
+        ])
+    }
+
+    func logTrialExtended(days: Int, reason: String) {
+        log("trial_extended", parameters: [
+            "days": days,
+            "reason": reason
+        ])
+    }
+
+    func logCancellationFlowStarted() {
+        log("cancellation_flow_started", parameters: [:])
+    }
+
+    func logCancellationReasonSelected(reason: String) {
+        log("cancellation_reason_selected", parameters: ["reason": reason])
+    }
+
+    func logRetentionOfferAccepted(offerType: String) {
+        log("retention_offer_accepted", parameters: ["offer_type": offerType])
+    }
+
+    // Friction Point Events
+    func logErrorOccurred(type: String, context: String, recovered: Bool) {
+        log("error_occurred", parameters: [
+            "type": type,
+            "context": context,
+            "recovered": recovered
+        ])
+    }
+
+    func logSyncFailed(reason: String) {
+        log("sync_failed", parameters: ["reason": reason])
+    }
+
+    func logPushPermissionDeclined() {
+        log("push_permission_declined", parameters: [:])
+    }
+
+    func logAppCrashed(context: String) {
+        log("app_crashed", parameters: ["context": context])
+    }
+
+    // Weekly Metrics Report (for team visibility)
+    func logWeeklyMetricsReport(parameters: [String: Any]) {
+        log("weekly_metrics_report", parameters: parameters)
+    }
 }
 
 /// Firebase Analytics implementation

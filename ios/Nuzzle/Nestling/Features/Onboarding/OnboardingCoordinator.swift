@@ -3,12 +3,13 @@ import Combine
 
 enum OnboardingStep {
     case welcome              // Value framing
-    case babyBasics          // Name + DOB/EDD + sex
-    case focusGoals          // What matters most
-    case lastWake            // First micro-aha (nap window)
-    case notifications       // Permission in context
-    case paywall            // Soft paywall (optional)
-    case complete           // Transition
+    case babySetup            // Name + DOB/EDD + optional last wake → show first nap window
+    case goalSelection        // Personalize home priorities
+    case aiConsent            // Smart predictions consent/preferences
+    case firstLog             // First value moment (log something) BEFORE paywall
+    case notificationsPrimer  // Primer only (no OS permission prompt in Session 1)
+    case paywall              // Soft paywall (optional)
+    case complete             // Transition
 }
 
 // Focus areas for personalization
@@ -61,6 +62,15 @@ class OnboardingCoordinator: ObservableObject {
     
     // State
     @Published var isCompleted: Bool = false
+
+    // Draft baby created during onboarding so IDs stay stable across steps.
+    @Published private(set) var draftBaby: Baby?
+    private var hasPersistedDraftBaby: Bool = false
+
+    // Notification permission timing: we show a primer during onboarding,
+    // then request OS permission on/after Session 2 (or when user explicitly turns it on in Settings).
+    private let notificationPrimerSeenKey = "onboarding_notifications_primer_seen"
+    private let launchCountKey = "app_launch_count"
     
     // Smart defaults based on locale
     private static func detectSmartDefaultUnit() -> String {
@@ -92,14 +102,20 @@ class OnboardingCoordinator: ObservableObject {
         withAnimation(.easeInOut(duration: 0.3)) {
             switch currentStep {
             case .welcome:
-                currentStep = .babyBasics
-            case .babyBasics:
-                currentStep = .focusGoals
-            case .focusGoals:
-                currentStep = .lastWake
-            case .lastWake:
-                currentStep = .notifications
-            case .notifications:
+                currentStep = .babySetup
+            case .babySetup:
+                // Persist baby early so first log can succeed.
+                Task { await persistDraftBabyIfNeeded() }
+                currentStep = .goalSelection
+            case .goalSelection:
+                currentStep = .aiConsent
+            case .aiConsent:
+                // Ensure baby exists before first log step.
+                Task { await persistDraftBabyIfNeeded() }
+                currentStep = .firstLog
+            case .firstLog:
+                currentStep = .notificationsPrimer
+            case .notificationsPrimer:
                 currentStep = .paywall
             case .paywall:
                 currentStep = .complete
@@ -110,7 +126,6 @@ class OnboardingCoordinator: ObservableObject {
     }
     
     func skipToPaywall() {
-        // Quick path from lastWake if user wants to skip notifications
         withAnimation(.easeInOut(duration: 0.3)) {
             currentStep = .paywall
         }
@@ -128,16 +143,37 @@ class OnboardingCoordinator: ObservableObject {
         firstNapWindow = NapPredictorService.predictNextNapWindow(for: baby, lastWakeTime: wakeTime)
     }
     
-    private func createBabyFromCurrentData() -> Baby? {
+    /// Creates (or returns) the stable draft baby for onboarding.
+    /// This avoids generating a new UUID every time the baby is referenced.
+    func createBabyFromCurrentData() -> Baby? {
+        if let existing = draftBaby {
+            return existing
+        }
+
         let finalName = babyName.trimmingCharacters(in: .whitespaces).isEmpty ? "Baby" : babyName
         let birthDate = birthDueSelection == .dateOfBirth ? dateOfBirth : dueDate
-        
-        return Baby(
+
+        let baby = Baby(
             name: finalName,
             dateOfBirth: birthDate,
             sex: sex,
             timezone: TimeZone.current.identifier
         )
+        draftBaby = baby
+        return baby
+    }
+
+    private func persistDraftBabyIfNeeded() async {
+        guard !hasPersistedDraftBaby else { return }
+        guard let baby = createBabyFromCurrentData() else { return }
+
+        do {
+            try await dataStore.addBaby(baby)
+            hasPersistedDraftBaby = true
+        } catch {
+            // If this fails, we still allow onboarding to continue, but first log may fallback.
+            logger.debug("Error persisting draft baby during onboarding: \(error)")
+        }
     }
     
     func skip() {
@@ -153,10 +189,11 @@ class OnboardingCoordinator: ObservableObject {
     private func stepNameForAnalytics(_ step: OnboardingStep) -> String {
         switch step {
         case .welcome: return "welcome"
-        case .babyBasics: return "baby_basics"
-        case .focusGoals: return "focus_goals"
-        case .lastWake: return "last_wake"
-        case .notifications: return "notifications"
+        case .babySetup: return "baby_setup"
+        case .goalSelection: return "goal_selection"
+        case .aiConsent: return "ai_consent"
+        case .firstLog: return "first_log"
+        case .notificationsPrimer: return "notifications_primer"
         case .paywall: return "paywall"
         case .complete: return "complete"
         }
@@ -167,17 +204,11 @@ class OnboardingCoordinator: ObservableObject {
             do {
                 // TODO: Analytics.track(.onboardingCompleted)
                 
-                // Create baby - use default name if empty (user skipped setup)
-                let finalBabyName = babyName.trimmingCharacters(in: .whitespaces).isEmpty ? "Baby" : babyName
-                let birthDate = birthDueSelection == .dateOfBirth ? dateOfBirth : dueDate
-                
-                let baby = Baby(
-                    name: finalBabyName,
-                    dateOfBirth: birthDate,
-                    sex: sex,
-                    timezone: TimeZone.current.identifier
-                )
-                try await dataStore.addBaby(baby)
+                // Ensure draft baby is persisted (needed if user skipped earlier steps)
+                await persistDraftBabyIfNeeded()
+                guard let baby = createBabyFromCurrentData() else {
+                    throw NSError(domain: "Onboarding", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing baby data"])
+                }
 
                 // Analytics: onboarding completed
                 await Analytics.shared.logOnboardingCompleted(babyId: baby.id.uuidString)
@@ -189,6 +220,9 @@ class OnboardingCoordinator: ObservableObject {
                 settings.aiDataSharingEnabled = aiDataSharingEnabled
                 settings.onboardingCompleted = true
                 settings.napWindowAlertEnabled = wantsNapNotifications
+
+                // Record primer seen; OS prompt is deferred until later session.
+                UserDefaults.standard.set(true, forKey: notificationPrimerSeenKey)
                 
                 // Save focus areas as userGoal
                 if !selectedFocusAreas.isEmpty {

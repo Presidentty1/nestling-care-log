@@ -100,3 +100,4 @@ class MilestoneTracker: ObservableObject {
         UserDefaults.standard.set(true, forKey: key)
     }
 }
+

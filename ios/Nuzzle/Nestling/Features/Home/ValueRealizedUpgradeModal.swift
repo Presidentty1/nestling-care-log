@@ -185,3 +185,4 @@ struct BenefitRow: View {
         onUpgrade: {}
     )
 }
+

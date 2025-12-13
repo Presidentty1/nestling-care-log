@@ -9,6 +9,10 @@ class ThemeManager: ObservableObject {
     private static let themePreferenceKey = "app_theme_preference"
     /// Storage key for night mode (red tint)
     private static let nightModeKey = "app_night_mode_enabled"
+    /// Storage key for auto-enable night mode
+    private static let autoEnableNightModeKey = "app_night_mode_auto_enable"
+    /// Storage key for extra-dim mode
+    private static let extraDimKey = "app_night_mode_extra_dim"
     
     private init() {}
 
@@ -26,6 +30,26 @@ class ThemeManager: ObservableObject {
     /// Night Mode (red tint) for low-light usage
     @AppStorage(ThemeManager.nightModeKey)
     var nightModeEnabled: Bool = false {
+        didSet {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                objectWillChange.send()
+            }
+        }
+    }
+    
+    /// Auto-enable night mode at night (10PM-7AM)
+    @AppStorage(ThemeManager.autoEnableNightModeKey)
+    var autoEnableNightMode: Bool = false {
+        didSet {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                objectWillChange.send()
+            }
+        }
+    }
+    
+    /// Extra-dim mode (50% brightness) for ultra-low light
+    @AppStorage(ThemeManager.extraDimKey)
+    var extraDimEnabled: Bool = false {
         didSet {
             withAnimation(.easeInOut(duration: 0.3)) {
                 objectWillChange.send()

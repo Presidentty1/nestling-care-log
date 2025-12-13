@@ -195,3 +195,4 @@
 | iPad Screenshots        | 2048×2732        | PNG/JPG | 5+ (if supported) |
 | App Preview Video       | Match screenshot | MP4/MOV | Optional          |
 
+

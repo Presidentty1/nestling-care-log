@@ -86,3 +86,4 @@ struct DoctorReportTeaser: View {
     .padding()
     .background(Color.background)
 }
+

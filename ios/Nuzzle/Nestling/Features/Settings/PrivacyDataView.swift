@@ -1,5 +1,5 @@
 import SwiftUI
-import Loggerimport Supabase
+import Supabase
 import Auth
 
 struct PrivacyDataView: View {

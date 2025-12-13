@@ -1,170 +1,205 @@
 import Foundation
 import StoreKit
-import UIKit
 
-/// Manages in-app review prompts based on usage thresholds
+/// Manages App Store review prompts with research-backed timing
+/// Apple limits to 3 prompts per 365 days per user
 @MainActor
 class ReviewPromptManager {
     static let shared = ReviewPromptManager()
 
     private let userDefaults = UserDefaults.standard
-    private let minTotalLogs = 50
-    private let minDaysSinceFirstLog = 7
+    private let maxPromptsPerYear = 3
+    private let minimumDaysBetweenPrompts = 60  // Space out prompts
 
     private enum Keys {
-        static let totalLogs = "reviewPrompt.totalLogs"
-        static let firstLogDate = "reviewPrompt.firstLogDate"
-        static let hasShownReview = "reviewPrompt.hasShownReview"
-        static let lastReviewVersion = "reviewPrompt.lastReviewVersion"
+        static let promptsThisYear = "review_prompts_this_year"
+        static let lastPromptDate = "last_review_prompt_date"
+        static let yearStartDate = "review_prompt_year_start"
     }
 
-    private init() {}
+    private init() {
+        initializeYearTracking()
+    }
 
-    // MARK: - Log Tracking
+    // MARK: - Prompt Logic
 
-    /// Track that a log was created
-    func trackLogCreated() {
-        let currentTotal = getTotalLogs()
-        userDefaults.set(currentTotal + 1, forKey: Keys.totalLogs)
+    /// Check if we should show a review prompt after positive moments
+    func checkForPositiveMoment(
+        streakDays: Int? = nil,
+        predictionAccurate: Bool? = nil,
+        longSleepMilestone: Bool? = nil
+    ) {
+        // Don't prompt if already at limit
+        guard canShowPrompt() else { return }
 
-        // Track first log date if not set
-        if userDefaults.object(forKey: Keys.firstLogDate) == nil {
-            userDefaults.set(Date(), forKey: Keys.firstLogDate)
+        // Check timing constraints
+        guard shouldShowBasedOnTiming() else { return }
+
+        // Check context (not at 2AM, etc.)
+        guard shouldShowBasedOnContext() else { return }
+
+        // Only show after genuine delight moments
+        let shouldShow = shouldShowBasedOnMoment(
+            streakDays: streakDays,
+            predictionAccurate: predictionAccurate,
+            longSleepMilestone: longSleepMilestone
+        )
+
+        if shouldShow {
+            requestReview()
         }
     }
 
-    /// Check if review prompt should be shown
-    func shouldShowReviewPrompt() -> Bool {
-        // Don't show if already shown for this version
-        if hasShownReviewForCurrentVersion() {
+    /// Main review request method
+    func requestReview() {
+        guard canShowPrompt() else { return }
+
+        // Use SKStoreReviewController for iOS 10.3+
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            SKStoreReviewController.requestReview(in: windowScene)
+
+            // Record the prompt
+            recordPromptShown()
+        }
+    }
+
+    // MARK: - Prompt Eligibility
+
+    private func canShowPrompt() -> Bool {
+        let promptsThisYear = getPromptsThisYear()
+        return promptsThisYear < maxPromptsPerYear
+    }
+
+    private func shouldShowBasedOnTiming() -> Bool {
+        guard let lastPromptDate = userDefaults.object(forKey: Keys.lastPromptDate) as? Date else {
+            return true // First prompt ever
+        }
+
+        let daysSinceLastPrompt = Calendar.current.dateComponents([.day], from: lastPromptDate, to: Date()).day ?? 0
+        return daysSinceLastPrompt >= minimumDaysBetweenPrompts
+    }
+
+    private func shouldShowBasedOnContext() -> Bool {
+        // Don't show during night mode hours
+        let hour = Calendar.current.component(.hour, from: Date())
+        let isNightTime = hour >= 22 || hour < 7  // 10PM - 7AM
+        if isNightTime { return false }
+
+        // Don't show if user recently dismissed a celebration
+        if let lastCelebrationDismissal = getLastCelebrationDismissal(),
+           Calendar.current.dateComponents([.minute], from: lastCelebrationDismissal, to: Date()).minute ?? 0 < 5 {
             return false
         }
 
-        let totalLogs = getTotalLogs()
-        let firstLogDate = getFirstLogDate()
-        let daysSinceFirstLog = calculateDaysSinceFirstLog(firstLogDate)
+        // Don't show if user recently had negative feedback
+        if let lastNegativeFeedback = getLastNegativeFeedbackDate(),
+           Calendar.current.dateComponents([.day], from: lastNegativeFeedback, to: Date()).day ?? 0 < 30 {
+            return false
+        }
 
-        return totalLogs >= minTotalLogs && daysSinceFirstLog >= minDaysSinceFirstLog
+        return true
     }
 
-    /// Show review prompt if conditions are met (SwiftUI version)
-    func requestReviewIfAppropriate() {
-        guard shouldShowReviewPrompt() else { return }
+    private func shouldShowBasedOnMoment(
+        streakDays: Int?,
+        predictionAccurate: Bool?,
+        longSleepMilestone: Bool?
+    ) -> Bool {
+        // Priority 1: 7-day logging streak celebration
+        if let days = streakDays, days >= 7 {
+            return true
+        }
 
-        // Request review using current window scene
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: windowScene)
-            markReviewShownForCurrentVersion()
-            
-            // Analytics
-            Task {
-                await Analytics.shared.log("review_prompt_shown", parameters: [
-                    "total_logs": getTotalLogs(),
-                    "days_since_first_log": calculateDaysSinceFirstLog(getFirstLogDate())
-                ])
+        // Priority 2: Accurate prediction confirmation
+        if predictionAccurate == true {
+            return true
+        }
+
+        // Priority 3: Long sleep milestone (4+ hours)
+        if longSleepMilestone == true {
+            return true
+        }
+
+        return false
+    }
+
+    // MARK: - Data Management
+
+    private func initializeYearTracking() {
+        let currentYear = Calendar.current.component(.year, from: Date())
+
+        if let storedYear = userDefaults.object(forKey: Keys.yearStartDate) as? Date {
+            let storedYearValue = Calendar.current.component(.year, from: storedYear)
+            if storedYearValue != currentYear {
+                // New year, reset counter
+                userDefaults.set(0, forKey: Keys.promptsThisYear)
+                userDefaults.set(Date(), forKey: Keys.yearStartDate)
             }
-        }
-    }
-    
-    /// Check and show review prompt for specific positive moments
-    func checkForPositiveMoment(
-        streakDays: Int? = nil,
-        totalLogs: Int? = nil,
-        predictionAccurate: Bool? = nil
-    ) {
-        var shouldShow = false
-        
-        // Check 7-day streak
-        if let streak = streakDays, streak == 7 {
-            shouldShow = true
-            Task {
-                await Analytics.shared.log("review_trigger", parameters: ["trigger": "7_day_streak"])
-            }
-        }
-        
-        // Check 50 logs milestone
-        if let logs = totalLogs, logs == 50 {
-            shouldShow = true
-            Task {
-                await Analytics.shared.log("review_trigger", parameters: ["trigger": "50_logs"])
-            }
-        }
-        
-        // Check accurate prediction feedback
-        if let accurate = predictionAccurate, accurate {
-            shouldShow = true
-            Task {
-                await Analytics.shared.log("review_trigger", parameters: ["trigger": "accurate_prediction"])
-            }
-        }
-        
-        if shouldShow && !hasShownReviewForCurrentVersion() {
-            requestReviewIfAppropriate()
+        } else {
+            // First time setup
+            userDefaults.set(0, forKey: Keys.promptsThisYear)
+            userDefaults.set(Date(), forKey: Keys.yearStartDate)
         }
     }
 
-    /// Force show review prompt (for testing)
-    func forceShowReview() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: windowScene)
+    private func getPromptsThisYear() -> Int {
+        return userDefaults.integer(forKey: Keys.promptsThisYear)
+    }
+
+    private func recordPromptShown() {
+        let currentCount = getPromptsThisYear()
+        userDefaults.set(currentCount + 1, forKey: Keys.promptsThisYear)
+        userDefaults.set(Date(), forKey: Keys.lastPromptDate)
+
+        // Analytics
+        Task {
+            await Analytics.shared.log("review_prompt_shown", parameters: [
+                "prompts_this_year": currentCount + 1,
+                "days_since_last": getDaysSinceLastPrompt()
+            ])
         }
     }
 
-    // MARK: - Private Helpers
-
-    private func getTotalLogs() -> Int {
-        return userDefaults.integer(forKey: Keys.totalLogs)
+    private func getDaysSinceLastPrompt() -> Int {
+        guard let lastDate = userDefaults.object(forKey: Keys.lastPromptDate) as? Date else {
+            return 999 // Never shown
+        }
+        return Calendar.current.dateComponents([.day], from: lastDate, to: Date()).day ?? 0
     }
 
-    private func getFirstLogDate() -> Date? {
-        return userDefaults.object(forKey: Keys.firstLogDate) as? Date
+    private func getLastCelebrationDismissal() -> Date? {
+        return userDefaults.object(forKey: "last_celebration_dismissal") as? Date
     }
 
-    private func calculateDaysSinceFirstLog(_ firstLogDate: Date?) -> Int {
-        guard let firstLogDate = firstLogDate else { return 0 }
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.day], from: firstLogDate, to: Date())
-        return components.day ?? 0
+    private func getLastNegativeFeedbackDate() -> Date? {
+        return userDefaults.object(forKey: "last_negative_feedback") as? Date
     }
 
-    private func hasShownReviewForCurrentVersion() -> Bool {
-        let currentVersion = getAppVersion()
-        let lastVersion = userDefaults.string(forKey: Keys.lastReviewVersion)
-        return lastVersion == currentVersion
+    // MARK: - Integration Points
+
+    /// Call this when user dismisses a celebration quickly (< 2 seconds)
+    func recordCelebrationDismissal() {
+        userDefaults.set(Date(), forKey: "last_celebration_dismissal")
     }
 
-    private func markReviewShownForCurrentVersion() {
-        let currentVersion = getAppVersion()
-        userDefaults.set(currentVersion, forKey: Keys.lastReviewVersion)
+    /// Call this when user provides negative feedback
+    func recordNegativeFeedback() {
+        userDefaults.set(Date(), forKey: "last_negative_feedback")
     }
 
-    private func getAppVersion() -> String {
-        return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    // MARK: - Debug/Testing
+
+    func resetPromptLimits() {
+        userDefaults.set(0, forKey: Keys.promptsThisYear)
+        userDefaults.removeObject(forKey: Keys.lastPromptDate)
     }
 
-    // MARK: - Debug Info
-
-    /// Get debug information about review prompt state
-    func getDebugInfo() -> [String: Any] {
-        let firstLogDate = getFirstLogDate()
+    func getPromptStatus() -> [String: Any] {
         return [
-            "total_logs": getTotalLogs(),
-            "first_log_date": firstLogDate?.description ?? "none",
-            "days_since_first_log": calculateDaysSinceFirstLog(firstLogDate),
-            "has_shown_review": hasShownReviewForCurrentVersion(),
-            "min_total_logs": minTotalLogs,
-            "min_days_since_first_log": minDaysSinceFirstLog,
-            "should_show": shouldShowReviewPrompt()
+            "prompts_this_year": getPromptsThisYear(),
+            "max_prompts_per_year": maxPromptsPerYear,
+            "days_since_last_prompt": getDaysSinceLastPrompt(),
+            "can_show_prompt": canShowPrompt()
         ]
     }
-
-    /// Reset review prompt state (for testing)
-    func reset() {
-        userDefaults.removeObject(forKey: Keys.totalLogs)
-        userDefaults.removeObject(forKey: Keys.firstLogDate)
-        userDefaults.removeObject(forKey: Keys.hasShownReview)
-        userDefaults.removeObject(forKey: Keys.lastReviewVersion)
-    }
 }
-
-

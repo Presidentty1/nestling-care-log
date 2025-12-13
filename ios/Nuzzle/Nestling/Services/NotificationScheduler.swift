@@ -434,5 +434,42 @@ class NotificationScheduler {
     func cancelAllNotifications() {
         center.removeAllPendingNotificationRequests()
     }
+
+    // MARK: - Snooze Support
+
+    /// Reschedule an existing notification content after a snooze interval.
+    /// Used for actionable notifications (e.g., "Snooze 15min").
+    func snooze(notification: UNNotification, minutes: Int) {
+        let original = notification.request.content
+
+        let content = UNMutableNotificationContent()
+        content.title = original.title
+        content.body = original.body
+        content.sound = original.sound
+        content.categoryIdentifier = original.categoryIdentifier
+        content.userInfo = original.userInfo
+        content.attachments = original.attachments
+
+        // Mark as snoozed for analytics/debugging
+        content.userInfo["snoozed_minutes"] = minutes
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(max(60, minutes * 60)), repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "snoozed_\(original.categoryIdentifier)_\(UUID().uuidString)",
+            content: content,
+            trigger: trigger
+        )
+
+        center.add(request) { error in
+            if let error = error {
+                Logger.notifications.error("Failed to schedule snoozed notification: \(error)")
+            } else {
+                AnalyticsService.shared.track(event: "notif_snoozed_scheduled", properties: [
+                    "category": original.categoryIdentifier,
+                    "minutes": minutes
+                ])
+            }
+        }
+    }
 }
 

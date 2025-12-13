@@ -1,5 +1,4 @@
 import SwiftUI
-import Logger
 struct AIDataSharingSettingsView: View {
     @EnvironmentObject var environment: AppEnvironment
     @Environment(\.dismiss) var dismiss

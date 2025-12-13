@@ -9,13 +9,16 @@ struct OnboardingProgressIndicatorEnhanced: View {
         switch currentStep {
         case .welcome: return 0
         case .babySetup: return 1
-        case .firstLog: return 2
-        case .partnerOnboarding: return 3
-        case .complete: return 3
+        case .goalSelection: return 2
+        case .aiConsent: return 3
+        case .firstLog: return 4
+        case .notificationsPrimer: return 5
+        case .paywall: return 6
+        case .complete: return 6
         }
     }
     
-    private var totalSteps: Int { 3 }
+    private var totalSteps: Int { 6 }
     
     private var progress: Double {
         guard totalSteps > 0 else { return 0 }
@@ -70,8 +73,11 @@ struct OnboardingProgressIndicatorEnhanced: View {
     VStack(spacing: .spacingXL) {
         OnboardingProgressIndicatorEnhanced(currentStep: .welcome)
         OnboardingProgressIndicatorEnhanced(currentStep: .babySetup)
+        OnboardingProgressIndicatorEnhanced(currentStep: .goalSelection)
+        OnboardingProgressIndicatorEnhanced(currentStep: .aiConsent)
         OnboardingProgressIndicatorEnhanced(currentStep: .firstLog)
-        OnboardingProgressIndicatorEnhanced(currentStep: .partnerOnboarding)
+        OnboardingProgressIndicatorEnhanced(currentStep: .notificationsPrimer)
+        OnboardingProgressIndicatorEnhanced(currentStep: .paywall)
         OnboardingProgressIndicatorEnhanced(currentStep: .complete)
     }
     .padding()

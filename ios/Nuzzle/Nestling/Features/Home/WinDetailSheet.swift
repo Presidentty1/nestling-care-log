@@ -161,3 +161,4 @@ struct WinDetailSheet: View {
         onShare: {}
     )
 }
+

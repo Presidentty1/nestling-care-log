@@ -224,3 +224,4 @@ struct PatternProgressCard: View {
     .padding()
     .background(Color.background)
 }
+

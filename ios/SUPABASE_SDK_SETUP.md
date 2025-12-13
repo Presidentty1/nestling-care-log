@@ -78,3 +78,4 @@ cd ios && find . -name "*.pbxproj" -exec grep -l "Supabase" {} \;
 echo $SUPABASE_URL $SUPABASE_ANON_KEY
 ```
 
+

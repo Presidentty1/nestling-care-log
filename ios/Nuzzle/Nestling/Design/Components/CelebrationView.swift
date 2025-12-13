@@ -1,5 +1,4 @@
 import SwiftUI
-import Logger
 // Import for feature flags and sharing
 private let featureFlags = PolishFeatureFlags.shared
 
@@ -175,13 +174,13 @@ struct CelebrationView: View {
             // Haptic feedback
             Haptics.success()
         }
-    }
-    .sheet(isPresented: $showShareSheet) {
-        MilestoneShareSheet(
-            milestone: convertToShareableMilestone() ?? .streakAchieved(days: 1),
-            babyName: babyName ?? "",
-            onDismiss: { showShareSheet = false }
-        )
+        .sheet(isPresented: $showShareSheet) {
+            MilestoneShareSheet(
+                milestone: convertToShareableMilestone() ?? .streakAchieved(days: 1),
+                babyName: babyName ?? "",
+                onDismiss: { showShareSheet = false }
+            )
+        }
     }
 
     private func shareMilestone() {

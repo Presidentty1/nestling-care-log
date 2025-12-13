@@ -43,3 +43,4 @@ final class VoiceDictationHintTests: XCTestCase {
         XCTAssertFalse(shouldShow)
     }
 }
+

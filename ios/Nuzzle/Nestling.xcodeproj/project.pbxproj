@@ -15,7 +15,6 @@
 		53E9D2D62DBA4AF9B1146A98 /* MilestoneTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2210EFCEF84CAA82CF7461 /* MilestoneTracker.swift */; };
 		56857B14F7004F109C6A5E08 /* CelebrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7935F077A972493F93FFD525 /* CelebrationService.swift */; };
 		6254D408262444C9A3BCC387 /* PatternProgressCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820175379D004B21A3EC9032 /* PatternProgressCard.swift */; };
-		6A6021383C0942779F8A9DB2 /* PartnerOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54EAAFDABF434825AC14B478 /* PartnerOnboardingView.swift */; };
 		7076AE456CCC4AE781DCE4C1 /* TestimonialCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B934B17BB1A4B928C5FA218 /* TestimonialCard.swift */; };
 		758661AF622A440BBC014B57 /* MicroCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CF35CA90E841F19FD20424 /* MicroCelebrationView.swift */; };
 		9A993C0725804513A05F6501 /* NightModeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E687E7C157FF48B2AFC90924 /* NightModeHomeView.swift */; };
@@ -23,7 +22,6 @@
 		BDF52CE948984B2BAEADAE1A /* DoctorReportTeaser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F36DC42260314378BB9C8FD8 /* DoctorReportTeaser.swift */; };
 		BE4DCE5F6B0C43A2B04C465A /* ProactiveInsightsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6680CFA0C1674F40B2D2714E /* ProactiveInsightsService.swift */; };
 		CE4540EB52CF42F885576094 /* AdaptiveTrialBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7772D070134C8B92B24F9A /* AdaptiveTrialBanner.swift */; };
-		D31825B9353E4128B142F1FC /* ExhaustedParentModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3655F5EF1EDA46E8BD94E7C9 /* ExhaustedParentModeService.swift */; };
 		DEAFF45606AC4244A4E291F1 /* InsightGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCA83FFEF9943C7AD287904 /* InsightGenerationService.swift */; };
 		E97601E8BC674B2F8CD113E5 /* ReassuranceCopyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8AB99470C4E619051295B /* ReassuranceCopyService.swift */; };
 		6E406116CBF9FED36A70637C /* BottleLevelIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74101708B3F2FBC89CF31488 /* BottleLevelIndicator.swift */; };
@@ -292,8 +290,6 @@
 
 /* Begin PBXFileReference section */
 		09248BB5269941D895900DC2 /* ValueRealizedUpgradeModal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Home/ValueRealizedUpgradeModal.swift; sourceTree = SOURCE_ROOT; };
-		3655F5EF1EDA46E8BD94E7C9 /* ExhaustedParentModeService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ExhaustedParentModeService.swift; sourceTree = SOURCE_ROOT; };
-		54EAAFDABF434825AC14B478 /* PartnerOnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/Onboarding/PartnerOnboardingView.swift; sourceTree = SOURCE_ROOT; };
 		6680CFA0C1674F40B2D2714E /* ProactiveInsightsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Services/ProactiveInsightsService.swift; sourceTree = SOURCE_ROOT; };
 		6B934B17BB1A4B928C5FA218 /* TestimonialCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Design/Components/TestimonialCard.swift; sourceTree = SOURCE_ROOT; };
 		6C45699F34DD4AD68FECDC1D /* WeeklyTrendsCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Nestling/Features/History/WeeklyTrendsCard.swift; sourceTree = SOURCE_ROOT; };
@@ -3828,10 +3824,8 @@
 				6254D408262444C9A3BCC387 /* PatternProgressCard.swift in Sources */,
 				9C1A84979C22407EA844FEF1 /* ValueRealizedUpgradeModal.swift in Sources */,
 				01DA4690818F492A933DD705 /* WinOfTheDayCard.swift in Sources */,
-				6A6021383C0942779F8A9DB2 /* PartnerOnboardingView.swift in Sources */,
 				56857B14F7004F109C6A5E08 /* CelebrationService.swift in Sources */,
 				001E4B24BEE843B99229587C /* ConversionTriggerService.swift in Sources */,
-				D31825B9353E4128B142F1FC /* ExhaustedParentModeService.swift in Sources */,
 				DEAFF45606AC4244A4E291F1 /* InsightGenerationService.swift in Sources */,
 				BE4DCE5F6B0C43A2B04C465A /* ProactiveInsightsService.swift in Sources */,
 				E97601E8BC674B2F8CD113E5 /* ReassuranceCopyService.swift in Sources */,
@@ -3887,15 +3881,19 @@
 				DEVELOPMENT_TEAM = 9BS3VKTM6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Nuzzle needs photo library access to save and attach photos to baby profiles and events.";
-				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Nuzzle uses notifications to remind you about feedings, diaper changes, and sleep schedules.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+			INFOPLIST_KEY_CFBundleDisplayName = Nestling;
+			INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+			INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
+			INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
+			INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";
+			INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Nuzzle needs photo library access to save and attach photos to baby profiles and events.";
+			INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Nuzzle uses notifications to remind you about feedings, diaper changes, and sleep schedules.";
+			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputElements = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+			INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+			INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+			INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				ITSAppUsesNonExemptEncryption = NO;
@@ -3973,15 +3971,19 @@
 				DEVELOPMENT_TEAM = 9BS3VKTM6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Nuzzle needs photo library access to save and attach photos to baby profiles and events.";
-				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Nuzzle uses notifications to remind you about feedings, diaper changes, and sleep schedules.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+			INFOPLIST_KEY_CFBundleDisplayName = Nestling;
+			INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+			INFOPLIST_KEY_NSCameraUsageDescription = "Nuzzle needs camera access to take photos for baby profiles and events.";
+			INFOPLIST_KEY_NSFaceIDUsageDescription = "Nuzzle uses Face ID to securely protect your baby's data.";
+			INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nuzzle needs microphone access to analyze your baby's cry patterns and provide insights.";
+			INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Nuzzle needs photo library access to save and attach photos to baby profiles and events.";
+			INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Nuzzle uses notifications to remind you about feedings, diaper changes, and sleep schedules.";
+			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputElements = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+			INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+			INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+			INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				ITSAppUsesNonExemptEncryption = NO;

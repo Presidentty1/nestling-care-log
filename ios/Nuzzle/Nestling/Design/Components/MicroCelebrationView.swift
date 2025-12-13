@@ -57,3 +57,4 @@ struct MicroCelebrationView: View {
         MicroCelebrationView(onComplete: {})
     }
 }
+

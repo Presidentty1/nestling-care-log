@@ -129,3 +129,4 @@ struct NightModeHomeView: View {
         showCryRecorder: .constant(false)
     )
 }
+

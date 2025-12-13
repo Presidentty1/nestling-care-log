@@ -40,3 +40,4 @@ class ProactiveInsightsService {
         return true // Placeholder logic
     }
 }
+

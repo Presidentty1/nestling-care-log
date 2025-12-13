@@ -46,3 +46,4 @@ final class PolishFeatureFlagsTests: XCTestCase {
         XCTAssertTrue(flags.contextualBadgesEnabled)
     }
 }
+

@@ -42,3 +42,4 @@ struct BottleLevelIndicator: View {
     }
     .padding()
 }
+

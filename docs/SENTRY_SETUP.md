@@ -43,3 +43,4 @@ CrashReportingService.shared.logError(
 
 Check your Sentry dashboard to confirm events are being received.
 
+

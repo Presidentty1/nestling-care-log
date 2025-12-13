@@ -1,0 +1,30 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-effect" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.1804 0 0 0 0 0.4902 0 0 0 0 0.4157 0 0 0 0.2 0"/>
+    </filter>
+  </defs>
+  
+  <!-- Glow layer (renders behind) -->
+  <g id="glow-effect-layer" filter="url(#glow-effect)" opacity="1">
+    <path d="M 100 65 C 90 65 82 57 82 47 C 82 37 90 29 100 29 C 110 29 118 37 118 47 C 118 57 110 65 100 65 Z" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-15 100 47)"/>
+    <path d="M 100 65 L 100 75 Q 100 85 85 90 L 75 140 Q 75 160 100 160 Q 125 160 125 140 L 115 90 Q 100 85 100 75" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 85 90 C 85 90 65 110 80 135 C 80 135 110 150 140 135" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 90 110 C 84.5 104.5 84.5 95.5 90 90 C 95.5 84.5 104.5 84.5 110 90 C 115.5 95.5 115.5 104.5 110 110 C 104.5 115.5 95.5 115.5 90 110 Z" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 95 115 Q 85 125 90 140 Q 95 155 115 150 Q 135 145 130 125" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Parent figure (crisp strokes) -->
+  <g id="parent-stroke" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 100 65 C 90 65 82 57 82 47 C 82 37 90 29 100 29 C 110 29 118 37 118 47 C 118 57 110 65 100 65 Z" transform="rotate(-15 100 47)"/>
+    <path d="M 100 65 L 100 75 Q 100 85 85 90 L 75 140 Q 75 160 100 160 Q 125 160 125 140 L 115 90 Q 100 85 100 75"/>
+    <path d="M 85 90 C 85 90 65 110 80 135 C 80 135 110 150 140 135"/>
+  </g>
+
+  <!-- Baby figure (crisp strokes) -->
+  <g id="baby-stroke" fill="none" stroke="#2E7D6A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 110 C 84.5 104.5 84.5 95.5 90 90 C 95.5 84.5 104.5 84.5 110 90 C 115.5 95.5 115.5 104.5 110 110 C 104.5 115.5 95.5 115.5 90 110 Z"/>
+    <path d="M 95 115 Q 85 125 90 140 Q 95 155 115 150 Q 135 145 130 125"/>
+  </g>
+</svg>

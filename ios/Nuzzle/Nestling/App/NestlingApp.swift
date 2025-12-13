@@ -1,5 +1,5 @@
 import SwiftUI
-import Loggerimport os.signpost
+import os.signpost
 import CoreSpotlight
 
 @main
@@ -8,6 +8,7 @@ struct NestlingApp: App {
     @StateObject private var authViewModel = AuthViewModel()
     @State private var showOnboarding = false
     @State private var showTrialCelebration = false
+    @State private var showNotificationPermissionNudge = false
     @State private var isCheckingAuth = true
     @State private var isCheckingOnboarding = true
     
@@ -33,6 +34,9 @@ struct NestlingApp: App {
         if UserDefaults.standard.object(forKey: "app_install_date") == nil {
             UserDefaults.standard.set(Date(), forKey: "app_install_date")
         }
+        // Track launch count for permission timing
+        let launches = UserDefaults.standard.integer(forKey: "app_launch_count")
+        UserDefaults.standard.set(launches + 1, forKey: "app_launch_count")
         UserDefaults.standard.set(false, forKey: "voiceover_session_tracked")
         
         // Set up notification delegate for quiet hours filtering
@@ -118,6 +122,7 @@ struct NestlingApp: App {
                         environment.refreshSettings()
                     }
                 }
+                .environmentObject(environment)
             } else {
                 ContentView()
                     .environmentObject(environment)
@@ -132,7 +137,7 @@ struct NestlingApp: App {
                                 .foregroundColor(.yellow)
                             Text("Welcome! 🎉")
                                 .font(.system(size: 32, weight: .bold))
-                            Text("Your 7-day free trial has started")
+                            Text("Your 14-day free trial has started")
                                 .font(.system(size: 18, weight: .regular))
                                 .foregroundColor(.mutedForeground)
                             Spacer()
@@ -150,6 +155,25 @@ struct NestlingApp: App {
                         }
                         .background(Color.background)
                     }
+                    .sheet(isPresented: $showNotificationPermissionNudge) {
+                        NotificationPermissionNudgeView(
+                            onEnable: {
+                                Task {
+                                    let granted = await NotificationPermissionManager.shared.requestPermission()
+                                    AnalyticsService.shared.track(event: "notif_permission_prompt_result", properties: [
+                                        "granted": granted
+                                    ])
+                                    await MainActor.run {
+                                        showNotificationPermissionNudge = false
+                                    }
+                                }
+                            },
+                            onNotNow: {
+                                AnalyticsService.shared.track(event: "notif_permission_prompt_dismissed")
+                                showNotificationPermissionNudge = false
+                            }
+                        )
+                    }
                     .onAppear {
                         SignpostLogger.endInterval("AppLaunch", signpostID: launchSignpostID, log: SignpostLogger.ui)
                         let ttiMs = Date().timeIntervalSince(launchStartTime) * 1000
@@ -163,6 +187,7 @@ struct NestlingApp: App {
                             UserDefaults.standard.set(true, forKey: "voiceover_session_tracked")
                         }
                         processWidgetActions()
+                        Task { await maybePromptForNotificationPermission() }
                     }
                     .onOpenURL { url in
                         let route = DeepLinkRouter.parse(url: url)
@@ -354,6 +379,76 @@ struct NestlingApp: App {
                 // Stop active sleep - handled by HomeViewModel
                 break
             }
+        }
+    }
+
+    // MARK: - Permission Timing (Session 2+)
+
+    private func maybePromptForNotificationPermission() async {
+        // Only prompt if the user opted in during onboarding primer.
+        guard UserDefaults.standard.bool(forKey: "notifications_primer_opted_in") else { return }
+
+        // Respect "no permission prompt in Session 1"
+        let launches = UserDefaults.standard.integer(forKey: "app_launch_count")
+        guard launches >= 2 else { return }
+
+        let status = await NotificationPermissionManager.shared.checkPermissionStatus()
+        guard status == .notDetermined else { return }
+
+        await MainActor.run {
+            showNotificationPermissionNudge = true
+        }
+    }
+}
+
+// MARK: - Notification Permission Nudge UI
+
+private struct NotificationPermissionNudgeView: View {
+    let onEnable: () -> Void
+    let onNotNow: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: .spacingXL) {
+                Spacer()
+
+                Image(systemName: "bell.badge.fill")
+                    .font(.system(size: 64))
+                    .foregroundColor(.primary)
+
+                VStack(spacing: .spacingSM) {
+                    Text("Turn on gentle reminders?")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+
+                    Text("We’ll only nudge you when it helps—like before a likely nap window. You can change this anytime.")
+                        .font(.body)
+                        .foregroundColor(.mutedForeground)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, .spacingLG)
+                }
+
+                Spacer()
+
+                VStack(spacing: .spacingSM) {
+                    Button(action: onEnable) {
+                        Text("Enable Notifications")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("Not now", action: onNotNow)
+                        .foregroundColor(.mutedForeground)
+                }
+                .padding(.horizontal, .spacingLG)
+                .padding(.bottom, .spacing2XL)
+            }
+            .background(Color.background)
+            .navigationTitle("Reminders")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

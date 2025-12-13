@@ -107,3 +107,4 @@ struct FirstLogCard: View {
 
 
 
+

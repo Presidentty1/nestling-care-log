@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <filter id="glowEffect" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0
+                                                    0 1 0 0 0
+                                                    0 0 1 0 0
+                                                    0 0 0 0.25 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#F5A623;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA726;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC266;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Glow effect (behind) -->
+  <g id="glow" filter="url(#glowEffect)">
+    <path d="M60 115 C 75 115, 92.5 95, 92.5 75 Q 92.5 65, 82.5 50 L 82.5 35 Q 80 20, 60 10 Q 40 20, 37.5 35 L 37.5 50 Q 27.5 65, 27.5 75 C 27.5 95, 45 115, 60 115 Z" fill="none" stroke="#F5A623" stroke-width="1"/>
+  </g>
+
+  <!-- Flame fill with gradient -->
+  <g id="flame-fill" transform="translate(0,-6)">
+    <path d="M60 115 C 75 115, 92.5 95, 92.5 75 Q 92.5 65, 82.5 50 L 82.5 35 Q 80 20, 60 10 Q 40 20, 37.5 35 L 37.5 50 Q 27.5 65, 27.5 75 C 27.5 95, 45 115, 60 115 Z" fill="url(#flameGradient)" />
+    <g id="flame-tips" transform="translate(60, 56) rotate(0) translate(-60, -56)">
+      <path d="M37.5 35 Q 40 20, 60 10 Q 80 20, 82.5 35 C 83.75 33.2, 85 31.4, 85 29.6 C 85 21.6, 70 10, 60 10 C 50 10, 35 21.6, 35 29.6 C 35 31.4, 36.25 33.2, 37.5 35 Z" fill="url(#flameGradient)" />
+    </g>
+  </g>
+
+  <!-- Flame outline -->
+  <g id="flame-outline" transform="translate(0,-6)">
+    <path d="M60 115 C 75 115, 92.5 95, 92.5 75 Q 92.5 65, 82.5 50 L 82.5 35 Q 80 20, 60 10 Q 40 20, 37.5 35 L 37.5 50 Q 27.5 65, 27.5 75 C 27.5 95, 45 115, 60 115 Z" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <g id="flame-tips-outline" transform="translate(60, 56) rotate(0) translate(-60, -56)">
+      <path d="M37.5 35 Q 40 20, 60 10 Q 80 20, 82.5 35 C 83.75 33.2, 85 31.4, 85 29.6 C 85 21.6, 70 10, 60 10 C 50 10, 35 21.6, 35 29.6 C 35 31.4, 36.25 33.2, 37.5 35 Z" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+
+  <!-- Base platform -->
+  <g id="base">
+    <rect x="40" y="116" width="40" height="6" rx="3" ry="3" fill="#F5A623" />
+  </g>
+
+  <!-- Friendly face - eyes -->
+  <g id="eyes">
+    <circle cx="53" cy="46" r="2" fill="#0D1B1E" opacity="0.4" transform="rotate(-2, 53, 46)"/>
+    <circle cx="67" cy="46" r="2" fill="#0D1B1E" opacity="0.4" transform="rotate(2, 67, 46)"/>
+  </g>
+
+  <!-- Friendly face - smile -->
+  <g id="smile">
+    <path d="M51 54 C 51 58, 69 58, 69 54" fill="none" stroke="#0D1B1E" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+  </g>
+</svg>

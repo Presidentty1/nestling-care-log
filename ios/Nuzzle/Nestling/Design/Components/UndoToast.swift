@@ -1,5 +1,4 @@
 import SwiftUI
-import Logger
 /// Toast component for undo operations.
 /// Appears at the bottom of the screen when an undoable action is performed.
 struct UndoToast: View {
@@ -100,3 +99,4 @@ extension View {
     }
     .withUndoToast()
 }
+

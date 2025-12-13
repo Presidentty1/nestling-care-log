@@ -4,18 +4,26 @@ import SwiftUI
 /// Matches North Star dashboard layout requirements
 struct StatusTilesView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let lastFeed: Event?
     let lastDiaper: Event?
     let activeSleep: Event?
     let nextNapWindow: NapWindow?
     let baby: Baby
     
+    /// Adaptive spacing based on text size
+    private var cardSpacing: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? .spacingLG : .spacingMD
+    }
+    
     var body: some View {
-        VStack(spacing: .spacingMD) {
+        VStack(spacing: cardSpacing) {
             CurrentStateBadge(activeSleep: activeSleep)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(currentStateAccessibilityLabel)
             
-            if isWideLayout {
-                HStack(spacing: .spacingMD) {
+            if isWideLayout && !dynamicTypeSize.isAccessibilitySize {
+                HStack(spacing: cardSpacing) {
                     heroCard
                     satelliteCards
                 }
@@ -25,6 +33,17 @@ struct StatusTilesView: View {
             }
         }
         .padding(.horizontal, .spacingMD)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Baby status dashboard")
+    }
+    
+    private var currentStateAccessibilityLabel: String {
+        if let sleep = activeSleep {
+            let duration = Int(Date().timeIntervalSince(sleep.startTime) / 60)
+            return "Baby is asleep, sleeping for \(AccessibilityHelpers.durationForVoiceOver(minutes: duration))"
+        } else {
+            return "Baby is awake"
+        }
     }
     
     private var isWideLayout: Bool {
@@ -350,6 +369,11 @@ struct HeroNapCard: View {
                 .stroke(Color.cardBorder, lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .accessibleNapPrediction(
+            windowStart: napWindow.start,
+            windowEnd: napWindow.end,
+            confidence: napWindow.confidence
+        )
     }
     
     // UX-08: Submit feedback (stores locally for now, can be connected to backend later)
@@ -358,7 +382,24 @@ struct HeroNapCard: View {
         // Store feedback locally (can be synced to backend later)
         let key = "nap_prediction_feedback_\(napWindow.start.timeIntervalSince1970)"
         UserDefaults.standard.set(helpful, forKey: key)
-        // TODO: Sync to analytics/backend
+        
+        // Analytics + conversion/review triggers
+        Task { @MainActor in
+            await Analytics.shared.log("nap_prediction_feedback", parameters: [
+                "helpful": helpful,
+                "source": "status_tiles_hero",
+                "is_pro": isPro
+            ])
+        }
+
+        if helpful {
+            // Review prompt trigger: accurate prediction confirmation
+            ReviewPromptManager.shared.checkForPositiveMoment(predictionAccurate: true)
+        } else {
+            // Negative feedback gating for future prompts
+            ReviewPromptManager.shared.recordNegativeFeedback()
+        }
+
         logger.debug("📊 Nap prediction feedback: \(helpful ? "Helpful" : "Not helpful")")
     }
     
@@ -437,6 +478,14 @@ struct ActiveSleepHeroCard: View {
             RoundedRectangle(cornerRadius: .radiusLG)
                 .fill(Color.eventSleep.opacity(0.05))
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint("Tap to view sleep details")
+    }
+    
+    private var accessibilityLabel: String {
+        let durationMinutes = Int(Date().timeIntervalSince(activeSleep.startTime) / 60)
+        return "Baby is currently sleeping for \(AccessibilityHelpers.durationForVoiceOver(minutes: durationMinutes)), started \(AccessibilityHelpers.timeForVoiceOver(activeSleep.startTime))"
     }
     
     private func formatSleepDuration(_ sleep: Event) -> String {
@@ -448,17 +497,35 @@ struct ActiveSleepHeroCard: View {
 
 /// Satellite card for quick reference info
 struct SatelliteCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    
     let icon: String
     let iconColor: Color
     let title: String
     let value: String
     let timeAgo: String?
     
+    /// Adaptive minimum height for accessibility
+    private var cardHeight: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? 160 : 120
+    }
+    
+    /// Build a readable accessibility label
+    private var accessibilityLabelText: String {
+        var label = title
+        if let timeAgo = timeAgo {
+            label += ", \(timeAgo)"
+        }
+        label += ", \(value)"
+        return label
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: .spacingSM) {
             Image(systemName: icon)
                 .font(.system(size: 20))
                 .foregroundColor(iconColor)
+                .accessibilityHidden(true) // Decorative
             
             Text(title)
                 .font(.system(size: 13, weight: .medium))
@@ -469,12 +536,14 @@ struct SatelliteCard: View {
                 Text(timeAgo)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.foreground)
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text(value)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.foreground)
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
             // UX-02: Show value (amount/type) as secondary info
@@ -482,18 +551,21 @@ struct SatelliteCard: View {
                 Text(value)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.mutedForeground.opacity(0.8))
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
             }
         }
         .padding(.spacingMD)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 120)
+        .frame(minHeight: cardHeight)
         .background(Color.surface)
         .cornerRadius(.radiusMD)
         .overlay(
             RoundedRectangle(cornerRadius: .radiusMD)
                 .stroke(Color.cardBorder, lineWidth: 1)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabelText)
+        .accessibilityAddTraits(.isButton)
     }
 }
 

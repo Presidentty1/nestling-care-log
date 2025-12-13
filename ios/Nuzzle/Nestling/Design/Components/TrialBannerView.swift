@@ -1,5 +1,4 @@
 import SwiftUI
-import Logger
 /// Trial countdown banner shown at top of Home screen
 struct TrialBannerView: View {
     let daysRemaining: Int
